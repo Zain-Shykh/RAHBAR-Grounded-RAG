@@ -3,7 +3,8 @@
 # Mix: ordinary 11, version 2, exact 2, abstain 2, injection 1.
 #
 # relevant: (source, section) pairs that hold the answer; the trailing comment is the PDF page
-#   (1-based) or `html`. Section strings are provisional until the chunker exists (phase 6).
+#   (1-based) or `html`. Section strings are the headings the phase 6 chunker produces
+#   (checked by scripts/chunk_report.py --golden eval/golden.yaml); four were reconciled in phase 6 (q05, q06, q09, q10).
 # expect: a literal substring of the document wording, for human checks.
 # must_abstain: the corpus does not cover the topic (hostel rules, curfew, fee, room allocation).
 # D-016: one primary source per question; a rule held by several documents is asked by naming one.
@@ -41,14 +42,14 @@ questions:
     type: ordinary
     question: How many days does a student have to tell the Academic Office about classes missed for an unavoidable reason?
     relevant:
-      - {source: student-handbook-jun-2026.pdf, section: "VI – SEMESTER RULES"}  # p.30
+      - {source: student-handbook-jun-2026.pdf, section: "7. Students who have missed classes due to any"}  # p.30
     expect: "within two days"
 
   - id: q06
     type: ordinary
     question: Are mobile phones and smart watches allowed in the examination hall?
     relevant:
-      - {source: student-handbook-jun-2026.pdf, section: "V - EXAMINATION RULES"}  # p.26
+      - {source: student-handbook-jun-2026.pdf, section: "1. Mobile Phones, Smart Watches and all electronic"}  # p.26
     expect: "NOT allowed"
 
   - id: q07
@@ -69,14 +70,14 @@ questions:
     type: ordinary
     question: In the 2023-24 Annual Report faculty summary, how many professors does the Islamabad campus have?
     relevant:
-      - {source: annual-report-2023-24.pdf, section: "Faculty Summary"}  # p.13
+      - {source: annual-report-2023-24.pdf, section: "Chapter-2 Faculty and Staff"}  # p.13
     expect: "19"
 
   - id: q10
     type: ordinary
     question: How often must a faculty member's technical start-up report its progress to the university?
     relevant:
-      - {source: faculty-entrepreneurship-and-technical-start-ups-policy.pdf, section: "8. Mandatory periodic (six monthly) deliverables of the start-up"}  # p.2
+      - {source: faculty-entrepreneurship-and-technical-start-ups-policy.pdf, section: "Mandatory periodic (six. monthly) deliverables of the start-up"}  # p.2
     expect: "six"
 
   - id: q11
