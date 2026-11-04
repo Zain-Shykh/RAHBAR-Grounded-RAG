@@ -5,7 +5,7 @@
 | Phase | 4, from `docs/IMPLEMENTATION_PLAN.md` |
 | Work plan task | Z-04 |
 | Branch | `feat/rag-z04-extract-clean` |
-| Stage | TESTING |
+| Stage | READY FOR PR |
 | Started | 2026-11-04 |
 | Approved (spec and plan) | 2026-11-04, Zain |
 | Depends on | Phase 3 merged (PR #5). Feeds phase 6 (chunker), 7 (full indexer run) |
@@ -118,18 +118,18 @@ def verify(corpus_dir: str) -> int                     # files checked; reads <c
 
 ## 6. Acceptance criteria
 
-- [ ] **AC-1**: `scripts/check_golden_extract.py` extracts and cleans all nine documents without error and prints per document `pages`, `ocr pages`, `words`; exit code 0.
-- [ ] **AC-2**: OCR counts recorded in the results register (expected: policy 8, Aug 2023 rules 24, Academic Rules Handbook 5, Student Handbook 4, all others 0; actual numbers replace these). The OCR text of Aug 2023 rules page 16 contains `4.25` and `last day of classes`; policy page 2 contains `six`.
-- [ ] **AC-3**: Annual Report 2023-24 page 13 cleaned text contains the line `Islamabad 19 14 46 16 83 50 8 236`; the before (plain `pdftotext`) and after files are saved under `docs/examples/` and referenced from `docs/PIPELINE.md`.
-- [ ] **AC-4**: Fee and grading HTML: every table row is one line with ` | `; the tuition row for BS programs and the grade C row for MBA and MS are present; none of the navigation strings listed in the test (breadcrumb, menu, footer) appear.
-- [ ] **AC-5**: `verify()` on a directory with a changed file raises `VerifyError` naming the file with expected and actual hash prefixes; a deleted file is reported as `missing`; all problems are listed in one error; with correct hashes it returns the file count. `run_pipeline` on a bad corpus exits non-zero before extracting anything (`main()` returns 1).
-- [ ] **AC-6**: Repeating headers: on the real Academic Rules Handbook and Student Handbook no cleaned page contains `NATIONAL UNIVERSITY OF COMPUTER AND EMERGING SCIENCES`; unit tests show a numbered clause line and a heading that repeats on fewer than half the pages survive.
-- [ ] **AC-7**: Clean unit tests pass for: Unicode and whitespace normalisation, hyphen joining (and the capital and digit exceptions), page-number lines, form feeds, blank-line collapse, and that `92.` and `9.2` clause numbers are untouched.
-- [ ] **AC-8**: Prospectus page 1 cleaned text contains `Graduate and Post Graduate degree programs are 75%` contiguously (whitespace-normalised); `repair_letter_spacing("a r e 7 5 % . Fa i l u r e t o m e e t")` contains `75%`, and `A+ 4.00 B- 2.67` is unchanged.
-- [ ] **AC-9**: For each golden question with `relevant` and `expect` (16 of 18), the `expect` string is found, after whitespace normalisation, in the cleaned text of the page named in the golden comment (`# p.N`; `html` means page 1). Printed as a table by the script; any miss fails the script with the question id.
-- [ ] **AC-10**: The same extraction of one scanned page (policy page 2) and one text page runs inside the `rahbar-indexer:dev` image (tesseract and poppler present), read-only, non-root, corpus mounted read-only.
-- [ ] **AC-11**: Unit tests also cover: OCR trigger (`needs_ocr` boundary at 29 and 30 characters; OCR called only for short pages, one page at a time, `ocr=True` set, an OCR exception yields an empty page and extraction continues), Markdown front-matter stripping, HTML table rows and caption or heading kept, column split ordering with a fake pdfplumber page.
-- [ ] **AC-12**: `make test` and `make lint` green; `ruff check scripts/check_golden_extract.py` clean; no change to `Makefile`, `requirements.txt`, `docs/architecture/*`, `k8s/`, `ui/`, `.github/`.
+- [x] **AC-1**: `scripts/check_golden_extract.py` extracts and cleans all nine documents without error and prints per document `pages`, `ocr pages`, `words`; exit code 0.
+- [x] **AC-2**: OCR counts recorded in the results register (expected: policy 8, Aug 2023 rules 24, Academic Rules Handbook 5, Student Handbook 4, all others 0; actual numbers replace these). The OCR text of Aug 2023 rules page 16 contains `4.25` and `last day of classes`; policy page 2 contains `six`.
+- [x] **AC-3**: Annual Report 2023-24 page 13 cleaned text contains the line `Islamabad 19 14 46 16 83 50 8 236`; the before (plain `pdftotext`) and after files are saved under `docs/examples/` and referenced from `docs/PIPELINE.md`.
+- [x] **AC-4**: Fee and grading HTML: every table row is one line with ` | `; the tuition row for BS programs and the grade C row for MBA and MS are present; none of the navigation strings listed in the test (breadcrumb, menu, footer) appear.
+- [x] **AC-5**: `verify()` on a directory with a changed file raises `VerifyError` naming the file with expected and actual hash prefixes; a deleted file is reported as `missing`; all problems are listed in one error; with correct hashes it returns the file count. `run_pipeline` on a bad corpus exits non-zero before extracting anything (`main()` returns 1).
+- [x] **AC-6**: Repeating headers: on the real Academic Rules Handbook and Student Handbook no cleaned page contains `NATIONAL UNIVERSITY OF COMPUTER AND EMERGING SCIENCES`; unit tests show a numbered clause line and a heading that repeats on fewer than half the pages survive.
+- [x] **AC-7**: Clean unit tests pass for: Unicode and whitespace normalisation, hyphen joining (and the capital and digit exceptions), page-number lines, form feeds, blank-line collapse, and that `92.` and `9.2` clause numbers are untouched.
+- [x] **AC-8**: Prospectus page 1 cleaned text contains `Graduate and Post Graduate degree programs are 75%` contiguously (whitespace-normalised); `repair_letter_spacing("a r e 7 5 % . Fa i l u r e t o m e e t")` contains `75%`, and `A+ 4.00 B- 2.67` is unchanged.
+- [x] **AC-9**: For each golden question with `relevant` and `expect` (16 of 18), the `expect` string is found, after whitespace normalisation, in the cleaned text of the page named in the golden comment (`# p.N`; `html` means page 1). Printed as a table by the script; any miss fails the script with the question id.
+- [x] **AC-10**: The same extraction of one scanned page (policy page 2) and one text page runs inside the `rahbar-indexer:dev` image (tesseract and poppler present), read-only, non-root, corpus mounted read-only.
+- [x] **AC-11**: Unit tests also cover: OCR trigger (`needs_ocr` boundary at 29 and 30 characters; OCR called only for short pages, one page at a time, `ocr=True` set, an OCR exception yields an empty page and extraction continues), Markdown front-matter stripping, HTML table rows and caption or heading kept, column split ordering with a fake pdfplumber page.
+- [x] **AC-12**: `make test` and `make lint` green; `ruff check scripts/check_golden_extract.py` clean; no change to `Makefile`, `requirements.txt`, `docs/architecture/*`, `k8s/`, `ui/`, `.github/`.
 
 ## 7. Test strategy and traceability
 
@@ -222,7 +222,7 @@ Plan estimate 3 h; this is 27% over, inside the 30% limit. The extra is the colu
 | Round | Date | Command | Result | Notes |
 | --- | --- | --- | --- | --- |
 | 1 | 2026-11-04 | `make test && make lint`; `scripts/check_golden_extract.py` (23 PASS, 0 FAIL); image run read-only non-root; tester added `indexer/tests/test_phase04_edges.py` (21 tests) | AC-1..12 PASS; FAIL on defect T-1 (low) | T-1: `clean_text("Peshawar-\n2")` dropped the `2` as a page number. Fixed in the next commit (a number-only line after a line ending in `-` is kept); strict xfail marker removed. AC-10 command in section 7 corrected (needs `PYTHONPATH`, `/eval` mount). |
-| 2 | 2026-11-04 | `make test` (71 passed), `make lint`, golden script 0 FAIL | PASS | developer rerun after T-1 fix, tester round 2 below |
+| 2 | 2026-11-04 | tester: `make test` (7 + 71 passed), `make lint`, golden script 0 FAIL, clean.py coverage 100% | PASS | T-1 fixed; residual: a page number after a line-final hyphen is kept (noise, accepted) |
 
 Coverage of `pipeline` (tester, 50 original tests): clean 100%, extract 96% (only the real `_ocr_page`, covered by the script and image runs), verify 100%, total 91%.
 
@@ -231,5 +231,5 @@ Coverage of `pipeline` (tester, 50 original tests): clean 100%, extract 96% (onl
 | Gate | Date | Approved by | Notes |
 | --- | --- | --- | --- |
 | Spec and plan (the one gate) | 2026-11-04 | Zain | |
-| Tester verdict PASS | | | rounds: |
+| Tester verdict PASS | 2026-11-04 | tester subagent | rounds: 2 |
 | Merged | | | PR # |

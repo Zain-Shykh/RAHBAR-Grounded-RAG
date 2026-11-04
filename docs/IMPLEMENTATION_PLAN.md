@@ -83,10 +83,10 @@ Hours spent so far (fill in at each phase end): planned 37.5 h, actual `____`.
 
 ```
 Phase:        4  Extract and clean
-Stage:        TESTING   (SPEC DRAFT, APPROVED, IMPLEMENTING, TESTING, READY FOR PR, MERGED)
+Stage:        READY FOR PR   (SPEC DRAFT, APPROVED, IMPLEMENTING, TESTING, READY FOR PR, MERGED)
 Branch:       feat/rag-z04-extract-clean
 Spec:         docs/specs/phase-04-extract-clean.md
-Next action:  independent testing subagent round 1
+Next action:  open PR into dev, merge if own-lane and green, then DONE commit via PR
 Waiting on:   nothing
 Last updated: 2026-11-04
 ```
@@ -144,6 +144,8 @@ Append-only, newest at the bottom. One line per event: date, phase, what happene
 2026-11-04  P04  SPEC DRAFT: spec and plan for extract and clean written, 2 questions answered (D-044 per-file column splits, D-045 golden check is a script). Found: Prospectus problem in pdfplumber is 3-column interleaving, letter-spacing only in pdftotext; default pdfplumber mode keeps table rows on one line. docs/specs/phase-04-extract-clean.md
 2026-11-04  P04  APPROVED: Zain approved spec and plan.
 2026-11-04  P04  IMPLEMENTING done: clean, extract (pdf, OCR, columns, html, md), verify, scripts/check_golden_extract.py. 9 docs extract, 41 pages OCR'd (88 s), all 16 golden expect strings found after fixing q05 page comment (p.30). make test and lint green, image run read-only non-root OK.
+2026-11-04  P04  TESTING round 1: FAIL, T-1 (lone digit after hyphenated line end dropped). Fixed 71f91df.
+2026-11-04  P04  TESTING round 2: PASS, AC-1..AC-12, 71 indexer tests, pipeline coverage 91%. READY FOR PR.
 ```
 
 ---
