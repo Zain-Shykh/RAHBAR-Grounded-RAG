@@ -83,11 +83,11 @@ Hours spent so far (fill in at each phase end): planned 37.5 h, actual `____`.
 
 ```
 Phase:        3  Golden set
-Stage:        SPEC DRAFT   (SPEC DRAFT, APPROVED, IMPLEMENTING, TESTING, READY FOR PR, MERGED)
+Stage:        IMPLEMENTING   (SPEC DRAFT, APPROVED, IMPLEMENTING, TESTING, READY FOR PR, MERGED)
 Branch:       feat/rag-z03-golden-set
 Spec:         docs/specs/phase-03-golden-set.md
-Next action:  Zain reviews spec and plan and says "Approved." (then step 1: schema test, step 2: eval/golden.yaml)
-Waiting on:   Zain (the gate); H-2, H-3 text still to send to Ahmad
+Next action:  step 1 schema test, step 2 eval/golden.yaml (spec section 10.1)
+Waiting on:   nothing; H-2, H-3 text still to send to Ahmad
 Last updated: 2026-11-04
 ```
 
@@ -137,6 +137,7 @@ Append-only, newest at the bottom. One line per event: date, phase, what happene
 2026-11-04  P02  H-2 TEXT for Ahmad: Redis Stack `redis/redis-stack-server:7.4.0-v8`. Image default user is root but it runs fine as runAsUser/runAsGroup 10001 with readOnlyRootFilesystem, capabilities drop ALL, allowPrivilegeEscalation false. Writable: only the PVC mounted at /data (use fsGroup 10001; its entrypoint sets --dir /data and the AOF lives there). In my test nothing else was written; add an emptyDir /tmp anyway, it is harmless. Set REDIS_ARGS="--appendonly yes" to match the AOF plan. Probe: redis-cli ping or tcpSocket 6379.
 2026-11-04  P02  H-3 TEXT for Ahmad: Chroma `chromadb/chroma:1.0.12`, no difference from R-01. Default user root, runs as 10001 with readOnlyRootFilesystem, drop ALL; env IS_PERSISTENT=TRUE PERSIST_DIRECTORY=/data ANONYMIZED_TELEMETRY=FALSE; writes only under /data (PVC with fsGroup 10001); emptyDir /tmp precaution. Heartbeat for probes: GET /api/v2/heartbeat on 8000. Not verified by me: the fsGroup mechanism itself (I chowned a Docker volume); confirm in minikube.
 2026-11-04  P03  SPEC DRAFT: spec and plan for the golden set written (18 questions: 11 ordinary, 2 version, 2 exact, 2 abstain, 1 injection), 3 questions answered (D-016, D-042, D-043). Found: attendance is 1.21 in BOTH 2023 and 2026 rules, so CORPUS.md and the plan note are wrong; version pair is withdrawal 4.25. docs/specs/phase-03-golden-set.md
+2026-11-04  P03  APPROVED: Zain approved spec and plan.
 ```
 
 ---
@@ -267,7 +268,7 @@ H-2, H-3 to Ahmad.
 
 ## Phase 3: Golden set (Z-03)
 
-**Status:** IN PROGRESS (SPEC DRAFT) · **Branch:** `feat/rag-z03-golden-set` · **Est:** 3 h · **Priority:** P0
+**Status:** IN PROGRESS (IMPLEMENTING) · **Branch:** `feat/rag-z03-golden-set` · **Est:** 3 h · **Priority:** P0
 
 ### Objective
 Write `eval/golden.yaml` **before anything is tuned**, from the documents themselves, never from what the retriever returns.

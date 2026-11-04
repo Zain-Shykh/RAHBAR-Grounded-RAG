@@ -5,9 +5,9 @@
 | Phase | 3, from `docs/IMPLEMENTATION_PLAN.md` |
 | Work plan task | Z-03 |
 | Branch | `feat/rag-z03-golden-set` |
-| Stage | SPEC DRAFT |
+| Stage | IMPLEMENTING |
 | Started | 2026-11-04 |
-| Approved (spec and plan) | (pending, Zain) |
+| Approved (spec and plan) | 2026-11-04, Zain |
 | Depends on | Phase 2 merged (PR #4). Feeds phase 5 (eval runner), 6 (section reconcile), 12 (baselines) |
 
 ## 1. Objective
@@ -195,6 +195,6 @@ Coverage of `app` (if relevant): not applicable (no application code).
 
 | Gate | Date | Approved by | Notes |
 | --- | --- | --- | --- |
-| Spec and plan (the one gate) | | | |
+| Spec and plan (the one gate) | 2026-11-04 | Zain | approved as written |
 | Tester verdict PASS | | | rounds: |
 | Merged | | | PR # |
