@@ -78,7 +78,7 @@ Extra "don't" items from the text (not listed as deductions but explicitly forbi
 - [x] Extract: detect no-text pages, OCR them, strip repeating headers/footers, keep headings.
 - [x] Extract: HTML tables handled; PDF tables kept row-wise (`pdftotext -layout` or pdfplumber).
 - [x] Clean: documented rules + one thing deliberately not stripped.
-- [ ] Chunk: sections, then paragraphs, then sentences; overlap; target size; unit stated.
+- [x] Chunk: sections, then paragraphs, then sentences; overlap; target size; unit stated.
 - [ ] Embed: pinned model, dimension recorded (768 for nomic-embed-text).
 - [ ] Store: id, text, vector, metadata. Metadata has `source`, `section`, `page`, `doc_version`, `superseded` on every chunk.
 - [ ] Collection metadata records embed model name + dimension [R-PIN-2].

@@ -591,6 +591,51 @@ Entry template:
 - Decision: A.
 - Decided on: 2026-11-04
 
+### D-049 How the chunker finds headings, and how long a section string may be
+- Status: DECIDED
+- Raised: 2026-11-05 by Claude (phase 6)
+- Area: indexer
+- Related: architecture 5.4.2, AD-22; golden q07, q15; DEV-003
+- Question: The architecture names three heading kinds (numbered clause, roman or lettered line, all caps). The HTML pages have plain short heading lines (`Fee Refund Policy`) that none of them find, and the numbered regex also matches years and table data (`2023 ...`, `19 14 46`). A clause line can also be long.
+- Options:
+  - A. Add a fourth rule (isolated short line: blank line before, text after, at most 10 words, no final punctuation); tighten the numbered rule to at most 2 leading digits and a capital or `(` next; cut `section` at 80 characters on a word boundary.
+  - B. Architecture rules only; HTML sections fall back to the page title.
+  - C. Change `extract` so HTML headings carry a marker.
+- Claude recommends: A. Smallest change that makes the HTML golden items matchable; B loses q07 and q15; C reopens a merged phase.
+- Blocks: chunk.py heading detection.
+- Decision: A. Logged as DEV-003 (S3).
+- Decided by: Claude, pre-approved by Zain
+- Decided on: 2026-11-05
+
+### D-050 Packing details: tiny sections, over-long units, overlap and tables
+- Status: DECIDED
+- Raised: 2026-11-05 by Claude (phase 6)
+- Area: indexer
+- Related: architecture 5.4.2, AD-10, AD-22
+- Question: What happens with clauses far shorter than `CHUNK_SIZE`, with a sentence longer than `CHUNK_SIZE`, and with overlap after a table row?
+- Options:
+  - A. Never merge sections (one clause is one chunk, so `section` stays exact); cut an over-long sentence into `size`-word pieces; no overlap after a chunk that ends in a table row.
+  - B. Merge small neighbouring sections up to `size` (fewer chunks, but the chunk label is wrong for the second clause and recall by section drops).
+  - C. Let an over-long sentence stay whole (violates the size cap).
+- Claude recommends: A. Keeps AD-22 labels true, the size cap simple (only one table row may exceed it), and overlap never starts mid-row.
+- Blocks: chunk.py packing.
+- Decision: A.
+- Decided by: Claude, pre-approved by Zain
+- Decided on: 2026-11-05
+
+### D-051 Chunk id sequence start and the page of a chunk
+- Status: DECIDED
+- Raised: 2026-11-05 by Claude (phase 6)
+- Area: indexer
+- Related: architecture 5.4.2 (id rule, page rule), AD-28
+- Question: Does `seq` start at 0 or 1, and is `page` the page of the overlap text or of the first new text?
+- Options: A. `seq` from 1; page of the first non-overlap unit. B. `seq` from 0; page of the overlap start.
+- Claude recommends: A. Overlap text is a copy; the new content defines where the chunk is cited from. 1-based matches the 1-based page.
+- Blocks: chunk ids.
+- Decision: A.
+- Decided by: Claude, pre-approved by Zain
+- Decided on: 2026-11-05
+
 ---
 
 ## Change log
@@ -603,3 +648,4 @@ Entry template:
 - 2026-11-04: phase 3 questions answered. D-016 decided; D-042, D-043 added, all DECIDED.
 - 2026-11-04: phase 4 questions answered. D-044, D-045 added, both DECIDED.
 - 2026-11-04: phase 5 questions answered. D-046 to D-048 added, all DECIDED.
+- 2026-11-05: phase 6 decisions. D-049 to D-051 added, all DECIDED (Claude, pre-approved by Zain).
