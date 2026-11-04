@@ -62,7 +62,7 @@ Hybrid retrieval, the `hosted` provider, the in-cluster Ollama mode, authenticat
 | --- | --- | --- | --- | --- | --- |
 | 0 | Foundation (repo, tools, corpus, architecture, docs) | n/a | Wed 4 Nov | DONE | #1, #2 |
 | 1 | Container images | Z-01 | Thu 09:00 | DONE | #3 |
-| 2 | Local services and assumption checks | Z-02 | Thu 10:30 | NOT STARTED | |
+| 2 | Local services and assumption checks | Z-02 | Thu 10:30 | DONE (pending merge) | #4 |
 | 3 | Golden set | Z-03 | Thu 13:30 | NOT STARTED | |
 | 4 | Extract and clean | Z-04 | Thu 16:30 | NOT STARTED | |
 | 5 | Evaluation runner | Z-11 | Thu 18:30 | NOT STARTED | |
@@ -82,12 +82,12 @@ Hours spent so far (fill in at each phase end): planned 37.5 h, actual `____`.
 ## 2. Current focus
 
 ```
-Phase:        2  Local services and assumption checks
+Phase:        3  Golden set   (phase 2 is READY FOR PR, waiting for merge)
 Stage:        not started   (SPEC DRAFT, APPROVED, IMPLEMENTING, TESTING, READY FOR PR, MERGED)
-Branch:       (none yet)
-Spec:         (none yet; docs/specs/phase-02-local-services.md)
-Next action:  fresh session: stage 0 then stage 1 of docs/WORKFLOW.md for phase 2 (branch feat/rag-z02-dev-services)
-Waiting on:   Ahmad (told H-1; he can build the images)
+Branch:       (none yet; feat/rag-z03-golden-set after phase 2 PR is merged into dev)
+Spec:         (none yet; docs/specs/phase-03-golden-set.md)
+Next action:  Zain says "Merge it" for the phase 2 PR; then a fresh session: stage 0 and 1 for phase 3
+Waiting on:   Zain (merge of phase 2 PR)
 Last updated: 2026-11-04
 ```
 
@@ -102,8 +102,8 @@ Things this lane owes Ahmad or needs from him. Tick when delivered. Newest at th
 | ID | Direction | Item | Phase | Done |
 | --- | --- | --- | --- | :---: |
 | H-1 | Zain to Ahmad | `rahbar-api` and `rahbar-indexer` Dockerfiles merged to `dev` (he needs images to run) | 1 | [x] |
-| H-2 | Zain to Ahmad | Verified Redis Stack image tag, its UID, and every path it needs writable | 2 | [ ] |
-| H-3 | Zain to Ahmad | Verified Chroma behaviour notes (user, writable paths) if anything differs from assumption R-01 | 2 | [ ] |
+| H-2 | Zain to Ahmad | Verified Redis Stack image tag, its UID, and every path it needs writable | 2 | [x] |
+| H-3 | Zain to Ahmad | Verified Chroma behaviour notes (user, writable paths) if anything differs from assumption R-01 | 2 | [x] |
 | H-4 | Zain to Ahmad | Indexer peak memory (for the Job limit), and the real corpus indexing time | 7 | [ ] |
 | H-5 | Zain to Ahmad | `eval/run_eval.py` working with the fixture golden set | 5 | [ ] |
 | H-6 | Zain to Ahmad | Hashing embedder and extractive provider merged (CI-mode) | 9 | [ ] |
@@ -127,6 +127,14 @@ Append-only, newest at the bottom. One line per event: date, phase, what happene
 2026-11-04  P01  TESTING round 2: FAIL, D-2 checker regression from **/ patterns, D-3 nested tests/corpus/md. Fixed 56bd1cf.
 2026-11-04  P01  TESTING round 3: PASS, AC-1..7. READY FOR PR. Sizes api 388 MB, indexer 592 MB.
 2026-11-04  P01  MERGED: PR #3. rahbar-api:dev and rahbar-indexer:dev build and run non-root read-only. H-1 delivered: tell Ahmad image names rahbar-api:dev, rahbar-indexer:dev, UID 10001, CMDs as in spec section 4; run the two docker build lines until A-01 fixes make images.
+2026-11-04  P02  SPEC DRAFT: spec and plan for local services and assumption checks written, 4 questions answered (D-038..D-041). docs/specs/phase-02-local-services.md
+2026-11-04  P02  APPROVED: Zain approved spec and plan.
+2026-11-04  P02  IMPLEMENTING done: make dev-services/-stop/-reset work (idempotent, volumes kept); verify_services.py all PASS: A-2 rename keeps metadata, A-3 500 per add (server max 5461), Redis FT.CREATE/KNN DIALECT 2/tag/DROPINDEX DD. R-01 and R-02 PASS: both images run as UID 10001, --read-only, --cap-drop ALL, no writes outside /data, no deviation. A-6 PASS (format honoured 3/3, num_ctx 8192 honoured, 3.0 GB RAM). Redis Stack pinned 7.4.0-v8.
+2026-11-04  P02  A-6 latency: first run measured 171 s for 6510 tokens while the host was busy; two warm reruns (tester and developer) gave 19.0 s and 19.8 s, about 330 tokens/s on CPU. Use the warm number; a cold model load or a busy host can be several times slower, so phase 10 still needs the timeout and the warm-up question.
+2026-11-04  P02  TESTING round 1: FAIL, 5 low defects D-1..D-5 (log placement, A-6 latency note, uid 0 accepted, labels and Ctrl-C, stray volume). Fixed ade8cdc.
+2026-11-04  P02  TESTING round 2: PASS, AC-1..AC-12. READY FOR PR. pkill ollama done.
+2026-11-04  P02  H-2 TEXT for Ahmad: Redis Stack `redis/redis-stack-server:7.4.0-v8`. Image default user is root but it runs fine as runAsUser/runAsGroup 10001 with readOnlyRootFilesystem, capabilities drop ALL, allowPrivilegeEscalation false. Writable: only the PVC mounted at /data (use fsGroup 10001; its entrypoint sets --dir /data and the AOF lives there). In my test nothing else was written; add an emptyDir /tmp anyway, it is harmless. Set REDIS_ARGS="--appendonly yes" to match the AOF plan. Probe: redis-cli ping or tcpSocket 6379.
+2026-11-04  P02  H-3 TEXT for Ahmad: Chroma `chromadb/chroma:1.0.12`, no difference from R-01. Default user root, runs as 10001 with readOnlyRootFilesystem, drop ALL; env IS_PERSISTENT=TRUE PERSIST_DIRECTORY=/data ANONYMIZED_TELEMETRY=FALSE; writes only under /data (PVC with fsGroup 10001); emptyDir /tmp precaution. Heartbeat for probes: GET /api/v2/heartbeat on 8000. Not verified by me: the fsGroup mechanism itself (I chowned a Docker volume); confirm in minikube.
 ```
 
 ---
@@ -215,7 +223,7 @@ H-1: message Ahmad when merged. Tell him the image names and tags used by `make 
 
 ## Phase 2: Local services and assumption checks (Z-02)
 
-**Status:** NOT STARTED · **Branch:** `feat/rag-z02-dev-services` · **Est:** 1.5 h · **Priority:** P0
+**Status:** DONE (pending merge) · **Branch:** `feat/rag-z02-local-services` · **Est:** 1.5 h · **Priority:** P0
 
 ### Objective
 Run Chroma and Redis Stack locally so you never need the cluster to code, and prove the architecture's unverified assumptions before building on them.
@@ -239,11 +247,11 @@ Architecture 5.4.4 (stage-and-swap), 5.9 (cache), 9 (assumptions A-2, A-3, risks
 Kubernetes manifests (Ahmad). Any use of the services by application code yet.
 
 ### Acceptance criteria
-- [ ] `make dev-services` starts both containers; `make dev-services-stop` removes them.
-- [ ] `python scripts/verify_services.py` prints PASS for items 1 and 2.
-- [ ] Items 3 and 4 have an explicit result recorded in the progress log (PASS with UID and writable paths, or FAIL with the fallback).
-- [ ] H-2 and H-3 delivered to Ahmad (tag, UID, writable paths).
-- [ ] The Redis Stack tag is written in `docs/architecture/architecture.md` section 3 table (replace "pinned at implementation") in a separate small commit.
+- [x] `make dev-services` starts both containers; `make dev-services-stop` removes them.
+- [x] `python scripts/verify_services.py` prints PASS for items 1 and 2.
+- [x] Items 3 and 4 have an explicit result recorded in the progress log (PASS with UID and writable paths, or FAIL with the fallback).
+- [x] H-2 and H-3 delivered to Ahmad (tag, UID, writable paths).
+- [x] The Redis Stack tag is written in `docs/architecture/architecture.md` section 3 table (replace "pinned at implementation") in a separate small commit.
 
 ### Verify
 ```bash

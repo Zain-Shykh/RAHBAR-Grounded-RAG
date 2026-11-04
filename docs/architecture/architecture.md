@@ -144,7 +144,7 @@ flowchart LR
 | UI | Static `ui/index.html` served by nginx | Image base `nginxinc/nginx-unprivileged`, pinned patch tag; listens on 8080; writes only under `/tmp` |
 | API | FastAPI, uvicorn, Pydantic v2, httpx (sync endpoints) | `fastapi 0.115.12`, `uvicorn 0.34.2`, `pydantic 2.11.4`, `httpx 0.28.1`, `prometheus-client`, `chromadb-client 1.0.12`, `redis 5.2.1` |
 | Vector store | ChromaDB server | `chromadb/chroma:1.0.12`, must equal the client version |
-| Cache | Redis Stack server (vector search module) | `redis/redis-stack-server`, one exact tag chosen and verified at implementation (see 9.2, R-02) |
+| Cache | Redis Stack server (vector search module) | `redis/redis-stack-server:7.4.0-v8`, pinned and verified in phase 2 (see 9.2, R-02) |
 | Indexer | Python 3.12, `pdfplumber`, `pypdf`, `pytesseract`, `pdf2image`, `pyyaml`, stdlib `html.parser` | System packages in the image: `tesseract-ocr`, `poppler-utils` |
 | LLM (default) | Ollama on the laptop, `llama3.2:3b` | Reached at `host.minikube.internal:11434` |
 | Embeddings | Ollama, `nomic-embed-text` (768 dimensions) | Same host. CI uses `hashing-bow-768` (AD-07) |
@@ -1218,18 +1218,18 @@ Each is expected to work. If it does not, the fix is a deviation entry, not a qu
 | # | Assumption | How to verify early |
 | --- | --- | --- |
 | A-1 | `host.minikube.internal` resolves inside pods, and the Calico `ipBlock` for the gateway lets the traffic through | `kubectl exec` a pod, `curl http://host.minikube.internal:11434/api/tags` |
-| A-2 | Chroma 1.0.12 supports `collection.modify(name=...)` and `delete_collection` over the HTTP client as used in 5.4.4 | a small script against the running StatefulSet before the indexer is written |
-| A-3 | `chromadb-client` batch limit is at least 500 records per `add` | same script |
+| A-2 | Chroma 1.0.12 supports `collection.modify(name=...)` and `delete_collection` over the HTTP client as used in 5.4.4 | a small script against the running StatefulSet before the indexer is written. **Verified 2026-11-04 (phase 2, `scripts/verify_services.py` 1.4, 1.5):** rename keeps count and metadata; the delete-then-rename swap works; `where` on a bool and on `$in` works (1.6). |
+| A-3 | `chromadb-client` batch limit is at least 500 records per `add` | same script. **Verified 2026-11-04:** 500 in one `add` works; server `get_max_batch_size()` is 5461. |
 | A-4 | `kubectl cp` works into the helper pod with a non-root user and an `fsGroup` PVC | `make corpus` dry run |
 | A-5 | The native `preStop` sleep action is available on the cluster's Kubernetes version | `kubectl explain pod.spec.containers.lifecycle.preStop.sleep` |
-| A-6 | `ollama` accepts `format=<json schema>` for `llama3.2:3b` and honours `num_ctx` 8192 within laptop memory | one manual call |
+| A-6 | `ollama` accepts `format=<json schema>` for `llama3.2:3b` and honours `num_ctx` 8192 within laptop memory | one manual call. **Verified 2026-11-04 (`scripts/verify_ollama.py`):** `format=Answer.model_json_schema()` is honoured on 3 of 3 prompts (answerable, unanswerable, injection), every reply validates; `num_ctx` 8192 is honoured (a 6510-token prompt was fully read and a code word from its first paragraph recovered); `llama3.2:3b` is 2986 MiB resident, 100% CPU. **Latency:** on this CPU-only host a warm 6510-token prompt took about 20 s (two runs: 19.0 s and 19.8 s, roughly 330 tokens/s), so a typical 3000-token prompt is about 10 s plus generation. A first run on a busy host took 171 s, so contention and cold loads can be many times slower; phase 10 keeps the timeout and the warm-up question, and phase 12 measures the real p50 and p95. |
 
 ### 9.2 Risks
 
 | # | Risk | Mitigation |
 | --- | --- | --- |
-| R-01 | `chromadb/chroma:1.0.12` may not start as a non-root user with `readOnlyRootFilesystem` | set `runAsUser` to the image's user, `fsGroup` for `/data`, `emptyDir` for any other write path. If impossible, log a deviation naming the weakened setting. |
-| R-02 | `redis/redis-stack-server` may expect to write outside `/data` and may default to root | same approach; pin a tag whose behaviour is verified; if the vector module cannot run non-root, log a deviation. Fallback option D-001 B (plain Redis with app-side cosine) remains available. |
+| R-01 | `chromadb/chroma:1.0.12` may not start as a non-root user with `readOnlyRootFilesystem` | set `runAsUser` to the image's user, `fsGroup` for `/data`, `emptyDir` for any other write path. If impossible, log a deviation naming the weakened setting. **Verified 2026-11-04: no deviation.** The image default user is root, but it runs as UID 10001 with `--read-only --cap-drop ALL --security-opt no-new-privileges`, `/data` writable (needs `fsGroup` or equivalent ownership), `PERSIST_DIRECTORY=/data`, and writes nothing else outside `/data` (`docker diff`). Collection create, 500-record add, rename, swap and filters all pass in that mode. |
+| R-02 | `redis/redis-stack-server` may expect to write outside `/data` and may default to root | same approach; pin a tag whose behaviour is verified; if the vector module cannot run non-root, log a deviation. Fallback option D-001 B (plain Redis with app-side cosine) remains available. **Verified 2026-11-04: no deviation.** `redis/redis-stack-server:7.4.0-v8` defaults to root but runs as UID 10001 with `--read-only --cap-drop ALL --security-opt no-new-privileges` and `REDIS_ARGS="--appendonly yes"`; it writes only under `/data` (`docker diff` shows nothing else; `--dir /data` is set by its entrypoint). The `/data` volume must be owned by the UID (`fsGroup: 10001` in Kubernetes). `FT.CREATE` HNSW cosine 768 plus TAG, KNN 1 `DIALECT 2` with a tag filter, TTL and `FT.DROPINDEX ... DD` all pass in that mode. Not verified here: the Kubernetes `fsGroup` mechanism itself (a `chown` of the Docker volume stood in for it); Ahmad confirms it in minikube. |
 | R-03 | The Ollama host IP differs between machines | `ipBlock` value in the `dev` overlay, documented one-line check in the README |
 | R-04 | 6 GB minikube plus Ollama models may be tight on the laptop | stop unused Ollama models; the resource table in 4.2 is deliberately small |
 | R-05 | OCR clause-number errors reduce exact-term recall on the scanned documents | documented in `PIPELINE.md`; not hidden |

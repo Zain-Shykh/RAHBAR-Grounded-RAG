@@ -339,6 +339,7 @@ make eval
 | `make test` | Unit tests for api and indexer. Run before every push. |
 | `make lint` | `ruff` and `mypy`. |
 | `make dev` | API with stubs and the UI on <http://localhost:8000>. |
+| `make dev-services` | Chroma on `localhost:8100` and Redis Stack on `6379` in Docker (`make dev-services-stop` removes them, `make dev-services-reset` also deletes their data). Until the desktop is re-logged: `sg docker -c "make dev-services"`. Prove them with `sg docker -c ".venv/bin/python scripts/verify_services.py"`. |
 | `make check` | The submission checker (a lint, not a grader). |
 | `make cluster` | Start minikube with the right options. |
 | `make images` | Build and load the three images. Re-run after any code change you want in the cluster. |
