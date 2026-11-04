@@ -209,7 +209,11 @@ def main() -> int:
     results = summarise(rows)
     try:
         baseline = json.loads(args.baseline.read_text()) if args.baseline.exists() else None
-    except ValueError as exc:
+        if baseline is not None:
+            recall = baseline.get("recall_at_5") if isinstance(baseline, dict) else "-"
+            if recall is not None and (isinstance(recall, bool) or not isinstance(recall, (int, float))):
+                raise ValueError("expected a JSON object with a numeric or null recall_at_5")
+    except (OSError, ValueError) as exc:
         print(f"ERROR: baseline {args.baseline}: {exc}. Nothing written.")
         return 1
     failures = gate(results, baseline)
