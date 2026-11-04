@@ -75,11 +75,36 @@ Copy this block to the end of section 7, increment the number, and fill every li
 
 | ID | Title | Severity | Status | Architecture reference | Date |
 | --- | --- | --- | --- | --- | --- |
-| | *no deviations recorded yet* | | | | |
+| DEV-001 | PDF extraction uses pdfplumber default text mode, not layout mode | S3 | OPEN | 5.4.2 (extract) | 2026-11-04 |
+| DEV-002 | Eval section match also folds dashes and applies NFKC | S3 | OPEN | 5.13.2, AD-22 | 2026-11-04 |
 
 ## 7. Log
 
 *(Entries start here. Newest last.)*
+
+### DEV-001 PDF extraction uses pdfplumber default text mode, not layout mode
+
+| | |
+| --- | --- |
+| Status | OPEN |
+| Severity | S3 |
+| Date | 2026-11-04 |
+| Raised by | Claude (phase 5, found in phase 4 evidence) |
+| Architecture reference | 5.4.2 (extract) |
+| Files changed | `indexer/pipeline/extract.py` (phase 4, already merged) |
+| Related | `docs/PIPELINE.md`, `docs/examples/annual-report-2023-24-p13-before.txt`, `docs/examples/annual-report-2023-24-p13-after.txt`, `docs/specs/phase-04-extract-clean.md` |
+
+**The architecture says:** PDF extraction is "`pdfplumber` text per page, layout preserved so table rows stay on one line".
+
+**What was built instead:** `page.extract_text()` in default text mode. `extract_text(layout=True)` is not used.
+
+**Why:** default mode already keeps a table row on one line (Annual Report 2023-24 PDF page 13: `Islamabad 19 14 46 16 83 50 8 236`). Layout mode keeps rows too, but pads every line with spaces and adds blank lines that the cleaner would have to strip. Evidence: `docs/PIPELINE.md` and `docs/examples/annual-report-2023-24-p13-*.txt`.
+
+**Impact:** none on behaviour. The goal of the sentence (table rows on one line) is met. No invariant, requirement or deduction item changes.
+
+**Plan:** absorb: reword architecture 5.4.2 to "table rows stay on one line (pdfplumber default text mode)" in the next architecture version.
+
+**Decision:** (human fills in)
 
 ---
 
@@ -96,3 +121,27 @@ Places where the architecture has flagged a real chance of deviation (architectu
 | A-5 native `preStop` sleep unavailable | `exec` sleep with an image that has `sleep` | S3 |
 | R-07 NetworkPolicy unenforced on kind | CI cannot prove isolation; evidence comes only from minikube | S3 |
 | Kit interface changes in `api/app` | Any change to `Retriever`, `LLMProvider`, `AskResponse` beyond architecture 5.7.2 | S2 |
+
+### DEV-002 Eval section match also folds dashes and applies NFKC
+
+| | |
+| --- | --- |
+| Status | OPEN |
+| Severity | S3 |
+| Date | 2026-11-04 |
+| Raised by | Claude (phase 5) |
+| Architecture reference | 5.13.2, AD-22 |
+| Files changed | `eval/run_eval.py` (`_norm`, `section_matches`), `eval/tests/test_run_eval.py` |
+| Related | `docs/OPEN_DECISIONS.md` D-046, `docs/specs/phase-05-eval-runner.md` |
+
+**The architecture says:** a retrieved section matches a golden section when equal after trimming, lower-casing and collapsing whitespace, or when it starts with the golden section followed by a space, `.` or `:`.
+
+**What was built instead:** the same rule, after also applying Unicode NFKC and mapping the dash variants U+2010 to U+2015 and U+2212 to `-`.
+
+**Why:** the real Student Handbook heading is `VI – SEMESTER RULES` (en dash) while `V - EXAMINATION RULES` uses a hyphen, and the chunker may emit either. A typographic dash must not count as a recall miss. Zain chose this on 2026-11-04 (D-046).
+
+**Impact:** recall can only rise, and only for headings that differ in dash or compatibility characters. No invariant, requirement or deduction item changes.
+
+**Plan:** absorb: add "after NFKC and dash folding" to architecture 5.13.2 and AD-22 in the next version.
+
+**Decision:** accepted by Zain 2026-11-04 (D-046); amend architecture later.

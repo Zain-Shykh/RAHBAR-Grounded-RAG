@@ -65,7 +65,7 @@ Hybrid retrieval, the `hosted` provider, the in-cluster Ollama mode, authenticat
 | 2 | Local services and assumption checks | Z-02 | Thu 10:30 | DONE | #4 |
 | 3 | Golden set | Z-03 | Thu 13:30 | DONE | #5 |
 | 4 | Extract and clean | Z-04 | Thu 16:30 | DONE | #6 |
-| 5 | Evaluation runner | Z-11 | Thu 18:30 | NOT STARTED | |
+| 5 | Evaluation runner | Z-11 | Thu 18:30 | IN PROGRESS | #8 |
 | 6 | Chunker | Z-05 | Fri 12:00 | NOT STARTED | |
 | 7 | Embed and store, full indexer run | Z-06 | Fri 14:00 | NOT STARTED | |
 | 8 | Retriever, index state, version scope | Z-07 | Fri 17:00 | NOT STARTED | |
@@ -83,11 +83,11 @@ Hours spent so far (fill in at each phase end): planned 37.5 h, actual `____`.
 
 ```
 Phase:        5  Evaluation runner
-Stage:        not started   (SPEC DRAFT, APPROVED, IMPLEMENTING, TESTING, READY FOR PR, MERGED)
-Branch:       (none yet; feat/rag-z11-eval-runner)
-Spec:         (none yet; docs/specs/phase-05-eval-runner.md)
-Next action:  fresh session: stage 0 then stage 1 of docs/WORKFLOW.md for phase 5
-Waiting on:   nothing
+Stage:        READY FOR PR   (SPEC DRAFT, APPROVED, IMPLEMENTING, TESTING, READY FOR PR, MERGED)
+Branch:       feat/rag-z11-eval-runner
+Spec:         docs/specs/phase-05-eval-runner.md
+Next action:  Zain says Merge it; then docs PR setting phase 5 DONE, tell Ahmad H-5
+Waiting on:   Zain (merge)
 Last updated: 2026-11-04
 ```
 
@@ -147,6 +147,12 @@ Append-only, newest at the bottom. One line per event: date, phase, what happene
 2026-11-04  P04  TESTING round 1: FAIL, T-1 (lone digit after hyphenated line end dropped). Fixed 71f91df.
 2026-11-04  P04  TESTING round 2: PASS, AC-1..AC-12, 71 indexer tests, pipeline coverage 91%. READY FOR PR.
 2026-11-04  P04  MERGED: PR #6. clean, extract (pdf, OCR, columns, html), verify, scripts/check_golden_extract.py on dev; 41 pages OCR'd; 16 of 16 golden expect strings found; q05 page comment now p.30. DONE.
+2026-11-04  P05  SPEC DRAFT: spec and plan for the evaluation runner written, 3 questions answered (D-046..D-048). DEV-001 logged, lint covers check_golden_extract.py, q05 page 30 verified against the real PDF (no change). docs/specs/phase-05-eval-runner.md
+2026-11-04  P05  APPROVED: Zain approved spec and plan.
+2026-11-04  P05  IMPLEMENTING done: run_eval.py four functions, ask headers, abort and baseline guard; 33 eval tests; make test and lint green; stub run exits 1 as designed (f05 leaks). DEV-002 logged.
+2026-11-04  P05  TESTING round 1: FAIL, D-1 malformed baseline.json traceback. Fixed 9237114.
+2026-11-04  P05  TESTING round 2: FAIL, D-2 wrong-shape baseline, directory path. Fixed 127c0ac.
+2026-11-04  P05  TESTING round 3: PASS, AC-1..AC-12. 87 eval tests. READY FOR PR.
 ```
 
 ---
@@ -401,10 +407,10 @@ Architecture 5.13 (all), 5.8 (citation rule); requirements R-EVA-1..9; `eval/run
 Producing baselines (phase 12). Changing the CLI flags (they exist: `--api --host --golden --baseline --out --update-baseline`).
 
 ### Acceptance criteria
-- [ ] `recall_at_k`, `citation_validity`, `summarise`, `gate` implemented; no `NotImplementedError` left in `eval/run_eval.py`.
-- [ ] Unit tests: prefix matching (`1.21` matches `1.21 Attendance`; `5` matches `5.4 Academic Warning`; `1.2` does **not** match `1.21`, because the golden section must be followed by a space, `.` or `:`), empty `relevant`, no citations, a failing gate for each of the three conditions, and a passing gate.
-- [ ] Running `make dev` (stubs) in one terminal and `make eval-fixtures` in another runs end to end and prints results (stub numbers are fine); exit code is 0, 1 or 2 as designed.
-- [ ] `make test` includes the eval tests and is green; `make lint` green.
+- [x] `recall_at_k`, `citation_validity`, `summarise`, `gate` implemented; no `NotImplementedError` left in `eval/run_eval.py`.
+- [x] Unit tests: prefix matching (`1.21` matches `1.21 Attendance`; `5` matches `5.4 Academic Warning`; `1.2` does **not** match `1.21`, because the golden section must be followed by a space, `.` or `:`), empty `relevant`, no citations, a failing gate for each of the three conditions, and a passing gate.
+- [x] Running `make dev` (stubs) in one terminal and `make eval-fixtures` in another runs end to end and prints results (stub numbers are fine); exit code is 0, 1 or 2 as designed.
+- [x] `make test` includes the eval tests and is green; `make lint` green.
 - [ ] H-5 delivered.
 
 ### Verify

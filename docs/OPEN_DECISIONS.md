@@ -80,6 +80,9 @@ Entry template:
 | D-043 | Injection golden question: `relevant` item or empty | eval | DECIDED | golden set |
 | D-044 | Multi-column Prospectus: how extract orders the text | indexer | DECIDED | extract |
 | D-045 | Where the golden-versus-cleaned-text check lives | indexer, eval | DECIDED | phase 4 test plan |
+| D-046 | Eval section match folds dashes | eval | DECIDED | run_eval.py recall_at_k, DEV-002 |
+| D-047 | Eval behaviour when an /api/ask call fails | eval | DECIDED | run_eval.py main |
+| D-048 | Guard --update-baseline against a failed gate | eval | DECIDED | run_eval.py main |
 
 ---
 
@@ -552,6 +555,42 @@ Entry template:
 - Decision: A.
 - Decided on: 2026-11-04
 
+### D-046 Eval section match folds dashes
+- Status: DECIDED
+- Raised: 2026-11-04 by Claude (phase 5)
+- Area: eval
+- Related: AD-22, architecture 5.13.2, R-EVA-1, eval/golden.yaml q05 and q06, DEV-002
+- Question: AD-22 matches sections by trim, lower-case, whitespace collapse. The real Student Handbook heading is `VI – SEMESTER RULES` (en dash) while `V - EXAMINATION RULES` uses a hyphen, and the chunker may emit either. Fold dashes too?
+- Options: A. NFKC plus en/em dash to hyphen before comparing (small deviation from AD-22). B. Strict AD-22.
+- Claude recommends: A. A typographic dash must not score as a recall miss.
+- Blocks: recall_at_k.
+- Decision: A. Logged as DEV-002 (S3) with the code.
+- Decided on: 2026-11-04
+
+### D-047 Eval behaviour when an /api/ask call fails
+- Status: DECIDED
+- Raised: 2026-11-04 by Claude (phase 5)
+- Area: eval
+- Related: R-EVA-9, contract C-6 (exit codes 0, 1, 2)
+- Question: A connection error or 5xx currently crashes the runner with a traceback (exit 1, same as gate failed). What should it do?
+- Options: A. Catch, name the question and the error, write no results, exit 1. B. New exit code 3 (changes C-6). C. Record an error row and continue.
+- Claude recommends: A. CI is red either way, contract unchanged, a half run is never scored.
+- Blocks: main().
+- Decision: A.
+- Decided on: 2026-11-04
+
+### D-048 Guard --update-baseline against a failed gate
+- Status: DECIDED
+- Raised: 2026-11-04 by Claude (phase 5)
+- Area: eval
+- Related: R-EVA-9, R-EVA-7
+- Question: main() writes baseline.json with --update-baseline even if the gate failed. Guard it?
+- Options: A. Refuse (print why, exit 1) when the abstention or citation gate fails; a recall drop alone may still be saved as a deliberate choice. B. Leave main() as given.
+- Claude recommends: A. A baseline with a leaked abstention or invalid citations must never be committed.
+- Blocks: main().
+- Decision: A.
+- Decided on: 2026-11-04
+
 ---
 
 ## Change log
@@ -563,3 +602,4 @@ Entry template:
 - 2026-11-04: phase 2 questions answered. D-038 to D-041 added, all DECIDED.
 - 2026-11-04: phase 3 questions answered. D-016 decided; D-042, D-043 added, all DECIDED.
 - 2026-11-04: phase 4 questions answered. D-044, D-045 added, both DECIDED.
+- 2026-11-04: phase 5 questions answered. D-046 to D-048 added, all DECIDED.
