@@ -63,7 +63,7 @@ Hybrid retrieval, the `hosted` provider, the in-cluster Ollama mode, authenticat
 | 0 | Foundation (repo, tools, corpus, architecture, docs) | n/a | Wed 4 Nov | DONE | #1, #2 |
 | 1 | Container images | Z-01 | Thu 09:00 | DONE | #3 |
 | 2 | Local services and assumption checks | Z-02 | Thu 10:30 | DONE | #4 |
-| 3 | Golden set | Z-03 | Thu 13:30 | IN PROGRESS | |
+| 3 | Golden set | Z-03 | Thu 13:30 | DONE | #5 |
 | 4 | Extract and clean | Z-04 | Thu 16:30 | NOT STARTED | |
 | 5 | Evaluation runner | Z-11 | Thu 18:30 | NOT STARTED | |
 | 6 | Chunker | Z-05 | Fri 12:00 | NOT STARTED | |
@@ -82,12 +82,12 @@ Hours spent so far (fill in at each phase end): planned 37.5 h, actual `____`.
 ## 2. Current focus
 
 ```
-Phase:        3  Golden set
-Stage:        READY FOR PR  (SPEC DRAFT, APPROVED, IMPLEMENTING, TESTING, READY FOR PR, MERGED)
-Branch:       feat/rag-z03-golden-set
-Spec:         docs/specs/phase-03-golden-set.md
-Next action:  PR open; auto-merge after checks, then set DONE by a PR commit
-Waiting on:   nothing; H-2, H-3 text still to send to Ahmad
+Phase:        4  Extract and clean
+Stage:        not started   (SPEC DRAFT, APPROVED, IMPLEMENTING, TESTING, READY FOR PR, MERGED)
+Branch:       (none yet; feat/rag-z04-extract-clean)
+Spec:         (none yet; docs/specs/phase-04-extract-clean.md)
+Next action:  fresh session: stage 0 then stage 1 of docs/WORKFLOW.md for phase 4
+Waiting on:   nothing (H-2, H-3 text ready to send to Ahmad)
 Last updated: 2026-11-04
 ```
 
@@ -140,6 +140,7 @@ Append-only, newest at the bottom. One line per event: date, phase, what happene
 2026-11-04  P03  APPROVED: Zain approved spec and plan.
 2026-11-04  P03  IMPLEMENTING done: eval/golden.yaml (18 questions) and indexer/tests/test_golden_set.py (5 tests) committed; all expect strings verified against extracted text; check_submission section H golden lines ok; CORPUS.md and plan note corrected.
 2026-11-04  P03  TESTING round 1: PASS, AC-1..AC-10, no blocking defect; tester added 9 tests (indexer 18 passed); O-1 page convention fixed. READY FOR PR.
+2026-11-04  P03  MERGED: PR #5. eval/golden.yaml (18 questions) on dev; version pair is withdrawal 4.25 (attendance is 1.21 in both versions, CORPUS.md fixed). Later phases: phase 8 AC and phase 12 cache note still cite attendance as the pair. Phase 4 must handle the letter-spaced Prospectus text (q11).
 ```
 
 ---
@@ -270,7 +271,7 @@ H-2, H-3 to Ahmad.
 
 ## Phase 3: Golden set (Z-03)
 
-**Status:** IN PROGRESS (READY FOR PR) · **Branch:** `feat/rag-z03-golden-set` · **Est:** 3 h · **Priority:** P0
+**Status:** DONE · **Branch:** `feat/rag-z03-golden-set` · **Est:** 3 h · **Priority:** P0
 
 ### Objective
 Write `eval/golden.yaml` **before anything is tuned**, from the documents themselves, never from what the retriever returns.
