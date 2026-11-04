@@ -1,0 +1,26 @@
+# RAHBAR: every dependency in one place.
+#
+# PYTHON (pip). Install everything with:   make install     (or: pip install -r requirements.txt)
+# The api and indexer images install only their own files; this root file is for developers.
+-r api/requirements-dev.txt
+-r indexer/requirements-dev.txt
+
+# ---------------------------------------------------------------------------------------
+# SYSTEM TOOLS (not pip packages). Versions are the ones this repo was developed with.
+# Linux x86_64, binaries installed to ~/.local/bin (no sudo). Make sure it is on PATH.
+#
+#   apt (sudo):  make git python3.12 python3-venv tesseract-ocr poppler-utils zstd curl
+#   docker       Docker Engine 29.x; add yourself to the docker group, then log out and in
+#   kubectl      v1.37.1      https://kubernetes.io/docs/tasks/tools/
+#   minikube     v1.39.0      https://github.com/kubernetes/minikube/releases/tag/v1.39.0
+#   kustomize    v5.8.3       https://github.com/kubernetes-sigs/kustomize/releases (CI + local)
+#   kubeconform  v0.8.0       https://github.com/yannh/kubeconform/releases (CI + local)
+#   k3d          v5.9.0       https://k3d.io (CI e2e cluster; kind also works)
+#   ollama       v0.40.14     https://ollama.com ; then:
+#                               ollama pull llama3.2:3b
+#                               ollama pull nomic-embed-text
+#                             run with OLLAMA_HOST=0.0.0.0 ollama serve  (minikube must reach it)
+#   trivy                     CI only (aquasecurity/trivy-action); not needed locally
+#
+# Cluster:  make cluster   (minikube, Calico CNI, metrics-server + ingress addons)
+# Check:    make test && make lint && make check
