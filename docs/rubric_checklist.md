@@ -140,13 +140,13 @@ Extra "don't" items from the text (not listed as deductions but explicitly forbi
 ### B7. Evaluation [R-GOL-*, R-EVA-*]
 
 - [x] `eval/golden.yaml` written before tuning: at least 15 questions: 8 ordinary, 2 version-sensitive, 2 exact-term, 2 must-abstain, 1 injection; relevant chunk ids or doc+section listed.
-- [ ] `recall_at_k`, `citation_validity`, `summarise`, `gate` implemented.
+- [x] `recall_at_k`, `citation_validity`, `summarise`, `gate` implemented.
 - [ ] recall@3 and recall@5 overall and by question type, committed.
 - [ ] Exact-term recall vs definitional recall noticed and explained.
 - [ ] Citation validity reported (target 100%, gate 95%).
 - [ ] Abstention correctness 100%.
 - [ ] `eval/results.json` and `eval/baseline.json` committed.
-- [ ] Gate fails on: recall@5 drop > 5 points, any must-abstain answered, citation validity < 95%.
+- [x] Gate fails on: recall@5 drop > 5 points, any must-abstain answered, citation validity < 95%.
 
 ### B8. Failure analysis [R-FAI-*]
 

@@ -5,7 +5,7 @@
 | Phase | 5, from `docs/IMPLEMENTATION_PLAN.md` |
 | Work plan task | Z-11 |
 | Branch | `feat/rag-z11-eval-runner` |
-| Stage | TESTING |
+| Stage | READY FOR PR |
 | Started | 2026-11-04 |
 | Approved (spec and plan) | 2026-11-04, Zain |
 | Depends on | phase 3 (golden set, merged); H-5 is delivered by this phase |
@@ -188,13 +188,20 @@ Spec and plan 0.7 h (done), tests 0.4 h, implementation 0.5 h, stub run 0.2 h, t
 
 | Round | Date | Command | Result | Notes |
 | --- | --- | --- | --- | --- |
+| 1 | 2026-11-04 | `make test`, `make lint`, stub run `make eval-fixtures`, 39 edge tests | FAIL | AC-1..AC-12 PASS; D-1 (low): malformed `baseline.json` gave a JSONDecodeError traceback. Fixed in 9237114. |
+| 2 | 2026-11-04 | same, plus a 12-case baseline sweep | FAIL | D-1 fixed. D-2 (low): baseline of valid JSON but wrong shape (list, string, non-numeric `recall_at_5`) or a directory path crashed `main()`. Fixed in 127c0ac. |
+| 3 | 2026-11-04 | `make test` (indexer 71, eval 87 passed), `make lint` clean, 25-case baseline sweep, `make eval-fixtures`, pdfplumber check of q05 | PASS | AC-1..AC-11 PASS with evidence (AC-12 is the H-5 message, delivered in the PR report). No defects. |
 
-Coverage of `run_eval.py`: `__`%
+Informational (S4, not fixed): a hand-edited baseline with `NaN` or `-Infinity` for `recall_at_5` is accepted and can never fail the recall gate. `--update-baseline` never writes such a value. Add `math.isfinite` to the baseline validation if wanted.
+
+q05 re-verified by the tester: "within two days" is on PDF page 30 (and the duplicate page 31), not 28 or 29.
+
+Coverage of `run_eval.py`: not measured (`pytest-cov` is not installed in the venv). The tester reports every function and branch exercised except the `__main__` guard and the `--host` header path.
 
 ## 13. Sign-offs
 
 | Gate | Date | Approved by | Notes |
 | --- | --- | --- | --- |
 | Spec and plan (the one gate) | 2026-11-04 | Zain | |
-| Tester verdict PASS | | | rounds: |
+| Tester verdict PASS | 2026-11-04 | tester subagent | rounds: 3 |
 | Merged | | | PR # |
