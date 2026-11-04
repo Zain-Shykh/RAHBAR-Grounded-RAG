@@ -5,7 +5,7 @@
 | Phase | 3, from `docs/IMPLEMENTATION_PLAN.md` |
 | Work plan task | Z-03 |
 | Branch | `feat/rag-z03-golden-set` |
-| Stage | TESTING |
+| Stage | READY FOR PR |
 | Started | 2026-11-04 |
 | Approved (spec and plan) | 2026-11-04, Zain |
 | Depends on | Phase 2 merged (PR #4). Feeds phase 5 (eval runner), 6 (section reconcile), 12 (baselines) |
@@ -76,7 +76,7 @@ Source file names: AH = `academic-rules-handbook-jun-2026.pdf`, SH = `student-ha
 | q02 | ordinary | What is the largest share of a degree program's credit hours that can be exempted for courses studied at another university? | AH, `3.7`, p.14 | `50%` | 3.7: exemption "cannot be given to more than 50% of the total credit hours" |
 | q03 | ordinary | How many students must register for a summer course, or the course is dropped? | AH, `6.11`, p.29 | `10` | 6.11: "A minimum of TEN (10) students should register in a summer course. Otherwise, the course shall be dropped." |
 | q04 | ordinary | According to the Student Handbook's policy on Generative AI tools, what counts as unacceptable use? (long definition) | SH, `5. Unacceptable Uses of Generative AI Tools`, p.52 | `entire assignment` | Section XII.5: e.g. "generating an entire assignment submission and passing it off as their own work"; the same policy also sits in AH section 10, hence "Student Handbook" in the question (D-016) |
-| q05 | ordinary | How many days does a student have to tell the Academic Office about classes missed for an unavoidable reason? | SH, `VI – SEMESTER RULES`, p.30 | `two days` | Semester rule 7: "immediately (within two days) inform the Academic Office" |
+| q05 | ordinary | How many days does a student have to tell the Academic Office about classes missed for an unavoidable reason? | SH, `VI – SEMESTER RULES`, p.29 | `two days` | Semester rule 7: "immediately (within two days) inform the Academic Office" |
 | q06 | ordinary | Are mobile phones and smart watches allowed in the examination hall? | SH, `V - EXAMINATION RULES`, p.26 | `NOT allowed` | Rule 1: "Mobile Phones, Smart Watches and all electronic communication devices are NOT allowed in Examination Hall." |
 | q07 | ordinary (table) | What percentage of the tuition fee is refunded if a student withdraws up to the 20th day after classes begin? | FEE, `Fee Refund Policy`, html | `60%` | Refund table: "Upto 20th day of commencement of classes: 60% Fee Refund" |
 | q08 | ordinary (table) | For MBA and MS programs, how is a grade of C interpreted? | GRD, `Letter grades for MBA & MS programs`, html | `Pass` | MBA/MS table: C, 2.00, Pass (BS table calls C "Adequate", so the program must be right) |
@@ -112,16 +112,16 @@ Count by type: ordinary 11, version 2, exact 2, abstain 2, injection 1 = 18. Spr
 
 ## 6. Acceptance criteria
 
-- [ ] **AC-1**: `eval/golden.yaml` parses with `yaml.safe_load` and has top-level `questions`, 18 entries, unique ids `q01`..`q18`.
-- [ ] **AC-2**: Counts by `type` are exactly ordinary 11, version 2, exact 2, abstain 2, injection 1 (so at least R-GOL's 8/2/2/2/1 and at least 15 total).
-- [ ] **AC-3**: Every `type` is one of the five allowed values; every question has a non-empty `question` string; every `source` appears in `corpus/MANIFEST.md`; every `section` is a string.
-- [ ] **AC-4**: Every non-abstain question has at least one `relevant` item and each item has a page or `html` comment found by reading the document.
-- [ ] **AC-5**: Both abstain questions have `must_abstain: true` and `relevant: []`; no other question has `must_abstain`.
-- [ ] **AC-6**: Every `expect` string, and every question's section, is checked against the document text by me and listed in section 11 with the page; no `expect` is invented. The independent tester re-verifies at least 8 of them against `corpus/raw/`.
-- [ ] **AC-7**: `python3 scripts/check_submission.py` section "H · evaluation" shows the golden-set lines passing (15+ questions, must-abstain, exact, injection, version).
-- [ ] **AC-8**: `make test && make lint` green with the new test.
-- [ ] **AC-9**: If D-042 is approved: `docs/CORPUS.md` rows 2 and 7 and the plan's phase 3 note no longer claim attendance is 1.22 in 2023; they state the 4.25 pair and that 130 credit hours is a 2023-only clause. Nothing else in those files changes.
-- [ ] **AC-10**: The diff touches only `eval/golden.yaml`, `indexer/tests/test_golden_set.py`, `docs/` (this phase's files) and nothing in `Makefile`, `requirements.txt`, `docs/architecture/`, `k8s/`, `ui/`, `.github/`.
+- [x] **AC-1**: `eval/golden.yaml` parses with `yaml.safe_load` and has top-level `questions`, 18 entries, unique ids `q01`..`q18`.
+- [x] **AC-2**: Counts by `type` are exactly ordinary 11, version 2, exact 2, abstain 2, injection 1 (so at least R-GOL's 8/2/2/2/1 and at least 15 total).
+- [x] **AC-3**: Every `type` is one of the five allowed values; every question has a non-empty `question` string; every `source` appears in `corpus/MANIFEST.md`; every `section` is a string.
+- [x] **AC-4**: Every non-abstain question has at least one `relevant` item and each item has a page or `html` comment found by reading the document.
+- [x] **AC-5**: Both abstain questions have `must_abstain: true` and `relevant: []`; no other question has `must_abstain`.
+- [x] **AC-6**: Every `expect` string, and every question's section, is checked against the document text by me and listed in section 11 with the page; no `expect` is invented. The independent tester re-verifies at least 8 of them against `corpus/raw/`.
+- [x] **AC-7**: `python3 scripts/check_submission.py` section "H · evaluation" shows the golden-set lines passing (15+ questions, must-abstain, exact, injection, version).
+- [x] **AC-8**: `make test && make lint` green with the new test.
+- [x] **AC-9**: If D-042 is approved: `docs/CORPUS.md` rows 2 and 7 and the plan's phase 3 note no longer claim attendance is 1.22 in 2023; they state the 4.25 pair and that 130 credit hours is a 2023-only clause. Nothing else in those files changes.
+- [x] **AC-10**: The diff touches only `eval/golden.yaml`, `indexer/tests/test_golden_set.py`, `docs/` (this phase's files) and nothing in `Makefile`, `requirements.txt`, `docs/architecture/`, `k8s/`, `ui/`, `.github/`.
 
 ## 7. Test strategy and traceability
 
@@ -196,6 +196,9 @@ Evidence (extracted text checked by `/tmp`-style script: every `expect` is a lit
 
 | Round | Date | Command | Result | Notes |
 | --- | --- | --- | --- | --- |
+| 1 | 2026-11-04 | `make test lint`, `check_submission.py`, re-extraction of 16 passages (pdftotext, tesseract, HTML strip), abstain greps, diff scope (commit a41d9ca) | PASS, AC-1..10 | indexer 18 passed (9 mine, 9 added by tester in `indexer/tests/test_golden_set_extra.py`). O-1 page convention (q05 p.30 vs heading p.29): fixed, heading page is the convention. O-2 `corpus/raw` symlink is not ignored by `.gitignore`: named adds only. O-3 CORPUS.md says p.12 for the faculty table, it is p.13: left (not in scope). |
+
+Tester evidence: `hostel` 7 hits, all passing mentions (SH p.45, annual reports, campus descriptions); `curfew` 0; `room allot`, `dormitor`, `accommodation`, `boarding` 0. 2023 clause 1.25 (130 credit hours) confirmed absent from 2026. Attendance 1.21 confirmed in both versions.
 
 Coverage of `app` (if relevant): not applicable (no application code).
 
@@ -204,5 +207,5 @@ Coverage of `app` (if relevant): not applicable (no application code).
 | Gate | Date | Approved by | Notes |
 | --- | --- | --- | --- |
 | Spec and plan (the one gate) | 2026-11-04 | Zain | approved as written |
-| Tester verdict PASS | | | rounds: |
+| Tester verdict PASS | 2026-11-04 | agent-skills:test-engineer | rounds: 1 |
 | Merged | | | PR # |

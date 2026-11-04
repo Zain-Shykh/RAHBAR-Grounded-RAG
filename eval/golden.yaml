@@ -41,7 +41,7 @@ questions:
     type: ordinary
     question: How many days does a student have to tell the Academic Office about classes missed for an unavoidable reason?
     relevant:
-      - {source: student-handbook-jun-2026.pdf, section: "VI – SEMESTER RULES"}  # p.30
+      - {source: student-handbook-jun-2026.pdf, section: "VI – SEMESTER RULES"}  # p.29
     expect: "within two days"
 
   - id: q06

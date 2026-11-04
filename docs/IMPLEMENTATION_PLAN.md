@@ -83,10 +83,10 @@ Hours spent so far (fill in at each phase end): planned 37.5 h, actual `____`.
 
 ```
 Phase:        3  Golden set
-Stage:        TESTING       (SPEC DRAFT, APPROVED, IMPLEMENTING, TESTING, READY FOR PR, MERGED)
+Stage:        READY FOR PR  (SPEC DRAFT, APPROVED, IMPLEMENTING, TESTING, READY FOR PR, MERGED)
 Branch:       feat/rag-z03-golden-set
 Spec:         docs/specs/phase-03-golden-set.md
-Next action:  independent tester round 1 (spec 10.2)
+Next action:  PR open; auto-merge after checks, then set DONE by a PR commit
 Waiting on:   nothing; H-2, H-3 text still to send to Ahmad
 Last updated: 2026-11-04
 ```
@@ -139,6 +139,7 @@ Append-only, newest at the bottom. One line per event: date, phase, what happene
 2026-11-04  P03  SPEC DRAFT: spec and plan for the golden set written (18 questions: 11 ordinary, 2 version, 2 exact, 2 abstain, 1 injection), 3 questions answered (D-016, D-042, D-043). Found: attendance is 1.21 in BOTH 2023 and 2026 rules, so CORPUS.md and the plan note are wrong; version pair is withdrawal 4.25. docs/specs/phase-03-golden-set.md
 2026-11-04  P03  APPROVED: Zain approved spec and plan.
 2026-11-04  P03  IMPLEMENTING done: eval/golden.yaml (18 questions) and indexer/tests/test_golden_set.py (5 tests) committed; all expect strings verified against extracted text; check_submission section H golden lines ok; CORPUS.md and plan note corrected.
+2026-11-04  P03  TESTING round 1: PASS, AC-1..AC-10, no blocking defect; tester added 9 tests (indexer 18 passed); O-1 page convention fixed. READY FOR PR.
 ```
 
 ---
@@ -269,7 +270,7 @@ H-2, H-3 to Ahmad.
 
 ## Phase 3: Golden set (Z-03)
 
-**Status:** IN PROGRESS (TESTING) · **Branch:** `feat/rag-z03-golden-set` · **Est:** 3 h · **Priority:** P0
+**Status:** IN PROGRESS (READY FOR PR) · **Branch:** `feat/rag-z03-golden-set` · **Est:** 3 h · **Priority:** P0
 
 ### Objective
 Write `eval/golden.yaml` **before anything is tuned**, from the documents themselves, never from what the retriever returns.
@@ -294,11 +295,11 @@ Requirements R-GOL-1..5, R-EVA-1..5; architecture 5.13.2 (matching rule); `eval/
 Running the retriever. Tuning. Fixtures (given).
 
 ### Acceptance criteria
-- [ ] At least 15 questions with the required mix (count by `type`).
-- [ ] Every non-abstain question has at least one `relevant` item, found by reading the document (note the page in a YAML comment).
-- [ ] Both hostel questions are `must_abstain: true` with empty `relevant`.
-- [ ] YAML parses (`python -c "import yaml; yaml.safe_load(open('eval/golden.yaml'))"`).
-- [ ] `python3 scripts/check_submission.py` section "H · evaluation" shows the golden-set lines passing.
+- [x] At least 15 questions with the required mix (count by `type`).
+- [x] Every non-abstain question has at least one `relevant` item, found by reading the document (note the page in a YAML comment).
+- [x] Both hostel questions are `must_abstain: true` with empty `relevant`.
+- [x] YAML parses (`python -c "import yaml; yaml.safe_load(open('eval/golden.yaml'))"`).
+- [x] `python3 scripts/check_submission.py` section "H · evaluation" shows the golden-set lines passing.
 - [ ] Ahmad skimmed it for unclear questions (optional, noted in the PR).
 
 ### Verify
