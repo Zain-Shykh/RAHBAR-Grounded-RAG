@@ -5,7 +5,7 @@
 | Phase | 5, from `docs/IMPLEMENTATION_PLAN.md` |
 | Work plan task | Z-11 |
 | Branch | `feat/rag-z11-eval-runner` |
-| Stage | READY FOR PR |
+| Stage | MERGED |
 | Started | 2026-11-04 |
 | Approved (spec and plan) | 2026-11-04, Zain |
 | Depends on | phase 3 (golden set, merged); H-5 is delivered by this phase |
@@ -204,4 +204,4 @@ Coverage of `run_eval.py`: not measured (`pytest-cov` is not installed in the ve
 | --- | --- | --- | --- |
 | Spec and plan (the one gate) | 2026-11-04 | Zain | |
 | Tester verdict PASS | 2026-11-04 | tester subagent | rounds: 3 |
-| Merged | | | PR # |
+| Merged | 2026-11-05 | Zain | PR #8 |

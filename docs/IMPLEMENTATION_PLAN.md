@@ -65,7 +65,7 @@ Hybrid retrieval, the `hosted` provider, the in-cluster Ollama mode, authenticat
 | 2 | Local services and assumption checks | Z-02 | Thu 10:30 | DONE | #4 |
 | 3 | Golden set | Z-03 | Thu 13:30 | DONE | #5 |
 | 4 | Extract and clean | Z-04 | Thu 16:30 | DONE | #6 |
-| 5 | Evaluation runner | Z-11 | Thu 18:30 | IN PROGRESS | #8 |
+| 5 | Evaluation runner | Z-11 | Thu 18:30 | DONE | #8 |
 | 6 | Chunker | Z-05 | Fri 12:00 | NOT STARTED | |
 | 7 | Embed and store, full indexer run | Z-06 | Fri 14:00 | NOT STARTED | |
 | 8 | Retriever, index state, version scope | Z-07 | Fri 17:00 | NOT STARTED | |
@@ -82,13 +82,13 @@ Hours spent so far (fill in at each phase end): planned 37.5 h, actual `____`.
 ## 2. Current focus
 
 ```
-Phase:        5  Evaluation runner
-Stage:        READY FOR PR   (SPEC DRAFT, APPROVED, IMPLEMENTING, TESTING, READY FOR PR, MERGED)
-Branch:       feat/rag-z11-eval-runner
-Spec:         docs/specs/phase-05-eval-runner.md
-Next action:  Zain says Merge it; then docs PR setting phase 5 DONE, tell Ahmad H-5
-Waiting on:   Zain (merge)
-Last updated: 2026-11-04
+Phase:        6  Chunker
+Stage:        not started   (SPEC DRAFT, APPROVED, IMPLEMENTING, TESTING, READY FOR PR, MERGED)
+Branch:       (none yet; feat/rag-z05-chunker)
+Spec:         (none yet; docs/specs/phase-06-chunker.md)
+Next action:  fresh session: stage 0 then stage 1 of docs/WORKFLOW.md for phase 6. Read eval/golden.yaml section strings and match or revise them (eval matches AD-22 plus dash folding)
+Waiting on:   nothing
+Last updated: 2026-11-05
 ```
 
 Update this block at the end of every work session, even if the phase is unfinished.
@@ -105,7 +105,7 @@ Things this lane owes Ahmad or needs from him. Tick when delivered. Newest at th
 | H-2 | Zain to Ahmad | Verified Redis Stack image tag, its UID, and every path it needs writable | 2 | [x] |
 | H-3 | Zain to Ahmad | Verified Chroma behaviour notes (user, writable paths) if anything differs from assumption R-01 | 2 | [x] |
 | H-4 | Zain to Ahmad | Indexer peak memory (for the Job limit), and the real corpus indexing time | 7 | [ ] |
-| H-5 | Zain to Ahmad | `eval/run_eval.py` working with the fixture golden set | 5 | [ ] |
+| H-5 | Zain to Ahmad | `eval/run_eval.py` working with the fixture golden set | 5 | [x] |
 | H-6 | Zain to Ahmad | Hashing embedder and extractive provider merged (CI-mode) | 9 | [ ] |
 | H-7 | Zain to Ahmad | Final ConfigMap values: `CHUNK_SIZE`, `CHUNK_OVERLAP`, `RELEVANCE_FLOOR`, `CACHE_THRESHOLD`, `TEMPERATURE` with one-line justifications | 12 | [ ] |
 | H-8 | Zain to Ahmad | `eval/fixtures/baseline.fixture.json` committed | 12 | [ ] |
@@ -153,6 +153,7 @@ Append-only, newest at the bottom. One line per event: date, phase, what happene
 2026-11-04  P05  TESTING round 1: FAIL, D-1 malformed baseline.json traceback. Fixed 9237114.
 2026-11-04  P05  TESTING round 2: FAIL, D-2 wrong-shape baseline, directory path. Fixed 127c0ac.
 2026-11-04  P05  TESTING round 3: PASS, AC-1..AC-12. 87 eval tests. READY FOR PR.
+2026-11-05  P05  MERGED: PR #8. run_eval.py scores and gates; 87 eval tests; DEV-001, DEV-002 logged. H-5 delivered: CLI unchanged, exit 0 pass, 1 gate failed or run aborted, 2 no longer emitted; baseline.fixture.json comes in phase 12.
 ```
 
 ---
@@ -384,7 +385,7 @@ None.
 
 ## Phase 5: Evaluation runner (Z-11)
 
-**Status:** NOT STARTED · **Branch:** `feat/rag-z11-eval-runner` · **Est:** 2 h · **Priority:** P0 · **Needed by:** Ahmad's A-09 (e2e job)
+**Status:** DONE · **Branch:** `feat/rag-z11-eval-runner` · **Est:** 2 h · **Priority:** P0 · **Needed by:** Ahmad's A-09 (e2e job)
 
 ### Objective
 Implement the four functions in `eval/run_eval.py` and make the gate trustworthy before any numbers matter.
