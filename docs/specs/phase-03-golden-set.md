@@ -5,7 +5,7 @@
 | Phase | 3, from `docs/IMPLEMENTATION_PLAN.md` |
 | Work plan task | Z-03 |
 | Branch | `feat/rag-z03-golden-set` |
-| Stage | IMPLEMENTING |
+| Stage | TESTING |
 | Started | 2026-11-04 |
 | Approved (spec and plan) | 2026-11-04, Zain |
 | Depends on | Phase 2 merged (PR #4). Feeds phase 5 (eval runner), 6 (section reconcile), 12 (baselines) |
@@ -182,7 +182,15 @@ Spec and plan 1.5 h (done at the gate), steps 1 and 2 about 0.75 h, step 3 0.5 h
 
 ## 11. Implementation notes
 
-(Filled during IMPLEMENT: evidence table per question with the quoted text and page.)
+Evidence (extracted text checked by `/tmp`-style script: every `expect` is a literal, whitespace-normalised substring of its source; sections and pages are as in 5.1):
+
+- All 16 non-abstain `expect` strings found in the source text, except two OCR/extraction artifacts: q10 OCR reads "(six. monthly)", so `expect` is `six`; q11 is letter-spaced in the Prospectus extraction ("a r e 7 5 % ."), visible as 75% on the page. Phase 4 must handle justified-text letter spacing in the Prospectus.
+- q09: Islamabad row of "Faculty Summary" on PDF page 13: Prof. 19, total 236 (CORPUS.md says page 12; the table is on 13, printed "Page 13 of 85").
+- Abstain: `hostel` appears only in passing (SH p.45; annual reports describe campus hostels); no hostel rule, fee, curfew or application text in any document; `curfew` has zero hits.
+- Deviation from plan wording only: attendance is not a version pair (D-042); `docs/CORPUS.md` rows 2, 7 and the plan phase 3 notes corrected (AC-9).
+- **Follow-up for later phases (not changed here):** plan phase 8 AC (line ~540, "a question about attendance ... in 2023 returns the 2023 rules") and phase 12 cache-threshold note (line ~722, "attendance 2023 versus 2026") assume the wrong pair; use withdrawal deadline 4.25 instead. Fix when those phases are specified.
+- `make test lint BIN=<main .venv/bin>` green (the worktree has no `.venv`): indexer 9 passed. `check_submission.py` section H: 5 golden lines ok; remaining FAILs are run_eval and baseline (phases 5, 12).
+
 
 ## 12. Test report
 
