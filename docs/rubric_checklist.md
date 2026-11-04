@@ -139,7 +139,7 @@ Extra "don't" items from the text (not listed as deductions but explicitly forbi
 
 ### B7. Evaluation [R-GOL-*, R-EVA-*]
 
-- [ ] `eval/golden.yaml` written before tuning: at least 15 questions: 8 ordinary, 2 version-sensitive, 2 exact-term, 2 must-abstain, 1 injection; relevant chunk ids or doc+section listed.
+- [x] `eval/golden.yaml` written before tuning: at least 15 questions: 8 ordinary, 2 version-sensitive, 2 exact-term, 2 must-abstain, 1 injection; relevant chunk ids or doc+section listed.
 - [ ] `recall_at_k`, `citation_validity`, `summarise`, `gate` implemented.
 - [ ] recall@3 and recall@5 overall and by question type, committed.
 - [ ] Exact-term recall vs definitional recall noticed and explained.

@@ -50,7 +50,7 @@ Entry template:
 | D-013 | Docker Hub account and repo names | ci-cd | OPEN | cd.yml |
 | D-014 | Branch protection: required checks and admin enforcement | process | OPEN | merging |
 | D-015 | Which four failure stages to break | docs | OPEN | FAILURE-ANALYSIS.md |
-| D-016 | Duplicate content: Prospectus 2026 vs Handbook 2026 | corpus, indexer | OPEN | golden set, retrieval |
+| D-016 | Duplicate content: Prospectus 2026 vs Handbook 2026 | corpus, indexer | DECIDED | golden set, retrieval |
 | D-017 | OCR settings and quality threshold | indexer | PROVISIONAL | extract stage |
 | D-018 | LLM provider scope | api | PROVISIONAL | provider code |
 | D-019 | Corpus choice | corpus | DECIDED | |
@@ -76,6 +76,8 @@ Entry template:
 | D-039 | Where the Ollama assumption check lives | process | DECIDED | verify_ollama.py |
 | D-040 | Dev services data persistence | process | DECIDED | make dev-services |
 | D-041 | Where the non-root read-only checks live | process | DECIDED | verify_services.py |
+| D-042 | Version pair for the golden set (attendance premise is wrong) | corpus, eval | DECIDED | golden set, CORPUS.md |
+| D-043 | Injection golden question: `relevant` item or empty | eval | DECIDED | golden set |
 
 ---
 
@@ -261,15 +263,15 @@ Entry template:
 - Decided on:
 
 ### D-016 Duplicate content: Prospectus 2026 vs Handbook 2026
-- Status: OPEN
+- Status: DECIDED
 - Raised: 2026-11-04 by Claude
 - Area: corpus, indexer
 - Related: R-COR-7, `docs/CORPUS.md` Known risks
 - Question: The 5-page Prospectus rules overlap the 58-page Handbook with different clause numbers. Two current documents give the same rule with different numbering. Which one counts as "relevant" in the golden set? Which one should the answer cite?
 - Claude recommends: golden questions list the Handbook as the primary relevant passage and accept the Prospectus as an alternate; do not dedupe at index time, and note the trap in PIPELINE.md.
 - Blocks: golden set.
-- Decision:
-- Decided on:
+- Decision: A, one primary source in `relevant`, no new YAML keys. Questions about a rule that exists in more than one current document name the document or pick content only one document holds (phase 3 spec 5.1). Index-time dedupe stays off; the trap is noted for PIPELINE.md.
+- Decided on: 2026-11-04
 
 ### D-017 OCR settings and quality threshold
 - Status: PROVISIONAL
@@ -497,6 +499,30 @@ Entry template:
 - Decision: A, inside the script.
 - Decided on: 2026-11-04
 
+### D-42 Version pair for the golden set (attendance premise is wrong)
+- Status: DECIDED
+- Raised: 2026-11-04 by Claude
+- Area: corpus, eval
+- Related: R-GOL-2, `docs/CORPUS.md` rows 2 and 7, `IMPLEMENTATION_PLAN.md` phase 3 design notes, phase 3 spec 2 and 5.1
+- Question: `docs/CORPUS.md` and the plan say attendance is clause 1.22 in the Aug 2023 rules and 1.21 in the 2026 Handbook. OCR of the 2023 rules (PDF pages 7 and 8) shows attendance is 1.21 in both, identical wording; 1.22 is the F/A consequence in both. "130 credit hours" is clause 1.25 in 2023 only; the 2026 text has no such clause. Real differences found by a clause-level comparison: withdrawal deadline 4.25 (2023 last day of classes; 2026 last day of the makeup week), summer new courses (2023 allows exceptions; 2026 repeat only), summer length (8 to 9 weeks; 8 weeks).
+- Options: A. Use withdrawal deadline 4.25 for the two version questions and correct CORPUS.md and the plan note in this PR. B. Same questions, leave the docs. C. Use summer new courses.
+- Claude recommends: A. Clean, same clause number, different wording, short OCR text; wrong notes in the docs would mislead phases 6 and 13.
+- Blocks: golden set; the wording of CORPUS.md.
+- Decision: A.
+- Decided on: 2026-11-04
+
+### D-43 Injection golden question: `relevant` item or empty
+- Status: DECIDED
+- Raised: 2026-11-04 by Claude
+- Area: eval
+- Related: R-GOL-5, `eval/fixtures/golden.fixture.yaml` f06, `eval/golden.example.yaml` q15
+- Question: The starter example gives the injection question an empty `relevant`; the CI fixture f06 gives it the attendance clause. Which one?
+- Options: A. `relevant` = Handbook 1.21, `expect: 100%` (recall counted; tests that the system still answers from the document). B. Empty `relevant` (excluded from recall).
+- Claude recommends: A. Matches the fixture and checks that resisting the injection does not turn into abstaining.
+- Blocks: golden set q18.
+- Decision: A.
+- Decided on: 2026-11-04
+
 ---
 
 ## Change log
@@ -506,3 +532,4 @@ Entry template:
 - 2026-11-04: work plan written. D-004 decided; D-032 to D-034 added.
 - 2026-11-04: phase 1 questions answered. D-035 to D-037 added, all DECIDED.
 - 2026-11-04: phase 2 questions answered. D-038 to D-041 added, all DECIDED.
+- 2026-11-04: phase 3 questions answered. D-016 decided; D-042, D-043 added, all DECIDED.
