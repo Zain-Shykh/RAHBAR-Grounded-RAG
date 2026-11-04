@@ -207,13 +207,16 @@ That is 40% over the work plan; the excess is the Ollama script and the hardened
 - Negative test found a bug: `chromadb.HttpClient` connects in its constructor, so the unreachable-service message needed the constructor inside the `try`. Fixed before the first commit of the script.
 - Hardened runs: an empty named volume gets root ownership copied up from the image, so the script seeds `/data/.keep` and `chown`s the volume (stands in for `fsGroup`). `docker diff` showed no writes outside `/data` for either image, so the confirmation run mounts only `/tmp` as tmpfs (precaution).
 - Results: A-2, A-3, R-01, R-02, A-6 all PASS; no deviation entry needed. Recorded in architecture 9.1 and 9.2.
-- Latency finding for phases 10 and 12 (not a deviation): CPU-only prompt evaluation about 38 tokens/s. 6510 tokens took 171 s; a 3000 to 3500 token prompt (5 chunks of 400 words) would take about 80 to 90 s, close to `LLM_TIMEOUT_SECONDS=90`. `llama3.2:3b` is 2986 MiB resident.
+- Latency (corrected after tester round 1, D-2): the first run took 171 s for 6510 tokens on a busy host; two warm reruns took 19.0 s and 19.8 s (about 330 tokens/s). The warm number stands; contention or a cold load can be several times slower. `llama3.2:3b` is 2986 MiB resident.
 - In a worktree session `make` needs `VENV=/home/zain-shykh/Desktop/SCD_ASSIGNMENTS/assign_2/.venv` because `.venv` lives in the main checkout.
 
 ## 12. Test report
 
 | Round | Date | Command | Result | Notes |
 | --- | --- | --- | --- | --- |
+| 1 | 2026-11-04 | `make test lint`, `verify_services.py` (with and without `--skip-docker`), `verify_ollama.py`, dev-services stop/reset/start, `check_submission.py` diff, break cases | FAIL (docs/low defects only): AC-1..AC-12 all PASS functionally | D-1 plan log lines outside the fenced log; D-2 A-6 latency (171 s) not reproduced (19.0 s warm); D-3 `--uid 0` accepted; D-4 Ctrl-C traceback, item 4 labelled 3.x, 3.2 PASS when an inner check failed; D-5 leftover volume `rahbar-verify-rtest`. Fixed in the round-1 fix commit (D-1 moved into the log; D-2 reran warm, 19.8 s, records corrected; D-3 uid above 0 enforced; D-4 labels, inner failure now fails 3.2/4.2, `KeyboardInterrupt` message; D-5 volume removed). |
+
+Round 1 break cases that passed: stale container replaced; port 8100 in use fails fast with docker's bind error; plain `redis:7-alpine` gives `FAIL 2.1 ... unknown command 'FT.CREATE'` plus a hint, no traceback; pre-existing `verify_a`, `verify_swap_next`, `idx:cache:verify` wiped and `rahbar_keep` untouched; SIGTERM and SIGINT mid-run leave no `rahbar-verify-*` container or volume; `--skip-docker` makes no docker calls; checker output identical to the phase-start baseline (AC-12); no change under `api/ indexer/ k8s/ ui/ .github/`. AC-7's `pkill ollama` was run by the developer session after round 1 (`pgrep ollama` empty).
 
 Coverage of `app`: not applicable (no application code changes).
 

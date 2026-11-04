@@ -238,7 +238,7 @@ def wait_for(fn, seconds=40):
     return False
 
 
-def hardened(label, image, uid, host_port, inner_port, env, ready, functional):
+def hardened(item, label, image, uid, host_port, inner_port, env, ready, functional):
     """Discover what a non-root container writes, then prove it runs read-only with only those paths."""
     global fails, prefix
     tag = uuid.uuid4().hex[:6]
@@ -260,22 +260,27 @@ def hardened(label, image, uid, host_port, inner_port, env, ready, functional):
 
     try:
         user = docker("image", "inspect", "-f", "{{.Config.User}}", image).stdout.strip()
-        check("3.1 image default user", lambda: f"User={user or '(root)'}")
+        check(f"{item}.1 image default user", lambda: f"User={user or '(root)'}")
         docker("volume", "create", vol, check_rc=True)
         # A non-empty, chowned volume stands in for Kubernetes fsGroup (an empty one is overwritten by copy-up).
         docker("run", "--rm", "-v", f"{vol}:/data", "alpine:3", "sh", "-c",
                f"touch /data/.keep && chown -R {uid}:{uid} /data", check_rc=True)
         found = {}
 
+        def run_functional():
+            before = fails
+            functional()
+            need(fails == before, "a functional check failed (see FAIL lines above)")
+
         def discover():
             start([], name)
-            functional()
+            run_functional()
             lines = docker("diff", name).stdout.splitlines()
             outside = [ln for ln in lines if not ln.split(" ", 1)[1].startswith("/data")]
             found["lines"] = outside
             return f"{len(lines)} paths changed, outside /data: {[ln for ln in outside] or 'none'}"
 
-        if not check("3.2 discovery (not read-only)", discover):
+        if not check(f"{item}.2 discovery (not read-only)", discover):
             return
         # tmpfs for the parent directory of every added path (never the root, never /tmp twice)
         tmpfs = sorted({os.path.dirname(ln[2:]) for ln in found["lines"] if ln.startswith("A ")} - {"/", "/tmp"})
@@ -285,11 +290,11 @@ def hardened(label, image, uid, host_port, inner_port, env, ready, functional):
             for t in tmpfs:
                 extra += ["--tmpfs", t]
             start(extra, name)
-            functional()
+            run_functional()
             return f"uid={uid}, --read-only, volume at /data, tmpfs /tmp + {tmpfs or 'nothing else'}"
 
         docker("rm", "-f", name)
-        check("3.3 confirmation (read-only root, caps dropped)", confirm)
+        check(f"{item}.3 confirmation (read-only root, caps dropped)", confirm)
     finally:
         docker("rm", "-f", name)
         docker("volume", "rm", vol)
@@ -308,6 +313,8 @@ def main():
     ap.add_argument("--uid", type=int, default=10001)
     ap.add_argument("--skip-docker", action="store_true", help="skip the hardened items 3 and 4")
     a = ap.parse_args()
+    if a.uid <= 0:
+        ap.error("--uid must be a non-root UID (above 0)")
 
     chroma_checks(a.host, a.chroma_port)
     redis_checks(os.environ.get("REDIS_HOST", a.host), a.redis_port)
@@ -319,11 +326,11 @@ def main():
             docker("rm", "-f", old)
         print("--- item 3: Redis Stack hardened (R-02)")
         prefix = "[redis] "
-        hardened("redis", REDIS_IMAGE, a.uid, 6380, 6379, {"REDIS_ARGS": "--appendonly yes"},
+        hardened(3, "redis", REDIS_IMAGE, a.uid, 6380, 6379, {"REDIS_ARGS": "--appendonly yes"},
                  lambda: redis.Redis(port=6380).ping(), lambda: redis_checks("localhost", 6380))
         print("--- item 4: Chroma hardened (R-01)")
         prefix = "[chroma] "
-        hardened("chroma", CHROMA_IMAGE, a.uid, 8101, 8000,
+        hardened(4, "chroma", CHROMA_IMAGE, a.uid, 8101, 8000,
                  {"IS_PERSISTENT": "TRUE", "PERSIST_DIRECTORY": "/data", "ANONYMIZED_TELEMETRY": "FALSE"},
                  lambda: http_ok("http://localhost:8101/api/v2/heartbeat"), lambda: chroma_checks("localhost", 8101))
     print(f"\n{'FAILED: ' + str(fails) + ' check(s)' if fails else 'ALL CHECKS PASSED'}")
@@ -331,4 +338,8 @@ def main():
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    try:
+        sys.exit(main())
+    except KeyboardInterrupt:  # the finally blocks have already cleaned up
+        print("\ninterrupted")
+        sys.exit(130)
