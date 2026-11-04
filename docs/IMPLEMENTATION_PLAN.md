@@ -61,7 +61,7 @@ Hybrid retrieval, the `hosted` provider, the in-cluster Ollama mode, authenticat
 | # | Phase | Work plan task | Target | Status | PR |
 | --- | --- | --- | --- | --- | --- |
 | 0 | Foundation (repo, tools, corpus, architecture, docs) | n/a | Wed 4 Nov | DONE | #1, #2 |
-| 1 | Container images | Z-01 | Thu 09:00 | NOT STARTED | |
+| 1 | Container images | Z-01 | Thu 09:00 | DONE | #3 |
 | 2 | Local services and assumption checks | Z-02 | Thu 10:30 | NOT STARTED | |
 | 3 | Golden set | Z-03 | Thu 13:30 | NOT STARTED | |
 | 4 | Extract and clean | Z-04 | Thu 16:30 | NOT STARTED | |
@@ -82,12 +82,12 @@ Hours spent so far (fill in at each phase end): planned 37.5 h, actual `____`.
 ## 2. Current focus
 
 ```
-Phase:        1  Container images
+Phase:        2  Local services and assumption checks
 Stage:        not started   (SPEC DRAFT, APPROVED, IMPLEMENTING, TESTING, READY FOR PR, MERGED)
 Branch:       (none yet)
-Spec:         (none yet; docs/specs/phase-01-container-images.md)
-Next action:  stage 0 then stage 1 of docs/WORKFLOW.md: cut feat/rag-z01-dockerfiles from dev, write the spec
-Waiting on:   nothing
+Spec:         (none yet; docs/specs/phase-02-local-services.md)
+Next action:  fresh session: stage 0 then stage 1 of docs/WORKFLOW.md for phase 2 (branch feat/rag-z02-dev-services)
+Waiting on:   Ahmad (told H-1; he can build the images)
 Last updated: 2026-11-04
 ```
 
@@ -101,7 +101,7 @@ Things this lane owes Ahmad or needs from him. Tick when delivered. Newest at th
 
 | ID | Direction | Item | Phase | Done |
 | --- | --- | --- | --- | :---: |
-| H-1 | Zain to Ahmad | `rahbar-api` and `rahbar-indexer` Dockerfiles merged to `dev` (he needs images to run) | 1 | [ ] |
+| H-1 | Zain to Ahmad | `rahbar-api` and `rahbar-indexer` Dockerfiles merged to `dev` (he needs images to run) | 1 | [x] |
 | H-2 | Zain to Ahmad | Verified Redis Stack image tag, its UID, and every path it needs writable | 2 | [ ] |
 | H-3 | Zain to Ahmad | Verified Chroma behaviour notes (user, writable paths) if anything differs from assumption R-01 | 2 | [ ] |
 | H-4 | Zain to Ahmad | Indexer peak memory (for the Job limit), and the real corpus indexing time | 7 | [ ] |
@@ -120,6 +120,13 @@ Append-only, newest at the bottom. One line per event: date, phase, what happene
 
 ```
 2026-11-04  P0   Foundation complete: repo, branch protection, tools, minikube, Ollama models, corpus (9 docs), architecture v1.0, requirements, rubric checklist, work plan, README/SETUP/CONTRIBUTING. PR #1 merged, PR #2 open.
+2026-11-04  P01  SPEC DRAFT: spec and plan for container images written, 3 questions answered (D-035, D-036, D-037). docs/specs/phase-01-container-images.md
+2026-11-04  P01  APPROVED: Zain approved spec and plan.
+2026-11-04  P01  IMPLEMENTING done: api and indexer Dockerfiles built; AC-1..7 pass locally (healthz 200 as UID 10001 read-only, indexer --dummy fails only on Chroma connect). 33242ec, b226d5a
+2026-11-04  P01  TESTING round 1: FAIL, D-1 nested pyc leak. Fixed 6bde1f6.
+2026-11-04  P01  TESTING round 2: FAIL, D-2 checker regression from **/ patterns, D-3 nested tests/corpus/md. Fixed 56bd1cf.
+2026-11-04  P01  TESTING round 3: PASS, AC-1..7. READY FOR PR. Sizes api 388 MB, indexer 592 MB.
+2026-11-04  P01  MERGED: PR #3. rahbar-api:dev and rahbar-indexer:dev build and run non-root read-only. H-1 delivered: tell Ahmad image names rahbar-api:dev, rahbar-indexer:dev, UID 10001, CMDs as in spec section 4; run the two docker build lines until A-01 fixes make images.
 ```
 
 ---
@@ -160,7 +167,7 @@ Each phase has the same shape: **Objective**, **Read first**, **Scope** (what to
 
 ## Phase 1: Container images (Z-01)
 
-**Status:** NOT STARTED · **Branch:** `feat/rag-z01-dockerfiles` · **Est:** 1.5 h · **Priority:** P0 · **Unblocks:** Ahmad's A-02 (do this first, merge early)
+**Status:** DONE (PR #3) · **Branch:** `feat/rag-z01-dockerfiles` · **Est:** 1.5 h · **Priority:** P0 · **Unblocks:** Ahmad's A-02 (do this first, merge early)
 
 ### Objective
 Build and run the `api` and `indexer` images so Ahmad can deploy real containers.
@@ -185,13 +192,13 @@ Architecture 4.12 (image rules), 4.7 (security posture), 5.2 (code map); `STARTE
 The ui Dockerfile (Ahmad, A-01). Any compose file for the full system. Image publishing (CD, Ahmad).
 
 ### Acceptance criteria
-- [ ] `docker build -t rahbar-api:dev api` and `docker build -t rahbar-indexer:dev indexer` succeed.
-- [ ] `docker run --rm --read-only --tmpfs /tmp --user 10001 -p 8000:8000 rahbar-api:dev` serves `GET /healthz` with 200 (stub config).
-- [ ] The api image has no `tesseract`, `pdfplumber`, `pdf2image`.
-- [ ] `docker run --rm rahbar-indexer:dev tesseract --version` works and `docker run --rm rahbar-indexer:dev python -c "import pytesseract, pdf2image, pdfplumber"` works.
-- [ ] `docker run --rm rahbar-indexer:dev python -m pipeline.run --dummy` starts as non-root and fails only because Chroma is unreachable (not on permissions or imports).
-- [ ] `scripts/check_submission.py` section "I · api image / indexer image / .dockerignore" has no failures for these two.
-- [ ] H-1 delivered: PR merged into `dev`.
+- [x] `docker build -t rahbar-api:dev api` and `docker build -t rahbar-indexer:dev indexer` succeed.
+- [x] `docker run --rm --read-only --tmpfs /tmp --user 10001 -p 8000:8000 rahbar-api:dev` serves `GET /healthz` with 200 (stub config).
+- [x] The api image has no `tesseract`, `pdfplumber`, `pdf2image`.
+- [x] `docker run --rm rahbar-indexer:dev tesseract --version` works and `docker run --rm rahbar-indexer:dev python -c "import pytesseract, pdf2image, pdfplumber"` works.
+- [x] `docker run --rm rahbar-indexer:dev python -m pipeline.run --dummy` starts as non-root and fails only because Chroma is unreachable (not on permissions or imports).
+- [x] `scripts/check_submission.py` section "I · api image / indexer image / .dockerignore" has no failures for these two.
+- [x] H-1 delivered: PR merged into `dev`.
 
 ### Verify
 ```bash

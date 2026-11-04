@@ -1,0 +1,16 @@
+.git
+__pycache__
+**/__pycache__
+*.pyc
+**/*.pyc
+.venv
+.mypy_cache
+.ruff_cache
+.pytest_cache
+tests
+**/tests
+corpus
+**/corpus
+*.md
+**/*.md
+requirements-dev.txt
