@@ -5,7 +5,7 @@
 | Phase | 2, from `docs/IMPLEMENTATION_PLAN.md` |
 | Work plan task | Z-02 |
 | Branch | `feat/rag-z02-local-services` (the plan says `-dev-services`; Zain's start prompt names this one) |
-| Stage | TESTING |
+| Stage | READY FOR PR |
 | Started | 2026-11-04 |
 | Approved (spec and plan) | 2026-11-04, Zain |
 | Depends on | Phase 1 merged (PR #3). Feeds H-2, H-3 to Ahmad (A-03) |
@@ -215,6 +215,7 @@ That is 40% over the work plan; the excess is the Ollama script and the hardened
 | Round | Date | Command | Result | Notes |
 | --- | --- | --- | --- | --- |
 | 1 | 2026-11-04 | `make test lint`, `verify_services.py` (with and without `--skip-docker`), `verify_ollama.py`, dev-services stop/reset/start, `check_submission.py` diff, break cases | FAIL (docs/low defects only): AC-1..AC-12 all PASS functionally | D-1 plan log lines outside the fenced log; D-2 A-6 latency (171 s) not reproduced (19.0 s warm); D-3 `--uid 0` accepted; D-4 Ctrl-C traceback, item 4 labelled 3.x, 3.2 PASS when an inner check failed; D-5 leftover volume `rahbar-verify-rtest`. Fixed in the round-1 fix commit (D-1 moved into the log; D-2 reran warm, 19.8 s, records corrected; D-3 uid above 0 enforced; D-4 labels, inner failure now fails 3.2/4.2, `KeyboardInterrupt` message; D-5 volume removed). |
+| 2 | 2026-11-04 | D-1..D-5 re-check, `make test lint`, full `verify_services.py` under `sg docker` | PASS | Fixes verified at ade8cdc. Exit code 130 and the inner-failure FAIL of 3.2/4.2 were read from the code, not triggered. |
 
 Round 1 break cases that passed: stale container replaced; port 8100 in use fails fast with docker's bind error; plain `redis:7-alpine` gives `FAIL 2.1 ... unknown command 'FT.CREATE'` plus a hint, no traceback; pre-existing `verify_a`, `verify_swap_next`, `idx:cache:verify` wiped and `rahbar_keep` untouched; SIGTERM and SIGINT mid-run leave no `rahbar-verify-*` container or volume; `--skip-docker` makes no docker calls; checker output identical to the phase-start baseline (AC-12); no change under `api/ indexer/ k8s/ ui/ .github/`. AC-7's `pkill ollama` was run by the developer session after round 1 (`pgrep ollama` empty).
 
@@ -225,5 +226,5 @@ Coverage of `app`: not applicable (no application code changes).
 | Gate | Date | Approved by | Notes |
 | --- | --- | --- | --- |
 | Spec and plan (the one gate) | 2026-11-04 | Zain | approved as written |
-| Tester verdict PASS | | | rounds: |
+| Tester verdict PASS | 2026-11-04 | independent tester subagent | rounds: 2 |
 | Merged | | | PR # |
