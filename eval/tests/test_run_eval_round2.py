@@ -45,3 +45,10 @@ def test_empty_or_null_baseline_tolerated(monkeypatch, tmp_path, text):
 def test_wrong_shape_baseline_does_not_traceback(monkeypatch, tmp_path, text):
     # D-2: valid JSON of the wrong shape currently raises AttributeError/TypeError in gate().
     assert _run(monkeypatch, tmp_path, b'{"answer": "x", "citations": [], "retrieved": []}', text) == 1
+
+
+@pytest.mark.parametrize("value", ["NaN", "Infinity", "-Infinity"])
+def test_non_finite_baseline_recall_aborts_cleanly(monkeypatch, tmp_path, value):
+    body = b'{"answer": "x", "citations": [], "retrieved": []}'
+    assert _run(monkeypatch, tmp_path, body, '{"recall_at_5": %s}' % value) == 1
+    assert not (tmp_path / "o.json").exists()
