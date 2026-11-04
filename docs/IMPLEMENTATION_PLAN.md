@@ -66,7 +66,7 @@ Hybrid retrieval, the `hosted` provider, the in-cluster Ollama mode, authenticat
 | 3 | Golden set | Z-03 | Thu 13:30 | DONE | #5 |
 | 4 | Extract and clean | Z-04 | Thu 16:30 | DONE | #6 |
 | 5 | Evaluation runner | Z-11 | Thu 18:30 | DONE | #8 |
-| 6 | Chunker | Z-05 | Fri 12:00 | NOT STARTED | |
+| 6 | Chunker | Z-05 | Fri 12:00 | IN PROGRESS | |
 | 7 | Embed and store, full indexer run | Z-06 | Fri 14:00 | NOT STARTED | |
 | 8 | Retriever, index state, version scope | Z-07 | Fri 17:00 | NOT STARTED | |
 | 9 | Prompt, validation, CI-mode components | Z-08 | Fri 20:00 | NOT STARTED | |
@@ -83,10 +83,10 @@ Hours spent so far (fill in at each phase end): planned 37.5 h, actual `____`.
 
 ```
 Phase:        6  Chunker
-Stage:        not started   (SPEC DRAFT, APPROVED, IMPLEMENTING, TESTING, READY FOR PR, MERGED)
-Branch:       (none yet; feat/rag-z05-chunker)
-Spec:         (none yet; docs/specs/phase-06-chunker.md)
-Next action:  fresh session: stage 0 then stage 1 of docs/WORKFLOW.md for phase 6. Read eval/golden.yaml section strings and match or revise them (eval matches AD-22 plus dash folding)
+Stage:        READY FOR PR   (SPEC DRAFT, APPROVED, IMPLEMENTING, TESTING, READY FOR PR, MERGED)
+Branch:       feat/rag-z05-chunker
+Spec:         docs/specs/phase-06-chunker.md
+Next action:  merge the PR into dev, then mark phase 6 DONE and set focus to phase 7 (docs PR)
 Waiting on:   nothing
 Last updated: 2026-11-05
 ```
@@ -154,6 +154,10 @@ Append-only, newest at the bottom. One line per event: date, phase, what happene
 2026-11-04  P05  TESTING round 2: FAIL, D-2 wrong-shape baseline, directory path. Fixed 127c0ac.
 2026-11-04  P05  TESTING round 3: PASS, AC-1..AC-12. 87 eval tests. READY FOR PR.
 2026-11-05  P05  MERGED: PR #8. run_eval.py scores and gates; 87 eval tests; DEV-001, DEV-002 logged. H-5 delivered: CLI unchanged, exit 0 pass, 1 gate failed or run aborted, 2 no longer emitted; baseline.fixture.json comes in phase 12.
+2026-11-05  P06  SPEC DRAFT: spec and plan for the chunker written, 3 decisions taken without a gate (D-049..D-051, Claude, pre-approved by Zain). Loose end from P05 closed first: baseline recall_at_5 must be finite (61a059b). docs/specs/phase-06-chunker.md
+2026-11-05  P06  IMPLEMENTING done: chunk() with five heading rules, 80-character sections, overlap within a section, stable ids; chunk_report.py on the real corpus: 1044 chunks, amplification 1.04, 18 of 18 golden items matched after changing 4 section strings (q05, q06, q09, q10). DEV-003 logged.
+2026-11-05  P06  TESTING round 1: FAIL, T-1 clause splitter cut a table row. Fixed 188d572.
+2026-11-05  P06  TESTING round 2: PASS, AC-1..AC-9, 183 indexer tests. READY FOR PR. Known loss: two-column Handbook text (follow-up: column splits for the two Handbook PDFs, like D-044).
 ```
 
 ---
@@ -166,7 +170,7 @@ Numbers this lane must measure. The agent fills them in as they are produced; th
 | --- | --- | --- | --- |
 | Pages needing OCR (per document) | Aug 2023 rules 24 of 26; policy 8 of 8; Academic Rules Handbook 5 of 58; Student Handbook 4 of 64; others 0. 41 pages OCR'd in about 88 s | 4 | indexer log, `scripts/check_golden_extract.py` |
 | Real corpus chunk count at shipped size | - | 7 | collection metadata `chunk_count` |
-| Storage amplification (stored words / source words) | - | 6 | `scripts/chunk_report.py` |
+| Storage amplification (stored words / source words) | 1.04 overall at 400/50 (1044 chunks; 85 094 stored, 82 099 source words); 1.00 to 1.06 per document | 6 | `scripts/chunk_report.py` |
 | Indexer peak memory | - | 7 | `/usr/bin/time -v` |
 | Indexer wall time, real corpus | - | 7 | indexer log |
 | Chunk config 1 (size, overlap) and recall@5 | - | 12 | `eval` |

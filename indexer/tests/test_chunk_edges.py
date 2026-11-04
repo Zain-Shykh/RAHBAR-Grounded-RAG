@@ -152,3 +152,39 @@ def test_table_row_with_decimal_is_not_split():
     row = "Course | 3.5 Credit hours | x"
     cs = chunk(doc("1.1 T\n\n" + row), 400, 50)
     assert row in "\n".join(c.text for c in cs)
+
+
+def _rows(cs):
+    return [ln for c in cs for ln in c.text.split("\n") if " | " in ln]
+
+
+def test_row_with_clause_number_midline_stays_whole():
+    row = "Fee | see 1.2 The rule applies | 500"
+    cs = chunk(doc("1.1 T\nbody\n" + row), 400, 50)
+    assert _rows(cs) == [row]
+
+
+def test_row_starting_like_clause_heading_is_not_a_heading():
+    row = "1.1 Fees | 500"
+    cs = chunk(doc("2.1 Real\nbody\n" + row + "\nmore body"), 400, 50)
+    assert {c.section for c in cs} == {"2.1 Real"} and _rows(cs) == [row]
+
+
+def test_prose_midline_clause_number_splits_and_keeps_all_words():
+    line = "Semester ends 4.25 The deadline is firm 4.26 Another rule follows"
+    cs = chunk(doc("1.1 T\nbody\n" + line), 400, 50)
+    assert set(line.split()) <= {w for c in cs for w in c.text.split()}
+
+
+def test_grade_decimal_midline_not_split():
+    line = "Minimum CGPA 4.00 Good standing is required"
+    cs = chunk(doc("1.1 T\nbody\n" + line), 400, 50)
+    assert line in "\n".join(c.text for c in cs)
+
+
+def test_oversize_row_between_paragraphs_kept_whole_no_overlap_after():
+    row = " | ".join(toks(30, "r").split())
+    cs = chunk(doc("1.1 T\n" + toks(10, "a") + "\n" + row + "\n" + toks(10, "b")), 20, 5)
+    assert _rows(cs) == [row]
+    after = next(c for c in cs if "bx0" in c.text)
+    assert "rx29" not in after.text

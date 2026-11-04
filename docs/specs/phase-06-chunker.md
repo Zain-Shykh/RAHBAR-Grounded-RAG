@@ -5,7 +5,7 @@
 | Phase | 6, from `docs/IMPLEMENTATION_PLAN.md` |
 | Work plan task | Z-05 |
 | Branch | `feat/rag-z05-chunker` |
-| Stage | TESTING |
+| Stage | READY FOR PR |
 | Started | 2026-11-05 |
 | Approved (spec and plan) | 2026-11-05, Zain (pre-approved: no gate this session) |
 | Depends on | phase 4 (extract, clean, merged), phase 5 (`section_matches`, merged) |
@@ -162,11 +162,15 @@ Spec 0.5 h, tests 0.75 h, code 0.75 h, report and corpus run 0.5 h, golden recon
 
 | Round | Date | Command | Result | Notes |
 | --- | --- | --- | --- | --- |
+| 1 | 2026-11-05 | `make test`, `make lint`, `scripts/chunk_report.py --size 400 --overlap 50 --golden eval/golden.yaml`, 40-seed fuzz | FAIL | AC-1..9 pass; defect T-1 (medium): the mid-line clause splitter cut a table row (`Course \| 3.5 Credit hours \| x`), breaking "table rows never split". Fixed in 188d572 (lines with ` \| ` skip the split). Tester added `indexer/tests/test_chunk_edges.py`. |
+| 2 | 2026-11-05 | same, plus 5 more break attempts on rows and clause splits | PASS | AC-1..AC-9 PASS; 183 indexer tests, 90 eval, 7 api; chunk_report exit 0, 0 golden misses, TOTAL 1044 chunks, 85 094 stored, 82 099 source words, amplification 1.04. `pipeline/chunk.py` 100% line coverage (round 1, `coverage` outside the repo; pytest-cov is not installed). |
+
+Observations from the tester, no action: a one-line numbered clause with no final period and no body is carried into the next section by the DEV-003 title rule (pinned by a test); GenAI sub-sections 8 and 11 and some Student Handbook labels are lost to two-column interleaving (known loss, section 11).
 
 ## 13. Sign-offs
 
 | Gate | Date | Approved by | Notes |
 | --- | --- | --- | --- |
 | Spec and plan (the one gate) | 2026-11-05 | Zain (pre-approved) | no gate in this session |
-| Tester verdict PASS | | | rounds: |
+| Tester verdict PASS | 2026-11-05 | independent subagent | rounds: 2 |
 | Merged | | | PR # |
