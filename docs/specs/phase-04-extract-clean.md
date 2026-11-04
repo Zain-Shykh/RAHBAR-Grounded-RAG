@@ -146,7 +146,7 @@ Unit tests need no network, model, PDF or tesseract: pdfplumber and the OCR func
 | AC-7 | unit | `indexer/tests/test_clean.py` | nothing |
 | AC-8 | unit and script | `test_clean.py::test_letter_spacing*`, `test_extract_pdf.py::test_column_split`; script asserts the Prospectus sentence | nothing / `corpus/raw` |
 | AC-9 | script | `scripts/check_golden_extract.py` (golden table) | `corpus/raw`, tesseract |
-| AC-10 | integration | `sg docker -c "docker run --rm --read-only --user 10001 -v $PWD/corpus/raw:/corpus:ro -v $PWD/scripts:/s:ro rahbar-indexer:dev python /s/check_golden_extract.py --only policy --pages 2"` (flags fixed in step 8) | Docker, built image |
+| AC-10 | integration | `sg docker -c "docker run --rm --read-only --tmpfs /tmp --user 10001 --cap-drop ALL -e PYTHONPATH=/app -v $RAW:/corpus:ro -v $PWD/scripts:/scripts:ro -v $PWD/eval:/eval:ro rahbar-indexer:p04 python /scripts/check_golden_extract.py --corpus /corpus --only policy"` (`--only prospectus` also) | Docker, image built from `indexer/` |
 | AC-11 | unit | `test_extract_pdf.py::test_needs_ocr_boundary`, `::test_ocr_called_only_for_empty_pages`, `::test_ocr_failure_is_not_fatal`, `test_extract_md.py`, `test_extract_html.py`, `test_extract_pdf.py::test_column_split` | nothing |
 | AC-12 | command | `make test && make lint`; `git diff --stat dev` | nothing |
 
@@ -221,8 +221,10 @@ Plan estimate 3 h; this is 27% over, inside the 30% limit. The extra is the colu
 
 | Round | Date | Command | Result | Notes |
 | --- | --- | --- | --- | --- |
+| 1 | 2026-11-04 | `make test && make lint`; `scripts/check_golden_extract.py` (23 PASS, 0 FAIL); image run read-only non-root; tester added `indexer/tests/test_phase04_edges.py` (21 tests) | AC-1..12 PASS; FAIL on defect T-1 (low) | T-1: `clean_text("Peshawar-\n2")` dropped the `2` as a page number. Fixed in the next commit (a number-only line after a line ending in `-` is kept); strict xfail marker removed. AC-10 command in section 7 corrected (needs `PYTHONPATH`, `/eval` mount). |
+| 2 | 2026-11-04 | `make test` (71 passed), `make lint`, golden script 0 FAIL | PASS | developer rerun after T-1 fix, tester round 2 below |
 
-Coverage of `pipeline` (clean, extract, verify): `__`%
+Coverage of `pipeline` (tester, 50 original tests): clean 100%, extract 96% (only the real `_ocr_page`, covered by the script and image runs), verify 100%, total 91%.
 
 ## 13. Sign-offs
 

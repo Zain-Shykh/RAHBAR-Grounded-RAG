@@ -47,7 +47,12 @@ def clean_text(text: str) -> str:
     text = "".join(" " if unicodedata.category(c) == "Zs" else c for c in text)
     lines = [repair_letter_spacing(_HSPACE.sub(" ", ln).strip()) for ln in text.split("\n")]
     text = _HYPHEN.sub(r"\1", "\n".join(lines))
-    text = "\n".join(ln for ln in text.split("\n") if not _PAGE_NO.match(ln))
+    kept: list[str] = []
+    for ln in text.split("\n"):
+        # a lone number after a line ending in "-" continues a word ("Peshawar-\n2"), not a page number
+        if not _PAGE_NO.match(ln) or (kept and kept[-1].endswith("-")):
+            kept.append(ln)
+    text = "\n".join(kept)
     return _BLANKS.sub("\n\n", text).strip()
 
 
