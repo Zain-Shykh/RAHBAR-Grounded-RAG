@@ -192,6 +192,7 @@ The full list is in [`docs/architecture/architecture.md`](docs/architecture/arch
 | [`docs/SETUP.md`](docs/SETUP.md) | Install everything and run it, for Linux, Windows (WSL 2) and macOS |
 | [`CONTRIBUTING.md`](CONTRIBUTING.md) | Branches, commits, pull requests, ownership |
 | [`docs/WORKPLAN.md`](docs/WORKPLAN.md) | Who builds what, in which order, in parallel |
+| [`docs/IMPLEMENTATION_PLAN.md`](docs/IMPLEMENTATION_PLAN.md) | Phased build plan and progress log for the RAG lane |
 | [`docs/architecture/architecture.md`](docs/architecture/architecture.md) | The architecture: platform and RAG. Single source of truth. |
 | [`docs/architecture/deviations.md`](docs/architecture/deviations.md) | Every difference between the build and the architecture |
 | [`docs/requirements.md`](docs/requirements.md) | Every requirement extracted from the assignment |
