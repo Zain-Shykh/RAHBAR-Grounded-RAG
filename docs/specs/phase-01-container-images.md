@@ -5,7 +5,7 @@
 | Phase | 01, from `docs/IMPLEMENTATION_PLAN.md` |
 | Work plan task | Z-01 |
 | Branch | `feat/rag-z01-dockerfiles` |
-| Stage | TESTING |
+| Stage | READY FOR PR |
 | Started | 2026-11-04 |
 | Approved (spec and plan) | 2026-11-04, Zain |
 | Depends on | nothing. Unblocks Ahmad's A-02 and A-04 (hand-off H-1). |
@@ -141,6 +141,11 @@ Step 1: 0.5 h. Step 2: 0.5 h. Step 3, test rounds, PR and hand-off: 0.5 h. Total
 
 | Round | Date | Command | Result | Notes |
 | --- | --- | --- | --- | --- |
+| 1 | 2026-11-04 | full AC run at c564c17 | FAIL | AC-1..7 pass. D-1 (low): nested `__pycache__`/`.pyc` leaked into images, `.dockerignore` patterns anchored at root. Fixed in 6bde1f6. |
+| 2 | 2026-11-04 | full AC run at 6bde1f6 | FAIL | D-1 closed. D-2 (medium): `**/__pycache__` alone broke the checker (AC-7), my regression. D-3 (low, latent): nested `tests`, `corpus`, `*.md` not excluded. Fixed in 56bd1cf (root and `**/` forms both kept). |
+| 3 | 2026-11-04 | full AC run at 56bd1cf | PASS | AC-1..7 PASS, AC-8 pending merge. `make test` 7 api + 4 indexer pass, `make lint` clean. D-1..D-3 closed. |
+
+Round 3 evidence: healthz 200 as UID 10001 with `--read-only --tmpfs /tmp --cap-drop ALL --security-opt no-new-privileges`; api has no tesseract/pdfplumber/pdf2image/pytesseract; indexer has all, no fastapi; `--dummy` ends `Could not connect to a Chroma server`; only `/tmp` writable as UID 10001; indexer OCRs a PNG and a PDF page under read-only root; SIGTERM clean; nested-leak test (planted `NOTE.md`, `tests/`, `corpus/`, `__pycache__`) leaves `/app` clean; checker section I only FAIL is `ui/Dockerfile` (Ahmad). Sizes: api 388 MB, indexer 592 MB.
 
 Coverage of `app`: not relevant (no Python change).
 
@@ -149,5 +154,5 @@ Coverage of `app`: not relevant (no Python change).
 | Gate | Date | Approved by | Notes |
 | --- | --- | --- | --- |
 | Spec and plan (the one gate) | 2026-11-04 | Zain | "Approved" |
-| Tester verdict PASS | | | rounds: |
+| Tester verdict PASS | 2026-11-04 | independent subagent | rounds: 3 |
 | Merged | | | PR # |

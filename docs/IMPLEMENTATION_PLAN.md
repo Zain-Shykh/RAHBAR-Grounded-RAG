@@ -61,7 +61,7 @@ Hybrid retrieval, the `hosted` provider, the in-cluster Ollama mode, authenticat
 | # | Phase | Work plan task | Target | Status | PR |
 | --- | --- | --- | --- | --- | --- |
 | 0 | Foundation (repo, tools, corpus, architecture, docs) | n/a | Wed 4 Nov | DONE | #1, #2 |
-| 1 | Container images | Z-01 | Thu 09:00 | IN PROGRESS | |
+| 1 | Container images | Z-01 | Thu 09:00 | IN PROGRESS | PR_NUM |
 | 2 | Local services and assumption checks | Z-02 | Thu 10:30 | NOT STARTED | |
 | 3 | Golden set | Z-03 | Thu 13:30 | NOT STARTED | |
 | 4 | Extract and clean | Z-04 | Thu 16:30 | NOT STARTED | |
@@ -83,11 +83,11 @@ Hours spent so far (fill in at each phase end): planned 37.5 h, actual `____`.
 
 ```
 Phase:        1  Container images
-Stage:        TESTING   (SPEC DRAFT, APPROVED, IMPLEMENTING, TESTING, READY FOR PR, MERGED)
+Stage:        READY FOR PR   (SPEC DRAFT, APPROVED, IMPLEMENTING, TESTING, READY FOR PR, MERGED)
 Branch:       feat/rag-z01-dockerfiles
 Spec:         docs/specs/phase-01-container-images.md
-Next action:  independent testing subagent round 1, then PR
-Waiting on:   nothing
+Next action:  Zain says "Merge it." then stage 5 (merge, tell Ahmad H-1), then Phase 2 in a fresh session
+Waiting on:   Zain (merge)
 Last updated: 2026-11-04
 ```
 
@@ -123,6 +123,9 @@ Append-only, newest at the bottom. One line per event: date, phase, what happene
 2026-11-04  P01  SPEC DRAFT: spec and plan for container images written, 3 questions answered (D-035, D-036, D-037). docs/specs/phase-01-container-images.md
 2026-11-04  P01  APPROVED: Zain approved spec and plan.
 2026-11-04  P01  IMPLEMENTING done: api and indexer Dockerfiles built; AC-1..7 pass locally (healthz 200 as UID 10001 read-only, indexer --dummy fails only on Chroma connect). 33242ec, b226d5a
+2026-11-04  P01  TESTING round 1: FAIL, D-1 nested pyc leak. Fixed 6bde1f6.
+2026-11-04  P01  TESTING round 2: FAIL, D-2 checker regression from **/ patterns, D-3 nested tests/corpus/md. Fixed 56bd1cf.
+2026-11-04  P01  TESTING round 3: PASS, AC-1..7. READY FOR PR. Sizes api 388 MB, indexer 592 MB.
 ```
 
 ---
@@ -188,13 +191,13 @@ Architecture 4.12 (image rules), 4.7 (security posture), 5.2 (code map); `STARTE
 The ui Dockerfile (Ahmad, A-01). Any compose file for the full system. Image publishing (CD, Ahmad).
 
 ### Acceptance criteria
-- [ ] `docker build -t rahbar-api:dev api` and `docker build -t rahbar-indexer:dev indexer` succeed.
-- [ ] `docker run --rm --read-only --tmpfs /tmp --user 10001 -p 8000:8000 rahbar-api:dev` serves `GET /healthz` with 200 (stub config).
-- [ ] The api image has no `tesseract`, `pdfplumber`, `pdf2image`.
-- [ ] `docker run --rm rahbar-indexer:dev tesseract --version` works and `docker run --rm rahbar-indexer:dev python -c "import pytesseract, pdf2image, pdfplumber"` works.
-- [ ] `docker run --rm rahbar-indexer:dev python -m pipeline.run --dummy` starts as non-root and fails only because Chroma is unreachable (not on permissions or imports).
-- [ ] `scripts/check_submission.py` section "I · api image / indexer image / .dockerignore" has no failures for these two.
-- [ ] H-1 delivered: PR merged into `dev`.
+- [x] `docker build -t rahbar-api:dev api` and `docker build -t rahbar-indexer:dev indexer` succeed.
+- [x] `docker run --rm --read-only --tmpfs /tmp --user 10001 -p 8000:8000 rahbar-api:dev` serves `GET /healthz` with 200 (stub config).
+- [x] The api image has no `tesseract`, `pdfplumber`, `pdf2image`.
+- [x] `docker run --rm rahbar-indexer:dev tesseract --version` works and `docker run --rm rahbar-indexer:dev python -c "import pytesseract, pdf2image, pdfplumber"` works.
+- [x] `docker run --rm rahbar-indexer:dev python -m pipeline.run --dummy` starts as non-root and fails only because Chroma is unreachable (not on permissions or imports).
+- [x] `scripts/check_submission.py` section "I · api image / indexer image / .dockerignore" has no failures for these two.
+- [ ] H-1 delivered: PR merged into `dev`. (open until Zain says merge)
 
 ### Verify
 ```bash

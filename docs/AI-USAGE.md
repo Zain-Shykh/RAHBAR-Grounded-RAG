@@ -4,3 +4,4 @@
 
 | Tool | What it wrote or shaped | What we changed afterwards, and why |
 | --- | --- | --- |
+| Claude Code (Sonnet 5.5) | Phase 1: wrote `api/Dockerfile` (two-stage, `/opt/venv`), `indexer/Dockerfile` (tesseract-ocr, poppler-utils), both `.dockerignore`, and the phase spec and plan. An independent Claude subagent tested it in 3 rounds. | Tester found nested `.pyc` leaking (anchored ignore patterns). My first fix (`**/` only) broke the starter checker, so both root and `**/` forms are kept. Decisions on venv, no HEALTHCHECK and leaving the Makefile were Zain's. |
