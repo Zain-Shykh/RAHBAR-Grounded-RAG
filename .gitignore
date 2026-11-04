@@ -1,0 +1,33 @@
+# secrets
+.env
+.env.*
+*secret*.yaml
+*secret*.yml
+!k8s/base/secret.placeholder.yaml
+*.pem
+*.key
+kubeconfig*
+.kube/
+
+# corpus: commit MANIFEST.md and sources.yaml, never the downloaded files
+corpus/raw/
+
+# python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+*.egg-info/
+
+# local index / editor / os
+chroma_data/
+.idea/
+.vscode/
+.DS_Store
+graphify-out/
