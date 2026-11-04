@@ -6,6 +6,7 @@ import logging
 import re
 import time
 from collections import Counter
+from html.parser import HTMLParser
 from pathlib import Path
 
 import pdfplumber
@@ -64,6 +65,104 @@ def remove_repeating_lines(pages: list[str]) -> list[str]:
             for lines, edge in zip(split, edges, strict=True)]
 
 
+_SKIP_TAGS = {"script", "style", "noscript", "header", "nav", "footer", "form"}
+_VOID = {"br", "img", "input", "meta", "link", "hr", "area", "base", "col", "source", "wbr"}
+_HEADINGS = {"h1", "h2", "h3", "h4"}
+_BLOCKS = {"p", "li", "div", "section", "ul", "ol", "caption", "table", "tr", *_HEADINGS}
+
+
+class _HtmlText(HTMLParser):
+    """Main content to lines. Table row -> one line, cells joined with ' | '."""
+
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.lines: list[str] = []
+        self.buf: list[str] = []
+        self.cell: list[str] | None = None
+        self.row: list[str] = []
+        self.skip_tag = ""
+        self.skip_depth = 0
+        self.mark: int | None = None  # index in lines where div.main-content opened
+
+    def _flush(self, after_blank: bool = True) -> None:
+        text = " ".join("".join(self.buf).split())
+        self.buf = []
+        if text:
+            self.lines.append(text)
+            if after_blank:
+                self.lines.append("")
+
+    def _end_cell(self) -> None:
+        if self.cell is not None:
+            self.row.append(" ".join("".join(self.cell).split()))
+            self.cell = None
+
+    def _end_row(self) -> None:
+        self._end_cell()
+        if any(self.row):
+            self.lines.append(" | ".join(self.row))
+        self.row = []
+
+    def _blank(self) -> None:
+        if self.lines and self.lines[-1] != "":
+            self.lines.append("")
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        cls = dict(attrs).get("class") or ""
+        if self.skip_tag:
+            self.skip_depth += tag == self.skip_tag
+            return
+        if tag in _SKIP_TAGS or (tag in {"ol", "ul"} and "breadcrumb" in cls):
+            self.skip_tag, self.skip_depth = tag, 1
+            return
+        if tag == "div" and "main-content" in cls.split() and self.mark is None:
+            self.mark = len(self.lines)
+        if tag in {"td", "th"}:
+            self._end_cell()  # tolerate an unclosed previous cell
+            self.cell = []
+        elif tag == "br":
+            (self.cell if self.cell is not None else self.buf).append(" ")
+        elif tag in _BLOCKS and self.cell is None:
+            self._flush()
+            if tag in _HEADINGS:
+                self._blank()
+        if tag == "tr":
+            self._end_row()
+
+    def handle_endtag(self, tag: str) -> None:
+        if self.skip_tag:
+            if tag == self.skip_tag:
+                self.skip_depth -= 1
+                if self.skip_depth == 0:
+                    self.skip_tag = ""
+            return
+        if tag in {"td", "th"}:
+            self._end_cell()
+        elif tag == "tr":
+            self._end_row()
+        elif tag == "table":
+            self._end_row()
+            self._blank()
+        elif tag in _BLOCKS and self.cell is None:
+            self._flush(after_blank=tag not in _HEADINGS and tag != "caption")
+
+    def handle_data(self, data: str) -> None:
+        if self.skip_tag:
+            return
+        (self.cell if self.cell is not None else self.buf).append(data)
+
+
+def html_to_text(html: str) -> str:
+    """Main content as text: headings and paragraphs as lines, one line per table row."""
+    parser = _HtmlText()
+    parser.feed(html)
+    parser.close()
+    parser._end_row()
+    parser._flush()
+    lines = parser.lines[parser.mark or 0:]
+    return "\n".join(lines).strip()
+
+
 def _ocr_page(path: str, n: int) -> str:
     """OCR one page (200 dpi). Imports here so unit tests and CI-mode need no system packages."""
     import pytesseract
@@ -113,6 +212,8 @@ def extract(path: str, doc_version: str, superseded: bool) -> Document:
     suffix = Path(path).suffix.lower()
     if suffix == ".pdf":
         pages = _extract_pdf(path, name)
+    elif suffix in {".html", ".htm"}:
+        pages = [Page(name, 1, html_to_text(Path(path).read_text(encoding="utf-8", errors="replace")))]
     elif suffix in {".md", ".txt"}:
         text = Path(path).read_text(encoding="utf-8")
         pages = [Page(name, 1, strip_front_matter(text) if suffix == ".md" else text)]
