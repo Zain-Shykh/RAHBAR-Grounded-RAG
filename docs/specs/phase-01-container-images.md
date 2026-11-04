@@ -5,9 +5,9 @@
 | Phase | 01, from `docs/IMPLEMENTATION_PLAN.md` |
 | Work plan task | Z-01 |
 | Branch | `feat/rag-z01-dockerfiles` |
-| Stage | SPEC DRAFT |
+| Stage | APPROVED |
 | Started | 2026-11-04 |
-| Approved (spec and plan) | (pending) |
+| Approved (spec and plan) | 2026-11-04, Zain |
 | Depends on | nothing. Unblocks Ahmad's A-02 and A-04 (hand-off H-1). |
 
 ## 1. Objective
@@ -142,6 +142,6 @@ Coverage of `app`: not relevant (no Python change).
 
 | Gate | Date | Approved by | Notes |
 | --- | --- | --- | --- |
-| Spec and plan (the one gate) | | | |
+| Spec and plan (the one gate) | 2026-11-04 | Zain | "Approved" |
 | Tester verdict PASS | | | rounds: |
 | Merged | | | PR # |

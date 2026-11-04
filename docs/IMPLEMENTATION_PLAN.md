@@ -83,11 +83,11 @@ Hours spent so far (fill in at each phase end): planned 37.5 h, actual `____`.
 
 ```
 Phase:        1  Container images
-Stage:        SPEC DRAFT   (SPEC DRAFT, APPROVED, IMPLEMENTING, TESTING, READY FOR PR, MERGED)
+Stage:        APPROVED   (SPEC DRAFT, APPROVED, IMPLEMENTING, TESTING, READY FOR PR, MERGED)
 Branch:       feat/rag-z01-dockerfiles
 Spec:         docs/specs/phase-01-container-images.md
-Next action:  Zain reviews spec and plan at the gate; on "Approved." implement step 1 (api Dockerfile)
-Waiting on:   Zain (gate)
+Next action:  implement step 1 (api Dockerfile)
+Waiting on:   nothing
 Last updated: 2026-11-04
 ```
 
@@ -121,6 +121,7 @@ Append-only, newest at the bottom. One line per event: date, phase, what happene
 ```
 2026-11-04  P0   Foundation complete: repo, branch protection, tools, minikube, Ollama models, corpus (9 docs), architecture v1.0, requirements, rubric checklist, work plan, README/SETUP/CONTRIBUTING. PR #1 merged, PR #2 open.
 2026-11-04  P01  SPEC DRAFT: spec and plan for container images written, 3 questions answered (D-035, D-036, D-037). docs/specs/phase-01-container-images.md
+2026-11-04  P01  APPROVED: Zain approved spec and plan.
 ```
 
 ---
