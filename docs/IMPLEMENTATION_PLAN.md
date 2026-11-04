@@ -83,11 +83,11 @@ Hours spent so far (fill in at each phase end): planned 37.5 h, actual `____`.
 
 ```
 Phase:        4  Extract and clean
-Stage:        not started   (SPEC DRAFT, APPROVED, IMPLEMENTING, TESTING, READY FOR PR, MERGED)
-Branch:       (none yet; feat/rag-z04-extract-clean)
-Spec:         (none yet; docs/specs/phase-04-extract-clean.md)
-Next action:  fresh session: stage 0 then stage 1 of docs/WORKFLOW.md for phase 4
-Waiting on:   nothing (H-2, H-3 text ready to send to Ahmad)
+Stage:        READY FOR PR   (SPEC DRAFT, APPROVED, IMPLEMENTING, TESTING, READY FOR PR, MERGED)
+Branch:       feat/rag-z04-extract-clean
+Spec:         docs/specs/phase-04-extract-clean.md
+Next action:  open PR into dev, merge if own-lane and green, then DONE commit via PR
+Waiting on:   nothing
 Last updated: 2026-11-04
 ```
 
@@ -141,6 +141,11 @@ Append-only, newest at the bottom. One line per event: date, phase, what happene
 2026-11-04  P03  IMPLEMENTING done: eval/golden.yaml (18 questions) and indexer/tests/test_golden_set.py (5 tests) committed; all expect strings verified against extracted text; check_submission section H golden lines ok; CORPUS.md and plan note corrected.
 2026-11-04  P03  TESTING round 1: PASS, AC-1..AC-10, no blocking defect; tester added 9 tests (indexer 18 passed); O-1 page convention fixed. READY FOR PR.
 2026-11-04  P03  MERGED: PR #5. eval/golden.yaml (18 questions) on dev; version pair is withdrawal 4.25 (attendance is 1.21 in both versions, CORPUS.md fixed). Later phases: phase 8 AC and phase 12 cache note still cite attendance as the pair. Phase 4 must handle the letter-spaced Prospectus text (q11).
+2026-11-04  P04  SPEC DRAFT: spec and plan for extract and clean written, 2 questions answered (D-044 per-file column splits, D-045 golden check is a script). Found: Prospectus problem in pdfplumber is 3-column interleaving, letter-spacing only in pdftotext; default pdfplumber mode keeps table rows on one line. docs/specs/phase-04-extract-clean.md
+2026-11-04  P04  APPROVED: Zain approved spec and plan.
+2026-11-04  P04  IMPLEMENTING done: clean, extract (pdf, OCR, columns, html, md), verify, scripts/check_golden_extract.py. 9 docs extract, 41 pages OCR'd (88 s), all 16 golden expect strings found after fixing q05 page comment (p.30). make test and lint green, image run read-only non-root OK.
+2026-11-04  P04  TESTING round 1: FAIL, T-1 (lone digit after hyphenated line end dropped). Fixed 71f91df.
+2026-11-04  P04  TESTING round 2: PASS, AC-1..AC-12, 71 indexer tests, pipeline coverage 91%. READY FOR PR.
 ```
 
 ---
@@ -151,7 +156,7 @@ Numbers this lane must measure. The agent fills them in as they are produced; th
 
 | Quantity | Value | Phase | Measured with |
 | --- | --- | --- | --- |
-| Pages needing OCR (per document) | - | 4 | indexer log |
+| Pages needing OCR (per document) | Aug 2023 rules 24 of 26; policy 8 of 8; Academic Rules Handbook 5 of 58; Student Handbook 4 of 64; others 0. 41 pages OCR'd in about 88 s | 4 | indexer log, `scripts/check_golden_extract.py` |
 | Real corpus chunk count at shipped size | - | 7 | collection metadata `chunk_count` |
 | Storage amplification (stored words / source words) | - | 6 | `scripts/chunk_report.py` |
 | Indexer peak memory | - | 7 | `/usr/bin/time -v` |
@@ -540,7 +545,7 @@ Architecture 5.3, 5.5.2 (steps 2, 3, 5), 5.6 (all), 4.8 (readiness diagram), AD-
 Cache, prompt, generation, `/readyz` wiring (phase 10), metrics (phase 10).
 
 ### Acceptance criteria
-- [ ] Against the local real index (phase 7), a question about attendance returns passages from the 2026 handbook first, and the same question with "in 2023" returns the 2023 rules.
+- [ ] Against the local real index (phase 7), a question about the withdrawal deadline (clause 4.25) returns the 2026 handbook first, and the same question with "in 2023" returns the 2023 rules.
 - [ ] `scope()` unit tests: year match, old-version phrase, default, year that matches nothing, a year matching both a superseded and a current version.
 - [ ] Re-running the indexer while a script queries in a loop produces no unhandled exception in the retriever (it re-resolves and continues).
 - [ ] Pin mismatch (start the API with `EMBED_MODEL=other`) is detected by `index_state` and logged with both model names.
@@ -722,7 +727,7 @@ Architecture 5.4.2 (tuning), 5.6.3 (floor), 5.9.3 (cache threshold), 5.13.4 (two
 ### Scope
 1. **Chunking.** Three `(size, overlap)` configurations (suggested: 200/25, 400/50, 600/100). For each: re-index locally, run `eval/run_eval.py` against the locally running API, record recall@5 (and @3), chunk count and amplification. Choose one and justify it with the numbers.
 2. **Relevance floor.** From the eval rows list the best score for every answerable question and every must-abstain question. Choose the highest floor that keeps all answerable questions above it and sits above the must-abstain maxima; if they overlap, say so and choose with a stated trade-off (abstention correctness must stay 100%).
-3. **Cache threshold.** Build a small test set of pairs: true paraphrases that should hit, near-misses that must not (attendance 2023 versus 2026, clause 1.21 versus 1.22, two different fees). Try at least three thresholds (suggested 0.88, 0.92, 0.96). Record the false hit that ruled one out. Ship the lowest with zero false hits.
+3. **Cache threshold.** Build a small test set of pairs: true paraphrases that should hit, near-misses that must not (withdrawal deadline 2023 versus 2026, clause 1.21 versus 1.22, two different fees). Try at least three thresholds (suggested 0.88, 0.92, 0.96). Record the false hit that ruled one out. Ship the lowest with zero false hits.
 4. **Baselines.** `eval/baseline.json` and `eval/results.json` from the real corpus (`--update-baseline`), and `eval/fixtures/baseline.fixture.json` from the fixture run in CI-mode (`EMBED_MODEL=hashing-bow-768`, `LLM_PROVIDER=extractive`, `CORPUS_DIR=eval/fixtures`).
 5. **Hand over** the ConfigMap values with one-line justifications.
 

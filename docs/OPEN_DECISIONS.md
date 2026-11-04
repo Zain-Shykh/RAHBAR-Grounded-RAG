@@ -78,6 +78,8 @@ Entry template:
 | D-041 | Where the non-root read-only checks live | process | DECIDED | verify_services.py |
 | D-042 | Version pair for the golden set (attendance premise is wrong) | corpus, eval | DECIDED | golden set, CORPUS.md |
 | D-043 | Injection golden question: `relevant` item or empty | eval | DECIDED | golden set |
+| D-044 | Multi-column Prospectus: how extract orders the text | indexer | DECIDED | extract |
+| D-045 | Where the golden-versus-cleaned-text check lives | indexer, eval | DECIDED | phase 4 test plan |
 
 ---
 
@@ -523,6 +525,33 @@ Entry template:
 - Decision: A.
 - Decided on: 2026-11-04
 
+### D-044 Multi-column Prospectus: how extract orders the text
+- Status: DECIDED
+- Raised: 2026-11-04 by Claude (phase 4)
+- Area: indexer
+- Related: architecture 5.4.2, 5.4.5; golden q11; phase 4 spec
+- Question: The Prospectus 2026 PDF is 3 columns. pdfplumber reads it line by line across the columns, so the 75% attendance sentence is cut by unrelated text. Fix it, and how?
+- Options:
+  - A. Per-file column splits: a small table in `extract.py` maps the file name to its gutters (measured x about 220 and 397); each column is cropped and read in order.
+  - B. Document the loss only.
+  - C. Generic per-page gutter detector for every PDF (risk: splits tables in the handbooks).
+- Claude recommends: A. Smallest change that fixes the one multi-column file, testable on a synthetic page.
+- Blocks: extract.py design.
+- Decision: A.
+- Decided on: 2026-11-04
+
+### D-045 Where the golden-versus-cleaned-text check lives
+- Status: DECIDED
+- Raised: 2026-11-04 by Claude (phase 4)
+- Area: indexer, eval
+- Related: eval/golden.yaml; phase 4 spec AC-9
+- Question: Each golden `expect` string should be found in the cleaned text of its source page. The check needs `corpus/raw` and tesseract, which CI lacks. Script, pytest that skips when the corpus is absent, or both?
+- Options: A. `scripts/check_golden_extract.py`, never skipped, run by developer and tester. B. pytest that skips without the corpus. C. Both.
+- Claude recommends: A. `make test` stays offline and nothing is silently skipped.
+- Blocks: phase 4 test plan.
+- Decision: A.
+- Decided on: 2026-11-04
+
 ---
 
 ## Change log
@@ -533,3 +562,4 @@ Entry template:
 - 2026-11-04: phase 1 questions answered. D-035 to D-037 added, all DECIDED.
 - 2026-11-04: phase 2 questions answered. D-038 to D-041 added, all DECIDED.
 - 2026-11-04: phase 3 questions answered. D-016 decided; D-042, D-043 added, all DECIDED.
+- 2026-11-04: phase 4 questions answered. D-044, D-045 added, both DECIDED.

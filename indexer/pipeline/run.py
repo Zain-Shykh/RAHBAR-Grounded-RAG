@@ -18,6 +18,7 @@ from pathlib import Path
 
 from .config import IndexerSettings, get_settings
 from .models import Chunk
+from .verify import VerifyError
 
 
 def log(msg: str, **fields: object) -> None:
@@ -69,7 +70,10 @@ def run_pipeline(settings: IndexerSettings) -> int:
     from .embed import embed
     from .extract import extract
     from .store import store
+    from .verify import verify
 
+    if (Path(settings.corpus_dir) / "_index.json").exists():  # fixture dirs have none
+        log("verified corpus", files=verify(settings.corpus_dir))
     documents = discover(settings.corpus_dir)
     if not documents:
         raise SystemExit(f"no documents found in {settings.corpus_dir}")
@@ -100,6 +104,10 @@ def main() -> int:
             count = write_dummy_index(settings, get_client(settings))
         else:
             count = run_pipeline(settings)
+    except VerifyError as exc:
+        for problem in str(exc).split("\n"):
+            log("corpus verification failed", problem=problem)
+        return 1
     except NotImplementedError as exc:
         log("indexer stage not implemented yet", error=str(exc))
         return 2
