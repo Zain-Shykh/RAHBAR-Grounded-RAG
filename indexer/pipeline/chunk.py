@@ -121,7 +121,7 @@ def chunk(doc: Document, size: int, overlap: int) -> list[Chunk]:
             para = []
 
     for page in doc.pages:
-        lines = [piece.strip() for ln in page.text.split("\n") for piece in _MID.split(ln.strip())]
+        lines = [piece.strip() for ln in page.text.split("\n") for piece in ([ln.strip()] if " | " in ln else _MID.split(ln.strip()))]
         for i, line in enumerate(lines):
             if not line:
                 end_para()
