@@ -83,10 +83,10 @@ Hours spent so far (fill in at each phase end): planned 37.5 h, actual `____`.
 
 ```
 Phase:        4  Extract and clean
-Stage:        IMPLEMENTING   (SPEC DRAFT, APPROVED, IMPLEMENTING, TESTING, READY FOR PR, MERGED)
+Stage:        TESTING   (SPEC DRAFT, APPROVED, IMPLEMENTING, TESTING, READY FOR PR, MERGED)
 Branch:       feat/rag-z04-extract-clean
 Spec:         docs/specs/phase-04-extract-clean.md
-Next action:  step 1 clean.py (spec section 10.1)
+Next action:  independent testing subagent round 1
 Waiting on:   nothing
 Last updated: 2026-11-04
 ```
@@ -143,6 +143,7 @@ Append-only, newest at the bottom. One line per event: date, phase, what happene
 2026-11-04  P03  MERGED: PR #5. eval/golden.yaml (18 questions) on dev; version pair is withdrawal 4.25 (attendance is 1.21 in both versions, CORPUS.md fixed). Later phases: phase 8 AC and phase 12 cache note still cite attendance as the pair. Phase 4 must handle the letter-spaced Prospectus text (q11).
 2026-11-04  P04  SPEC DRAFT: spec and plan for extract and clean written, 2 questions answered (D-044 per-file column splits, D-045 golden check is a script). Found: Prospectus problem in pdfplumber is 3-column interleaving, letter-spacing only in pdftotext; default pdfplumber mode keeps table rows on one line. docs/specs/phase-04-extract-clean.md
 2026-11-04  P04  APPROVED: Zain approved spec and plan.
+2026-11-04  P04  IMPLEMENTING done: clean, extract (pdf, OCR, columns, html, md), verify, scripts/check_golden_extract.py. 9 docs extract, 41 pages OCR'd (88 s), all 16 golden expect strings found after fixing q05 page comment (p.30). make test and lint green, image run read-only non-root OK.
 ```
 
 ---
@@ -153,7 +154,7 @@ Numbers this lane must measure. The agent fills them in as they are produced; th
 
 | Quantity | Value | Phase | Measured with |
 | --- | --- | --- | --- |
-| Pages needing OCR (per document) | - | 4 | indexer log |
+| Pages needing OCR (per document) | Aug 2023 rules 24 of 26; policy 8 of 8; Academic Rules Handbook 5 of 58; Student Handbook 4 of 64; others 0. 41 pages OCR'd in about 88 s | 4 | indexer log, `scripts/check_golden_extract.py` |
 | Real corpus chunk count at shipped size | - | 7 | collection metadata `chunk_count` |
 | Storage amplification (stored words / source words) | - | 6 | `scripts/chunk_report.py` |
 | Indexer peak memory | - | 7 | `/usr/bin/time -v` |

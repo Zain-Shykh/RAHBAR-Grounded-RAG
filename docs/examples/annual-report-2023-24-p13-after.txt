@@ -1,0 +1,12 @@
+Chapter-2 Faculty and Staff
+Faculty Summary
+Campuses Prof. Assoc. Asst. Profs. Asst. Profs. Lect. Instr. Lab Total
+Profs. Engrs.
+(PhD) (non-PhD)
+Chiniot-Faisalabad 2 4 17 8 58 12 2 103
+Islamabad 19 14 46 16 83 50 8 236
+Karachi 4 6 23 10 84 26 4 157
+Lahore 16 11 29 21 82 19 10 188
+Peshawar 1 2 13 3 18 8 6 51
+Total 42 37 128 58 325 115 30 735
+Chiniot-Faisalabad Campus

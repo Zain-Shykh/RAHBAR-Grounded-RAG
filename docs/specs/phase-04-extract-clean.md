@@ -5,7 +5,7 @@
 | Phase | 4, from `docs/IMPLEMENTATION_PLAN.md` |
 | Work plan task | Z-04 |
 | Branch | `feat/rag-z04-extract-clean` |
-| Stage | IMPLEMENTING |
+| Stage | TESTING |
 | Started | 2026-11-04 |
 | Approved (spec and plan) | 2026-11-04, Zain |
 | Depends on | Phase 3 merged (PR #5). Feeds phase 6 (chunker), 7 (full indexer run) |
@@ -208,7 +208,14 @@ Plan estimate 3 h; this is 27% over, inside the 30% limit. The extra is the colu
 
 ## 11. Implementation notes
 
-(Filled during IMPLEMENT.)
+- Steps 1 to 8 done as planned; commits on the branch. 50 indexer tests pass; `scripts/check_golden_extract.py` on the real corpus: all 9 documents, 41 pages OCR'd in about 88 s, 15 of 16 golden `expect` strings found at first run.
+- **Golden q05 page corrected.** The first run missed q05. The text is on PDF page 30 (page 31 is an identical duplicate page in the source PDF; pages 28 and 29 likewise), not 29. I changed the `# p.29` comment in `eval/golden.yaml` to `# p.30`. Comment only; no question, section or `expect` changed. Phase 3 test still passes.
+- **Footer key ignores digits entirely** (spec 5.2 said masked to `#`). A footer with the page number on the same line ("Rules 2026 17") and without ("Rules 2026") must match. Checked on the real corpus: only footers removed (Academic Rules Handbook -289 words, 2023 rules -25), Annual Report word counts unchanged.
+- **HTML tolerates unclosed `td` and `tr`** (found by a test; real pages were fine).
+- `extract()` also reads `.txt` as one page and raises `ValueError` for other suffixes.
+- Architecture 5.4.2 says "layout preserved". I used pdfplumber's default mode, which keeps rows on one line without padding (measured). Treated as meeting the intent, no deviation entry (shared file would hold the merge). Zain to confirm at the PR.
+- AC-10 evidence: image built from this branch, run `--read-only --tmpfs /tmp --user 10001 --cap-drop ALL` with the corpus mounted `:ro`: policy (8 OCR pages, 9.3 s) q10 PASS; Prospectus q11 and sentence PASS. Image removed after.
+- Not added to `make lint`: `scripts/check_golden_extract.py` (needs a Makefile edit). Ruff run by hand: clean.
 
 ## 12. Test report
 
