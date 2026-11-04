@@ -65,7 +65,7 @@ Hybrid retrieval, the `hosted` provider, the in-cluster Ollama mode, authenticat
 | 2 | Local services and assumption checks | Z-02 | Thu 10:30 | DONE | #4 |
 | 3 | Golden set | Z-03 | Thu 13:30 | DONE | #5 |
 | 4 | Extract and clean | Z-04 | Thu 16:30 | DONE | #6 |
-| 5 | Evaluation runner | Z-11 | Thu 18:30 | IN PROGRESS | |
+| 5 | Evaluation runner | Z-11 | Thu 18:30 | IN PROGRESS | #8 |
 | 6 | Chunker | Z-05 | Fri 12:00 | NOT STARTED | |
 | 7 | Embed and store, full indexer run | Z-06 | Fri 14:00 | NOT STARTED | |
 | 8 | Retriever, index state, version scope | Z-07 | Fri 17:00 | NOT STARTED | |
