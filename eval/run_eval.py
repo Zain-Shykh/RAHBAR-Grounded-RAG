@@ -193,7 +193,7 @@ def main() -> int:
             started = time.perf_counter()
             try:
                 response = ask(client, args.api, q["question"])
-            except (httpx.HTTPError, ValueError) as exc:  # D-047: never score a half run
+            except (httpx.HTTPError, ValueError, TypeError) as exc:  # D-047: never score a half run
                 print(f"ERROR: question {q['id']}: {exc!r}. Run aborted, nothing written.")
                 return 1
             rows.append({
@@ -207,7 +207,11 @@ def main() -> int:
             print(f"  {q['id']:<5} {rows[-1]['seconds']:>6.2f}s  {q['question'][:60]}")
 
     results = summarise(rows)
-    baseline = json.loads(args.baseline.read_text()) if args.baseline.exists() else None
+    try:
+        baseline = json.loads(args.baseline.read_text()) if args.baseline.exists() else None
+    except ValueError as exc:
+        print(f"ERROR: baseline {args.baseline}: {exc}. Nothing written.")
+        return 1
     failures = gate(results, baseline)
 
     results["golden"] = str(args.golden)
