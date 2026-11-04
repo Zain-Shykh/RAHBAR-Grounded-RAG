@@ -60,3 +60,92 @@ def test_front_matter() -> None:
     assert strip_front_matter(md) == "# Title\n\ntext"
     assert strip_front_matter("# No front matter") == "# No front matter"
     assert strip_front_matter("---\nunclosed\n# x") == "---\nunclosed\n# x"
+
+
+# ---- extract() with a fake pdfplumber (no PDFs, no tesseract) ----
+import pytest  # noqa: E402
+from pipeline import extract as ex  # noqa: E402
+
+
+class FakePage:
+    def __init__(self, text: str = "", cols: list[str] | None = None) -> None:
+        self.text, self.cols, self.width, self.height = text, cols or [], 600.0, 800.0
+        self.crops: list[tuple[float, ...]] = []
+
+    def extract_text(self) -> str | None:
+        return self.text or None
+
+    def crop(self, box: tuple[float, ...]) -> FakePage:
+        self.crops.append(box)
+        return FakePage(self.cols[len(self.crops) - 1])
+
+    def flush_cache(self) -> None:
+        pass
+
+
+class FakePdf:
+    def __init__(self, pages: list[FakePage]) -> None:
+        self.pages = pages
+
+    def __enter__(self) -> FakePdf:
+        return self
+
+    def __exit__(self, *a: object) -> None:
+        pass
+
+
+def _patch(monkeypatch: pytest.MonkeyPatch, pages: list[FakePage], ocr_calls: list[int]) -> None:
+    monkeypatch.setattr(ex.pdfplumber, "open", lambda path: FakePdf(pages))
+
+    def fake_ocr(path: str, n: int) -> str:
+        ocr_calls.append(n)
+        return f"ocr text of page {n} " + "word " * 10
+
+    monkeypatch.setattr(ex, "_ocr_page", fake_ocr)
+
+
+def test_ocr_called_only_for_empty_pages(monkeypatch: pytest.MonkeyPatch) -> None:
+    calls: list[int] = []
+    pages = [FakePage("real text " * 10), FakePage(""), FakePage("tiny"), FakePage("more text " * 10)]
+    _patch(monkeypatch, pages, calls)
+    doc = ex.extract("/x/a.pdf", "2026", False)
+    assert calls == [2, 3]
+    assert [p.ocr for p in doc.pages] == [False, True, True, False]
+    assert [p.page for p in doc.pages] == [1, 2, 3, 4]
+    assert doc.source == "a.pdf" and doc.doc_version == "2026" and doc.superseded is False
+
+
+def test_ocr_failure_is_not_fatal(monkeypatch: pytest.MonkeyPatch) -> None:
+    _patch(monkeypatch, [FakePage(""), FakePage("fine text " * 10)], [])
+
+    def boom(path: str, n: int) -> str:
+        raise RuntimeError("tesseract missing")
+
+    monkeypatch.setattr(ex, "_ocr_page", boom)
+    doc = ex.extract("/x/b.pdf", "v", True)
+    assert doc.pages[0].text == "" and doc.pages[0].ocr
+    assert doc.pages[1].text.startswith("fine text")
+
+
+def test_column_split_reads_columns_in_order(monkeypatch: pytest.MonkeyPatch) -> None:
+    name = "prospectus-2026-academic-rules-and-regulations.pdf"
+    page = FakePage("interleaved " * 5, cols=["left col " * 5, "mid col " * 5, "right col " * 5])
+    _patch(monkeypatch, [page], [])
+    doc = ex.extract(f"/x/{name}", "2026", False)
+    assert page.crops == [(0.0, 0, 220.0, 800.0), (220.0, 0, 397.0, 800.0), (397.0, 0, 600.0, 800.0)]
+    t = doc.pages[0].text
+    assert t.index("left col") < t.index("mid col") < t.index("right col")
+    assert "interleaved" not in t
+
+
+def test_markdown_and_unknown_suffix(tmp_path: object) -> None:
+    from pathlib import Path
+
+    d = Path(str(tmp_path))
+    (d / "f.md").write_text("---\ndoc_version: 1\n---\n# H\n\nbody", encoding="utf-8")
+    doc = ex.extract(str(d / "f.md"), "1", False)
+    assert doc.pages[0].text == "# H\n\nbody" and doc.pages[0].page == 1
+    with pytest.raises(ValueError):
+        ex.extract(str(d / "f.docx"), "1", False)
+    with pytest.raises(FileNotFoundError):
+        ex.extract(str(d / "missing.md"), "1", False)
