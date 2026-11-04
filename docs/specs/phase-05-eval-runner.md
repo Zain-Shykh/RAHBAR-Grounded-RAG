@@ -5,9 +5,9 @@
 | Phase | 5, from `docs/IMPLEMENTATION_PLAN.md` |
 | Work plan task | Z-11 |
 | Branch | `feat/rag-z11-eval-runner` |
-| Stage | SPEC DRAFT |
+| Stage | APPROVED |
 | Started | 2026-11-04 |
-| Approved (spec and plan) | (pending) |
+| Approved (spec and plan) | 2026-11-04, Zain |
 | Depends on | phase 3 (golden set, merged); H-5 is delivered by this phase |
 
 ## 1. Objective
@@ -191,6 +191,6 @@ Coverage of `run_eval.py`: `__`%
 
 | Gate | Date | Approved by | Notes |
 | --- | --- | --- | --- |
-| Spec and plan (the one gate) | | | |
+| Spec and plan (the one gate) | 2026-11-04 | Zain | |
 | Tester verdict PASS | | | rounds: |
 | Merged | | | PR # |

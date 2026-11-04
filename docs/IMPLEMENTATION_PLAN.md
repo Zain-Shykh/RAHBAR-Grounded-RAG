@@ -83,11 +83,11 @@ Hours spent so far (fill in at each phase end): planned 37.5 h, actual `____`.
 
 ```
 Phase:        5  Evaluation runner
-Stage:        SPEC DRAFT   (SPEC DRAFT, APPROVED, IMPLEMENTING, TESTING, READY FOR PR, MERGED)
+Stage:        APPROVED   (SPEC DRAFT, APPROVED, IMPLEMENTING, TESTING, READY FOR PR, MERGED)
 Branch:       feat/rag-z11-eval-runner
 Spec:         docs/specs/phase-05-eval-runner.md
-Next action:  Zain approves spec and plan (the gate); then implement steps 2 to 8
-Waiting on:   Zain (gate)
+Next action:  step 2: failing tests in eval/tests
+Waiting on:   nothing
 Last updated: 2026-11-04
 ```
 
@@ -148,6 +148,7 @@ Append-only, newest at the bottom. One line per event: date, phase, what happene
 2026-11-04  P04  TESTING round 2: PASS, AC-1..AC-12, 71 indexer tests, pipeline coverage 91%. READY FOR PR.
 2026-11-04  P04  MERGED: PR #6. clean, extract (pdf, OCR, columns, html), verify, scripts/check_golden_extract.py on dev; 41 pages OCR'd; 16 of 16 golden expect strings found; q05 page comment now p.30. DONE.
 2026-11-04  P05  SPEC DRAFT: spec and plan for the evaluation runner written, 3 questions answered (D-046..D-048). DEV-001 logged, lint covers check_golden_extract.py, q05 page 30 verified against the real PDF (no change). docs/specs/phase-05-eval-runner.md
+2026-11-04  P05  APPROVED: Zain approved spec and plan.
 ```
 
 ---
