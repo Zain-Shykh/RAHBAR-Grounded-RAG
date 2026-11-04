@@ -32,8 +32,17 @@ Applied to each page, in order: Unicode NFKC and whitespace normalisation (zero-
 **Deliberately not stripped:** clause numbers and heading numbering, even when OCR mangled them (`92.` for `9.2`). Dropping them would hide the loss and break exact-term questions such as "clause 1.21". Table separators ` | ` and heading lines are also never touched.
 
 ## Chunking
-Size and overlap you shipped, storage amplification (stored tokens / original tokens),
-and the three configurations you measured:
+Unit: **words** (whitespace split, AD-10). Defaults 400 words and 50 overlap; the shipped pair comes from the three runs below (phase 12). Code: `indexer/pipeline/chunk.py`; measured with `scripts/chunk_report.py`.
+
+**Order:** headings first, then blank-line paragraphs, then sentences, then `size`-word pieces for a sentence that is still too long; units are packed greedily up to `size`. A table row (` | `) is one unit and is never split. Overlap is the last `overlap` words of the previous chunk, only inside the same section, and never after a table row. A short clause is never merged with its neighbour, so a chunk's `section` is always true and the median chunk is small (26 to 117 words).
+
+**Headings** (first match wins, details and reasons in DEV-003): numbered clause `4.3 The ...` or `5. Title` (a capital next, line at most 150 characters; `1)` items and page headers like `16 Student Handbook 2026` do not count); roman `VI – SEMESTER RULES`; lettered `A. Eligibility`; all-caps line; an isolated short line (blank above, text below, no final punctuation), which finds the HTML headings `Fee Refund Policy`. `section` is the heading line, whitespace-normalised, cut at 80 characters. Before the first heading it is the file stem. A bare title with no body hands its line to the next section. A line is split before a dotted clause number with a capital word after it, because the two-column pages of the Academic Rules Handbook put two columns on one line.
+
+**Chunk id:** `<stem>-p<page:03d>-c<seq:03d>`, `seq` from 1 over the document; `page` is the page of the first new (non-overlap) text.
+
+**Known losses.** Headings that sit mid-line in the interleaved two-column Student Handbook are not recovered, so a chunk may carry the previous heading (GenAI policy sub-sections 8 and 11, for example); numbered list items inside a roman section become their own sections (the chunk is labelled `7. Students who ...`, not `VI – SEMESTER RULES`); OCR text puts clause numbers on their own lines, so the policy sections are named by their title. Annual-report tables have no heading and are labelled with the chapter line above them. The Student Handbook PDF repeats some pages, so some chunks exist twice. Four golden section strings were changed to the real labels (q05, q06, q09, q10).
+
+**Measured at 400 / 50 on the nine real documents** (`scripts/chunk_report.py`, 2026-11-05): 1044 chunks; stored words 85 094 over 82 099 source words, **storage amplification 1.04** (1.00 for the Aug 2023 rules, Prospectus, fee, grading and policy; 1.01 Academic Rules Handbook; 1.04 Student Handbook; 1.03 and 1.06 the Annual Reports). Median chunk size 25 words (Aug 2023 rules) to 117 (Annual Report 2023-24); the largest is 400.
 
 | Size (tokens) | Overlap (tokens) | recall@5 | Chunks stored |
 | --- | --- | --- | --- |
