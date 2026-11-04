@@ -11,9 +11,12 @@ BIN := $(abspath $(VENV))/bin
 # docker driver, run `minikube tunnel` in another terminal and use INGRESS_IP=127.0.0.1.
 INGRESS_IP ?= $(shell minikube ip 2>/dev/null)
 HOST ?= rahbar.local
+# Local data services (phase 2). Tags verified in docs/specs/phase-02-local-services.md.
+CHROMA_IMAGE ?= chromadb/chroma:1.0.12
+REDIS_IMAGE ?= redis/redis-stack-server:7.4.0-v8
 
 .DEFAULT_GOAL := help
-.PHONY: help install test lint dev cluster images apply secret index ask fetch eval eval-fixtures check
+.PHONY: help install test lint dev dev-services dev-services-stop dev-services-reset cluster images apply secret index ask fetch eval eval-fixtures check
 
 help: ## list the targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  make %-14s %s\n", $$1, $$2}'
@@ -34,6 +37,23 @@ lint: ## ruff and mypy over everything in Python
 
 dev: ## run the API with stubs on http://localhost:8000, serving the chat UI too
 	cd api && SERVE_UI_DIR=../ui RETRIEVER=stub LLM_PROVIDER=stub $(BIN)/uvicorn app.main:app --reload --port 8000
+
+dev-services: ## start Chroma :8100 and Redis Stack :6379 (until re-login: sg docker -c "make dev-services")
+	-@docker rm -f rahbar-dev-chroma rahbar-dev-redis >/dev/null 2>&1
+	docker run -d --name rahbar-dev-chroma -p 127.0.0.1:8100:8000 -v rahbar-dev-chroma:/data \
+	  -e IS_PERSISTENT=TRUE -e PERSIST_DIRECTORY=/data -e ANONYMIZED_TELEMETRY=FALSE $(CHROMA_IMAGE)
+	docker run -d --name rahbar-dev-redis -p 127.0.0.1:6379:6379 -v rahbar-dev-redis:/data \
+	  -e REDIS_ARGS="--appendonly yes" $(REDIS_IMAGE)
+	@for i in $$(seq 30); do \
+	  curl -sf http://localhost:8100/api/v2/heartbeat >/dev/null && docker exec rahbar-dev-redis redis-cli ping 2>/dev/null | grep -q PONG && break; \
+	  [ $$i = 30 ] && { echo "services did not become ready in 30 s"; exit 1; }; sleep 1; done
+	@echo "ready. export CHROMA_HOST=localhost CHROMA_PORT=8100 REDIS_HOST=localhost REDIS_PORT=6379"
+
+dev-services-stop: ## stop and remove the two dev containers (data volumes are kept)
+	-docker rm -f rahbar-dev-chroma rahbar-dev-redis
+
+dev-services-reset: dev-services-stop ## also delete the dev data volumes
+	-docker volume rm rahbar-dev-chroma rahbar-dev-redis
 
 cluster: ## start minikube with Calico, then enable metrics-server and ingress
 	minikube start --driver=docker --cni=calico --memory=6144 --cpus=4
