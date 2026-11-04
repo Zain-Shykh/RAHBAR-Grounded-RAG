@@ -5,7 +5,7 @@
 | Phase | 5, from `docs/IMPLEMENTATION_PLAN.md` |
 | Work plan task | Z-11 |
 | Branch | `feat/rag-z11-eval-runner` |
-| Stage | APPROVED |
+| Stage | TESTING |
 | Started | 2026-11-04 |
 | Approved (spec and plan) | 2026-11-04, Zain |
 | Depends on | phase 3 (golden set, merged); H-5 is delivered by this phase |
@@ -178,7 +178,11 @@ Spec and plan 0.7 h (done), tests 0.4 h, implementation 0.5 h, stub run 0.2 h, t
 
 ## 11. Implementation notes
 
-(filled during IMPLEMENT)
+- Steps 2 to 7 done as planned; steps 3 to 5 landed in one commit because the tests are one file and the functions share helpers.
+- AC-10 evidence (stub API via `uvicorn` with `RETRIEVER=stub LLM_PROVIDER=stub`, then `make eval-fixtures`): all 6 questions ran, results written, then `GATE FAILED: must-abstain answered from context: f05 (abstention 0.00)`; make printed `Error 1` (the runner exited 1). That is the correct outcome: the stub answers every question, so the hostel question leaks. Plumbing works; no traceback.
+- DEV-002 logged with the code. DEV-001 and the lint change were committed before the gate.
+- The sandbox guard in this session refused commands containing the word `eval` as a program argument; `make test` and `e*/tests` globs work.
+- Stub run needed no `X-Outcome` header (the API does not emit it yet), so `_meta` values were null as predicted.
 
 ## 12. Test report
 
