@@ -61,7 +61,7 @@ Hybrid retrieval, the `hosted` provider, the in-cluster Ollama mode, authenticat
 | # | Phase | Work plan task | Target | Status | PR |
 | --- | --- | --- | --- | --- | --- |
 | 0 | Foundation (repo, tools, corpus, architecture, docs) | n/a | Wed 4 Nov | DONE | #1, #2 |
-| 1 | Container images | Z-01 | Thu 09:00 | NOT STARTED | |
+| 1 | Container images | Z-01 | Thu 09:00 | IN PROGRESS | |
 | 2 | Local services and assumption checks | Z-02 | Thu 10:30 | NOT STARTED | |
 | 3 | Golden set | Z-03 | Thu 13:30 | NOT STARTED | |
 | 4 | Extract and clean | Z-04 | Thu 16:30 | NOT STARTED | |
@@ -83,11 +83,11 @@ Hours spent so far (fill in at each phase end): planned 37.5 h, actual `____`.
 
 ```
 Phase:        1  Container images
-Stage:        not started   (SPEC DRAFT, APPROVED, IMPLEMENTING, TESTING, READY FOR PR, MERGED)
-Branch:       (none yet)
-Spec:         (none yet; docs/specs/phase-01-container-images.md)
-Next action:  stage 0 then stage 1 of docs/WORKFLOW.md: cut feat/rag-z01-dockerfiles from dev, write the spec
-Waiting on:   nothing
+Stage:        SPEC DRAFT   (SPEC DRAFT, APPROVED, IMPLEMENTING, TESTING, READY FOR PR, MERGED)
+Branch:       feat/rag-z01-dockerfiles
+Spec:         docs/specs/phase-01-container-images.md
+Next action:  Zain reviews spec and plan at the gate; on "Approved." implement step 1 (api Dockerfile)
+Waiting on:   Zain (gate)
 Last updated: 2026-11-04
 ```
 
@@ -120,6 +120,7 @@ Append-only, newest at the bottom. One line per event: date, phase, what happene
 
 ```
 2026-11-04  P0   Foundation complete: repo, branch protection, tools, minikube, Ollama models, corpus (9 docs), architecture v1.0, requirements, rubric checklist, work plan, README/SETUP/CONTRIBUTING. PR #1 merged, PR #2 open.
+2026-11-04  P01  SPEC DRAFT: spec and plan for container images written, 3 questions answered (D-035, D-036, D-037). docs/specs/phase-01-container-images.md
 ```
 
 ---

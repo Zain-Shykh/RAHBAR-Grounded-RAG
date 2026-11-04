@@ -69,6 +69,9 @@ Entry template:
 | D-032 | Pull request flow inside the team | process | PROVISIONAL | merging |
 | D-033 | License | docs | DECIDED | |
 | D-034 | Load balance between lanes | process | OPEN | work plan |
+| D-035 | api image: how the build stage hands over dependencies | api | DECIDED | api/Dockerfile |
+| D-036 | HEALTHCHECK in the Dockerfiles | api, indexer | DECIDED | Dockerfiles |
+| D-037 | Makefile `images` target during phase 1 | process | DECIDED | make images |
 
 ---
 
@@ -406,6 +409,42 @@ Entry template:
 - Decision: Use `sg docker -c "<cmd>"` until the user logs out and in so the `docker` group applies.
 - Decided on: 2026-11-04
 
+### D-035 api image: how the build stage hands over dependencies
+- Status: DECIDED
+- Raised: 2026-11-04 by Claude
+- Area: api
+- Related: architecture 4.12, phase 1 spec
+- Question: Copy a virtualenv or a wheel directory from the build stage to the runtime stage?
+- Options: A. Virtualenv at `/opt/venv`. B. Wheel directory, `pip install --no-index` in the final stage.
+- Claude recommends: A. One COPY, no wheel-install step in the final image.
+- Blocks: api/Dockerfile.
+- Decision: A, virtualenv at `/opt/venv`.
+- Decided on: 2026-11-04
+
+### D-036 HEALTHCHECK in the Dockerfiles
+- Status: DECIDED
+- Raised: 2026-11-04 by Claude
+- Area: api, indexer
+- Related: architecture 4.8, R-PRB-1
+- Question: Add a Docker `HEALTHCHECK`?
+- Options: A. None. B. api only, python one-liner against `/healthz`.
+- Claude recommends: A. Kubernetes ignores `HEALTHCHECK`; the probes in the manifests are fixed by the assignment; slim has no curl.
+- Blocks: Dockerfiles.
+- Decision: A, none.
+- Decided on: 2026-11-04
+
+### D-037 Makefile `images` target during phase 1
+- Status: DECIDED
+- Raised: 2026-11-04 by Claude
+- Area: process
+- Related: Makefile `images`, WORKPLAN A-01
+- Question: `make images` also builds the ui image, which does not exist until Ahmad's A-01. Edit the shared Makefile now?
+- Options: A. Leave it; Ahmad runs the two `docker build` lines until A-01 lands. B. Add an `images-rag` target.
+- Claude recommends: A. Shared file, outside the phase scope.
+- Blocks: nothing.
+- Decision: A, leave the Makefile alone. Tell Ahmad in H-1.
+- Decided on: 2026-11-04
+
 ---
 
 ## Change log
@@ -413,3 +452,4 @@ Entry template:
 - 2026-11-04: file created with D-001 to D-025.
 - 2026-11-04: architecture v1.0 written. D-001, D-005, D-007, D-010 decided; D-002, D-003, D-006, D-008, D-009, D-011, D-012, D-017, D-018 made provisional; D-026 to D-031 added.
 - 2026-11-04: work plan written. D-004 decided; D-032 to D-034 added.
+- 2026-11-04: phase 1 questions answered. D-035 to D-037 added, all DECIDED.
