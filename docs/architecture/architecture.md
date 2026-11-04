@@ -144,7 +144,7 @@ flowchart LR
 | UI | Static `ui/index.html` served by nginx | Image base `nginxinc/nginx-unprivileged`, pinned patch tag; listens on 8080; writes only under `/tmp` |
 | API | FastAPI, uvicorn, Pydantic v2, httpx (sync endpoints) | `fastapi 0.115.12`, `uvicorn 0.34.2`, `pydantic 2.11.4`, `httpx 0.28.1`, `prometheus-client`, `chromadb-client 1.0.12`, `redis 5.2.1` |
 | Vector store | ChromaDB server | `chromadb/chroma:1.0.12`, must equal the client version |
-| Cache | Redis Stack server (vector search module) | `redis/redis-stack-server`, one exact tag chosen and verified at implementation (see 9.2, R-02) |
+| Cache | Redis Stack server (vector search module) | `redis/redis-stack-server:7.4.0-v8`, pinned and verified in phase 2 (see 9.2, R-02) |
 | Indexer | Python 3.12, `pdfplumber`, `pypdf`, `pytesseract`, `pdf2image`, `pyyaml`, stdlib `html.parser` | System packages in the image: `tesseract-ocr`, `poppler-utils` |
 | LLM (default) | Ollama on the laptop, `llama3.2:3b` | Reached at `host.minikube.internal:11434` |
 | Embeddings | Ollama, `nomic-embed-text` (768 dimensions) | Same host. CI uses `hashing-bow-768` (AD-07) |
