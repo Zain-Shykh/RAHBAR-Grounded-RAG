@@ -540,7 +540,7 @@ Architecture 5.3, 5.5.2 (steps 2, 3, 5), 5.6 (all), 4.8 (readiness diagram), AD-
 Cache, prompt, generation, `/readyz` wiring (phase 10), metrics (phase 10).
 
 ### Acceptance criteria
-- [ ] Against the local real index (phase 7), a question about attendance returns passages from the 2026 handbook first, and the same question with "in 2023" returns the 2023 rules.
+- [ ] Against the local real index (phase 7), a question about the withdrawal deadline (clause 4.25) returns the 2026 handbook first, and the same question with "in 2023" returns the 2023 rules.
 - [ ] `scope()` unit tests: year match, old-version phrase, default, year that matches nothing, a year matching both a superseded and a current version.
 - [ ] Re-running the indexer while a script queries in a loop produces no unhandled exception in the retriever (it re-resolves and continues).
 - [ ] Pin mismatch (start the API with `EMBED_MODEL=other`) is detected by `index_state` and logged with both model names.
@@ -722,7 +722,7 @@ Architecture 5.4.2 (tuning), 5.6.3 (floor), 5.9.3 (cache threshold), 5.13.4 (two
 ### Scope
 1. **Chunking.** Three `(size, overlap)` configurations (suggested: 200/25, 400/50, 600/100). For each: re-index locally, run `eval/run_eval.py` against the locally running API, record recall@5 (and @3), chunk count and amplification. Choose one and justify it with the numbers.
 2. **Relevance floor.** From the eval rows list the best score for every answerable question and every must-abstain question. Choose the highest floor that keeps all answerable questions above it and sits above the must-abstain maxima; if they overlap, say so and choose with a stated trade-off (abstention correctness must stay 100%).
-3. **Cache threshold.** Build a small test set of pairs: true paraphrases that should hit, near-misses that must not (attendance 2023 versus 2026, clause 1.21 versus 1.22, two different fees). Try at least three thresholds (suggested 0.88, 0.92, 0.96). Record the false hit that ruled one out. Ship the lowest with zero false hits.
+3. **Cache threshold.** Build a small test set of pairs: true paraphrases that should hit, near-misses that must not (withdrawal deadline 2023 versus 2026, clause 1.21 versus 1.22, two different fees). Try at least three thresholds (suggested 0.88, 0.92, 0.96). Record the false hit that ruled one out. Ship the lowest with zero false hits.
 4. **Baselines.** `eval/baseline.json` and `eval/results.json` from the real corpus (`--update-baseline`), and `eval/fixtures/baseline.fixture.json` from the fixture run in CI-mode (`EMBED_MODEL=hashing-bow-768`, `LLM_PROVIDER=extractive`, `CORPUS_DIR=eval/fixtures`).
 5. **Hand over** the ConfigMap values with one-line justifications.
 
