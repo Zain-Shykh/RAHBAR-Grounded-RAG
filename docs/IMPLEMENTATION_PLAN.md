@@ -66,7 +66,7 @@ Hybrid retrieval, the `hosted` provider, the in-cluster Ollama mode, authenticat
 | 3 | Golden set | Z-03 | Thu 13:30 | DONE | #5 |
 | 4 | Extract and clean | Z-04 | Thu 16:30 | DONE | #6 |
 | 5 | Evaluation runner | Z-11 | Thu 18:30 | DONE | #8 |
-| 6 | Chunker | Z-05 | Fri 12:00 | IN PROGRESS | |
+| 6 | Chunker | Z-05 | Fri 12:00 | DONE | #10 |
 | 7 | Embed and store, full indexer run | Z-06 | Fri 14:00 | NOT STARTED | |
 | 8 | Retriever, index state, version scope | Z-07 | Fri 17:00 | NOT STARTED | |
 | 9 | Prompt, validation, CI-mode components | Z-08 | Fri 20:00 | NOT STARTED | |
@@ -82,11 +82,11 @@ Hours spent so far (fill in at each phase end): planned 37.5 h, actual `____`.
 ## 2. Current focus
 
 ```
-Phase:        6  Chunker
-Stage:        READY FOR PR   (SPEC DRAFT, APPROVED, IMPLEMENTING, TESTING, READY FOR PR, MERGED)
-Branch:       feat/rag-z05-chunker
-Spec:         docs/specs/phase-06-chunker.md
-Next action:  merge the PR into dev, then mark phase 6 DONE and set focus to phase 7 (docs PR)
+Phase:        7  Embed, store, full indexer run
+Stage:        not started   (SPEC DRAFT, APPROVED, IMPLEMENTING, TESTING, READY FOR PR, MERGED)
+Branch:       (none yet; feat/rag-z06-embed-store)
+Spec:         (none yet; docs/specs/phase-07-embed-store.md)
+Next action:  fresh session: stage 0 then stage 1 of docs/WORKFLOW.md for phase 7. Consider first the follow-up for two-column Handbook text (COLUMN_SPLITS for the two Handbook PDFs, like D-044)
 Waiting on:   nothing
 Last updated: 2026-11-05
 ```
@@ -158,6 +158,7 @@ Append-only, newest at the bottom. One line per event: date, phase, what happene
 2026-11-05  P06  IMPLEMENTING done: chunk() with five heading rules, 80-character sections, overlap within a section, stable ids; chunk_report.py on the real corpus: 1044 chunks, amplification 1.04, 18 of 18 golden items matched after changing 4 section strings (q05, q06, q09, q10). DEV-003 logged.
 2026-11-05  P06  TESTING round 1: FAIL, T-1 clause splitter cut a table row. Fixed 188d572.
 2026-11-05  P06  TESTING round 2: PASS, AC-1..AC-9, 183 indexer tests. READY FOR PR. Known loss: two-column Handbook text (follow-up: column splits for the two Handbook PDFs, like D-044).
+2026-11-05  P06  MERGED: PR #10 (f7eede5). chunk() and scripts/chunk_report.py on dev; 1044 chunks at 400/50, amplification 1.04; 4 golden strings changed; DEV-003, D-049..D-051. No hand-off. DONE.
 ```
 
 ---
@@ -432,7 +433,7 @@ H-5: tell Ahmad the CLI and exit codes are final (contract C-6).
 
 ## Phase 6: Chunker (Z-05)
 
-**Status:** NOT STARTED · **Branch:** `feat/rag-z05-chunker` · **Est:** 3 h · **Priority:** P0
+**Status:** DONE (PR #10, DEV-003) · **Branch:** `feat/rag-z05-chunker` · **Est:** 3 h · **Priority:** P0
 
 ### Objective
 Structure-aware chunking with overlap and the five metadata fields, good enough that long definitions stay whole.
@@ -458,13 +459,13 @@ Architecture 5.4.2 (chunk row), 5.4.3 (record), AD-10, AD-22, AD-28; `indexer/pi
 Embedding. Section-title prefixing of the embedded text (that is in `embed`, phase 7). Tuning the numbers (phase 12).
 
 ### Acceptance criteria
-- [ ] Every chunk has `source`, `section`, `page`, `doc_version`, `superseded`, and a stable id; ids are unique and identical across two runs.
-- [ ] No chunk crosses a document boundary; no chunk exceeds `size` words except an unsplittable single row or sentence (documented in a test).
-- [ ] Overlap is present between neighbours in the same section and absent across sections.
-- [ ] In the Student Handbook, each numbered sub-section of the Generative AI policy that fits within `size` words is inside one chunk (check with `chunk_report.py` or a targeted test).
-- [ ] `scripts/chunk_report.py` runs on all nine documents; amplification and per-document counts recorded in the results register.
-- [ ] Golden-set sections reconciled with real heading strings (log the number of items changed).
-- [ ] `make test && make lint` green.
+- [x] Every chunk has `source`, `section`, `page`, `doc_version`, `superseded`, and a stable id; ids are unique and identical across two runs.
+- [x] No chunk crosses a document boundary; no chunk exceeds `size` words except an unsplittable single row or sentence (documented in a test).
+- [x] Overlap is present between neighbours in the same section and absent across sections.
+- [x] In the Student Handbook, each numbered sub-section of the Generative AI policy that fits within `size` words is inside one chunk (check with `chunk_report.py` or a targeted test).
+- [x] `scripts/chunk_report.py` runs on all nine documents; amplification and per-document counts recorded in the results register.
+- [x] Golden-set sections reconciled with real heading strings (4 items changed: q05, q06, q09, q10).
+- [x] `make test && make lint` green.
 
 ### Verify
 ```bash

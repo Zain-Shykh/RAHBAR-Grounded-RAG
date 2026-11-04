@@ -5,7 +5,7 @@
 | Phase | 6, from `docs/IMPLEMENTATION_PLAN.md` |
 | Work plan task | Z-05 |
 | Branch | `feat/rag-z05-chunker` |
-| Stage | READY FOR PR |
+| Stage | MERGED |
 | Started | 2026-11-05 |
 | Approved (spec and plan) | 2026-11-05, Zain (pre-approved: no gate this session) |
 | Depends on | phase 4 (extract, clean, merged), phase 5 (`section_matches`, merged) |
@@ -173,4 +173,4 @@ Observations from the tester, no action: a one-line numbered clause with no fina
 | --- | --- | --- | --- |
 | Spec and plan (the one gate) | 2026-11-05 | Zain (pre-approved) | no gate in this session |
 | Tester verdict PASS | 2026-11-05 | independent subagent | rounds: 2 |
-| Merged | | | PR # |
+| Merged | 2026-11-05 | Claude (pre-approved by Zain) | PR #10 |
