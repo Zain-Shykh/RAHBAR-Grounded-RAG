@@ -5,9 +5,9 @@
 | Phase | 2, from `docs/IMPLEMENTATION_PLAN.md` |
 | Work plan task | Z-02 |
 | Branch | `feat/rag-z02-local-services` (the plan says `-dev-services`; Zain's start prompt names this one) |
-| Stage | SPEC DRAFT |
+| Stage | APPROVED |
 | Started | 2026-11-04 |
-| Approved (spec and plan) | |
+| Approved (spec and plan) | 2026-11-04, Zain |
 | Depends on | Phase 1 merged (PR #3). Feeds H-2, H-3 to Ahmad (A-03) |
 
 ## 1. Objective
@@ -215,6 +215,6 @@ Coverage of `app`: not applicable (no application code changes).
 
 | Gate | Date | Approved by | Notes |
 | --- | --- | --- | --- |
-| Spec and plan (the one gate) | | | |
+| Spec and plan (the one gate) | 2026-11-04 | Zain | approved as written |
 | Tester verdict PASS | | | rounds: |
 | Merged | | | PR # |

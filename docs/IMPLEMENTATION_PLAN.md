@@ -83,11 +83,11 @@ Hours spent so far (fill in at each phase end): planned 37.5 h, actual `____`.
 
 ```
 Phase:        2  Local services and assumption checks
-Stage:        SPEC DRAFT   (SPEC DRAFT, APPROVED, IMPLEMENTING, TESTING, READY FOR PR, MERGED)
+Stage:        APPROVED   (SPEC DRAFT, APPROVED, IMPLEMENTING, TESTING, READY FOR PR, MERGED)
 Branch:       feat/rag-z02-local-services
 Spec:         docs/specs/phase-02-local-services.md
-Next action:  Zain reviews spec and plan; on "Approved." run step 0 to 8 of spec section 10
-Waiting on:   Zain (the gate)
+Next action:  implement steps 0 to 8 of spec section 10
+Waiting on:   nothing
 Last updated: 2026-11-04
 ```
 
@@ -889,3 +889,4 @@ export OLLAMA_URL=http://localhost:11434 EMBED_MODEL=nomic-embed-text
 **Ordering rule of thumb:** indexer stages before API stages; pure functions before network code; tests in the same PR as the code; one phase's PR merged before the next phase starts.
 
 **If you are stuck for more than 30 minutes:** write what you tried in the progress log, add an `OPEN_DECISIONS.md` entry if it is a design question, tell Zain, and switch to the next unblocked item inside the same phase (or the cut line in `WORKPLAN.md` section 7).
+2026-11-04  P02  APPROVED: Zain approved spec and plan.
