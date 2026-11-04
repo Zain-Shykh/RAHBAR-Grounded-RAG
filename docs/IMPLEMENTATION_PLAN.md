@@ -62,7 +62,7 @@ Hybrid retrieval, the `hosted` provider, the in-cluster Ollama mode, authenticat
 | --- | --- | --- | --- | --- | --- |
 | 0 | Foundation (repo, tools, corpus, architecture, docs) | n/a | Wed 4 Nov | DONE | #1, #2 |
 | 1 | Container images | Z-01 | Thu 09:00 | DONE | #3 |
-| 2 | Local services and assumption checks | Z-02 | Thu 10:30 | DONE (pending merge) | PR |
+| 2 | Local services and assumption checks | Z-02 | Thu 10:30 | DONE (pending merge) | #4 |
 | 3 | Golden set | Z-03 | Thu 13:30 | NOT STARTED | |
 | 4 | Extract and clean | Z-04 | Thu 16:30 | NOT STARTED | |
 | 5 | Evaluation runner | Z-11 | Thu 18:30 | NOT STARTED | |
