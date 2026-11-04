@@ -5,7 +5,7 @@
 | Phase | 2, from `docs/IMPLEMENTATION_PLAN.md` |
 | Work plan task | Z-02 |
 | Branch | `feat/rag-z02-local-services` (the plan says `-dev-services`; Zain's start prompt names this one) |
-| Stage | APPROVED |
+| Stage | TESTING |
 | Started | 2026-11-04 |
 | Approved (spec and plan) | 2026-11-04, Zain |
 | Depends on | Phase 1 merged (PR #3). Feeds H-2, H-3 to Ahmad (A-03) |
@@ -202,7 +202,13 @@ That is 40% over the work plan; the excess is the Ollama script and the hardened
 
 ## 11. Implementation notes
 
-<!-- Filled during IMPLEMENT. -->
+- Steps 2 and 3 were committed together (one script, `verify_services.py`); the plan's two commit messages merged into one.
+- The ruff line in `make lint` lists the two scripts by name (plan 10.3) so the old `check_submission.py` stays out of scope.
+- Negative test found a bug: `chromadb.HttpClient` connects in its constructor, so the unreachable-service message needed the constructor inside the `try`. Fixed before the first commit of the script.
+- Hardened runs: an empty named volume gets root ownership copied up from the image, so the script seeds `/data/.keep` and `chown`s the volume (stands in for `fsGroup`). `docker diff` showed no writes outside `/data` for either image, so the confirmation run mounts only `/tmp` as tmpfs (precaution).
+- Results: A-2, A-3, R-01, R-02, A-6 all PASS; no deviation entry needed. Recorded in architecture 9.1 and 9.2.
+- Latency finding for phases 10 and 12 (not a deviation): CPU-only prompt evaluation about 38 tokens/s. 6510 tokens took 171 s; a 3000 to 3500 token prompt (5 chunks of 400 words) would take about 80 to 90 s, close to `LLM_TIMEOUT_SECONDS=90`. `llama3.2:3b` is 2986 MiB resident.
+- In a worktree session `make` needs `VENV=/home/zain-shykh/Desktop/SCD_ASSIGNMENTS/assign_2/.venv` because `.venv` lives in the main checkout.
 
 ## 12. Test report
 

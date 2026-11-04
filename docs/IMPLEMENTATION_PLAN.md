@@ -83,10 +83,10 @@ Hours spent so far (fill in at each phase end): planned 37.5 h, actual `____`.
 
 ```
 Phase:        2  Local services and assumption checks
-Stage:        APPROVED   (SPEC DRAFT, APPROVED, IMPLEMENTING, TESTING, READY FOR PR, MERGED)
+Stage:        TESTING   (SPEC DRAFT, APPROVED, IMPLEMENTING, TESTING, READY FOR PR, MERGED)
 Branch:       feat/rag-z02-local-services
 Spec:         docs/specs/phase-02-local-services.md
-Next action:  implement steps 0 to 8 of spec section 10
+Next action:  independent tester round 1 (spec section 12)
 Waiting on:   nothing
 Last updated: 2026-11-04
 ```
@@ -102,8 +102,8 @@ Things this lane owes Ahmad or needs from him. Tick when delivered. Newest at th
 | ID | Direction | Item | Phase | Done |
 | --- | --- | --- | --- | :---: |
 | H-1 | Zain to Ahmad | `rahbar-api` and `rahbar-indexer` Dockerfiles merged to `dev` (he needs images to run) | 1 | [x] |
-| H-2 | Zain to Ahmad | Verified Redis Stack image tag, its UID, and every path it needs writable | 2 | [ ] |
-| H-3 | Zain to Ahmad | Verified Chroma behaviour notes (user, writable paths) if anything differs from assumption R-01 | 2 | [ ] |
+| H-2 | Zain to Ahmad | Verified Redis Stack image tag, its UID, and every path it needs writable | 2 | [x] |
+| H-3 | Zain to Ahmad | Verified Chroma behaviour notes (user, writable paths) if anything differs from assumption R-01 | 2 | [x] |
 | H-4 | Zain to Ahmad | Indexer peak memory (for the Job limit), and the real corpus indexing time | 7 | [ ] |
 | H-5 | Zain to Ahmad | `eval/run_eval.py` working with the fixture golden set | 5 | [ ] |
 | H-6 | Zain to Ahmad | Hashing embedder and extractive provider merged (CI-mode) | 9 | [ ] |
@@ -890,3 +890,6 @@ export OLLAMA_URL=http://localhost:11434 EMBED_MODEL=nomic-embed-text
 
 **If you are stuck for more than 30 minutes:** write what you tried in the progress log, add an `OPEN_DECISIONS.md` entry if it is a design question, tell Zain, and switch to the next unblocked item inside the same phase (or the cut line in `WORKPLAN.md` section 7).
 2026-11-04  P02  APPROVED: Zain approved spec and plan.
+2026-11-04  P02  IMPLEMENTING done: make dev-services/-stop/-reset work (idempotent, volumes kept); verify_services.py all PASS: A-2 rename keeps metadata, A-3 500 per add (server max 5461), Redis FT.CREATE/KNN DIALECT 2/tag/DROPINDEX DD. R-01 and R-02 PASS: both images run as UID 10001, --read-only, --cap-drop ALL, no writes outside /data, no deviation. A-6 PASS (format honoured 3/3, num_ctx 8192 honoured, 3.0 GB RAM) with a latency finding: CPU prompt eval ~38 tokens/s, 6510 tokens = 171 s. Redis Stack pinned 7.4.0-v8.
+2026-11-04  P02  H-2 TEXT for Ahmad: Redis Stack `redis/redis-stack-server:7.4.0-v8`. Image default user is root but it runs fine as runAsUser/runAsGroup 10001 with readOnlyRootFilesystem, capabilities drop ALL, allowPrivilegeEscalation false. Writable: only the PVC mounted at /data (use fsGroup 10001; it writes appendonlydir and the RDB there; its entrypoint sets --dir /data). No emptyDir needed in my test (I mounted /tmp as a precaution; add an emptyDir /tmp, it is harmless). Set REDIS_ARGS="--appendonly yes" to match the AOF plan. Probe: redis-cli ping or tcpSocket 6379.
+2026-11-04  P02  H-3 TEXT for Ahmad: Chroma `chromadb/chroma:1.0.12`, no difference from R-01. Default user root, runs as 10001 with readOnlyRootFilesystem, drop ALL; env IS_PERSISTENT=TRUE PERSIST_DIRECTORY=/data ANONYMIZED_TELEMETRY=FALSE; writes only under /data (PVC with fsGroup 10001); emptyDir /tmp precaution. Heartbeat for probes: GET /api/v2/heartbeat on 8000. Not verified by me: the fsGroup mechanism itself (I chowned a Docker volume); confirm in minikube.
