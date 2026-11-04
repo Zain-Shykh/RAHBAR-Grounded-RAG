@@ -38,7 +38,7 @@ Entry template:
 | D-001 | Semantic cache backend | api | DECIDED | ADR, Redis manifests, cache code |
 | D-002 | Chunk size unit | indexer | PROVISIONAL | chunker, ConfigMap, PIPELINE.md |
 | D-003 | How documents reach the indexer Job | indexer, k8s | PROVISIONAL | Job manifest, indexer Dockerfile |
-| D-004 | Work split between Zain and Ahmad | process | OPEN | everything |
+| D-004 | Work split between Zain and Ahmad | process | DECIDED | everything |
 | D-005 | Embedding via Ollama host | indexer, api | DECIDED | embed stage, NetworkPolicy |
 | D-006 | Retrieval: vector only or hybrid | api, eval | PROVISIONAL | retriever, exact-term recall |
 | D-007 | ADR 0002 and 0003 topics | docs | DECIDED | ADR files, checker |
@@ -66,6 +66,9 @@ Entry template:
 | D-029 | Kit interface extensions | api | PROVISIONAL | provider, retriever code |
 | D-030 | Embedding code duplicated in api and indexer | api, indexer | PROVISIONAL | embedder code |
 | D-031 | Two eval baselines | eval, ci-cd | PROVISIONAL | CI gate |
+| D-032 | Pull request flow inside the team | process | PROVISIONAL | merging |
+| D-033 | License | docs | DECIDED | |
+| D-034 | Load balance between lanes | process | OPEN | work plan |
 
 ---
 
@@ -114,15 +117,15 @@ Entry template:
 - Decided on: (pending confirmation)
 
 ### D-004 Work split between Zain and Ahmad
-- Status: OPEN
+- Status: DECIDED
 - Raised: 2026-11-04 by Claude
 - Area: process
 - Question: Who owns which stream? Two natural streams: (1) platform: Dockerfiles, k8s manifests, NetworkPolicy, CI/CD, evidence; (2) RAG: indexer stages, retriever, providers, cache, eval, golden set. Docs split along the same lines.
 - Options: A. Zain platform, Ahmad RAG. B. Reverse. C. Pair on both, alternating.
 - Claude recommends: A or B (pick by who is stronger at what), with the golden set written jointly and early, since both streams depend on it.
 - Blocks: everything; also the AI-USAGE.md attribution.
-- Decision:
-- Decided on:
+- Decision: Zain: RAG, API, indexer, eval, api and indexer Dockerfiles. Ahmad: Kubernetes, UI, CI/CD, evidence. Details in docs/WORKPLAN.md.
+- Decided on: 2026-11-04
 
 ### D-005 Embedding via Ollama on the host
 - Status: DECIDED
@@ -332,6 +335,30 @@ Entry template:
 - Question: The CI gate runs on fixtures with a deterministic embedder, so its numbers differ from the real-corpus baseline. CI uses `eval/fixtures/baseline.fixture.json`; `eval/baseline.json` holds the shipped real numbers from a local run.
 - Decision: pending confirmation.
 
+### D-032 Pull request flow inside the team
+- Status: PROVISIONAL
+- Raised: 2026-11-04 by Claude
+- Area: process
+- Related: CONTRIBUTING.md section 2
+- Question: Feature branches off `dev`, one PR per task. A change touching only your own lane's files may be merged into `dev` by its author after `make test && make lint`; changes in shared files or contracts need the other person's review. `dev` to `main` needs approval (protection).
+- Claude recommends: as written, to keep a four-day schedule moving. Stricter option: every PR into `dev` needs the other person's approval.
+- Decision: pending confirmation.
+
+### D-033 License
+- Status: DECIDED
+- Raised: 2026-11-04 by Claude
+- Area: docs
+- Decision: No license for now (Zain, 2026-11-04). `scripts/check_submission.py` may warn about a missing LICENSE; revisit before submission.
+- Decided on: 2026-11-04
+
+### D-034 Load balance between lanes
+- Status: OPEN
+- Raised: 2026-11-04 by Claude
+- Area: process
+- Related: docs/WORKPLAN.md
+- Question: Estimates are about 37.5 h (Zain) and 39 h (Ahmad) against roughly 40 h each. Zain's lane has the serial dependency chain. If Zain slips, candidates to move to Ahmad: the `hashing-bow-768` embedder and `extractive` provider (he needs them for CI e2e), unit tests for the pure modules, and running the four failure-analysis experiments.
+- Decision: pending.
+
 ---
 
 ## Decided
@@ -385,3 +412,4 @@ Entry template:
 
 - 2026-11-04: file created with D-001 to D-025.
 - 2026-11-04: architecture v1.0 written. D-001, D-005, D-007, D-010 decided; D-002, D-003, D-006, D-008, D-009, D-011, D-012, D-017, D-018 made provisional; D-026 to D-031 added.
+- 2026-11-04: work plan written. D-004 decided; D-032 to D-034 added.
