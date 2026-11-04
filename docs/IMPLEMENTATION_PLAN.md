@@ -16,6 +16,8 @@ Ahmad's lane (Kubernetes, UI, CI/CD, evidence) is in [`WORKPLAN.md`](WORKPLAN.md
 
 You are the agent building Zain's lane. Follow the plan, in order, and update it as you go.
 
+**The procedure for each phase is [`WORKFLOW.md`](WORKFLOW.md):** write a spec (`docs/specs/phase-NN-<slug>.md`), get approval, write the plan inside it, get approval, implement, test with an independent subagent, get approval, open the PR. Sections 0.1 to 0.3 below are the short version; where they differ from `WORKFLOW.md`, `WORKFLOW.md` wins.
+
 ### 0.1 Start of every session
 
 1. Read this file top to bottom, then **Current focus** (section 2).
@@ -81,9 +83,11 @@ Hours spent so far (fill in at each phase end): planned 37.5 h, actual `____`.
 
 ```
 Phase:        1  Container images
+Stage:        not started
 Branch:       (none yet)
-Next action:  create feat/rag-z01-dockerfiles from dev; write api/Dockerfile and indexer/Dockerfile
-Blocked by:   nothing
+Spec:         (none yet; docs/specs/phase-01-container-images.md)
+Next action:  stage 0 then stage 1 of docs/WORKFLOW.md: cut feat/rag-z01-dockerfiles from dev, write the spec
+Waiting on:   nothing
 Last updated: 2026-11-04
 ```
 

@@ -31,3 +31,6 @@ chroma_data/
 .vscode/
 .DS_Store
 graphify-out/
+
+# local-only agent context (personal, not shared)
+CLAUDE.md

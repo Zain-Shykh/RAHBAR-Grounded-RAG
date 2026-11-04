@@ -193,6 +193,7 @@ The full list is in [`docs/architecture/architecture.md`](docs/architecture/arch
 | [`CONTRIBUTING.md`](CONTRIBUTING.md) | Branches, commits, pull requests, ownership |
 | [`docs/WORKPLAN.md`](docs/WORKPLAN.md) | Who builds what, in which order, in parallel |
 | [`docs/IMPLEMENTATION_PLAN.md`](docs/IMPLEMENTATION_PLAN.md) | Phased build plan and progress log for the RAG lane |
+| [`docs/WORKFLOW.md`](docs/WORKFLOW.md) | Spec-driven development workflow used for every phase |
 | [`docs/architecture/architecture.md`](docs/architecture/architecture.md) | The architecture: platform and RAG. Single source of truth. |
 | [`docs/architecture/deviations.md`](docs/architecture/deviations.md) | Every difference between the build and the architecture |
 | [`docs/requirements.md`](docs/requirements.md) | Every requirement extracted from the assignment |
