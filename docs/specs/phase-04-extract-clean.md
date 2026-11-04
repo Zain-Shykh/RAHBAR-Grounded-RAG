@@ -5,9 +5,9 @@
 | Phase | 4, from `docs/IMPLEMENTATION_PLAN.md` |
 | Work plan task | Z-04 |
 | Branch | `feat/rag-z04-extract-clean` |
-| Stage | SPEC DRAFT |
+| Stage | IMPLEMENTING |
 | Started | 2026-11-04 |
-| Approved (spec and plan) | (pending) |
+| Approved (spec and plan) | 2026-11-04, Zain |
 | Depends on | Phase 3 merged (PR #5). Feeds phase 6 (chunker), 7 (full indexer run) |
 
 ## 1. Objective
@@ -221,6 +221,6 @@ Coverage of `pipeline` (clean, extract, verify): `__`%
 
 | Gate | Date | Approved by | Notes |
 | --- | --- | --- | --- |
-| Spec and plan (the one gate) | | | |
+| Spec and plan (the one gate) | 2026-11-04 | Zain | |
 | Tester verdict PASS | | | rounds: |
 | Merged | | | PR # |
