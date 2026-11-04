@@ -5,7 +5,7 @@
 | Phase | 01, from `docs/IMPLEMENTATION_PLAN.md` |
 | Work plan task | Z-01 |
 | Branch | `feat/rag-z01-dockerfiles` |
-| Stage | APPROVED |
+| Stage | TESTING |
 | Started | 2026-11-04 |
 | Approved (spec and plan) | 2026-11-04, Zain |
 | Depends on | nothing. Unblocks Ahmad's A-02 and A-04 (hand-off H-1). |
@@ -129,7 +129,13 @@ Step 1: 0.5 h. Step 2: 0.5 h. Step 3, test rounds, PR and hand-off: 0.5 h. Total
 
 ## 11. Implementation notes
 
-(filled during IMPLEMENT)
+- Built as planned, no deviation. Step 3 needed no fix.
+- Sizes: `rahbar-api:dev` 388 MB, `rahbar-indexer:dev` 592 MB.
+- `HOME=/tmp` is set in both images; read-only runs (`--read-only --tmpfs /tmp`) worked with no other writable path.
+- api `/healthz` returns `{"status":"alive"}` (no `version` yet; phase 10 adds it per architecture 4.8).
+- `--dummy` fails at `chromadb.HttpClient` with `Could not connect to a Chroma server` (DNS for `chroma`), no permission or import error.
+- Checker section I: api, indexer and both `.dockerignore` files all `ok`. Remaining FAILs are `ui/Dockerfile` and `.github/workflows/` (Ahmad's).
+- Developer-side evidence: AC-1 to AC-7 pass. Awaiting independent tester.
 
 ## 12. Test report
 
