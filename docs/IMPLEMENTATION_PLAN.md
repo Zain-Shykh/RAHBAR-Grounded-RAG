@@ -63,7 +63,7 @@ Hybrid retrieval, the `hosted` provider, the in-cluster Ollama mode, authenticat
 | 0 | Foundation (repo, tools, corpus, architecture, docs) | n/a | Wed 4 Nov | DONE | #1, #2 |
 | 1 | Container images | Z-01 | Thu 09:00 | DONE | #3 |
 | 2 | Local services and assumption checks | Z-02 | Thu 10:30 | DONE | #4 |
-| 3 | Golden set | Z-03 | Thu 13:30 | NOT STARTED | |
+| 3 | Golden set | Z-03 | Thu 13:30 | IN PROGRESS | |
 | 4 | Extract and clean | Z-04 | Thu 16:30 | NOT STARTED | |
 | 5 | Evaluation runner | Z-11 | Thu 18:30 | NOT STARTED | |
 | 6 | Chunker | Z-05 | Fri 12:00 | NOT STARTED | |
@@ -83,11 +83,11 @@ Hours spent so far (fill in at each phase end): planned 37.5 h, actual `____`.
 
 ```
 Phase:        3  Golden set
-Stage:        not started   (SPEC DRAFT, APPROVED, IMPLEMENTING, TESTING, READY FOR PR, MERGED)
-Branch:       (none yet; feat/rag-z03-golden-set)
-Spec:         (none yet; docs/specs/phase-03-golden-set.md)
-Next action:  fresh session: stage 0 then stage 1 of docs/WORKFLOW.md for phase 3
-Waiting on:   nothing (H-2, H-3 text ready to send to Ahmad)
+Stage:        SPEC DRAFT   (SPEC DRAFT, APPROVED, IMPLEMENTING, TESTING, READY FOR PR, MERGED)
+Branch:       feat/rag-z03-golden-set
+Spec:         docs/specs/phase-03-golden-set.md
+Next action:  Zain reviews spec and plan and says "Approved." (then step 1: schema test, step 2: eval/golden.yaml)
+Waiting on:   Zain (the gate); H-2, H-3 text still to send to Ahmad
 Last updated: 2026-11-04
 ```
 
@@ -136,6 +136,7 @@ Append-only, newest at the bottom. One line per event: date, phase, what happene
 2026-11-04  P02  MERGED: PR #4 (8fe27ec). make dev-services, verify_services.py, verify_ollama.py on dev; A-2, A-3, A-6, R-01, R-02 verified, no deviation. Tell Ahmad: H-2 and H-3 texts below, plus Makefile, architecture 3 and 9, SETUP.md touched.
 2026-11-04  P02  H-2 TEXT for Ahmad: Redis Stack `redis/redis-stack-server:7.4.0-v8`. Image default user is root but it runs fine as runAsUser/runAsGroup 10001 with readOnlyRootFilesystem, capabilities drop ALL, allowPrivilegeEscalation false. Writable: only the PVC mounted at /data (use fsGroup 10001; its entrypoint sets --dir /data and the AOF lives there). In my test nothing else was written; add an emptyDir /tmp anyway, it is harmless. Set REDIS_ARGS="--appendonly yes" to match the AOF plan. Probe: redis-cli ping or tcpSocket 6379.
 2026-11-04  P02  H-3 TEXT for Ahmad: Chroma `chromadb/chroma:1.0.12`, no difference from R-01. Default user root, runs as 10001 with readOnlyRootFilesystem, drop ALL; env IS_PERSISTENT=TRUE PERSIST_DIRECTORY=/data ANONYMIZED_TELEMETRY=FALSE; writes only under /data (PVC with fsGroup 10001); emptyDir /tmp precaution. Heartbeat for probes: GET /api/v2/heartbeat on 8000. Not verified by me: the fsGroup mechanism itself (I chowned a Docker volume); confirm in minikube.
+2026-11-04  P03  SPEC DRAFT: spec and plan for the golden set written (18 questions: 11 ordinary, 2 version, 2 exact, 2 abstain, 1 injection), 3 questions answered (D-016, D-042, D-043). Found: attendance is 1.21 in BOTH 2023 and 2026 rules, so CORPUS.md and the plan note are wrong; version pair is withdrawal 4.25. docs/specs/phase-03-golden-set.md
 ```
 
 ---
@@ -266,7 +267,7 @@ H-2, H-3 to Ahmad.
 
 ## Phase 3: Golden set (Z-03)
 
-**Status:** NOT STARTED · **Branch:** `feat/rag-z03-golden-set` · **Est:** 3 h · **Priority:** P0
+**Status:** IN PROGRESS (SPEC DRAFT) · **Branch:** `feat/rag-z03-golden-set` · **Est:** 3 h · **Priority:** P0
 
 ### Objective
 Write `eval/golden.yaml` **before anything is tuned**, from the documents themselves, never from what the retriever returns.
