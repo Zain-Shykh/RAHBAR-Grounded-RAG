@@ -149,3 +149,9 @@ def test_markdown_and_unknown_suffix(tmp_path: object) -> None:
         ex.extract(str(d / "f.docx"), "1", False)
     with pytest.raises(FileNotFoundError):
         ex.extract(str(d / "missing.md"), "1", False)
+
+
+def test_footer_with_and_without_page_number_match() -> None:
+    pages = [f"body {w}\nmore {w}\nlast {w}\nBook Title 2026" + (f" {i}" if i % 2 else "")
+             for i, w in enumerate(["aa", "bb", "cc", "dd", "ee", "ff"])]
+    assert all("Book Title" not in p for p in remove_repeating_lines(pages))

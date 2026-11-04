@@ -39,7 +39,7 @@ def strip_front_matter(text: str) -> str:
 
 
 def _key(line: str) -> str:
-    return " ".join(re.sub(r"\d+", "#", line).split())
+    return " ".join(re.sub(r"\d+", "", line).split())
 
 
 def remove_repeating_lines(pages: list[str]) -> list[str]:
