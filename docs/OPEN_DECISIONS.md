@@ -35,24 +35,24 @@ Entry template:
 
 | ID | Title | Area | Status | Blocks |
 | --- | --- | --- | --- | --- |
-| D-001 | Semantic cache backend | api | OPEN | ADR, Redis manifests, cache code |
-| D-002 | Chunk size unit | indexer | OPEN | chunker, ConfigMap, PIPELINE.md |
-| D-003 | How documents reach the indexer Job | indexer, k8s | OPEN | Job manifest, indexer Dockerfile |
+| D-001 | Semantic cache backend | api | DECIDED | ADR, Redis manifests, cache code |
+| D-002 | Chunk size unit | indexer | PROVISIONAL | chunker, ConfigMap, PIPELINE.md |
+| D-003 | How documents reach the indexer Job | indexer, k8s | PROVISIONAL | Job manifest, indexer Dockerfile |
 | D-004 | Work split between Zain and Ahmad | process | OPEN | everything |
-| D-005 | Embedding via Ollama host | indexer, api | OPEN | embed stage, NetworkPolicy |
-| D-006 | Retrieval: vector only or hybrid | api, eval | OPEN | retriever, exact-term recall |
-| D-007 | ADR 0002 and 0003 topics | docs | OPEN | ADR files, checker |
-| D-008 | Where ARCHITECTURE.md lives | docs | OPEN | doc layout |
-| D-009 | Ingress hostname | k8s | OPEN | Ingress, eval host header |
-| D-010 | CI e2e cluster: kind or k3d | ci-cd | OPEN | ci.yml |
-| D-011 | Handling of the "older version" question | api | OPEN | retriever filter logic |
-| D-012 | Follow-up question detection | api | OPEN | cache, answer service |
+| D-005 | Embedding via Ollama host | indexer, api | DECIDED | embed stage, NetworkPolicy |
+| D-006 | Retrieval: vector only or hybrid | api, eval | PROVISIONAL | retriever, exact-term recall |
+| D-007 | ADR 0002 and 0003 topics | docs | DECIDED | ADR files, checker |
+| D-008 | Where ARCHITECTURE.md lives | docs | PROVISIONAL | doc layout |
+| D-009 | Ingress hostname | k8s | PROVISIONAL | Ingress, eval host header |
+| D-010 | CI e2e cluster: kind or k3d | ci-cd | DECIDED | ci.yml |
+| D-011 | Handling of the "older version" question | api | PROVISIONAL | retriever filter logic |
+| D-012 | Follow-up question detection | api | PROVISIONAL | cache, answer service |
 | D-013 | Docker Hub account and repo names | ci-cd | OPEN | cd.yml |
 | D-014 | Branch protection: required checks and admin enforcement | process | OPEN | merging |
 | D-015 | Which four failure stages to break | docs | OPEN | FAILURE-ANALYSIS.md |
 | D-016 | Duplicate content: Prospectus 2026 vs Handbook 2026 | corpus, indexer | OPEN | golden set, retrieval |
-| D-017 | OCR settings and quality threshold | indexer | OPEN | extract stage |
-| D-018 | LLM provider scope | api | OPEN | provider code |
+| D-017 | OCR settings and quality threshold | indexer | PROVISIONAL | extract stage |
+| D-018 | LLM provider scope | api | PROVISIONAL | provider code |
 | D-019 | Corpus choice | corpus | DECIDED | |
 | D-020 | Absent topic is hostel rules | corpus | DECIDED | |
 | D-021 | Default LLM mode and models | api | DECIDED | |
@@ -60,13 +60,19 @@ Entry template:
 | D-023 | Branching and PR flow | process | DECIDED | |
 | D-024 | Dependency documentation | process | DECIDED | |
 | D-025 | Docker access workaround | process | DECIDED | |
+| D-026 | Re-index swap strategy | indexer | DECIDED |  |
+| D-027 | Cache invalidation without indexer in Redis | api, indexer | PROVISIONAL | cache code |
+| D-028 | Third overlay `ci` | k8s, ci-cd | PROVISIONAL | kustomize layout |
+| D-029 | Kit interface extensions | api | PROVISIONAL | provider, retriever code |
+| D-030 | Embedding code duplicated in api and indexer | api, indexer | PROVISIONAL | embedder code |
+| D-031 | Two eval baselines | eval, ci-cd | PROVISIONAL | CI gate |
 
 ---
 
 ## Open
 
 ### D-001 Semantic cache backend
-- Status: OPEN
+- Status: DECIDED
 - Raised: 2026-11-04 by Claude
 - Area: api
 - Related: R-CAC-1..5, R-K8S-REDIS, R-PRB-2, future ADR
@@ -77,11 +83,11 @@ Entry template:
   - C. Redis Stack with vector search. Real index, but bigger image, more memory, not needed at our scale.
 - Claude recommends: A. The assignment already requires Redis objects and a Redis readiness check; option B would leave Redis decorative. Invalidate by bumping a generation key or deleting the `cache:*` keys when the indexer starts.
 - Blocks: ADR, Redis manifests, cache code.
-- Decision:
-- Decided on:
+- Decision: Redis Stack with a real vector index (HNSW, cosine). Chosen by Zain on 2026-11-04. See architecture AD-03. Risk: image must run non-root (architecture R-02); fallback is plain Redis with app-side cosine.
+- Decided on: 2026-11-04
 
 ### D-002 Chunk size unit
-- Status: OPEN
+- Status: PROVISIONAL
 - Raised: 2026-11-04 by Claude
 - Area: indexer
 - Related: R-IDX-3, R-IDX-7, R-IDX-8, `CHUNK_SIZE=400`, `CHUNK_OVERLAP=50`
@@ -89,11 +95,11 @@ Entry template:
 - Options: A. Tokens (use an approximate tokenizer or word count). B. Characters (simple, deterministic, no tokenizer dependency).
 - Claude recommends: A with whitespace-word counts as a proxy (no extra dependency), stated plainly in PIPELINE.md. Amplification is then just words stored / words original. Three configs to measure, for example (200, 25), (400, 50), (600, 100).
 - Blocks: chunker, ConfigMap, PIPELINE.md.
-- Decision:
-- Decided on:
+- Decision: Words (whitespace-separated), AD-10 in architecture. Confirm.
+- Decided on: (pending confirmation)
 
 ### D-003 How documents reach the indexer Job
-- Status: OPEN
+- Status: PROVISIONAL
 - Raised: 2026-11-04 by Claude
 - Area: indexer, k8s
 - Related: R-IDX-9, R-COR-12
@@ -104,8 +110,8 @@ Entry template:
   - C. Mount a PVC filled by hand with `kubectl cp`. Simple but not reproducible from a clean clone, which breaks R-DED-11.
 - Claude recommends: A for the real corpus (init container, verify hashes, egress allowed to the internet only for that pod). CI keeps using `eval/fixtures` baked or mounted, so CI stays offline and fast.
 - Blocks: Job manifest, indexer Dockerfile, NetworkPolicy egress.
-- Decision:
-- Decided on:
+- Decision: PVC corpus-data filled by `make corpus` from local corpus/raw (AD-08); the Job re-hashes files against _index.json before indexing. Zain asked for the drawbacks of this option; Claude proceeded provisionally. Confirm or switch to the init-container fetch.
+- Decided on: (pending confirmation)
 
 ### D-004 Work split between Zain and Ahmad
 - Status: OPEN
@@ -119,7 +125,7 @@ Entry template:
 - Decided on:
 
 ### D-005 Embedding via Ollama on the host
-- Status: OPEN
+- Status: DECIDED
 - Raised: 2026-11-04 by Claude
 - Area: indexer, api
 - Related: R-LLM-5, R-PIN-1..3, R-SEC-4
@@ -127,11 +133,11 @@ Entry template:
 - Options: A. Yes, host Ollama for both embedding and generation. B. Embed with a library in the image (sentence-transformers): heavier image, more RAM in the Job, no Ollama dependency for indexing.
 - Claude recommends: A. Already installed and tested (768-dim). Consequence: the indexer Job and the API both need egress to the host, and the CI e2e job cannot reach Ollama, so CI needs a deterministic fake embedder or a stub path. See D-010.
 - Blocks: embed stage, NetworkPolicy, CI design.
-- Decision:
-- Decided on:
+- Decision: Yes: Ollama on the host embeds for both indexer and API (AD-06). CI uses the deterministic hashing embedder `hashing-bow-768` instead (AD-07).
+- Decided on: 2026-11-04
 
 ### D-006 Retrieval: vector only or hybrid
-- Status: OPEN
+- Status: PROVISIONAL
 - Raised: 2026-11-04 by Claude
 - Area: api, eval
 - Related: R-COR-7, R-ENG-5, R-BON-2
@@ -139,44 +145,44 @@ Entry template:
 - Options: A. Vector only, measure the weakness, explain it (ENG-5 only asks to name the technique). B. Add hybrid (BM25 over chunks in memory, rank fusion), show recall by type before and after.
 - Claude recommends: A first. Add B only if time remains after the CI gate works; it is bonus-sized and risks the CI timeline.
 - Blocks: retriever design only.
-- Decision:
-- Decided on:
+- Decision: Vector only in the baseline (architecture 1.2). Hybrid stays optional bonus.
+- Decided on: (pending confirmation)
 
 ### D-007 ADR 0002 and 0003 topics
-- Status: OPEN
+- Status: DECIDED
 - Raised: 2026-11-04 by Claude
 - Area: docs
 - Related: `docs/adr/`, `scripts/check_submission.py`
 - Question: The assignment names ADR 0001 (indexer as Job) and 0004 (LLM provider and data governance). What are 0002 and 0003? Need to read what the checker expects.
 - Claude recommends: 0002 semantic cache backend (D-001), 0003 embedding pin and metadata filtering for versions. Claude will read `scripts/check_submission.py` and adjust.
 - Blocks: ADR files.
-- Decision:
-- Decided on:
+- Decision: Read from scripts/check_submission.py: 0001 indexer-as-Job, 0002 chunking, 0003 cache store, 0004 LLM provider and data governance (PII). Filenames should contain these words.
+- Decided on: 2026-11-04
 
 ### D-008 Where ARCHITECTURE.md lives
-- Status: OPEN
+- Status: PROVISIONAL
 - Raised: 2026-11-04 by Claude
 - Area: docs
 - Related: R-K8S-CHROMA
 - Question: The assignment requires the reason for StatefulSet to be documented "in your ARCHITECTURE.md", but the layout lists no such file.
 - Claude recommends: `docs/ARCHITECTURE.md`, unless the checker looks for it at the root.
 - Blocks: doc layout.
-- Decision:
-- Decided on:
+- Decision: The reason for the StatefulSet is written in docs/architecture/architecture.md section 4.10. Add a short docs/ARCHITECTURE.md pointer when the README is written, so the file name the assignment mentions exists. The checker does not look for it.
+- Decided on: (pending confirmation)
 
 ### D-009 Ingress hostname
-- Status: OPEN
+- Status: PROVISIONAL
 - Raised: 2026-11-04 by Claude
 - Area: k8s
 - Related: R-K8S-ING, `make ask`, `run_eval.py --host`
 - Question: Which host name does the Ingress use? Starter `run_eval.py` examples use `--host rahbar.local`.
 - Claude recommends: `rahbar.local`, with the `/etc/hosts` line (`$(minikube ip) rahbar.local`) in the README.
 - Blocks: Ingress manifest, README.
-- Decision:
-- Decided on:
+- Decision: rahbar.local, as in the Makefile and run_eval examples (architecture 4.3).
+- Decided on: (pending confirmation)
 
 ### D-010 CI e2e cluster: kind or k3d
-- Status: OPEN
+- Status: DECIDED
 - Raised: 2026-11-04 by Claude
 - Area: ci-cd
 - Related: R-CI-6
@@ -184,11 +190,11 @@ Entry template:
 - Options: A. kind or k3d plus the stub LLM and a deterministic fake embedder (hash-based) so recall on the 3 fixture docs is meaningful but cheap. B. Ollama in the runner (slow model pulls, flaky).
 - Claude recommends: k3d (installed locally already) with option A. Needs an `EMBED_MODEL` value for the fake embedder and care so the pin check still runs. This also means the baseline in CI differs from the real-corpus baseline: keep two baselines or gate on fixtures only. Needs your decision.
 - Blocks: ci.yml, eval baseline design.
-- Decision:
-- Decided on:
+- Decision: Zain: no LLM in CI, a rule-based fallback instead. Implemented as the `extractive` provider plus the `hashing-bow-768` embedder (AD-07). Cluster: kind plus ingress-nginx (AD-19, provisional). Two baselines (AD-27).
+- Decided on: 2026-11-04
 
 ### D-011 Handling of the "older version" question
-- Status: OPEN
+- Status: PROVISIONAL
 - Raised: 2026-11-04 by Claude
 - Area: api
 - Related: R-QRY-4, R-GOL-2
@@ -196,11 +202,11 @@ Entry template:
 - Options: A. Keyword/regex on year or words like "2023", "old", "previous", "before", "superseded". B. Ask the LLM to extract an intent flag. C. Two-pass: retrieve current; if the question names a year matching a superseded `doc_version`, retrieve from it.
 - Claude recommends: C using the year/version text (regex), no LLM call, easy to test. Answers must name which version they quote.
 - Blocks: retriever filter logic, version-sensitive golden questions.
-- Decision:
-- Decided on:
+- Decision: Rule-based: year tokens matching known doc_versions, else older-version phrases, else current only (architecture 5.6.2).
+- Decided on: (pending confirmation)
 
 ### D-012 Follow-up question detection
-- Status: OPEN
+- Status: PROVISIONAL
 - Raised: 2026-11-04 by Claude
 - Area: api
 - Related: R-QRY-2, R-CAC-4
@@ -208,8 +214,8 @@ Entry template:
 - Options: A. Add an optional `history` or `conversation_id` field to the request (contract change, needs an ADR). B. Heuristic on the text (pronouns, "and what about", very short). C. Single-turn only: nothing is a follow-up, document it.
 - Claude recommends: check what `ui/index.html` already sends. If it sends history, use it; otherwise C and say so.
 - Blocks: cache, answer service.
-- Decision:
-- Decided on:
+- Decision: Single-turn API, no follow-ups. The UI sends only the question. A follow_up flag exists internally for the cache rule (architecture 5.5.4).
+- Decided on: (pending confirmation)
 
 ### D-013 Docker Hub account and repo names
 - Status: OPEN
@@ -256,26 +262,75 @@ Entry template:
 - Decided on:
 
 ### D-017 OCR settings and quality threshold
-- Status: OPEN
+- Status: PROVISIONAL
 - Raised: 2026-11-04 by Claude
 - Area: indexer
 - Related: R-IDX-1, R-COR-3
 - Question: When is a page "no text layer"? Which dpi and language? What is the accepted loss (for example clause numbers like 9.2 read as `92.`)?
 - Claude recommends: a page counts as scanned when it has fewer than ~30 extractable characters; OCR at 200 dpi, `eng`, via `pytesseract` + `pdf2image` (what we tested). Add a light fix-up for clause numbers only if measured as worth it; otherwise document the loss.
 - Blocks: extract stage.
-- Decision:
-- Decided on:
+- Decision: Page is scanned when it has fewer than 30 non-space characters; OCR at 200 dpi, language eng, pdf2image + pytesseract (architecture 5.4.2).
+- Decided on: (pending confirmation)
 
 ### D-018 LLM provider scope
-- Status: OPEN
+- Status: PROVISIONAL
 - Raised: 2026-11-04 by Claude
 - Area: api
 - Related: R-LLM-1..4
 - Question: Implement only `ollama-host` fully (the minimum), or also `hosted`? `hosted` needs a free-tier key and Secret handling and may be used in CI-less demos.
 - Claude recommends: `ollama-host` full; `hosted` as a thin second file if time remains. Stub stays for tests.
 - Blocks: provider code, ADR 0004.
-- Decision:
-- Decided on:
+- Decision: ollama-host full; `extractive` for CI and tests; `hosted` as a thin second file only if time allows (architecture 5.7.2).
+- Decided on: (pending confirmation)
+
+### D-026 Re-index swap strategy
+- Status: DECIDED
+- Raised: 2026-11-04 by Claude
+- Area: indexer
+- Related: AD-02, `indexer/pipeline/store.py`, ADR 0001
+- Decision: Build `rahbar_next`, verify the count, delete `rahbar`, rename `rahbar_next` to `rahbar`. A failed Job never touches the live index. Chosen by Zain on 2026-11-04.
+- Decided on: 2026-11-04
+
+### D-027 Cache invalidation without the indexer touching Redis
+- Status: PROVISIONAL
+- Raised: 2026-11-04 by Claude
+- Area: api, indexer
+- Related: AD-04, AD-05, R-CAC-5, R-SEC-4
+- Question: The assignment says "redis from api only" and also "expire the cache when the indexing Job runs". Both hold only if the indexer never reaches Redis.
+- Claude recommends (and used): the indexer stamps a new `index_id` in the collection metadata; each API pod names its cache search index by it and drops older ones. A `scope` tag keeps version-intent questions apart.
+- Decision: pending confirmation.
+
+### D-028 Overlays: add `ci` next to `dev` and `prod`
+- Status: PROVISIONAL
+- Raised: 2026-11-04 by Claude
+- Area: k8s, ci-cd
+- Related: AD-18, requirements R-CI-6, R-CD-1
+- Question: The assignment names two overlays. CI and the CD smoke test run on kind with no Ollama, so they need fixture corpus, hashing embedder and extractive provider. Three overlays keep that out of `dev` and `prod`.
+- Decision: pending confirmation.
+
+### D-029 Kit interface extensions
+- Status: PROVISIONAL
+- Raised: 2026-11-04 by Claude
+- Area: api
+- Related: AD-14, AD-15, STARTER.md ("If you change a contract, say why in an ADR")
+- Question: Provider `generate` returns a `GenerationResult` (adds token counts) and accepts a retry `hint`; the retriever accepts an optional pre-computed `vector` and `where`; outcome travels in `X-Outcome` and `X-Cache` headers. The external JSON is unchanged. Needs a line in ADR 0004.
+- Decision: pending confirmation.
+
+### D-030 Embedding code duplicated in api and indexer
+- Status: PROVISIONAL
+- Raised: 2026-11-04 by Claude
+- Area: api, indexer
+- Related: AD-09
+- Question: The two images have separate build contexts, so the Ollama client and the hashing embedder exist twice. A parity test with a fixed golden vector keeps them equal. Alternative: a shared package built into both images (more build plumbing).
+- Decision: pending confirmation.
+
+### D-031 Two eval baselines
+- Status: PROVISIONAL
+- Raised: 2026-11-04 by Claude
+- Area: eval, ci-cd
+- Related: AD-27
+- Question: The CI gate runs on fixtures with a deterministic embedder, so its numbers differ from the real-corpus baseline. CI uses `eval/fixtures/baseline.fixture.json`; `eval/baseline.json` holds the shipped real numbers from a local run.
+- Decision: pending confirmation.
 
 ---
 
@@ -329,3 +384,4 @@ Entry template:
 ## Change log
 
 - 2026-11-04: file created with D-001 to D-025.
+- 2026-11-04: architecture v1.0 written. D-001, D-005, D-007, D-010 decided; D-002, D-003, D-006, D-008, D-009, D-011, D-012, D-017, D-018 made provisional; D-026 to D-031 added.
