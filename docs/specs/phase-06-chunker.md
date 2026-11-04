@@ -5,7 +5,7 @@
 | Phase | 6, from `docs/IMPLEMENTATION_PLAN.md` |
 | Work plan task | Z-05 |
 | Branch | `feat/rag-z05-chunker` |
-| Stage | SPEC DRAFT |
+| Stage | TESTING |
 | Started | 2026-11-05 |
 | Approved (spec and plan) | 2026-11-05, Zain (pre-approved: no gate this session) |
 | Depends on | phase 4 (extract, clean, merged), phase 5 (`section_matches`, merged) |
@@ -57,7 +57,7 @@ def chunk(doc: Document, size: int, overlap: int) -> list[Chunk]
 
 **Headings** (a line, stripped, not containing ` | `; first match wins):
 
-1. Numbered clause: `^\d{1,2}(\.\d+)*[.)]?\s+[A-Z(]` (architecture regex, tightened: at most 2 leading digits and a capital or `(` next, so years and table data such as `2023 ...` or `19 14 46` do not match). DEV-003.
+1. Numbered clause: `N.` or `N.N...` (1 or 2 digits and a dot), then a capital or `(`, line at most 150 characters (architecture regex tightened: years, table data, page headers such as `16 Student Handbook 2026`, `1)` list items and one-line numbered lists do not match). DEV-003.
 2. Roman: `^[IVXLC]{1,6}\s*[-–—.]\s*[A-Z][A-Z &/,'-]{3,}$` (`V - EXAMINATION RULES`, `VI – SEMESTER RULES`).
 3. Lettered: `^[A-Z][.)]\s+[A-Z]` with at most 10 words and no final `.`.
 4. All caps: at least 4 letters, 1 to 10 words, no lower case letter, no final `.`.
@@ -151,7 +151,12 @@ Spec 0.5 h, tests 0.75 h, code 0.75 h, report and corpus run 0.5 h, golden recon
 
 ## 11. Implementation notes
 
-(filled during IMPLEMENT)
+- Rules changed while measuring on the real corpus (all in DEV-003, none touch an acceptance criterion): a bare number needs a dot (page headers `16 Student Handbook 2026` were becoming sections); lines over 150 characters are never headings (an HTML list on one line); a heading may have one blank line below it (grading tables); a body-less short title hands its line to the next heading, which names the section (so `Attendance Requirements` above `1.21 ...` keeps the clause number in `section`); a line is split before a dotted clause number followed by a capital word (two-column Handbook text: `Freezing of Semester 4.25 The deadline`), excluding grades such as `4.00`. A roman-heading split was tried and dropped (it moved the answer of q05 under the wrong heading).
+- The spec said the heading line stays in the first chunk of its section: true, including a carried title.
+- `chunk_report.py --golden` is stricter than the spec asked: the chunk that holds the question's `expect` text must carry the golden section, not just any chunk of that section.
+- Real corpus run, 400/50 (AC-7): 1044 chunks, amplification 1.04, per-document numbers in `docs/PIPELINE.md`. AC-8: 18 of 18 golden items matched; four section strings changed (q05 `7. Students who have missed classes due to any`, q06 `1. Mobile Phones, Smart Watches and all electronic`, q09 `Chapter-2 Faculty and Staff`, q10 `Mandatory periodic (six. monthly) deliverables of the start-up`).
+- AC-4 on the real Student Handbook: GenAI sub-sections 1 to 7, 9, 10, 12 are each in one chunk (largest 392 words); 8 and 11 are not found as headings (mid-line in two-column text; known loss).
+- Remaining real defect found, outside this phase: the Student Handbook and Academic Rules Handbook PDFs interleave two columns in `extract` (phase 4 handled only the Prospectus, D-044). Chunk labels are wrong where that happens. Suggested follow-up: column splits for the Handbook files, a small `COLUMN_SPLITS` entry plus a golden re-check.
 
 ## 12. Test report
 
