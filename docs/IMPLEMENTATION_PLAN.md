@@ -62,7 +62,7 @@ Hybrid retrieval, the `hosted` provider, the in-cluster Ollama mode, authenticat
 | --- | --- | --- | --- | --- | --- |
 | 0 | Foundation (repo, tools, corpus, architecture, docs) | n/a | Wed 4 Nov | DONE | #1, #2 |
 | 1 | Container images | Z-01 | Thu 09:00 | DONE | #3 |
-| 2 | Local services and assumption checks | Z-02 | Thu 10:30 | NOT STARTED | |
+| 2 | Local services and assumption checks | Z-02 | Thu 10:30 | IN PROGRESS | |
 | 3 | Golden set | Z-03 | Thu 13:30 | NOT STARTED | |
 | 4 | Extract and clean | Z-04 | Thu 16:30 | NOT STARTED | |
 | 5 | Evaluation runner | Z-11 | Thu 18:30 | NOT STARTED | |
@@ -83,11 +83,11 @@ Hours spent so far (fill in at each phase end): planned 37.5 h, actual `____`.
 
 ```
 Phase:        2  Local services and assumption checks
-Stage:        not started   (SPEC DRAFT, APPROVED, IMPLEMENTING, TESTING, READY FOR PR, MERGED)
-Branch:       (none yet)
-Spec:         (none yet; docs/specs/phase-02-local-services.md)
-Next action:  fresh session: stage 0 then stage 1 of docs/WORKFLOW.md for phase 2 (branch feat/rag-z02-dev-services)
-Waiting on:   Ahmad (told H-1; he can build the images)
+Stage:        SPEC DRAFT   (SPEC DRAFT, APPROVED, IMPLEMENTING, TESTING, READY FOR PR, MERGED)
+Branch:       feat/rag-z02-local-services
+Spec:         docs/specs/phase-02-local-services.md
+Next action:  Zain reviews spec and plan; on "Approved." run step 0 to 8 of spec section 10
+Waiting on:   Zain (the gate)
 Last updated: 2026-11-04
 ```
 
@@ -127,6 +127,7 @@ Append-only, newest at the bottom. One line per event: date, phase, what happene
 2026-11-04  P01  TESTING round 2: FAIL, D-2 checker regression from **/ patterns, D-3 nested tests/corpus/md. Fixed 56bd1cf.
 2026-11-04  P01  TESTING round 3: PASS, AC-1..7. READY FOR PR. Sizes api 388 MB, indexer 592 MB.
 2026-11-04  P01  MERGED: PR #3. rahbar-api:dev and rahbar-indexer:dev build and run non-root read-only. H-1 delivered: tell Ahmad image names rahbar-api:dev, rahbar-indexer:dev, UID 10001, CMDs as in spec section 4; run the two docker build lines until A-01 fixes make images.
+2026-11-04  P02  SPEC DRAFT: spec and plan for local services and assumption checks written, 4 questions answered (D-038..D-041). docs/specs/phase-02-local-services.md
 ```
 
 ---
@@ -215,7 +216,7 @@ H-1: message Ahmad when merged. Tell him the image names and tags used by `make 
 
 ## Phase 2: Local services and assumption checks (Z-02)
 
-**Status:** NOT STARTED · **Branch:** `feat/rag-z02-dev-services` · **Est:** 1.5 h · **Priority:** P0
+**Status:** IN PROGRESS · **Branch:** `feat/rag-z02-local-services` · **Est:** 1.5 h · **Priority:** P0
 
 ### Objective
 Run Chroma and Redis Stack locally so you never need the cluster to code, and prove the architecture's unverified assumptions before building on them.

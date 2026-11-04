@@ -72,6 +72,10 @@ Entry template:
 | D-035 | api image: how the build stage hands over dependencies | api | DECIDED | api/Dockerfile |
 | D-036 | HEALTHCHECK in the Dockerfiles | api, indexer | DECIDED | Dockerfiles |
 | D-037 | Makefile `images` target during phase 1 | process | DECIDED | make images |
+| D-038 | Redis Stack server image tag | api, k8s | DECIDED | Makefile, Redis manifest |
+| D-039 | Where the Ollama assumption check lives | process | DECIDED | verify_ollama.py |
+| D-040 | Dev services data persistence | process | DECIDED | make dev-services |
+| D-041 | Where the non-root read-only checks live | process | DECIDED | verify_services.py |
 
 ---
 
@@ -445,6 +449,54 @@ Entry template:
 - Decision: A, leave the Makefile alone. Tell Ahmad in H-1.
 - Decided on: 2026-11-04
 
+### D-38 Redis Stack server image tag
+- Status: DECIDED
+- Raised: 2026-11-04 by Claude
+- Area: api, k8s
+- Related: architecture 3, 9.2 R-02, D-001, H-2
+- Question: Which exact `redis/redis-stack-server` tag to pin (no `latest`)?
+- Options: A. `7.4.0-v8` (newest 7.4, 2025-11-03). B. `7.2.0-v20` (newest 7.2).
+- Claude recommends: A. Newest stable line; fall back to B in the same phase if the non-root check fails on A for a tag-specific reason.
+- Blocks: Makefile `REDIS_IMAGE`, architecture section 3, Ahmad's Redis manifest.
+- Decision: A, `redis/redis-stack-server:7.4.0-v8`.
+- Decided on: 2026-11-04
+
+### D-39 Where the Ollama assumption check lives
+- Status: DECIDED
+- Raised: 2026-11-04 by Claude
+- Area: process
+- Related: architecture 9.1 A-6, phase 10
+- Question: Where does the A-6 check (`format`, `num_ctx` 8192, embed batch) live?
+- Options: A. Separate `scripts/verify_ollama.py`. B. Flag on `verify_services.py`. C. Manual curl only.
+- Claude recommends: A. `verify_services.py` then needs only the two containers; the Ollama script is re-runnable in phase 10.
+- Blocks: verify_ollama.py.
+- Decision: A, separate script.
+- Decided on: 2026-11-04
+
+### D-40 Dev services data persistence
+- Status: DECIDED
+- Raised: 2026-11-04 by Claude
+- Area: process
+- Related: phase 2, phase 7
+- Question: Do `make dev-services` containers keep data between runs?
+- Options: A. Named volumes kept; stop removes containers only; extra `dev-services-reset` removes volumes. B. Fully ephemeral.
+- Claude recommends: A. Phase 7 indexing with OCR and embeddings is slow; no re-index per session.
+- Blocks: Makefile targets.
+- Decision: A, named volumes kept.
+- Decided on: 2026-11-04
+
+### D-41 Where the non-root read-only checks live
+- Status: DECIDED
+- Raised: 2026-11-04 by Claude
+- Area: process
+- Related: architecture 4.7, R-01, R-02
+- Question: Where do the R-01 and R-02 `docker run --read-only --user` checks live?
+- Options: A. Items 3 and 4 inside `verify_services.py` via subprocess docker. B. Manual commands recorded in the spec only.
+- Claude recommends: A. Re-runnable evidence the tester can repeat; skipped cleanly without docker.
+- Blocks: verify_services.py.
+- Decision: A, inside the script.
+- Decided on: 2026-11-04
+
 ---
 
 ## Change log
@@ -453,3 +505,4 @@ Entry template:
 - 2026-11-04: architecture v1.0 written. D-001, D-005, D-007, D-010 decided; D-002, D-003, D-006, D-008, D-009, D-011, D-012, D-017, D-018 made provisional; D-026 to D-031 added.
 - 2026-11-04: work plan written. D-004 decided; D-032 to D-034 added.
 - 2026-11-04: phase 1 questions answered. D-035 to D-037 added, all DECIDED.
+- 2026-11-04: phase 2 questions answered. D-038 to D-041 added, all DECIDED.
