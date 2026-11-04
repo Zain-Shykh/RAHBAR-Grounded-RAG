@@ -1,7 +1,7 @@
-# Phase NN spec: <title>
+# Phase NN spec and plan: <title>
 
-<!-- Copy to docs/specs/phase-NN-<slug>.md. Delete these comments. Fill sections 1 to 9 in the SPEC stage,
-     section 10 in the PLAN stage, section 11 during IMPLEMENT, section 12 in the TEST stage, section 13 at each gate.
+<!-- Copy to docs/specs/phase-NN-<slug>.md. Delete these comments. Fill sections 1 to 10 in stage 1 (spec and plan
+     are approved together at the one gate), section 11 during IMPLEMENT, section 12 in the TEST stage, section 13 at the gate and at the PR.
      Keep it specific: file paths, signatures, numbers. Link, do not copy, text that lives in architecture.md. -->
 
 | | |
@@ -9,10 +9,9 @@
 | Phase | NN, from `docs/IMPLEMENTATION_PLAN.md` |
 | Work plan task | Z-NN |
 | Branch | `feat/rag-zNN-<topic>` |
-| Stage | SPEC DRAFT / SPEC APPROVED / PLAN DRAFT / PLAN APPROVED / IMPLEMENTING / TESTING / READY FOR PR / MERGED |
+| Stage | SPEC DRAFT / APPROVED / IMPLEMENTING / TESTING / READY FOR PR / MERGED |
 | Started | YYYY-MM-DD |
-| Spec approved | (date, by) |
-| Plan approved | (date, by) |
+| Approved (spec and plan) | (date, by) |
 | Depends on | earlier phases, hand-offs H-n |
 
 ## 1. Objective
@@ -74,7 +73,7 @@ Things that could make the spec wrong, and how to find out early.
 
 ## 10. Plan
 
-<!-- Filled in the PLAN stage, after the spec is approved. -->
+<!-- Written together with the spec, before the gate. -->
 
 ### 10.1 Ordered steps
 
@@ -113,6 +112,6 @@ Coverage of `app` (if relevant): `__`%
 
 | Gate | Date | Approved by | Notes |
 | --- | --- | --- | --- |
-| Spec | | | |
-| Plan | | | |
-| Final (before PR) | | | |
+| Spec and plan (the one gate) | | | |
+| Tester verdict PASS | | | rounds: |
+| Merged | | | PR # |
