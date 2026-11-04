@@ -77,6 +77,7 @@ Copy this block to the end of section 7, increment the number, and fill every li
 | --- | --- | --- | --- | --- | --- |
 | DEV-001 | PDF extraction uses pdfplumber default text mode, not layout mode | S3 | OPEN | 5.4.2 (extract) | 2026-11-04 |
 | DEV-002 | Eval section match also folds dashes and applies NFKC | S3 | OPEN | 5.13.2, AD-22 | 2026-11-04 |
+| DEV-003 | Chunker heading rules: isolated short line added, numbered rule tightened, section cut at 80 characters | S3 | OPEN | 5.4.2 (chunk), AD-22 | 2026-11-05 |
 
 ## 7. Log
 
@@ -145,3 +146,27 @@ Places where the architecture has flagged a real chance of deviation (architectu
 **Plan:** absorb: add "after NFKC and dash folding" to architecture 5.13.2 and AD-22 in the next version.
 
 **Decision:** accepted by Zain 2026-11-04 (D-046); amend architecture later.
+
+### DEV-003 Chunker heading rules: isolated short line added, numbered rule tightened, section cut at 80 characters
+
+| | |
+| --- | --- |
+| Status | OPEN |
+| Severity | S3 |
+| Date | 2026-11-05 |
+| Raised by | Claude (phase 6) |
+| Architecture reference | 5.4.2 (chunk row), AD-22 |
+| Files changed | `indexer/pipeline/chunk.py`, `indexer/tests/test_chunk.py` |
+| Related | `docs/OPEN_DECISIONS.md` D-049, D-050, `docs/specs/phase-06-chunker.md` |
+
+**The architecture says:** headings are numbered clauses (`^\d+(\.\d+)*[.)]?\s+\S`), roman or lettered section lines, and short all-caps lines; `section` is the heading text exactly as written, whitespace-normalised.
+
+**What was built instead:** (1) a fourth rule: a short line (1 to 10 words, at least 4 letters, capital first, no final `. : ; , ! ?`, mostly not numbers) with a blank line above and text directly below is a heading; (2) the numbered rule needs at most 2 leading digits, a `.` (not `)`) and a capital or `(` next; (3) `section` is cut at 80 characters on a word boundary; (4) a heading that directly follows a short title with no body joins that title's section (name stays the first one).
+
+**Why:** the fee and grading HTML pages have plain heading lines (`Fee Refund Policy`) that the three rules never find, so golden q07 and q15 could not match. The original numbered regex matches years and table data (`2023 ...`, `19 14 46`) and the `1)` list items inside one policy sub-section, which would split it. Full clause lines can be 100 characters or more.
+
+**Impact:** a heading is found in more cases; `section` for a long clause is a prefix of the line, which `section_matches` (AD-22) already accepts. No invariant or requirement changes. Known loss: headings inside interleaved two-column text are not recovered.
+
+**Plan:** absorb: add the four rules and the 80-character cut to architecture 5.4.2 and AD-22 in the next version.
+
+**Decision:** pre-approved by Zain 2026-11-05 (D-049); amend architecture later.
