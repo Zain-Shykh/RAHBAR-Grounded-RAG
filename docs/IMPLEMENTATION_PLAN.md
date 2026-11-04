@@ -64,7 +64,7 @@ Hybrid retrieval, the `hosted` provider, the in-cluster Ollama mode, authenticat
 | 1 | Container images | Z-01 | Thu 09:00 | DONE | #3 |
 | 2 | Local services and assumption checks | Z-02 | Thu 10:30 | DONE | #4 |
 | 3 | Golden set | Z-03 | Thu 13:30 | DONE | #5 |
-| 4 | Extract and clean | Z-04 | Thu 16:30 | NOT STARTED | |
+| 4 | Extract and clean | Z-04 | Thu 16:30 | DONE | #6 |
 | 5 | Evaluation runner | Z-11 | Thu 18:30 | NOT STARTED | |
 | 6 | Chunker | Z-05 | Fri 12:00 | NOT STARTED | |
 | 7 | Embed and store, full indexer run | Z-06 | Fri 14:00 | NOT STARTED | |
@@ -82,11 +82,11 @@ Hours spent so far (fill in at each phase end): planned 37.5 h, actual `____`.
 ## 2. Current focus
 
 ```
-Phase:        4  Extract and clean
-Stage:        READY FOR PR   (SPEC DRAFT, APPROVED, IMPLEMENTING, TESTING, READY FOR PR, MERGED)
-Branch:       feat/rag-z04-extract-clean
-Spec:         docs/specs/phase-04-extract-clean.md
-Next action:  open PR into dev, merge if own-lane and green, then DONE commit via PR
+Phase:        5  Evaluation runner
+Stage:        not started   (SPEC DRAFT, APPROVED, IMPLEMENTING, TESTING, READY FOR PR, MERGED)
+Branch:       (none yet; feat/rag-z11-eval-runner)
+Spec:         (none yet; docs/specs/phase-05-eval-runner.md)
+Next action:  fresh session: stage 0 then stage 1 of docs/WORKFLOW.md for phase 5
 Waiting on:   nothing
 Last updated: 2026-11-04
 ```
@@ -146,6 +146,7 @@ Append-only, newest at the bottom. One line per event: date, phase, what happene
 2026-11-04  P04  IMPLEMENTING done: clean, extract (pdf, OCR, columns, html, md), verify, scripts/check_golden_extract.py. 9 docs extract, 41 pages OCR'd (88 s), all 16 golden expect strings found after fixing q05 page comment (p.30). make test and lint green, image run read-only non-root OK.
 2026-11-04  P04  TESTING round 1: FAIL, T-1 (lone digit after hyphenated line end dropped). Fixed 71f91df.
 2026-11-04  P04  TESTING round 2: PASS, AC-1..AC-12, 71 indexer tests, pipeline coverage 91%. READY FOR PR.
+2026-11-04  P04  MERGED: PR #6. clean, extract (pdf, OCR, columns, html), verify, scripts/check_golden_extract.py on dev; 41 pages OCR'd; 16 of 16 golden expect strings found; q05 page comment now p.30. DONE.
 ```
 
 ---
@@ -324,7 +325,7 @@ None. Section names get reconciled in phase 6.
 
 ## Phase 4: Extract and clean (Z-04)
 
-**Status:** NOT STARTED · **Branch:** `feat/rag-z04-extract-clean` · **Est:** 3 h · **Priority:** P0
+**Status:** DONE · **Branch:** `feat/rag-z04-extract-clean` · **Est:** 3 h · **Priority:** P0
 
 ### Objective
 Turn each of the nine corpus documents into clean per-page text, with scanned pages OCR'd and table rows kept on one line.
@@ -350,12 +351,12 @@ Architecture 5.4.2 (stage specification), 5.4.5 (what each stage loses); `docs/C
 Chunking, embedding, any Chroma access. OCR clause-number repair (document the loss instead).
 
 ### Acceptance criteria
-- [ ] All nine real documents extract without error (script or REPL run recorded in the log).
-- [ ] The scanned Entrepreneurship policy and the 2023 rules body pages produce readable text via OCR; the per-document OCR page counts are recorded in the results register.
-- [ ] A table row from the Annual Report page 12 stays on one line after extraction; the before/after pair is saved for `PIPELINE.md` (a note in the log pointing to the file is enough).
-- [ ] The fee and grading HTML yield their tables as one row per line, without site navigation text.
-- [ ] `verify.py` fails with a clear message on a wrong hash.
-- [ ] Unit tests cover: header/footer removal, hyphen joining, page-number lines, HTML table rows, front-matter stripping, OCR trigger. `make test` and `make lint` green.
+- [x] All nine real documents extract without error (script or REPL run recorded in the log).
+- [x] The scanned Entrepreneurship policy and the 2023 rules body pages produce readable text via OCR; the per-document OCR page counts are recorded in the results register.
+- [x] A table row from the Annual Report page 12 stays on one line after extraction; the before/after pair is saved for `PIPELINE.md` (a note in the log pointing to the file is enough).
+- [x] The fee and grading HTML yield their tables as one row per line, without site navigation text.
+- [x] `verify.py` fails with a clear message on a wrong hash.
+- [x] Unit tests cover: header/footer removal, hyphen joining, page-number lines, HTML table rows, front-matter stripping, OCR trigger. `make test` and `make lint` green.
 
 ### Verify
 ```bash
