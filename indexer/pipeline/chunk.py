@@ -11,9 +11,12 @@ from pathlib import Path
 
 from .models import Chunk, Document
 
-_NUM = re.compile(r"^\d{1,2}(?:\.\d+)*\.?\s+(\S)")
+_NUM = re.compile(r"^(?:\d{1,2}\.|\d{1,2}(?:\.\d+)+\.?)\s+(\S)")
 _ROMAN = re.compile(r"^[IVXLC]{1,6}\s*[-–—.]\s*[A-Z][A-Z &/,'-]{3,}$")
 _LETTER = re.compile(r"^[A-Z][.)]\s+[A-Z]")
+# Two-column text runs two columns into one line: split before a dotted clause number
+# ("... Semester 4.25 The deadline"; not a grade like "4.00").
+_MID = re.compile(r"(?<=\S)\s+(?=\d{1,2}\.(?!00\b)\d{1,2}\s+[A-Z](?:[a-z]|\s))")
 _SENTENCE = re.compile(r"(?<=[.!?])\s+")
 SECTION_MAX = 80  # characters; D-049
 _Unit = tuple[str, int, bool]  # text, page, is_table_row
@@ -25,8 +28,9 @@ def _numeric(token: str) -> bool:
 
 def _heading(line: str, prev_blank: bool, has_body: bool) -> str | None:
     """The section name if `line` is a heading, else None. Rules: numbered clause, roman,
-    lettered, all caps, and (DEV-003) an isolated short line: blank above, text below."""
-    if not line or " | " in line or len(line) > 200:
+    lettered, all caps, and (DEV-003) an isolated short line: blank above, text below.
+    `has_body`: a non-blank line follows within two lines."""
+    if not line or " | " in line or len(line) > 150:
         return None
     n = len(line.split())
     letters = sum(c.isalpha() for c in line)
@@ -52,7 +56,7 @@ def _heading(line: str, prev_blank: bool, has_body: bool) -> str | None:
 
 
 def _title_like(name: str) -> bool:
-    """A short heading with no final period is a title: a heading right below it joins it."""
+    """A short heading with no final period is a title: with no body, it joins the next section."""
     return len(name.split()) <= 10 and not name.endswith(".")
 
 
@@ -117,17 +121,18 @@ def chunk(doc: Document, size: int, overlap: int) -> list[Chunk]:
             para = []
 
     for page in doc.pages:
-        lines = [ln.strip() for ln in page.text.split("\n")]
+        lines = [piece.strip() for ln in page.text.split("\n") for piece in _MID.split(ln.strip())]
         for i, line in enumerate(lines):
             if not line:
                 end_para()
                 continue
-            h = _heading(line, i == 0 or not lines[i - 1], i + 1 < len(lines) and bool(lines[i + 1]))
-            if h and not title_only:
+            h = _heading(line, i == 0 or not lines[i - 1], any(lines[i + 1:i + 3]))
+            if h:
                 end_para()
-                sections.append((name, units))
-                name, units = h, []
-                para, para_page = [line], page.page
+                if not title_only:  # a bare title carries its line into the next section
+                    sections.append((name, units))
+                    units = []
+                name, para, para_page = h, [line], page.page
                 title_only = _title_like(h)
                 continue
             if " | " in line:
@@ -137,7 +142,7 @@ def chunk(doc: Document, size: int, overlap: int) -> list[Chunk]:
                 if not para:
                     para_page = page.page
                 para.append(line)
-            title_only = title_only and bool(h)
+            title_only = False
         end_para()
     sections.append((name, units))
 

@@ -85,7 +85,7 @@ def test_no_overlap_across_sections():
 
 
 def test_no_overlap_after_table_row():
-    rows = "\n".join(f"item{i} | Rs. {i}00" for i in range(25))
+    rows = "\n".join(f"item{i} | Rs. {i}00" for i in range(18))
     cs = chunk(doc("Fees\n" + rows), 30, 10)
     assert len(cs) >= 2
     for c in cs:
@@ -125,6 +125,7 @@ def test_heading_yes(line):
 
 
 @pytest.mark.parametrize("line", [
+    "16 Student Handbook 2026",
     "2023 was a good year for the university",
     "19 14 46 16 83 50 8 236",
     "1) Students generating an entire assignment submission",
@@ -154,7 +155,7 @@ def test_isolated_line_rule():
 
 
 def test_section_text_and_truncation():
-    long = "4.3 " + " ".join(f"Word{i}" for i in range(25))
+    long = "4.3 " + " ".join(f"Word{i}" for i in range(18))
     cs = chunk(doc(long + "\nmore"), 400, 50)
     assert len(cs[0].section) <= 80 and cs[0].section.startswith("4.3 Word0")
     assert not cs[0].section.endswith(" ") and "Word3" in cs[0].section
@@ -164,7 +165,8 @@ def test_section_text_and_truncation():
 
 def test_html_style_sections():
     text = ("Fee Structure\n\nAdmission Fee\nAdmission Fee of Rs 30,000 is payable once.\n\n"
-            "Fee Refund Policy\n1. Admission Fee is non-refundable.\n\nTimeline | Percentage\nUpto 20th day | 60%")
+            "Fee Refund Policy\n1. Admission Fee is non-refundable. 2. Security deposit is refundable at the time of "
+            "completion of degree or closing of admission. 3. Tuition Fee is refunded in accordance with HEC guidelines.\n\nTimeline | Percentage\nUpto 20th day | 60%")
     secs = [c.section for c in chunk(doc(text, source="fee.html"), 400, 50)]
     assert "Admission Fee" in secs and "Fee Refund Policy" in secs
 
@@ -229,3 +231,29 @@ def test_bad_params(size, overlap):
 def test_odd_characters_do_not_crash():
     cs = chunk(doc("1.1 Ünïcode – heading with\tnbsp\nbody  text\x0c more"), 400, 50)
     assert cs and cs[0].section.startswith("1.1 Ünïcode")
+
+
+def test_title_then_clause_keeps_clause_number():
+    cs = chunk(doc("Intro text.\n\nAttendance Requirements\n1.21 Students must keep 100% attendance.\n"
+                   "more words here\n1.22 Next clause text"), 400, 50)
+    names = [c.section for c in cs]
+    assert names[1].startswith("1.21") and names[2].startswith("1.22")
+    assert "Attendance Requirements" in cs[1].text  # the title line is kept in the text
+
+
+def test_heading_above_blank_then_table():
+    cs = chunk(doc("Intro.\n\nLetter grades for PhD programs\n\nGrade | Points\nA | 4.00"), 400, 50)
+    assert cs[-1].section == "Letter grades for PhD programs" and "A | 4.00" in cs[-1].text
+
+
+def test_two_column_line_is_split_before_clause_number():
+    text = ("4.24 Students may not withdraw in the\nFreezing of Semester 4.25 The deadline to withdraw is Friday.\n"
+            "C. Eligible for FYP by earning minimum 6.11 A minimum of TEN students.\nmore words")
+    names = [c.section for c in chunk(doc(text), 400, 50)]
+    assert any(n.startswith("4.25 The deadline") for n in names)
+    assert any(n.startswith("6.11 A minimum") for n in names)
+
+
+def test_grade_points_are_not_clause_numbers():
+    cs = chunk(doc("1.1 Grades\nA student with CGPA 4.00 Summa Cum Laude and 3.90 to 4.00 Gold"), 400, 50)
+    assert len(cs) == 1 and cs[0].section == "1.1 Grades"
