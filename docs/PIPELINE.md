@@ -42,19 +42,41 @@ Unit: **words** (whitespace split, AD-10). Defaults 400 words and 50 overlap; th
 
 **Known losses.** The Handbooks were two-page spreads read across the gutter; they are split per page now (D-052), so mid-line headings are recovered; numbered list items inside a roman section become their own sections (the chunk is labelled `7. Students who ...`, not `VI – SEMESTER RULES`); OCR text puts clause numbers on their own lines, so the policy sections are named by their title. Annual-report tables have no heading and are labelled with the chapter line above them. The Student Handbook PDF repeats some pages, so some chunks exist twice. Four golden section strings were changed to the real labels (q05, q06, q09, q10).
 
-**Measured at 400 / 50 on the nine real documents** (`scripts/chunk_report.py`, 2026-11-05): 1044 chunks; stored words 85 094 over 82 099 source words, **storage amplification 1.04** (1.00 for the Aug 2023 rules, Prospectus, fee, grading and policy; 1.01 Academic Rules Handbook; 1.04 Student Handbook; 1.03 and 1.06 the Annual Reports). Median chunk size 25 words (Aug 2023 rules) to 117 (Annual Report 2023-24); the largest is 400.
+**Measured at 400 / 50 on the nine real documents** (`scripts/chunk_report.py`, 2026-11-05): 981 chunks; stored words 75 644 over 73 051 source words, **storage amplification 1.04** (1.00 for the Aug 2023 rules, Prospectus, fee, grading and policy; 1.01 Academic Rules Handbook; 1.04 Student Handbook; 1.03 and 1.06 the Annual Reports). Median chunk size 25 words (Aug 2023 rules) to 117 (Annual Report 2023-24); the largest is 400.
 
-| Size (tokens) | Overlap (tokens) | recall@5 | Chunks stored |
-| --- | --- | --- | --- |
+**Chunking experiment (phase 12, 2026-11-05).** Same nine documents, same golden set (18 questions, 16 with relevant passages), real `nomic-embed-text`, scope `current`; recall from `eval/retrieval_only.py recall` (the `retrieved` list the API builds before the model is called, scored by the same `run_eval.summarise` as the gate; raw output in `eval/tuning/`). Size and overlap are in words (AD-10), not tokens.
+
+| Size (words) | Overlap (words) | recall@3 | recall@5 | recall@5 by type (ordinary / version / exact / injection) | Chunks stored | Amplification |
+| ---: | ---: | ---: | ---: | --- | ---: | ---: |
+| 200 | 25 | 0.875 | 0.875 | 0.909 / 1.0 / 0.5 / 1.0 | 1103 | 1.06 |
+| **400** | **50** | **0.875** | **0.875** | 0.909 / 1.0 / 0.5 / 1.0 | **981** | **1.04** |
+| 600 | 100 | 0.875 | 0.875 | 0.909 / 1.0 / 0.5 / 1.0 | 952 | 1.03 |
+
+**Shipped: 400 / 50.** The three configurations are indistinguishable on recall and on the score of every question to within 0.011 (q04 0.889 at 200/25, 0.878 at the others), and they miss the same two questions (q10 and q14, see the exact-term finding in the results register). The reason is the chunker, not luck: it splits at headings first, so most chunks are one clause (median 25 to 117 words) and the size limit only matters for the few long sections; a 600-word limit changes 3% of the chunks, a 200-word limit 12%. With recall tied, nothing measured justifies leaving the architecture default: 600/100 stores 3% fewer chunks but lengthens the worst-case prompt by half on a CPU model whose latency is prompt-bound, and 200/25 adds 12% more chunks and more duplicated text for no gain (D-81). The conclusion for the design is that on this corpus heading structure matters more than the size knob.
 
 ## Embedding
 Model, vector dimension, where the pin lives, how the API checks it.
 
+## Relevance floor
+`RELEVANCE_FLOOR` is the cosine similarity of the best retrieved passage below which the API abstains without calling the model (architecture 5.6.3). Measured on the shipped 400/50 index with `eval/retrieval_only.py recall` (the same on all three chunk configurations, `eval/tuning/`):
+
+| Group | Questions | Best-score range |
+| --- | --- | --- |
+| Answerable, answer passage retrieved | 14 | 0.746 (q09) to 0.908 (q06); next lowest q11 0.747, q07 0.776, q18 0.783 |
+| Answerable, answer passage not retrieved | q10, q14 | best retrieved 0.821 and 0.713; no floor can rescue them |
+| Must abstain (hostel curfew, hostel fee) | q16, q17 | 0.655 and 0.658 |
+
+The ranges do not overlap: the gap is 0.658 to 0.746. **Shipped: 0.70**, the midpoint, 0.042 above the highest must-abstain and 0.046 below the lowest answerable score. Before, at 0.50, both hostel questions went to the model (it happened to abstain); at 0.70 they stop at the floor in 0.1 to 0.3 s with no model call. Trade-off: the margin is built from 18 questions, a user paraphrase of an answerable question may score below 0.70 and be refused, and q14 (0.713) sits only 0.013 above. The floor is not the only defence: the model can still answer `answered_from_context: false` (it did for q10 and q14, which were retrieval misses). `rahbar_top_score` shows the live distribution.
+
 ## Semantic cache
-Thresholds you tried, the false hit that ruled one out, the one you shipped.
+Threshold **0.96** (phase 11, `scripts/calibrate_cache.py`, real `nomic-embed-text`, 9 paraphrase and 9 near-miss pairs looked up under the same scope tag so the embedding alone is measured): 0.88 hit 8 of 9 paraphrases with 7 false hits (the first, 2023 against 2026 withdrawal deadline, cosine 0.934); 0.92 hit 7 of 9 with 4 false hits (clause 1.21 against 1.22, 0.927; BS against MS fee, 0.924); 0.96 hit 4 of 9 with 0 false hits (worst near-miss: undergraduate against graduate attendance, 0.958, a 0.002 margin). Shipped the lowest with zero false hits. The year pair is also separated by the scope tag at any threshold. Phase 12 did not repeat the measurement (D-80).
+
+Live demonstration pairs (real index, llama3.2:3b): "What minimum attendance does the Prospectus 2026 require for graduate programs?" (MISS, 20.8 s) then "What is the minimum attendance requirement for graduate students under the 2026 prospectus?" (cosine 0.9736): HIT in 0.20 s with the same answer. "What is the tuition fee per credit hour for BS programs for 2026-27?" then "What is the BS tuition fee per credit hour for 2026-27?" (0.9865): HIT. Control: "What is the fee per credit hour for BS in 2026-27?" (0.9504): MISS.
 
 ## Evaluation method
-How recall@k matches retrieved passages to golden ones (by source and section? by chunk id?).
+A retrieved passage matches a golden item when the `source` is equal and the retrieved `section` equals the golden `section` after trimming, lower-casing, whitespace collapse, NFKC and dash folding, or starts with it followed by a space, `.` or `:` (so golden `1.21` matches `1.21 Attendance`; architecture 5.13.2, `eval/run_eval.py section_matches`). Matching is by section, not by chunk id, so re-chunking does not invalidate the golden set. recall@k is the fraction of a question's golden items matched in the first k retrieved; must-abstain questions have no golden items and are excluded. Citation validity uses the same rule against the response's own `retrieved` list. The real run is `eval/run_eval.py` against the live API (`eval/results.json`, baseline `eval/baseline.json`); the CI run uses the fixture documents, `hashing-bow-768` and the extractive provider (`eval/fixtures/baseline.fixture.json`).
+
+**Result (400/50, floor 0.70, llama3.2:3b, 18 questions):** recall@3 = recall@5 = 0.875 (ordinary 0.909, version 1.000, exact 0.500, injection 1.000); citation validity 1.000 (16 of 16); abstention correctness 1.000 (2 of 2, both at the floor); fallback rate 0; latency p50 39.0 s, p95 138.6 s per question uncached. The two misses (q10, q14) are exact-term or OCR-labelled sections the embedding does not find; hybrid retrieval would address them.
 
 ## Embed and store (phase 7)
 

@@ -1,0 +1,26 @@
+recall@3 0.875   recall@5 0.875
+  exact      n=2   recall@3 0.500  recall@5 0.500
+  injection  n=1   recall@3 1.000  recall@5 1.000
+  ordinary   n=11  recall@3 0.909  recall@5 0.909
+  version    n=2   recall@3 1.000  recall@5 1.000
+  miss q10 (ordinary): recall@3 0.0 recall@5 0.0 scope current
+  miss q14 (exact): recall@3 0.0 recall@5 0.0 scope current
+  scores (top = best retrieved, hit = best passage holding the answer):
+    q01  ordinary          top 0.863  hit 0.863
+    q02  ordinary          top 0.827  hit 0.827
+    q03  ordinary          top 0.882  hit 0.882
+    q04  ordinary          top 0.878  hit 0.878
+    q05  ordinary          top 0.883  hit 0.883
+    q06  ordinary          top 0.908  hit 0.908
+    q07  ordinary          top 0.776  hit 0.776
+    q08  ordinary          top 0.804  hit 0.804
+    q09  ordinary          top 0.746  hit 0.746
+    q10  ordinary          top 0.821  hit   -  
+    q11  ordinary          top 0.747  hit 0.747
+    q12  version           top 0.895  hit 0.895
+    q13  version           top 0.792  hit 0.792
+    q14  exact             top 0.713  hit   -  
+    q15  exact             top 0.824  hit 0.824
+    q16  abstain   ABSTAIN top 0.655  hit   -  
+    q17  abstain   ABSTAIN top 0.658  hit   -  
+    q18  injection         top 0.798  hit 0.783

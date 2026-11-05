@@ -72,7 +72,7 @@ Hybrid retrieval, the `hosted` provider, the in-cluster Ollama mode, authenticat
 | 9 | Prompt, validation, CI-mode components | Z-08 | Fri 20:00 | DONE | PR (see log) |
 | 10 | Generation, orchestration, readiness, metrics | Z-09 | Sat 13:00 | DONE | #15 |
 | 11 | Semantic cache | Z-10 | Sat 16:00 | DONE (with deviation DEV-006) | #16 |
-| 12 | Tuning, calibration, baselines | Z-12 | Sat 19:00 | NOT STARTED | |
+| 12 | Tuning, calibration, baselines | Z-12 | Sat 19:00 | DONE (with open deviation DEV-007) | #17 |
 | 13 | Failure analysis | Z-14 | Sun 11:00 | NOT STARTED | |
 | 14 | Documents and ADRs | Z-15 | Sun 14:00 | NOT STARTED | |
 | 15 | Integration support and final verification | joint | Sun 14:00 to 18:00 | NOT STARTED | |
@@ -82,12 +82,12 @@ Hours spent so far (fill in at each phase end): planned 37.5 h, actual `____`.
 ## 2. Current focus
 
 ```
-Phase:        12  Tuning and baselines
+Phase:        13  Failure analysis
 Stage:        not started   (SPEC DRAFT, APPROVED, IMPLEMENTING, TESTING, READY FOR PR, MERGED)
-Branch:       (none yet; feat/rag-z11-tuning)
-Spec:         (none yet; docs/specs/phase-12-tuning.md)
-Next action:  fresh session: stage 0 then stage 1 for phase 12. The cache threshold was measured in phase 11 (0.96, table in section 5); phase 12 only re-checks it against the final chunking and fills H-7. Real index in `rahbar-dev-chroma` was rebuilt in phase 11 (index_id 20261105T090620Z-ad70de, 981 chunks, 400/50).
-Waiting on:   nothing
+Branch:       (none yet; feat/rag-z14-failure-analysis)
+Spec:         (none yet; docs/specs/phase-13-failure-analysis.md)
+Next action:  fresh session: stage 0 then stage 1 for phase 13. Shipped numbers: chunking 400/50, floor 0.70, threshold 0.96; real baseline recall@5 0.875, citation validity 1.0, abstention 1.0 (eval/baseline.json). The local real index in `rahbar-dev-chroma` is the 400/50 index (981 chunks). DEV-007 (model and Ingress timeouts) is open for Zain.
+Waiting on:   Zain (DEV-007), Ahmad (H-7, H-8 values into the ConfigMap and the ci overlay)
 Last updated: 2026-11-05
 ```
 
@@ -109,8 +109,8 @@ Things this lane owes Ahmad or needs from him. Tick when delivered. Newest at th
 | H-6 | Zain to Ahmad | Hashing embedder and extractive provider merged (CI-mode): `LLM_PROVIDER=extractive`, `EMBED_MODEL=hashing-bow-768` | 9 | [x] |
 | H-11 | Zain to Ahmad | Real `/healthz` and `/readyz` merged (his A-13 pin demonstration needs it). Text in the log | 10 | [x] |
 | H-12 | Zain to Ahmad | Cache is merged: Redis settings, env vars, index name, `X-Cache` values, demo steps. Text in the log | 11 | [x] |
-| H-7 | Zain to Ahmad | Final ConfigMap values: `CHUNK_SIZE`, `CHUNK_OVERLAP`, `RELEVANCE_FLOOR`, `CACHE_THRESHOLD`, `TEMPERATURE` with one-line justifications | 12 | [ ] |
-| H-8 | Zain to Ahmad | `eval/fixtures/baseline.fixture.json` committed | 12 | [ ] |
+| H-7 | Zain to Ahmad | Final ConfigMap values: `CHUNK_SIZE`, `CHUNK_OVERLAP`, `RELEVANCE_FLOOR`, `CACHE_THRESHOLD`, `TEMPERATURE` with one-line justifications. Text in the log | 12 | [x] |
+| H-8 | Zain to Ahmad | `eval/fixtures/baseline.fixture.json` committed (and the `ci` overlay floor). Text in the log | 12 | [x] |
 | H-9 | Ahmad to Zain | ConfigMap, Redis Stack and Chroma manifests running in minikube (milestone I-1) | n/a | [ ] |
 | H-10 | Ahmad to Zain | Real corpus on `corpus-data` PVC and the Job runnable in the cluster (milestone I-2) | n/a | [ ] |
 
@@ -183,6 +183,13 @@ Append-only, newest at the bottom. One line per event: date, phase, what happene
 2026-11-05  P11  Live: q07 MISS 48.1 s then HIT 0.17 s; re-index (new index_id, 444 s) invalidated the cache (old idx:cache gone, q07 MISS); Redis stopped: ask 200 MISS, readyz 503 redis. Results register section 5.
 2026-11-05  P11  TESTING round 1: PASS, AC-1..AC-11, 17 tester tests added, api 271 passed + 19 skipped (290 with REDIS_URL), coverage 97%. No defects; observations O-1 (0.96 margin 0.0017) and the old-snapshot maintain race recorded in spec section 12.
 2026-11-05  P11  H-12 TEXT for Ahmad: Redis Stack `redis/redis-stack-server:7.4.0-v8` (module search needed; plain Redis fails), Service `redis` port 6379, PVC `cache-data` with AOF (`REDIS_ARGS=--appendonly yes`). api env: `REDIS_HOST` (redis), `REDIS_PORT` (6379), `CACHE_THRESHOLD` (0.96, measured: lowest of 0.88/0.92/0.96 with zero false hits on real nomic embeddings; add that as the one-line YAML comment), `CACHE_TTL_SECONDS` (86400). Redis index `idx:cache:{index_id}`, entries `cache:{index_id}:{uuid}`; one index per live `index_id`, the api drops older ones. Only the api reaches Redis (NetworkPolicy: redis from api only; the indexer has no Redis client). `/readyz` now PINGs Redis and needs the cache index: Redis down means the api pod is 0/1 and `failed:["redis"]`, but `/api/ask` still answers on a running pod (miss). Headers: `X-Cache` HIT (with `X-Outcome: cached`), MISS, SKIP; `/metrics` has `rahbar_cache_lookups_total{result}` and `rahbar_cache_hit_ratio`. Demo a hit: `for i in 1 2; do curl -si -XPOST $URL/api/ask -H 'content-type: application/json' -d '{"question":"What percentage of the tuition fee is refunded if a student withdraws up to the 20th day after classes begin?"}' | grep -iE '^(x-cache|x-outcome)'; done` gives MISS then HIT (the second must be the same words: paraphrases hit only above cosine 0.96). Demo invalidation: `make index`, wait over `INDEX_REFRESH_SECONDS` (10 s) plus one readiness period, ask again: MISS. Redis memory is tiny (about 3 KB per entry), the 256Mi request is ample; set no eviction. Ingress read timeout stays at 120 s or more for misses.
+2026-11-05  P12  Pre-work: DEV-004 absorbed into architecture 5.7.2 (178d610); ChromaRetriever malformed row becomes IndexUnavailable 503 with a test (9583a00). Spec and plan pushed (066dbdf), decisions D-76 to D-80 recorded.
+2026-11-05  P12  Chunking: 200/25 (1103 chunks), 400/50 (981), 600/100 (952) all give recall@3 = recall@5 = 0.875 and the same score per question within 0.011; 400/50 kept (D-81). Raw output in eval/tuning/.
+2026-11-05  P12  Fixture recall was 0: Markdown extractor kept `##`; fixed (3eb5131, D-82). Fixture baseline from CI mode, floor 0.20: recall 0.80, citation 1.0, abstention 1.0 (926cb7c).
+2026-11-05  P12  Floor 0.70: must-abstain max 0.658, answerable hit min 0.746 (a5b5a89). Real run, llama3.2:3b: recall@5 0.875, citation validity 16/16, abstention 2/2 at the floor, fallback 0, p50 39.0 s, p95 138.6 s; gate passed; baseline and results committed (a562f1a). q10 and q14 are retrieval misses (exact-term finding in the register).
+2026-11-05  P12  DEV-007 logged: two questions took 123 s and 139 s, over the architecture's 90 s model and 120 s Ingress timeouts; the baseline was measured with LLM_TIMEOUT_SECONDS=300. Needs Zain's decision (A or B).
+2026-11-05  P12  H-7 TEXT for Ahmad (api and indexer ConfigMap values, measured on the real corpus; the Job MUST use the same chunk values or the baseline does not apply): CHUNK_SIZE=400 and CHUNK_OVERLAP=50 (words; three pairs tie on recall@5 0.875 because the chunker splits at headings first; the architecture default stays); RELEVANCE_FLOOR=0.70 (midpoint of the hostel maximum 0.658 and the lowest answerable score 0.746; the code default is now 0.70, the old 0.50 let both hostel questions reach the model); TOP_K=5 (unchanged; recall@3 equals recall@5 on the golden set, so 5 only adds headroom for paraphrases; the gate metric is recall@5); CACHE_THRESHOLD=0.96 (phase 11: lowest of 0.88, 0.92, 0.96 with zero false hits; the worst near-miss scored 0.958); TEMPERATURE=0.2 (unchanged: facts and JSON want a low value, not 0 so the one retry can differ; phase 13 tests 1.2 on purpose); EMBED_MODEL=nomic-embed-text, LLM_PROVIDER=ollama-host, LLM_MODEL=llama3.2:3b. Timeouts: LLM_TIMEOUT_SECONDS=300 and the Ingress proxy-read-timeout at least 310 s if DEV-007 option A is chosen (the baseline was measured that way); with the architecture's 90 s the two slowest questions fall back. Add one-line YAML comments for TEMPERATURE, RELEVANCE_FLOOR and CACHE_THRESHOLD (R-GEN-7).
+2026-11-05  P12  H-8 TEXT for Ahmad: `eval/fixtures/baseline.fixture.json` and `eval/fixtures/results.fixture.json` are committed (recall@5 0.800, citation validity 1.0, abstention 1.0, fallback 0). They were produced with EMBED_MODEL=hashing-bow-768, LLM_PROVIDER=extractive, CHUNK_SIZE=400, CHUNK_OVERLAP=50 and RELEVANCE_FLOOR=0.20: the `ci` overlay must set RELEVANCE_FLOOR=0.20, because the lexical embedder scores 0.00 to 0.43 and the default 0.70 would make every fixture question abstain. The CI command is unchanged: `python eval/run_eval.py --api http://localhost --host rahbar.local --golden eval/fixtures/golden.fixture.yaml --baseline eval/fixtures/baseline.fixture.json --out eval/fixtures/results.fixture.json`.
 ```
 
 ---
@@ -198,20 +205,24 @@ Numbers this lane must measure. The agent fills them in as they are produced; th
 | Storage amplification (stored words / source words) | 1.04 overall at 400/50 (1044 chunks; 85 094 stored, 82 099 source words); 1.00 to 1.06 per document | 6 | `scripts/chunk_report.py` |
 | Indexer peak memory | 438 MB RSS (437 860 kB and 437 732 kB in two runs); Ollama's model is on the host, not in this number | 7 | `/usr/bin/time -v` |
 | Indexer wall time, real corpus | 9 min 39 s (extract+clean+chunk 4 min 17 s with 41 OCR pages, embed 422 s, store 1.3 s); two runs identical to 0.5 s | 7 | indexer log, `/usr/bin/time -v` |
-| Chunk config 1 (size, overlap) and recall@5 | - | 12 | `eval` |
-| Chunk config 2 | - | 12 | `eval` |
-| Chunk config 3 | - | 12 | `eval` |
-| Shipped chunk config | - | 12 | |
-| recall@3 / recall@5 overall | EARLY, retrieval only, no LLM, 16 answerable questions, TOP_K 5, 400/50: 0.875 / 0.875 (phase 8; not the baseline, phase 12 re-measures) | 8, 12 | `eval/retrieval_only.py recall` |
-| recall@5 by type: ordinary / version / exact | EARLY (phase 8): ordinary 0.909 (n=11), version 1.000 (n=2), exact 0.500 (n=2), injection 1.000 (n=1); recall@3 identical. Misses: q10 (six-monthly start-up report, wrong section of the right policy), q14 (clause 1.21: dense search cannot match a bare clause number) | 8, 12 | same |
-| Best-score range, answerable questions | - | 12 | `rahbar_top_score`, eval rows |
-| Best-score range, must-abstain questions | - | 12 | same |
-| Shipped `RELEVANCE_FLOOR` | - | 12 | |
+| Chunk config 1 (size, overlap) and recall@5 | 200/25: 1103 chunks, amplification 1.06; recall@3 0.875, recall@5 0.875 (ordinary 0.909 (n=11), version 1.000 (n=2), exact 0.500 (n=2), injection 1.000 (n=1)); misses q10 and q14, same as the other two. `eval/tuning/chunk-200-25.*` | 12 | `eval/run_eval.py`, `eval/retrieval_only.py recall` |
+| Chunk config 2 | 400/50: 981 chunks, amplification 1.04; recall@3 0.875, recall@5 0.875 (ordinary 0.909 (n=11), version 1.000 (n=2), exact 0.500 (n=2), injection 1.000 (n=1)); misses q10 and q14, same as the other two. `eval/tuning/chunk-400-50.*` | 12 | `eval/run_eval.py`, `eval/retrieval_only.py recall` |
+| Chunk config 3 | 600/100: 952 chunks, amplification 1.03; recall@3 0.875, recall@5 0.875 (ordinary 0.909 (n=11), version 1.000 (n=2), exact 0.500 (n=2), injection 1.000 (n=1)); misses q10 and q14, same as the other two. `eval/tuning/chunk-600-100.*` | 12 | `eval/run_eval.py`, `eval/retrieval_only.py recall` |
+| Shipped chunk config | 400 words / 50 overlap (D-81). All three tie on recall and on every question's best score (within 0.011) because the chunker splits at headings first, so the size limit only affects the few long sections (600/100 changes the chunk count by 3%, 200/25 by 12%). Nothing measured favours a change, so the architecture default stays; 600/100 would lengthen the worst-case prompt by half on a prompt-bound CPU model for 3% fewer chunks. Justification in `PIPELINE.md` | 12 | `eval/run_eval.py`, `eval/retrieval_only.py recall` |
+| recall@3 / recall@5 overall | 0.875 / 0.875 (14 of 16 answerable questions fully retrieved) on the shipped 400/50 index, real run through the API (`eval/results.json`) and retrieval-only agree to the digit. Phase 12, `eval/run_eval.py --update-baseline` | 12 | `eval/run_eval.py`, `eval/retrieval_only.py recall` |
+| recall@5 by type: ordinary / version / exact | recall@3 = recall@5 in every type: ordinary 0.909 (n=11), version 1.000 (n=2), exact 0.500 (n=2), injection 1.000 (n=1). Phase 12, `eval/results.json` | 12 | `eval/run_eval.py`, `eval/retrieval_only.py recall` |
+| Best-score range, answerable questions | Best passage holding the answer: 0.746 (q09) to 0.908 (q06); mean 0.829; lowest four q09 0.746, q11 0.747, q07 0.776, q18 0.783. q10 and q14 have no answer passage in the top 5 (their best retrieved scores are 0.821 and 0.713). `eval/tuning/chunk-400-50.json` `scores` | 12 | `eval/run_eval.py`, `eval/retrieval_only.py recall` |
+| Best-score range, must-abstain questions | 0.655 (q16 hostel curfew) and 0.658 (q17 hostel fee); same on all three chunk configurations | 12 | `eval/run_eval.py`, `eval/retrieval_only.py recall` |
+| Shipped `RELEVANCE_FLOOR` | 0.70 (D-78), the midpoint of the gap between the must-abstain maximum 0.658 and the lowest answerable hit 0.746 (margin 0.042 below, 0.046 above). Trade-off: the 0.50 default let both hostel questions through to the model (the 3B model happened to abstain); at 0.70 both abstain before any model call (0.1 to 0.3 s, `abstained`, `abstain_reason=below_floor`). The cost is that a real question whose best passage scores under 0.70 is refused: 18 questions are a small sample, and a user paraphrase could score lower than the golden wording. q14 (best 0.713) sits 0.013 above the floor | 12 | `eval/run_eval.py`, `eval/retrieval_only.py recall` |
 | Cache thresholds tried and false hits | Phase 11, real nomic-embed-text, Redis Stack 7.4.0-v8, 9 paraphrase and 9 near-miss pairs, looked up under the SAME scope tag (measures the embedding, not the scope guard). 0.88: 8/9 paraphrases hit, 7/9 false hits (first: withdrawal deadline 2023 vs 2026 rules, cosine 0.934). 0.90: 7/9, 5/9. 0.92: 7/9, 4/9 (2023 vs 2026 0.934; clause 1.21 vs 1.22 0.927; BS vs MS fee per credit hour 0.924; undergraduate vs graduate attendance 0.958). 0.94: 5/9, 1/9 (attendance undergraduate vs graduate, 0.958, ruled 0.94 out). 0.96: 4/9, 0/9. Paraphrase cosines 0.846 to 0.998; near-miss 0.822 to 0.958. The 2023 and 2026 questions also get different scope tags, so the scope guard blocks that pair at any threshold | 11 | `python scripts/calibrate_cache.py --thresholds 0.88 0.90 0.92 0.94 0.96` |
-| Shipped `CACHE_THRESHOLD` | 0.96, the lowest of 0.88/0.92/0.96 with zero false hits. Margin over the worst near-miss (0.958) is 0.002 and only 4 of 9 paraphrases hit, so hits are rare and safe; the set is small (18 pairs). Phase 12 re-checks it after the final chunking | 11 | same |
-| Citation validity | - | 12 | `eval` |
-| Abstention correctness | - | 12 | `eval` |
-| Generation p50 / p95 seconds per question | - | 12 | `eval` |
+| Shipped `CACHE_THRESHOLD` | 0.96, the lowest of 0.88/0.92/0.96 with zero false hits. Margin over the worst near-miss (0.958) is 0.002 and only 4 of 9 paraphrases hit, so hits are rare and safe; the set is small (18 pairs). Not repeated in phase 12 (D-80): chunking does not change question embeddings; live demo pairs recorded below | 11 | same |
+| Citation validity | 100% (16 of 16 citations name a retrieved chunk), real run, 400/50, floor 0.70. Phase 12 | 12 | `eval/run_eval.py`, `eval/retrieval_only.py recall` |
+| Abstention correctness | 100% (2 of 2 must-abstain questions; both stopped by the floor, none by fallback: `must_abstain_fallback` 0). Two answerable questions (q10, q14) were also answered `false` by the model, see the exact-term finding. Phase 12 | 12 | `eval/run_eval.py`, `eval/retrieval_only.py recall` |
+| Exact-term finding (q10, q14) (required finding for engineering note Q5) | Both are retrieval misses at every chunk size, not model errors, and the model abstained on both rather than inventing an answer. q14 "clause 1.21" (Academic Rules Handbook Jun 2026, p.10, a text PDF): the question is nearly all generic words ("academic rules require") plus one number, and the embedding gives the number almost no weight, so the top 5 are generic "Academic Rules" chunks (Prospectus, Student Handbook, rule 5.3; best 0.713) and clause 1.21 is not among them. Embeddings blur digits (1.21 and 1.22 sit at cosine 0.927, the reason the cache threshold had to be 0.96). q10 (start-up policy, a scanned PDF, OCR'd): the policy's sections are named by title because OCR put the numbering apart (`six. monthly`), and the question's words match "Evaluation criteria" and "Eligibility criteria" chunks of the same document (0.821, 0.811) better than the "Mandatory periodic (six. monthly) deliverables" chunk. Exact recall 0.50 against definitional (ordinary) 0.909. The technique that addresses it is hybrid retrieval (BM25 or a clause-number match fused with the vector score), out of scope (5.13.2) | 12 | `eval/run_eval.py`, `scripts/calibrate_cache.py`, API logs |
+| Real-run outcomes per question (phase 12, 400/50, floor 0.70, llama3.2:3b) | Answered with valid citation: q01-q09, q11-q13, q15, q18. Model abstained (`answered_from_context=false`, no valid-citation claim): q10, q14. Floor abstained, no model call: q16, q17. Fallbacks 0. Answers are correct but terse ("No", "60%", "10", "6", "Average"): the Phase 10 sentence instruction and a schema `description` on `Answer.answer` (tried, reverted) do not change this on a 3B model, so the prompt was left as is and recall, citation validity and abstention are unchanged by it (D-79). A larger model or the `hosted` provider is the lever | 12 | `eval/run_eval.py`, `scripts/calibrate_cache.py`, API logs |
+| Cache demo paraphrase pairs at `CACHE_THRESHOLD` 0.96 (phase 12, live) | (1) "What minimum attendance does the Prospectus 2026 require for graduate programs?" (MISS, 20.8 s) then "What is the minimum attendance requirement for graduate students under the 2026 prospectus?" (cosine 0.9736): HIT, 0.20 s, same answer "75%". (2) "What is the tuition fee per credit hour for BS programs for 2026-27?" then "What is the BS tuition fee per credit hour for 2026-27?" (0.9865): HIT, answer "Rs. 12,000". Control: "What is the fee per credit hour for BS in 2026-27?" (0.9504) is a MISS, as 0.96 intends. Abstentions are never cached (q10, q14, q16, q17 MISS every time) | 12 | `eval/run_eval.py`, `scripts/calibrate_cache.py`, API logs |
+| Fixture baseline (CI mode, phase 12) | `hashing-bow-768`, `extractive`, `CORPUS_DIR=eval/fixtures`, floor 0.20: recall@3 = recall@5 0.800 (f01 missed: the lexical embedder), citation validity 1.0 (5 of 5), abstention 1.0, fallback 0, gate passes against its own baseline twice. Needed a Markdown fix: the extractor kept `##`, so no heading was found and recall was 0 (D-82). Floor 0.20 sits above the fixture abstain score 0.00 and below the lowest answerable top 0.316; the real floor 0.70 would abstain every fixture question | 12 | `eval/run_eval.py`, `scripts/calibrate_cache.py`, API logs |
+| Generation p50 / p95 seconds per question | Whole request, uncached, 18 golden questions, llama3.2:3b on this CPU, first run after a cold model load: p50 39.0 s, p95 138.6 s (q04 123 s and q09 139 s were the slowest; a warm re-run of four questions took 14 to 41 s). Floor abstentions take 0.1 to 0.3 s; fallback rate 0. Phase 12 | 12 | `eval/run_eval.py`, `eval/retrieval_only.py recall` |
 | Coverage of `api/app` (`pytest --cov=app`) | Phase 11: 97% (1060 statements, 36 missed; `services/cache.py` 92%, `answer.py` 100%), api 263 passed + 10 skipped (Redis integration, run with `REDIS_URL`).  Phase 10: 97% (853 statements, 22 missed; only `providers/llm/hosted.py` is 0%). Phase 9: 95% (644 statements, 33 missed; `providers/llm/{ollama,hosted}.py` 0% because they are unbuilt stubs). Target 60% | 9 | `cd api && ../.venv/bin/pytest -q --cov=app` |
 | Cache hit vs miss latency, live (phase 11; real index, llama3.2:3b, Redis Stack) | q07 MISS 48 106 ms then HIT 187 ms and 165 ms (same answer, different request_id); q06 MISS 36 570 ms, HIT 123 ms; after a real re-index q07 MISS 72 925 ms then HIT 169 ms. A hit costs about one query embedding (about 100 to 190 ms), roughly 250 times faster than a miss. Abstentions (q16, q17) and a fallback (q17 once) were never stored: Redis entries 2 to 5 after 3 answered answers. Redis stopped: `/readyz` 503 `failed:["redis"]`, `/healthz` 200, `/api/ask` 200 `X-Cache: MISS` with the warning `cache unavailable`; Redis restarted: `/readyz` 200 and entries intact (AOF) | 11 | `scripts/live_check_phase11.py ask q07 q07 q07` |
 | Live llama3.2:3b, real index, 3 golden questions + hostel (phase 10; Ollama 0.x on this CPU, floor 0.50, scope current, `LLM_TIMEOUT_SECONDS=300`). Run 1 (before DEV-005): q06 mobile phones, top 0.908, model abstained (answer "false"), 46.4 s; q07 refund day 20, 0.776, answered "60" with valid citation, 48.8 s; q01 course load, 0.863, FALLBACK (model cited section "4.3", retrieved section is the long heading, exact match failed twice), 77.3 s. Run 2 (after DEV-005 and the full-sentence prompt line): q06 answered "No", cites Student Handbook "1. Mobile Phones, Smart Watches and all electronic" and "V - EXAMINATION RULES", 35.8 s; q07 answered "60%", cites Fee Refund Policy, 36.8 s; q01 answered "5 courses, with an additional course for final-year students", cites Academic Rules Handbook 4.3 (exact section string), 39.1 s. Citations valid on all (every one names a retrieved chunk). Answers are terse (3B model ignores the full-sentence line); generation 36 to 49 s per question here (about 600 to 800 prompt tokens, 144 to 152 output tokens), embed 0.6 s, retrieve 0.1 s | 10 | `scripts/live_check_phase10.py ask q06 q07 q01 q16`, API logs `answered` lines |
@@ -760,7 +771,7 @@ Tell Ahmad cache behaviour is ready for his evidence capture (HIT then MISS afte
 
 ## Phase 12: Tuning, calibration, baselines (Z-12)
 
-**Status:** NOT STARTED · **Branch:** `feat/rag-z12-tuning` · **Est:** 3 h · **Priority:** P0
+**Status:** DONE (with open deviation DEV-007) · **Branch:** `feat/rag-z12-tuning` · **Est:** 3 h · **Priority:** P0
 
 ### Objective
 Choose the shipped numbers by measurement, and commit the baselines that gate CI and the submission.
@@ -786,14 +797,14 @@ Architecture 5.4.2 (tuning), 5.6.3 (floor), 5.9.3 (cache threshold), 5.13.4 (two
 Failure experiments (phase 13). New features.
 
 ### Acceptance criteria
-- [ ] The three-row chunking table with recall@5 for each, the shipped pair and a one-paragraph justification (kept in the results register, then moved to `PIPELINE.md` in phase 14).
-- [ ] The chosen `RELEVANCE_FLOOR` with the score ranges that justify it.
-- [ ] The cache threshold table with the false hit that ruled one out.
-- [ ] `eval/baseline.json`, `eval/results.json` and `eval/fixtures/baseline.fixture.json` committed; the gate passes against its own baseline; `recall` appears in `baseline.json`.
-- [ ] Citation validity is 100% on the real run; abstention correctness is 100% (investigate and fix if not).
-- [ ] recall@3 and recall@5 overall and by type are in the results register.
-- [ ] H-7 and H-8 delivered to Ahmad in writing (values plus justifications).
-- [ ] `make test && make lint` green; results register (section 5) filled.
+- [x] The three-row chunking table with recall@5 for each, the shipped pair and a one-paragraph justification (kept in the results register, then moved to `PIPELINE.md` in phase 14).
+- [x] The chosen `RELEVANCE_FLOOR` with the score ranges that justify it.
+- [x] The cache threshold table with the false hit that ruled one out.
+- [x] `eval/baseline.json`, `eval/results.json` and `eval/fixtures/baseline.fixture.json` committed; the gate passes against its own baseline; `recall` appears in `baseline.json`.
+- [x] Citation validity is 100% on the real run; abstention correctness is 100% (investigate and fix if not).
+- [x] recall@3 and recall@5 overall and by type are in the results register.
+- [x] H-7 and H-8 delivered to Ahmad in writing (values plus justifications).
+- [x] `make test && make lint` green; results register (section 5) filled.
 
 ### Verify
 ```bash

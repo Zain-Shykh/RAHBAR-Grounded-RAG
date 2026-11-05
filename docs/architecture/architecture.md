@@ -924,7 +924,7 @@ Rules: evidence is numbered from 1 in rank order; the strings `<<<` and `>>>` ar
 
 #### 5.7.2 Provider interface (AD-14)
 
-Kit contract: `generate(question, passages) -> Answer`. Extended, backwards compatible with the stub:
+Kit contract: `generate(question, passages) -> Answer`. Extended, backwards compatible with the stub (DEV-004: `Passage` also gains optional `doc_version: str | None` and `superseded: bool | None`, default `None`, filled by the retriever from chunk metadata for the evidence header of 5.7.1; the prompt omits a header field whose value is `None`; no external JSON shape changes):
 
 ```python
 @dataclass

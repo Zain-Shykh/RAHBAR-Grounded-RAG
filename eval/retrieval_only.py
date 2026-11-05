@@ -62,8 +62,24 @@ def cmd_recall(r: ChromaRetriever, a: argparse.Namespace) -> int:
     for q in res["per_question"]:
         if q["recall_at_5"] is not None and q["recall_at_5"] < 1:
             print(f"  miss {q['id']} ({q['type']}): recall@3 {q['recall_at_3']} recall@5 {q['recall_at_5']} scope {scopes[q['id']]}")
+    # Floor calibration (5.6.3): best score per question, and best score of a passage that
+    # holds the answer (a golden section match) among the top 5.
+    scores = []
+    for row in rows:
+        got = row["response"]["retrieved"]
+        hit = [p["score"] for p in got if any(
+            g["source"] == p["source"] and run_eval.section_matches(g["section"], p["section"])
+            for g in row["relevant"])]
+        scores.append({"id": row["id"], "type": row["type"], "must_abstain": row["must_abstain"],
+                       "top": max((p["score"] for p in got), default=0.0),
+                       "hit": max(hit, default=None)})
+    print("  scores (top = best retrieved, hit = best passage holding the answer):")
+    for sc in scores:
+        hit = "  -  " if sc["hit"] is None else f"{sc['hit']:.3f}"
+        flag = "ABSTAIN" if sc["must_abstain"] else "       "
+        print(f"    {sc['id']}  {sc['type']:<9} {flag} top {sc['top']:.3f}  hit {hit}")
     if a.json:
-        Path(a.json).write_text(json.dumps(res, indent=2), encoding="utf-8")
+        Path(a.json).write_text(json.dumps({**res, "scores": scores}, indent=2), encoding="utf-8")
     return 0
 
 

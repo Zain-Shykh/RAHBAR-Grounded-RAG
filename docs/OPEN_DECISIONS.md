@@ -919,3 +919,80 @@ Entry template:
 - Claude recommends: A. Cheap, and a cached bad answer is served many times.
 - Decision: A. Decided by: Claude, pre-approved by Zain.
 - Decided on: 2026-11-05
+
+### D-76 How the three chunking configurations are scored
+- Status: DECIDED
+- Raised: 2026-11-05 by Claude (phase 12)
+- Area: eval
+- Related: phase 12 spec, architecture 5.13.5, R-IDX-7
+- Question: Each of three configurations needs recall@3 and @5. A full `run_eval.py` run with the real model takes 10 to 30 minutes (18 questions at 30 to 90 s).
+- Options: A. Score each configuration with `eval/retrieval_only.py recall` (same `summarise`, same retriever, no model call), then do the full real-model run once on the chosen configuration. B. Full `run_eval.py` run with the model for each of the three.
+- Claude recommends: A. Recall is computed from the `retrieved` list that exists before any model call, so the numbers are identical; B adds about 1 to 1.5 hours of CPU for no extra information about the choice. Zain's brief named B; this differs in method, not in result, and is reported as such.
+- Decision: A. Decided by: Claude, pre-approved by Zain.
+- Decided on: 2026-11-05
+
+### D-77 How the chunking configuration is chosen
+- Status: DECIDED
+- Raised: 2026-11-05 by Claude (phase 12)
+- Area: indexer
+- Related: phase 12 spec, R-IDX-7
+- Question: What rule picks the shipped (size, overlap)?
+- Options: A. Highest recall@5, then recall@3, then fewer chunks, then lower amplification. B. Highest recall@3. C. Fewest chunks within one point of the best recall@5.
+- Claude recommends: A. recall@5 is the gated metric (5.13.3); the tie-breaks are cost.
+- Decision: A. Decided by: Claude, pre-approved by Zain.
+- Decided on: 2026-11-05
+
+### D-78 How the relevance floor is chosen
+- Status: DECIDED
+- Raised: 2026-11-05 by Claude (phase 12)
+- Area: api
+- Related: phase 12 spec, architecture 5.6.3, AD-12
+- Question: Where between the must-abstain maximum and the lowest answerable score does the floor sit?
+- Options: A. The midpoint of the gap, rounded to 0.01, when the ranges do not overlap; if they overlap, keep abstention at 100% and list the answerable questions lost. B. Just above the abstain maximum (0.01 margin). C. Just below the answerable minimum.
+- Claude recommends: A. With 18 questions, a margin on both sides is the least over-fitted choice.
+- Decision: A. Decided by: Claude, pre-approved by Zain.
+- Decided on: 2026-11-05
+
+### D-79 Prompt wording when answers are terse
+- Status: DECIDED
+- Raised: 2026-11-05 by Claude (phase 12)
+- Area: api
+- Related: phase 12 spec, phase 10 results ("No", "60%")
+- Question: The 3B model answers with one or two words. Change the prompt?
+- Options: A. Only if the real run shows it hurts a metric or the demo; then change the wording and re-run the golden set to prove recall, citation validity and abstention did not get worse. B. Never. C. Always.
+- Claude recommends: A. The prompt is also part of the measured system; every change needs a re-run.
+- Decision: A. Decided by: Claude, pre-approved by Zain.
+- Decided on: 2026-11-05
+
+### D-80 The cache threshold is not re-measured
+- Status: DECIDED
+- Raised: 2026-11-05 by Claude (phase 12)
+- Area: api
+- Related: D-73, architecture 5.9.3, R-CAC-3
+- Question: The plan lists the cache threshold in phase 12, but D-73 moved it to phase 11 (0.96, three thresholds, the false hit recorded).
+- Options: A. Keep 0.96, record only real paraphrase pairs for the demo. B. Re-run the three thresholds against the final chunking.
+- Claude recommends: A. The cache works on question embeddings, which chunking does not change; Zain's brief says not to redo it.
+- Decision: A. Decided by: Claude, pre-approved by Zain.
+- Decided on: 2026-11-05
+
+### D-81 Chunking result is a three-way tie: which pair ships
+- Status: DECIDED
+- Raised: 2026-11-05 by Claude (phase 12)
+- Area: indexer
+- Related: D-77, phase 12 spec, `eval/tuning/`
+- Question: 200/25, 400/50 and 600/100 give identical recall@3 and @5 (0.875 both) and identical score ranges. D-77's literal tie-break (fewer chunks) would pick 600/100 (952 chunks against 981, 3% fewer).
+- Options: A. Keep 400/50 (the architecture default, 981 chunks, the index every earlier measurement used). B. 600/100 by D-77's tie-break. C. 200/25 (smallest worst-case chunk, 1103 chunks, amplification 1.06).
+- Claude recommends: A. Nothing measured favours a change: 3% fewer chunks buys nothing, while a 600-word chunk lengthens the worst-case prompt by half on a CPU model whose latency is prompt-bound; 200/25 stores 12% more chunks and more overlap for no recall. When the numbers tie, the default stays. D-77 is amended: on a recall tie, keep the architecture default unless another pair is better by a measured quantity beyond the noise (more than 5% fewer chunks or better recall).
+- Decision: A. Decided by: Claude, pre-approved by Zain.
+- Decided on: 2026-11-05
+
+### D-82 Markdown headings in the extractor, and the CI floor
+- Status: DECIDED
+- Raised: 2026-11-05 by Claude (phase 12)
+- Area: indexer, eval
+- Related: phase 12 spec, `eval/fixtures`, architecture 5.4.2
+- Question: The fixture run had recall 0: the Markdown extractor kept the `##` marks, so the chunker never saw `## 1. Attendance` as a heading and every fixture section label differed from the golden label. Also the 0.70 floor suits `nomic-embed-text`, not the lexical hashing embedder (fixture scores 0.28 to 0.43).
+- Options: A. Drop the leading `#` marks of Markdown headings in the extractor, keep `golden.fixture.yaml` as it is; set the CI overlay `RELEVANCE_FLOOR` to 0.20 (above the fixture abstain score 0.00, below the lowest answerable top 0.316). B. Rewrite the fixture golden labels to what the chunker produced. C. Floor 0.70 in CI (every fixture question abstains).
+- Claude recommends: A. The golden file stays as written; the bug is the extractor's. A real Markdown source with `##` headings is also affected.
+- Decision: A. Decided by: Claude, pre-approved by Zain. H-8 tells Ahmad to set `RELEVANCE_FLOOR=0.20` in the `ci` overlay.
+- Decided on: 2026-11-05

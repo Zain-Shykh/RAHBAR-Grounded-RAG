@@ -42,6 +42,12 @@ def strip_front_matter(text: str) -> str:
     return text
 
 
+def strip_md_markers(text: str) -> str:
+    """Drop the leading `#` marks of Markdown headings so `## 1. Attendance` reads as the heading
+    `1. Attendance` that the chunker's numbered rule recognises (phase 12: CI fixture recall was 0)."""
+    return re.sub(r"(?m)^#{1,6}[ \t]+", "", text)
+
+
 def _key(line: str) -> str:
     return " ".join(re.sub(r"\d+", "", line).split())
 
@@ -221,7 +227,7 @@ def extract(path: str, doc_version: str, superseded: bool) -> Document:
         pages = [Page(name, 1, html_to_text(Path(path).read_text(encoding="utf-8", errors="replace")))]
     elif suffix in {".md", ".txt"}:
         text = Path(path).read_text(encoding="utf-8")
-        pages = [Page(name, 1, strip_front_matter(text) if suffix == ".md" else text)]
+        pages = [Page(name, 1, strip_md_markers(strip_front_matter(text)) if suffix == ".md" else text)]
     else:
         raise ValueError(f"unsupported file type: {name}")
     log("extracted", source=name, pages=len(pages), ocr_pages=sum(p.ocr for p in pages),
