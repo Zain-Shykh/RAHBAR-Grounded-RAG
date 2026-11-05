@@ -69,7 +69,7 @@ Hybrid retrieval, the `hosted` provider, the in-cluster Ollama mode, authenticat
 | 6 | Chunker | Z-05 | Fri 12:00 | DONE | #10 |
 | 7 | Embed and store, full indexer run | Z-06 | Fri 14:00 | DONE | #12 |
 | 8 | Retriever, index state, version scope | Z-07 | Fri 17:00 | DONE | PR (see log) |
-| 9 | Prompt, validation, CI-mode components | Z-08 | Fri 20:00 | NOT STARTED | |
+| 9 | Prompt, validation, CI-mode components | Z-08 | Fri 20:00 | DONE | PR (see log) |
 | 10 | Generation, orchestration, readiness, metrics | Z-09 | Sat 13:00 | NOT STARTED | |
 | 11 | Semantic cache | Z-10 | Sat 16:00 | NOT STARTED | |
 | 12 | Tuning, calibration, baselines | Z-12 | Sat 19:00 | NOT STARTED | |
@@ -82,11 +82,11 @@ Hours spent so far (fill in at each phase end): planned 37.5 h, actual `____`.
 ## 2. Current focus
 
 ```
-Phase:        9  Prompt, validation, CI-mode components
+Phase:        10  Generation, orchestration, readiness, metrics
 Stage:        not started   (SPEC DRAFT, APPROVED, IMPLEMENTING, TESTING, READY FOR PR, MERGED)
-Branch:       (none yet; feat/rag-z08-prompt-validate)
-Spec:         (none yet; docs/specs/phase-09-prompt-validate.md)
-Next action:  fresh session: stage 0 then stage 1 for phase 9. Phase 8 gives IndexState.problem(), IndexUnavailable(reason), Scope.tag, EmbedError (phase 10 maps EmbedError and IndexUnavailable to 503/fallback).
+Branch:       (none yet; feat/rag-z09-generation)
+Spec:         (none yet; docs/specs/phase-10-generation.md)
+Next action:  fresh session: stage 0 then stage 1 for phase 10. Phase 9 gives validate(), abstention(), fallback(), retry_hint(), build_messages(), GenerationResult, InvalidModelOutput (reason prefix bad_citation vs others), ProviderError, ExtractiveProvider, Passage.doc_version/superseded. get_provider raises NotImplementedError for ollama-* until you build OllamaProvider. Floor alone does not abstain on weak topics (hostel curfew 0.594): phase 12. Phase 8 gives IndexState.problem(), IndexUnavailable(reason), Scope.tag, EmbedError (phase 10 maps EmbedError and IndexUnavailable to 503/fallback).
 Waiting on:   nothing
 Last updated: 2026-11-05
 ```
@@ -106,7 +106,7 @@ Things this lane owes Ahmad or needs from him. Tick when delivered. Newest at th
 | H-3 | Zain to Ahmad | Verified Chroma behaviour notes (user, writable paths) if anything differs from assumption R-01 | 2 | [x] |
 | H-4 | Zain to Ahmad | Indexer peak memory (for the Job limit), and the real corpus indexing time | 7 | [x] |
 | H-5 | Zain to Ahmad | `eval/run_eval.py` working with the fixture golden set | 5 | [x] |
-| H-6 | Zain to Ahmad | Hashing embedder and extractive provider merged (CI-mode) | 9 | [ ] |
+| H-6 | Zain to Ahmad | Hashing embedder and extractive provider merged (CI-mode): `LLM_PROVIDER=extractive`, `EMBED_MODEL=hashing-bow-768` | 9 | [x] |
 | H-7 | Zain to Ahmad | Final ConfigMap values: `CHUNK_SIZE`, `CHUNK_OVERLAP`, `RELEVANCE_FLOOR`, `CACHE_THRESHOLD`, `TEMPERATURE` with one-line justifications | 12 | [ ] |
 | H-8 | Zain to Ahmad | `eval/fixtures/baseline.fixture.json` committed | 12 | [ ] |
 | H-9 | Ahmad to Zain | ConfigMap, Redis Stack and Chroma manifests running in minikube (milestone I-1) | n/a | [ ] |
@@ -166,6 +166,10 @@ Append-only, newest at the bottom. One line per event: date, phase, what happene
 2026-11-05  P08  SPEC DRAFT, APPROVED (pre-approved): D-57..D-60 (Claude, pre-approved by Zain). docs/specs/phase-08-retriever.md
 2026-11-05  P08  IMPLEMENTING done: api embedders (hashing byte-copy, Ollama), scope(), IndexState (pin, dimension, swap refresh), ChromaRetriever, eval/retrieval_only.py. Real index rebuilt twice (981 chunks). Withdrawal 4.25: 2026 handbook first (0.895), "in 2023" gives the 2023 rules first (0.826). Loops across two index swaps: 1689 queries, 0 errors. EMBED_MODEL=other: pin conflict logged, retrieve refused. Early retrieval-only recall@3 = recall@5 = 0.875.
 2026-11-05  P08  TESTING round 1: FAIL, D-T1 malformed collection metadata leaked JSON/Key/TypeError, D-T2 AC-8 numbers not in register. Fixed; 35 edge tests added.
+2026-11-05  P09  SPEC DRAFT, APPROVED (pre-approved): D-61..D-64 (Claude, pre-approved by Zain). docs/specs/phase-09-prompt-validate.md
+2026-11-05  P09  IMPLEMENTING done: prompt builder, validate with citation check, abstention/fallback texts, ExtractiveProvider, GenerationResult contract; Passage optional fields (DEV-004); pytest-cov pinned. Coverage of app 95%. Extractive on the real index, 3 golden questions: correct and cited. Security review: strip_delimiters hardened.
+2026-11-05  P09  TESTING round 1: FAIL, D-1 RecursionError escaped validate. Fixed 51c97a9.
+2026-11-05  P09  TESTING round 2: PASS, AC-1..AC-12 (AC-11 by developer). api 124 tests. READY FOR PR. H-6 ready: LLM_PROVIDER=extractive, EMBED_MODEL=hashing-bow-768 on dev once merged.
 ```
 
 ---
@@ -195,6 +199,8 @@ Numbers this lane must measure. The agent fills them in as they are produced; th
 | Citation validity | - | 12 | `eval` |
 | Abstention correctness | - | 12 | `eval` |
 | Generation p50 / p95 seconds per question | - | 12 | `eval` |
+| Coverage of `api/app` (`pytest --cov=app`) | 95% (644 statements, 33 missed; `providers/llm/{ollama,hosted}.py` 0% because they are unbuilt stubs). Target 60% | 9 | `cd api && ../.venv/bin/pytest -q --cov=app` |
+| Extractive provider on the real index (CI-mode sanity, floor 0.50, real 981-chunk index, scope `current`) | Mobile phones in the exam hall (q06): score 0.908, answers "Mobile Phones, Smart Watches and all electronic communication devices are NOT allowed in Examination", cites Student Handbook p.26. Refund by day 20 (q07): 0.776, answers "Upto 20th day of commencement of classes \| 60% Fee Refund ...", cites fee-structure-page.html "Fee Refund Policy". Missed classes (q05): 0.883, answers "...(within two days) inform the Academic Office.", cites Student Handbook p.30. All three correct and cited to a retrieved chunk. A hostel curfew question scored 0.594 (above the floor), so the floor alone would not abstain; extractive found no word overlap and abstained | 9 | one-off script over `ChromaRetriever` + `ExtractiveProvider` + `validate` (Ollama embeddings only) |
 
 ---
 
@@ -590,7 +596,7 @@ None.
 
 ## Phase 9: Prompt, validation, CI-mode components (Z-08)
 
-**Status:** NOT STARTED · **Branch:** `feat/rag-z08-prompt-validate` · **Est:** 3 h · **Priority:** P0 · **Needed by:** Ahmad's A-09 on Saturday morning
+**Status:** DONE · **Branch:** `feat/rag-z08-prompt-validate` · **Est:** 3 h · **Priority:** P0 · **Needed by:** Ahmad's A-09 on Saturday morning
 
 ### Objective
 Everything needed to produce and verify an answer without an LLM: the prompt, the validator with the citation check and canned responses, and the rule-based provider that CI uses.
@@ -618,10 +624,10 @@ Architecture 5.7 (all), 5.8, 5.10, 5.11, 5.15, AD-07, AD-13, AD-14, AD-25; `api/
 The Ollama HTTP client (phase 10), the answer orchestrator (phase 10), the cache (phase 11).
 
 ### Acceptance criteria
-- [ ] Tests: prompt layout and delimiter stripping; invalid JSON, wrong schema and fabricated citation each raise `InvalidModelOutput`; `answered_from_context=false` empties citations; `page` filled from the passage; extractive provider cites only given passages and abstains with no passages; **injection test**; **abstention test**; **fallback test** (their names contain `injection`, `abstain`, `fallback` for the checker).
-- [ ] At least 12 test functions exist across the repo and coverage of `app` is reported (run `pytest --cov=app` once; note the number in the log).
-- [ ] H-6 delivered: PR merged so Ahmad can use `LLM_PROVIDER=extractive` and `EMBED_MODEL=hashing-bow-768`.
-- [ ] `make test && make lint` green.
+- [x] Tests: prompt layout and delimiter stripping; invalid JSON, wrong schema and fabricated citation each raise `InvalidModelOutput`; `answered_from_context=false` empties citations; `page` filled from the passage; extractive provider cites only given passages and abstains with no passages; **injection test**; **abstention test**; **fallback test** (their names contain `injection`, `abstain`, `fallback` for the checker).
+- [x] At least 12 test functions exist across the repo and coverage of `app` is reported (run `pytest --cov=app` once; note the number in the log).
+- [x] H-6 delivered: PR merged so Ahmad can use `LLM_PROVIDER=extractive` and `EMBED_MODEL=hashing-bow-768`.
+- [x] `make test && make lint` green.
 
 ### Verify
 ```bash

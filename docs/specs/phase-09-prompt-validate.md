@@ -5,7 +5,7 @@
 | Phase | 9, from `docs/IMPLEMENTATION_PLAN.md` |
 | Work plan task | Z-08 |
 | Branch | `feat/rag-z08-prompt-validate` |
-| Stage | SPEC DRAFT |
+| Stage | READY FOR PR |
 | Started | 2026-11-05 |
 | Approved (spec and plan) | pre-approved by Zain 2026-11-05 (no gate for this run) |
 | Depends on | phase 8 (retriever, `IndexState`, `EmbedError`); delivers H-6 |
@@ -78,18 +78,18 @@ Config keys read: none new. `ExtractiveProvider(settings)` reads `relevance_floo
 
 ## 6. Acceptance criteria
 
-- [ ] **AC-1** `build_messages` gives exactly two messages (system, user), evidence numbered from 1 in rank order, header fields quoted and escaped, question block last; `<<<` and `>>>` removed from chunk text, question and header values.
-- [ ] **AC-2** `validate` raises `InvalidModelOutput` for: non-JSON, wrong schema, a citation whose source or section was not retrieved, `answered_from_context=true` with no citations, an empty answer.
-- [ ] **AC-3** `validate` empties citations when `answered_from_context=false`, fills `page` from the passage, and passes a good answer through.
-- [ ] **AC-4** Extractive cites only passages it was given and only the one it used; abstains with no passages or no word overlap; deterministic; confidence rule at floor + 0.15.
-- [ ] **AC-5** Test `*injection*`: the poisoned fixture chunk is delimited, a `>>>` closer in a chunk is stripped, an injection-obeying fake model that invents a source fails validation, extractive on the fixture states the real 80 percent figure, and comments state what code enforces and what only a live model shows.
-- [ ] **AC-6** Test `*abstain*`: abstention text, empty citations, `high` confidence for the floor.
-- [ ] **AC-7** Test `*fallback*`: fallback text, `low`, empty citations, text is no passage text.
-- [ ] **AC-8** `get_provider` returns stub and extractive; `ollama-*` raises a clear `NotImplementedError` naming phase 10; unknown name raises `ValueError`.
-- [ ] **AC-9** Kit tests still pass.
-- [ ] **AC-10** At least 12 new test functions; coverage of `app` reported with `pytest --cov=app` and recorded; `pytest-cov` pinned.
-- [ ] **AC-11** Extractive answers for 3 golden questions on the real index recorded in the results register.
-- [ ] **AC-12** `make test && make lint` green; H-6 text ready for Ahmad.
+- [x] **AC-1** `build_messages` gives exactly two messages (system, user), evidence numbered from 1 in rank order, header fields quoted and escaped, question block last; `<<<` and `>>>` removed from chunk text, question and header values.
+- [x] **AC-2** `validate` raises `InvalidModelOutput` for: non-JSON, wrong schema, a citation whose source or section was not retrieved, `answered_from_context=true` with no citations, an empty answer.
+- [x] **AC-3** `validate` empties citations when `answered_from_context=false`, fills `page` from the passage, and passes a good answer through.
+- [x] **AC-4** Extractive cites only passages it was given and only the one it used; abstains with no passages or no word overlap; deterministic; confidence rule at floor + 0.15.
+- [x] **AC-5** Test `*injection*`: the poisoned fixture chunk is delimited, a `>>>` closer in a chunk is stripped, an injection-obeying fake model that invents a source fails validation, extractive on the fixture states the real 80 percent figure, and comments state what code enforces and what only a live model shows.
+- [x] **AC-6** Test `*abstain*`: abstention text, empty citations, `high` confidence for the floor.
+- [x] **AC-7** Test `*fallback*`: fallback text, `low`, empty citations, text is no passage text.
+- [x] **AC-8** `get_provider` returns stub and extractive; `ollama-*` raises a clear `NotImplementedError` naming phase 10; unknown name raises `ValueError`.
+- [x] **AC-9** Kit tests still pass.
+- [x] **AC-10** At least 12 new test functions; coverage of `app` reported with `pytest --cov=app` and recorded; `pytest-cov` pinned.
+- [x] **AC-11** Extractive answers for 3 golden questions on the real index recorded in the results register.
+- [x] **AC-12** `make test && make lint` green; H-6 text ready for Ahmad.
 
 ## 7. Test strategy and traceability
 
@@ -151,17 +151,24 @@ All additions; revert the branch. The only changed signature is `generate` (kit 
 
 ## 11. Implementation notes
 
+- D-61 to D-64 followed as written. DEV-004 logged (`Passage` optional fields).
+- `strip_delimiters` removes whole runs of 2 or more `<` / `>` (not a single-pass replace of `<<<`), after the automated security review showed `<<>>><` rebuilding `<<<`. Test added.
+- Real-index extractive run (AC-11): see results register. The floor alone did not abstain on a hostel-curfew question (0.594 > 0.50); the extractive no-overlap rule did. Input for phase 12 calibration.
+- Used `make dev-services`, index from phase 7 was still in the volume (no rebuild).
+
 ## 12. Test report
 
 | Round | Date | Command | Result | Notes |
 | --- | --- | --- | --- | --- |
+| 1 | 2026-11-05 | `make test`, `make lint`, `pytest --cov=app`, probes | FAIL | D-1 (medium): `validate("[" * 200000, ...)` raised `RecursionError`, not `InvalidModelOutput` (AC-2, never a 500). Fixed 51c97a9. 20 probe tests added. |
+| 2 | 2026-11-05 | same | PASS | AC-1..AC-10, AC-12 pass; AC-11 manual (developer). 9 more probe tests. api 124 tests (248 indexer, 90 eval) green. Low notes: `citation_matches` takes the first of two passages with equal source and section; extractive splitter does not split after "digit." |
 
-Coverage of `app`: `__`%
+Coverage of `app`: 95%
 
 ## 13. Sign-offs
 
 | Gate | Date | Approved by | Notes |
 | --- | --- | --- | --- |
 | Spec and plan (the one gate) | 2026-11-05 | Zain (pre-approved, no gate this run) | |
-| Tester verdict PASS | | | rounds: |
+| Tester verdict PASS | 2026-11-05 | independent subagent | rounds: 2 |
 | Merged | | | PR # |
