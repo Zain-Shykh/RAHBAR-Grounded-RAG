@@ -109,7 +109,7 @@ class IndexState:
             return
         self._problem = "embed_pin"
         if snap.index_id not in self._pin_logged:
-            self._pin_logged.add(snap.index_id)
+            self._pin_logged |= {snap.index_id}
             log.error("embedding pin conflict", extra={
                 "collection_embed_model": snap.embed_model, "api_embed_model": self._s.embed_model,
                 "collection": self._s.collection,
@@ -125,11 +125,11 @@ class IndexState:
             return
         if n != snap.dimension:
             self._problem = "dimension"
-            self._dim_bad.add(snap.index_id)
+            self._dim_bad |= {snap.index_id}
             log.error("embedding dimension conflict", extra={
                 "collection_dimension": snap.dimension, "query_dimension": n, "index_id": snap.index_id})
             raise IndexUnavailable("dimension", f"collection {snap.dimension} vs query {n}")
-        self._dim_checked.add(snap.index_id)
+        self._dim_checked |= {snap.index_id}
 
     def problem(self) -> str | None:
         """None when healthy, else chroma | collection | embed_pin | dimension (for /readyz in phase 10)."""
