@@ -161,3 +161,45 @@ def test_unknown_embed_model_does_not_crash_construction() -> None:
     with pytest.raises(IndexUnavailable) as e2:
         r2.retrieve("q", 2)
     assert e2.value.reason == "embed_pin" and r2.state.problem() == "embed_pin"
+
+
+# Tester round 1: more malformed result shapes; each must be IndexUnavailable, never a raw error.
+def _bad_distance_none(r: dict) -> None:
+    r["distances"] = [[None, None]]
+
+
+def _bad_distance_text(r: dict) -> None:
+    r["distances"] = [["x", "y"]]
+
+
+def _ragged(r: dict) -> None:
+    r["distances"] = [[0.2]]
+
+
+def _no_documents(r: dict) -> None:
+    r.pop("documents")
+
+
+def _no_ids(r: dict) -> None:
+    r["ids"] = []
+
+
+def _no_section(r: dict) -> None:
+    r["metadatas"] = [[{"source": "a.pdf"}, {"source": "b.pdf"}]]
+
+
+@pytest.mark.parametrize("break_res", [_bad_distance_none, _bad_distance_text, _ragged,
+                                       _no_documents, _no_ids, _no_section])
+def test_malformed_result_shapes_are_index_unavailable(break_res) -> None:  # type: ignore[no-untyped-def]
+    col = FakeCollection(rows(), meta())
+    real = col.query
+
+    def broken(**kw):  # type: ignore[no-untyped-def]
+        res = real(**kw)
+        break_res(res)
+        return res
+
+    col.query = broken  # type: ignore[method-assign]
+    r, _ = _retriever(col)
+    with pytest.raises(IndexUnavailable):
+        r.retrieve("q", 2)

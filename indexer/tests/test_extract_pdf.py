@@ -184,3 +184,16 @@ def test_md_heading_markers_are_dropped() -> None:
     from pipeline.extract import strip_md_markers
     assert strip_md_markers("# T\n\n## 1. Attendance\ntext # not a heading\n####### seven") == \
         "T\n\n1. Attendance\ntext # not a heading\n####### seven"
+
+
+@pytest.mark.parametrize("text", ["#hashtag", "#", "  # indented", "a #tag b", "#1 priority", "####### x"])
+def test_md_strip_leaves_non_headings_alone(text: str) -> None:
+    from pipeline.extract import strip_md_markers
+    assert strip_md_markers(text) == text
+
+
+def test_md_strip_handles_crlf_tab_and_empty_heading() -> None:
+    from pipeline.extract import strip_md_markers
+    assert strip_md_markers("## A\r\nb\r\n###\tC") == "A\r\nb\r\nC"
+    assert strip_md_markers("# \nx") == "\nx"
+    assert strip_md_markers("") == ""

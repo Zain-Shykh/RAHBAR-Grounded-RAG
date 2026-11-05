@@ -147,7 +147,7 @@ def answer_question(
         if best is not None:
             m.TOP_SCORE.observe(max(0.0, min(1.0, best)))
 
-        if best is None or best < settings.relevance_floor:
+        if best is None or not (best >= settings.relevance_floor):  # also true for NaN (T12-D1)
             # 6. Floor: abstain with no model call (AD-12).
             answer, outcome, abstain_reason = abstention(reason="floor"), "abstained", "below_floor"
         else:

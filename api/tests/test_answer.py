@@ -290,3 +290,10 @@ def test_metrics_move_after_a_request(client) -> None:
     text = c.get("/metrics").text
     assert counter("rahbar_tokens_count", direction="in") == before + 1
     assert "rahbar_top_score_count" in text and 'rahbar_generation_seconds_count{provider="scripted"}' in text
+
+
+def test_nan_score_never_reaches_the_model() -> None:
+    """A NaN similarity must not slip past the floor (nan < floor is False)."""
+    prov = Scripted(ans(1))
+    r = run([P(1, float("nan"))], prov)
+    assert prov.calls == [] and r.outcome == "abstained"
