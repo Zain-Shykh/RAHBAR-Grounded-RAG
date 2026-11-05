@@ -28,19 +28,21 @@ def citation_matches(c: Citation, passages: list[Passage]) -> Passage | None:
     return None
 
 
+def parse_answer(raw: str) -> Answer:
+    """Model text to `Answer`, or `InvalidModelOutput("not_json" | "schema")`."""
+    try:
+        data = json.loads(raw)
+    except (ValueError, TypeError, RecursionError) as e:   # deep nesting: RecursionError
+        raise InvalidModelOutput("not_json") from e
+    try:
+        return Answer.model_validate(data)
+    except ValidationError as e:
+        raise InvalidModelOutput("schema") from e
+
+
 def validate(raw: str | Answer, passages: list[Passage]) -> Answer:
     """Return a checked `Answer`, or raise `InvalidModelOutput(reason)`."""
-    if isinstance(raw, Answer):
-        ans = raw
-    else:
-        try:
-            data = json.loads(raw)
-        except (ValueError, TypeError, RecursionError) as e:   # deep nesting: RecursionError
-            raise InvalidModelOutput("not_json") from e
-        try:
-            ans = Answer.model_validate(data)
-        except ValidationError as e:
-            raise InvalidModelOutput("schema") from e
+    ans = raw if isinstance(raw, Answer) else parse_answer(raw)
 
     checked: list[Citation] = []
     for c in ans.citations:

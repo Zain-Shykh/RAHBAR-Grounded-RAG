@@ -103,8 +103,7 @@ def test_validate_accepts_answer_instance() -> None:
 def test_get_provider_selects_and_fails_clearly() -> None:
     assert get_provider(Settings(llm_provider="stub")).name == "stub"
     assert get_provider(Settings(llm_provider="extractive")).name == "extractive"
-    with pytest.raises(NotImplementedError, match="phase 10"):
-        get_provider(Settings(llm_provider="ollama-host"))
+    assert get_provider(Settings(llm_provider="ollama-host")).name == "ollama-host"   # phase 10
     with pytest.raises(ValueError, match="unknown LLM_PROVIDER"):
         get_provider(Settings(llm_provider="nope"))
 
