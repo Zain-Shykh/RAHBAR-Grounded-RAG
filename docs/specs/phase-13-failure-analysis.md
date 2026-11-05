@@ -134,4 +134,4 @@ Experiments ran as designed (D-83 to D-85). Raw captures are in the job tmp dire
 | --- | --- | --- | --- |
 | Spec and plan (the one gate) | 2026-11-05 | Zain (pre-approved) | |
 | Tester verdict PASS | 2026-11-05 | independent subagent | rounds: 2 |
-| Merged | | | PR # |
+| Merged | 2026-11-05 | Claude, pre-approved by Zain | PR #18 |
