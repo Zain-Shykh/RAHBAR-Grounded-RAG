@@ -40,7 +40,7 @@ RAHBAR answers **only from a real document corpus** (public FAST-NUCES policies,
 - **Indexing as a Job.** One writer, never at API start-up; re-index with one command and no downtime.
 - **Embedding-model pin enforced in code.** If the API and the index disagree on the model, the pod refuses to become ready and logs why.
 - **Measured quality.** A golden set, recall@k by question type, citation validity and abstention correctness, enforced as a CI gate.
-- **Secure by default.** Non-root containers, read-only root filesystems, dropped capabilities, per-workload service accounts, default-deny network policies.
+- **Secure by default (design; manifests in progress).** Non-root containers, read-only root filesystems, dropped capabilities, per-workload service accounts, default-deny network policies.
 - **Observable.** JSON logs with a request id, Prometheus metrics, and one log line per request listing the retrieved chunk ids and scores.
 
 ## Architecture
@@ -103,7 +103,7 @@ make fetch                   # download the public documents to corpus/raw (not 
 
 # 3. build and deploy
 make images                  # build api, indexer, ui and load them into minikube
-make corpus                  # create the namespace and corpus PVC, copy the documents in
+make corpus                  # create the namespace and corpus PVC, copy the documents in (target not written yet: Ahmad)
 make apply                   # kubectl apply -k k8s/overlays/dev; the indexer Job runs once Chroma is up
 kubectl get pods -n rahbar -w
 

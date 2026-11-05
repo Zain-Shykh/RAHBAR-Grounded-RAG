@@ -22,7 +22,7 @@ def get_provider(settings: Settings) -> LLMProvider:
         # Not built (ADR 0004, D-87): it would send question text and corpus passages off-site.
         raise ValueError(
             "LLM_PROVIDER 'hosted' is not implemented in this build; "
-            "use ollama-host (default), ollama-incluster, extractive or stub (see docs/adr/0004)"
+            "use ollama-host, ollama-incluster, extractive or stub (see docs/adr/0004)"
         )
     raise ValueError(
         f"unknown LLM_PROVIDER {name!r}; expected stub, extractive, ollama-host or ollama-incluster"

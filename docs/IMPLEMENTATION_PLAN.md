@@ -74,7 +74,7 @@ Hybrid retrieval, the `hosted` provider, the in-cluster Ollama mode, authenticat
 | 11 | Semantic cache | Z-10 | Sat 16:00 | DONE (with deviation DEV-006) | #16 |
 | 12 | Tuning, calibration, baselines | Z-12 | Sat 19:00 | DONE (with open deviation DEV-007) | #17 |
 | 13 | Failure analysis | Z-14 | Sun 11:00 | DONE (DEV-007 absorbed) | #18 |
-| 14 | Documents and ADRs | Z-15 | Sun 14:00 | NOT STARTED | |
+| 14 | Documents and ADRs | Z-15 | Sun 14:00 | DONE | PR (see log) |
 | 15 | Integration support and final verification | joint | Sun 14:00 to 18:00 | NOT STARTED | |
 
 Hours spent so far (fill in at each phase end): planned 37.5 h, actual `____`.
@@ -82,12 +82,12 @@ Hours spent so far (fill in at each phase end): planned 37.5 h, actual `____`.
 ## 2. Current focus
 
 ```
-Phase:        14  Documents and ADRs
+Phase:        15  Integration support and final verification
 Stage:        not started   (SPEC DRAFT, APPROVED, IMPLEMENTING, TESTING, READY FOR PR, MERGED)
-Branch:       (none yet; docs/rag-z15-docs)
-Spec:         (none yet; docs/specs/phase-14-docs-adrs.md)
-Next action:  fresh session: stage 0 then stage 1 for phase 14. Failure analysis is written from real runs (docs/FAILURE-ANALYSIS.md, 6 of 6 stages named by the checker, four measured). Shipped numbers: chunking 400/50, floor 0.70, threshold 0.96, LLM timeout 300 s; real baseline recall@5 0.875 (eval/baseline.json).
-Waiting on:   Ahmad (H-7, H-8, H-13 values into the ConfigMap, Ingress and the ci overlay)
+Branch:       (none yet)
+Spec:         (none yet)
+Next action:  fresh session: stage 0 then stage 1 for phase 15. Phase 14 is DONE: ADRs 0001 to 0004, PIPELINE, ENGINEERING-NOTES (Q5, Q6, Q7 + lane facts), README API table. ADR 0001 needs Ahmad's review. Remaining checker failures are Ahmad's (evidence, workflows, k8s manifests, ui/Dockerfile) and 6 placeholder mentions in requirements.md, rubric_checklist.md, WORKFLOW.md, WORKPLAN.md (Zain to reword).
+Waiting on:   Ahmad (H-7, H-8, H-13, H-14; ADR 0001 review; Q1 to Q4 and his half of Q6)
 Last updated: 2026-11-05
 ```
 
@@ -197,6 +197,8 @@ Append-only, newest at the bottom. One line per event: date, phase, what happene
 2026-11-05  P13  A: policy PDF, no OCR: indexer exit 0, 0 chunks (8 of 8 pages), best score 0.911 to 0.613, abstained below floor. C: EMBED_MODEL on api only: /readyz 503 failed embed_pin, /api/ask 503, /healthz 200; bypassing the pin gives scores 0.034 to 0.045 on a question that scores 0.908. E: filter removed: 2023 clause ranks first (0.896 vs 0.895), 9 of 15 current-scope questions have a superseded chunk in the top 5; the model still answered from the 2026 clause. F: TEMPERATURE=1.2 on 4 questions: no retry, no fallback, valid citations; wording and length differ; no measurable degradation.
 2026-11-05  P13  Restore: recall@3 = recall@5 = 0.875 on the live index, equal to eval/baseline.json by type; `git diff` has no experiment code; checker shows 6 of 6 failure stages.
 2026-11-05  P13  H-14 for Ahmad: the pin capture is reusable (docs/FAILURE-ANALYSIS.md stage C).
+2026-11-05  P14  Spec pushed, decisions D-86 (ADR 0001 written here, Ahmad to review), D-87 (hosted stub removed, ValueError), D-88 (notes: Q5, Q6, Q7 full, Q1 to Q4 lane facts), D-89 (placeholder mentions reworded in lane files).
+2026-11-05  P14  ADRs 0001 to 0004, PIPELINE embedding and document delivery, ENGINEERING-NOTES, README API table, AI-USAGE; hosted.py removed with a test. Tester round 1 FAIL (6 doc defects, fixed), round 2 PASS (5 low, fixed). Checker: 6 failures left, none this lane's: Ahmad's evidence, workflows, k8s, ui/Dockerfile, and the placeholder word in requirements.md, rubric_checklist.md, WORKFLOW.md, WORKPLAN.md (shared, listed for Zain). Register note: stage times (4 min 17 s + 422 s + 1.3 s) do not add up to the 9 min 39 s wall time; re-check.
 ```
 
 ---
@@ -863,7 +865,7 @@ Tell Ahmad if he can reuse the pin demonstration capture for his evidence.
 
 ## Phase 14: Documents and ADRs (Z-15)
 
-**Status:** NOT STARTED · **Branch:** `docs/rag-z15-docs` · **Est:** 3 h · **Priority:** P0
+**Status:** DONE · **Branch:** `feat/rag-z15-docs` · **Est:** 3 h · **Priority:** P0
 
 ### Objective
 Write the RAG-lane documents from real measurements, in your own words, with file and line references.

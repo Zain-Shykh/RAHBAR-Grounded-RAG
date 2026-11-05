@@ -5,7 +5,7 @@
 | Phase | 14, from `docs/IMPLEMENTATION_PLAN.md` |
 | Work plan task | Z-15 |
 | Branch | `feat/rag-z15-docs` |
-| Stage | IMPLEMENTING |
+| Stage | READY FOR PR |
 | Started | 2026-11-05 |
 | Approved (spec and plan) | 2026-11-05, pre-approved by Zain (no gate) |
 | Depends on | phases 1 to 13 DONE on `dev`; H-13, H-14 open on Ahmad's side |
@@ -119,11 +119,12 @@ Hosted provider removed, not built (D-87). ADR 0001 written here (D-86). The res
 | Round | Date | Command | Result | Notes |
 | --- | --- | --- | --- | --- |
 | 1 | 2026-11-05 | tester brief (WORKFLOW 6, adapted) | FAIL | D1 OCR timing, D2 cluster policies stated as built, D3 provider default, D4 AD-26 cite, D5 readiness timeout, D6 README hosted step and median range; all fixed in the next commit |
+| 2 | 2026-11-05 | same brief | PASS | five low defects N1 to N5 (median 23 to 117, amplification 1.02, make corpus not written, IP wording, design wording), fixed |
 
 ## 13. Sign-offs
 
 | Gate | Date | Approved by | Notes |
 | --- | --- | --- | --- |
 | Spec and plan | 2026-11-05 | Zain (pre-approved, no gate) | |
-| Tester verdict PASS | | | rounds: |
+| Tester verdict PASS | 2026-11-05 | independent subagent | rounds: 2 |
 | Merged | | | PR # |
