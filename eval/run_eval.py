@@ -156,6 +156,15 @@ def summarise(rows: list[dict]) -> dict:
     }
 
 
+def golden_label(path: Path) -> str:
+    """Golden path as stored in results: relative to the repo root when inside it."""
+    p = Path(path).resolve()
+    try:
+        return p.relative_to(HERE.parent).as_posix()
+    except ValueError:
+        return p.as_posix()
+
+
 def gate(results: dict, baseline: dict | None) -> list[str]:
     """Return one message per failed gate (architecture 5.13.3); an empty list means pass."""
     messages = []
@@ -219,7 +228,7 @@ def main() -> int:
         return 1
     failures = gate(results, baseline)
 
-    results["golden"] = str(args.golden)
+    results["golden"] = golden_label(args.golden)
     results["questions"] = len(rows)
     args.out.write_text(json.dumps(results, indent=2), encoding="utf-8")
     print(f"\nresults written to {args.out}")
