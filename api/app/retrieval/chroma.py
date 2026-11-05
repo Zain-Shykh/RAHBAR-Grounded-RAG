@@ -59,7 +59,10 @@ class ChromaRetriever:
                 res = self._query(snap.collection, vector, k, where)
             except Exception as exc2:
                 raise IndexUnavailable("chroma", repr(exc2)) from exc2
-        return self._passages(res)
+        try:
+            return self._passages(res)
+        except Exception as exc:  # a malformed row is an index fault (503), never a 500
+            raise IndexUnavailable("chroma", f"malformed result: {exc!r}") from exc
 
     @staticmethod
     def _query(collection: Any, vector: list[float], k: int, where: dict[str, Any] | None) -> Any:

@@ -113,6 +113,20 @@ def test_dimension_mismatch_blocks_retrieval() -> None:
     assert e.value.reason == "dimension" and col.queries == []
 
 
+@pytest.mark.parametrize("break_row", [
+    lambda d: d[0]["md"].pop("source"),
+    lambda d: d[0]["md"].pop("section"),
+    lambda d: d[0].update(md=None),
+])
+def test_malformed_row_is_index_unavailable(break_row) -> None:  # type: ignore[no-untyped-def]
+    data = rows()
+    break_row(data)
+    r, _ = _retriever(FakeCollection(data, meta()))
+    with pytest.raises(IndexUnavailable) as e:
+        r.retrieve("q", 2)
+    assert e.value.reason == "chroma"
+
+
 def test_missing_page_maps_to_none() -> None:
     data = rows()
     data[0]["md"]["page"] = 0
