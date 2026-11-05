@@ -710,3 +710,47 @@ Entry template:
 - Claude recommends: A. Fewer contract changes; defaults are the architecture's numbers.
 - Decision: A. Decided by: Claude, pre-approved by Zain.
 - Decided on: 2026-11-05
+
+### D-57 Retriever pass-through of `vector` and `where`
+- Status: DECIDED
+- Raised: 2026-11-05 by Claude (phase 8)
+- Area: api
+- Related: phase 8 spec
+- Question: The orchestrator (phase 10) embeds once for the cache and the retrieval. How does the retriever take the vector and scope?
+- Options: A. `retrieve(question, k, *, vector=None, where=None)`; embeds itself when `vector` is None; stub ignores both. B. The retriever always embeds. C. Separate `retrieve_by_vector`.
+- Claude recommends: A. One embed per request, and the protocol stays one method.
+- Decision: A. Decided by: Claude, pre-approved by Zain.
+- Decided on: 2026-11-05
+
+### D-58 What an embedding-pin or dimension conflict does to retrieval
+- Status: DECIDED
+- Raised: 2026-11-05 by Claude (phase 8)
+- Area: api
+- Related: phase 8 spec, architecture 5.3, R-PIN-3
+- Question: On a pin mismatch, log only, or refuse to query?
+- Options: A. Log the exact 5.3 line once per `index_id` and raise `IndexUnavailable("embed_pin")` on retrieve. B. Log only, query anyway.
+- Claude recommends: A. Querying with the wrong model returns plausible but wrong passages, the worst failure.
+- Decision: A. Decided by: Claude, pre-approved by Zain.
+- Decided on: 2026-11-05
+
+### D-59 Index-state refresh failure with a previous snapshot
+- Status: DECIDED
+- Raised: 2026-11-05 by Claude (phase 8)
+- Area: api
+- Related: phase 8 spec, AD-20
+- Question: When the periodic refresh cannot reach Chroma, drop the snapshot or keep the old one?
+- Options: A. Keep serving the old snapshot, log a warning; raise only when none exists. B. Raise at once.
+- Claude recommends: A. A one-second Chroma blip should not break requests; the query itself still fails honestly if Chroma is down.
+- Decision: A. Decided by: Claude, pre-approved by Zain.
+- Decided on: 2026-11-05
+
+### D-60 Where the retrieval-only dev tool lives
+- Status: DECIDED
+- Raised: 2026-11-05 by Claude (phase 8)
+- Area: eval
+- Related: phase 8 spec
+- Question: Recall without the LLM, the loop test and manual asks need a script. Where?
+- Options: A. `eval/retrieval_only.py` (own lane, covered by `ruff check eval`, reuses `run_eval.summarise`). B. `scripts/` (needs a Makefile lint-list edit, a shared file).
+- Claude recommends: A. No shared file touched.
+- Decision: A. Decided by: Claude, pre-approved by Zain.
+- Decided on: 2026-11-05
