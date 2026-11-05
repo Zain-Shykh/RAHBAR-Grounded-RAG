@@ -46,7 +46,7 @@ class Settings:
     # Architecture 4.4 defaults; the later phases read these.
     redis_host: str = "redis"
     redis_port: int = 6379
-    relevance_floor: float = 0.50
+    relevance_floor: float = 0.70   # phase 12: midpoint of hostel max 0.658 and answerable min 0.746
     cache_threshold: float = 0.96   # phase 11: lowest of 0.88/0.92/0.96 with zero false hits
     cache_ttl_seconds: int = 86400
     llm_num_ctx: int = 8192
@@ -74,7 +74,7 @@ def get_settings() -> Settings:
         log_level=os.environ.get("LOG_LEVEL", "INFO"),
         redis_host=os.environ.get("REDIS_HOST", "redis"),
         redis_port=_int("REDIS_PORT", 6379),
-        relevance_floor=_float("RELEVANCE_FLOOR", 0.50),
+        relevance_floor=_float("RELEVANCE_FLOOR", 0.70),
         cache_threshold=_float("CACHE_THRESHOLD", 0.96),
         cache_ttl_seconds=_int("CACHE_TTL_SECONDS", 86400),
         llm_num_ctx=_int("LLM_NUM_CTX", 8192),

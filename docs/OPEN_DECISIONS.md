@@ -974,3 +974,25 @@ Entry template:
 - Claude recommends: A. The cache works on question embeddings, which chunking does not change; Zain's brief says not to redo it.
 - Decision: A. Decided by: Claude, pre-approved by Zain.
 - Decided on: 2026-11-05
+
+### D-81 Chunking result is a three-way tie: which pair ships
+- Status: DECIDED
+- Raised: 2026-11-05 by Claude (phase 12)
+- Area: indexer
+- Related: D-77, phase 12 spec, `eval/tuning/`
+- Question: 200/25, 400/50 and 600/100 give identical recall@3 and @5 (0.875 both) and identical score ranges. D-77's literal tie-break (fewer chunks) would pick 600/100 (952 chunks against 981, 3% fewer).
+- Options: A. Keep 400/50 (the architecture default, 981 chunks, the index every earlier measurement used). B. 600/100 by D-77's tie-break. C. 200/25 (smallest worst-case chunk, 1103 chunks, amplification 1.06).
+- Claude recommends: A. Nothing measured favours a change: 3% fewer chunks buys nothing, while a 600-word chunk lengthens the worst-case prompt by half on a CPU model whose latency is prompt-bound; 200/25 stores 12% more chunks and more overlap for no recall. When the numbers tie, the default stays. D-77 is amended: on a recall tie, keep the architecture default unless another pair is better by a measured quantity beyond the noise (more than 5% fewer chunks or better recall).
+- Decision: A. Decided by: Claude, pre-approved by Zain.
+- Decided on: 2026-11-05
+
+### D-82 Markdown headings in the extractor, and the CI floor
+- Status: DECIDED
+- Raised: 2026-11-05 by Claude (phase 12)
+- Area: indexer, eval
+- Related: phase 12 spec, `eval/fixtures`, architecture 5.4.2
+- Question: The fixture run had recall 0: the Markdown extractor kept the `##` marks, so the chunker never saw `## 1. Attendance` as a heading and every fixture section label differed from the golden label. Also the 0.70 floor suits `nomic-embed-text`, not the lexical hashing embedder (fixture scores 0.28 to 0.43).
+- Options: A. Drop the leading `#` marks of Markdown headings in the extractor, keep `golden.fixture.yaml` as it is; set the CI overlay `RELEVANCE_FLOOR` to 0.20 (above the fixture abstain score 0.00, below the lowest answerable top 0.316). B. Rewrite the fixture golden labels to what the chunker produced. C. Floor 0.70 in CI (every fixture question abstains).
+- Claude recommends: A. The golden file stays as written; the bug is the extractor's. A real Markdown source with `##` headings is also affected.
+- Decision: A. Decided by: Claude, pre-approved by Zain. H-8 tells Ahmad to set `RELEVANCE_FLOOR=0.20` in the `ci` overlay.
+- Decided on: 2026-11-05
