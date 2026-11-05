@@ -47,7 +47,7 @@ class Settings:
     redis_host: str = "redis"
     redis_port: int = 6379
     relevance_floor: float = 0.50
-    cache_threshold: float = 0.92
+    cache_threshold: float = 0.96   # phase 11: lowest of 0.88/0.92/0.96 with zero false hits
     cache_ttl_seconds: int = 86400
     llm_num_ctx: int = 8192
     llm_max_tokens: int = 512
@@ -75,7 +75,7 @@ def get_settings() -> Settings:
         redis_host=os.environ.get("REDIS_HOST", "redis"),
         redis_port=_int("REDIS_PORT", 6379),
         relevance_floor=_float("RELEVANCE_FLOOR", 0.50),
-        cache_threshold=_float("CACHE_THRESHOLD", 0.92),
+        cache_threshold=_float("CACHE_THRESHOLD", 0.96),
         cache_ttl_seconds=_int("CACHE_TTL_SECONDS", 86400),
         llm_num_ctx=_int("LLM_NUM_CTX", 8192),
         llm_max_tokens=_int("LLM_MAX_TOKENS", 512),

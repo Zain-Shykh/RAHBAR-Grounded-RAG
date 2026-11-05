@@ -266,7 +266,7 @@ Annotations: `nginx.ingress.kubernetes.io/proxy-read-timeout: "120"` (model call
 | `REDIS_HOST`, `REDIS_PORT` | `redis`, `6379` | api | |
 | `TOP_K` | `5` | api | Recall@5 is the headline metric. |
 | `RELEVANCE_FLOOR` | `0.50` (to be calibrated, section 5.6.3) | api | Cosine similarity of the best passage. |
-| `CACHE_THRESHOLD` | `0.92` (to be calibrated, section 5.9.3) | api | Lowest value with zero false hits on the test set. |
+| `CACHE_THRESHOLD` | `0.96` (calibrated in phase 11, section 5.9.3) | api | Lowest value with zero false hits on the test set. |
 | `CACHE_TTL_SECONDS` | `86400` | api | A safety net. Real invalidation is by `index_id`. |
 | `TEMPERATURE` | `0.2` | api | JSON and facts want 0 to 0.3. Not 0, so that the one retry can produce a different output than the first try. |
 | `LLM_NUM_CTX` | `8192` | api | Five chunks of 400 words plus instructions exceed Ollama's small default context. |
@@ -956,7 +956,7 @@ Ollama call: `POST {OLLAMA_URL}/api/chat` with `model=LLM_MODEL`, `messages`, `s
 `validate.py` checks, in order:
 
 1. The text parses as JSON and satisfies `Answer`.
-2. Every citation resolves to a retrieved passage, matching `source` exactly and `section` exactly (page is filled from the passage if the model omitted it or disagrees).
+2. Every citation resolves to a retrieved passage, matching `source` exactly and `section` exactly, or, failing an exact match, `section` is a prefix of exactly one distinct retrieved `section` of the same `source`, ending at a space, dot or colon, and not an all-digit parent number (`4.3` for `4.3 The normal course load is 5 courses.`; DEV-005). The citation is rewritten to the passage's exact `source`, `section` and `page`, so a response only carries retrieved strings. An ambiguous or mid-word prefix is rejected.
 3. If `answered_from_context` is true, there is at least one citation. If it is false, citations are emptied.
 4. `answer` is non-empty.
 
@@ -1014,7 +1014,7 @@ The assignment requires the cache to expire when the indexing Job runs, and requ
 
 1. The indexer stamps a new `index_id` into the collection metadata at every run (5.4.3).
 2. Every cache entry and every cache search index is named by the `index_id` it was built under.
-3. When an API pod's refresh sees a new `index_id`, it creates `idx:cache:{new}`, then drops every other `idx:cache:*` index with `FT.DROPINDEX ... DD` (which deletes its entries). The operation is idempotent, so three pods doing it at once is safe.
+3. When an API pod sees a new `index_id` in its snapshot (on the next question or the next `/readyz` probe, whichever comes first; `SemanticCache.maintain`, DEV-006), it creates `idx:cache:{new}`, then drops every other `idx:cache:*` index with `FT.DROPINDEX ... DD` (which deletes its entries). The operation is idempotent, so three pods doing it at once is safe.
 4. A pod's retriever and its cache both read the same `index_state` snapshot, so within one pod the cache and the index always agree. For up to `INDEX_REFRESH_SECONDS` after a swap, a pod that has not refreshed yet may still serve cached answers built from the old index (and its collection handle may error and trigger a refresh, see 5.6.4). Once it refreshes it only sees the new `index_id`, so the old entries are unreachable. The window is bounded by the refresh interval, and the demonstration waits longer than that.
 5. Entries written by a late pod under an old `index_id` land under a prefix with no search index. They are never found and expire by TTL.
 
