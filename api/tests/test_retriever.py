@@ -135,3 +135,15 @@ def test_app_starts_without_chroma_and_stub_has_no_state(monkeypatch: pytest.Mon
     with TestClient(app) as c:
         assert c.get("/healthz").status_code == 200
         assert app.state.index_state.problem() == "chroma"
+
+
+def test_unknown_embed_model_does_not_crash_construction() -> None:
+    s = Settings(embed_model="other")
+    r, _ = _retriever(FakeCollection(rows(), meta(model="other")), s)   # collection agrees, embedder unknown
+    with pytest.raises(IndexUnavailable) as e:
+        r.retrieve("q", 2)
+    assert e.value.reason == "embed_pin" and "unknown EMBED_MODEL" in str(e.value)
+    r2, _ = _retriever(FakeCollection(rows(), meta(model="hashing-bow-768")), s)   # the real mismatch
+    with pytest.raises(IndexUnavailable) as e2:
+        r2.retrieve("q", 2)
+    assert e2.value.reason == "embed_pin" and r2.state.problem() == "embed_pin"

@@ -29,7 +29,12 @@ class ChromaRetriever:
     def __init__(self, settings: Settings, *, state: IndexState | None = None,
                  embedder: Embedder | None = None) -> None:
         self.settings = settings
-        self.embedder = embedder or get_embedder(settings)
+        self.embed_error = ""
+        try:
+            self.embedder: Embedder | None = embedder or get_embedder(settings)
+        except ValueError as exc:
+            # An unknown EMBED_MODEL must leave the pod not ready (the pin check names it), not crash it.
+            self.embedder, self.embed_error = None, str(exc)
         self.state = state or IndexState(settings)
 
     def retrieve(self, question: str, k: int, *, vector: list[float] | None = None,
@@ -37,6 +42,8 @@ class ChromaRetriever:
         snap = self.state.get()
         self.state.require_pin(snap)
         if vector is None:
+            if self.embedder is None:
+                raise IndexUnavailable("embed_pin", self.embed_error)
             vector = self.embedder.embed_query(question)
         self.state.check_dimension(snap, len(vector))
         try:
