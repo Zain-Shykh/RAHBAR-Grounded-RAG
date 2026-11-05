@@ -57,11 +57,26 @@ Unit: **words** (whitespace split, AD-10). Defaults 400 words and 50 overlap; th
 ## Embedding
 Model, vector dimension, where the pin lives, how the API checks it.
 
+## Relevance floor
+`RELEVANCE_FLOOR` is the cosine similarity of the best retrieved passage below which the API abstains without calling the model (architecture 5.6.3). Measured on the shipped 400/50 index with `eval/retrieval_only.py recall` (the same on all three chunk configurations, `eval/tuning/`):
+
+| Group | Questions | Best-score range |
+| --- | --- | --- |
+| Answerable, answer passage retrieved | 14 | 0.746 (q09) to 0.908 (q06); next lowest q11 0.747, q07 0.776, q18 0.783 |
+| Answerable, answer passage not retrieved | q10, q14 | best retrieved 0.821 and 0.713; no floor can rescue them |
+| Must abstain (hostel curfew, hostel fee) | q16, q17 | 0.655 and 0.658 |
+
+The ranges do not overlap: the gap is 0.658 to 0.746. **Shipped: 0.70**, the midpoint, 0.042 above the highest must-abstain and 0.046 below the lowest answerable score. Before, at 0.50, both hostel questions went to the model (it happened to abstain); at 0.70 they stop at the floor in 0.1 to 0.3 s with no model call. Trade-off: the margin is built from 18 questions, a user paraphrase of an answerable question may score below 0.70 and be refused, and q14 (0.713) sits only 0.013 above. The floor is not the only defence: the model can still answer `answered_from_context: false` (it did for q10 and q14, which were retrieval misses). `rahbar_top_score` shows the live distribution.
+
 ## Semantic cache
-Thresholds you tried, the false hit that ruled one out, the one you shipped.
+Threshold **0.96** (phase 11, `scripts/calibrate_cache.py`, real `nomic-embed-text`, 9 paraphrase and 9 near-miss pairs looked up under the same scope tag so the embedding alone is measured): 0.88 hit 8 of 9 paraphrases with 7 false hits (the first, 2023 against 2026 withdrawal deadline, cosine 0.934); 0.92 hit 7 of 9 with 4 false hits (clause 1.21 against 1.22, 0.927; BS against MS fee, 0.924); 0.96 hit 4 of 9 with 0 false hits (worst near-miss: undergraduate against graduate attendance, 0.958, a 0.002 margin). Shipped the lowest with zero false hits. The year pair is also separated by the scope tag at any threshold. Phase 12 did not repeat the measurement (D-80).
+
+Live demonstration pairs (real index, llama3.2:3b): "What minimum attendance does the Prospectus 2026 require for graduate programs?" (MISS, 20.8 s) then "What is the minimum attendance requirement for graduate students under the 2026 prospectus?" (cosine 0.9736): HIT in 0.20 s with the same answer. "What is the tuition fee per credit hour for BS programs for 2026-27?" then "What is the BS tuition fee per credit hour for 2026-27?" (0.9865): HIT. Control: "What is the fee per credit hour for BS in 2026-27?" (0.9504): MISS.
 
 ## Evaluation method
-How recall@k matches retrieved passages to golden ones (by source and section? by chunk id?).
+A retrieved passage matches a golden item when the `source` is equal and the retrieved `section` equals the golden `section` after trimming, lower-casing, whitespace collapse, NFKC and dash folding, or starts with it followed by a space, `.` or `:` (so golden `1.21` matches `1.21 Attendance`; architecture 5.13.2, `eval/run_eval.py section_matches`). Matching is by section, not by chunk id, so re-chunking does not invalidate the golden set. recall@k is the fraction of a question's golden items matched in the first k retrieved; must-abstain questions have no golden items and are excluded. Citation validity uses the same rule against the response's own `retrieved` list. The real run is `eval/run_eval.py` against the live API (`eval/results.json`, baseline `eval/baseline.json`); the CI run uses the fixture documents, `hashing-bow-768` and the extractive provider (`eval/fixtures/baseline.fixture.json`).
+
+**Result (400/50, floor 0.70, llama3.2:3b, 18 questions):** recall@3 = recall@5 = 0.875 (ordinary 0.909, version 1.000, exact 0.500, injection 1.000); citation validity 1.000 (16 of 16); abstention correctness 1.000 (2 of 2, both at the floor); fallback rate 0; latency p50 39.0 s, p95 138.6 s per question uncached. The two misses (q10, q14) are exact-term or OCR-labelled sections the embedding does not find; hybrid retrieval would address them.
 
 ## Embed and store (phase 7)
 
