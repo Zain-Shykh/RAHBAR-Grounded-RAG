@@ -1,6 +1,6 @@
 # AI usage
 
-<!-- STARTER-TODO: list every AI tool you used. A specific disclosure carries no penalty. -->
+Tools used: Claude Code (model Sonnet 5.5) as the developer session for Zain's RAG lane, and fresh Claude subagents as independent testers for each phase (they read the spec and the repository and report; they may add tests but not change application code). No other AI tool was used for code or text in this lane. Zain made or approved every decision recorded in `docs/OPEN_DECISIONS.md` (several are marked "Claude, pre-approved by Zain"). Ahmad's lane keeps its own entries.
 
 | Tool | What it wrote or shaped | What we changed afterwards, and why |
 | --- | --- | --- |

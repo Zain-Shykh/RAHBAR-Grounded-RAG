@@ -876,7 +876,7 @@ Requirements R-IDX (report items), R-ENG-5, R-ENG-7, R-AI-1; `docs/PIPELINE.md`,
 - `docs/adr/0002-chunking.md`, `0003-cache-store.md`, `0004-llm-provider-and-data-governance.md` (use the template; 0004 also records the provider interface extension, the embedder duplication, data leaving the pod in `hosted` mode, Ollama on `0.0.0.0`, no auth on Chroma and Redis). ADR 0001 is Ahmad's.
 - `docs/ENGINEERING-NOTES.md`: **Q5** (recall@5 by type: where worst, why, which technique) and **Q7** if the worst-hour failure was in this lane. Every answer cites real files and line numbers. A generic answer scores zero.
 - `docs/AI-USAGE.md`: this lane's entries, specific about what the AI wrote and what was changed.
-- Remove every `STARTER-TODO` comment in files this lane owns.
+- Remove every starter placeholder comment in files this lane owns.
 
 ### Design notes
 - Numbers come from the results register, not from memory. If a number is missing, run the measurement; do not invent it.
@@ -890,13 +890,13 @@ Ahmad's documents. README apply order.
 - [ ] ADRs 0002, 0003, 0004 exist with their topic words in the file names.
 - [ ] Q5 (and Q7 if applicable) answered with file and line references.
 - [ ] `AI-USAGE.md` entries present and specific.
-- [ ] `grep -rn STARTER-TODO api indexer eval corpus docs/PIPELINE.md docs/FAILURE-ANALYSIS.md` returns nothing for this lane's files.
+- [ ] `grep -rn "STARTER-TOD[O]" api indexer eval corpus docs/PIPELINE.md docs/FAILURE-ANALYSIS.md` returns nothing for this lane's files.
 - [ ] `python3 scripts/check_submission.py` has no failures in sections G, H, J attributable to this lane.
 
 ### Verify
 ```bash
 python3 scripts/check_submission.py | grep -E "FAIL|✗" | head
-grep -rn STARTER-TODO --exclude-dir=.venv --exclude-dir=.git . | head
+grep -rn "STARTER-TOD[O]" --exclude-dir=.venv --exclude-dir=.git . | head
 ```
 
 ### Hand-off
@@ -921,7 +921,7 @@ Make the lanes meet: real index in the cluster, gate green in CI, and a clean su
 
 **I-4 (Sun 14:00).** Final verification, then the submission list:
 - [ ] `make test && make lint && make check` clean (report remaining warnings).
-- [ ] `grep -rn STARTER-TODO --exclude-dir=.venv .` returns nothing; no `NotImplementedError` left.
+- [ ] `grep -rn "STARTER-TOD[O]" --exclude-dir=.venv .` returns nothing; no `NotImplementedError` left.
 - [ ] No secret in Git history (scan: `git log -p | grep -iE "api[_-]?key|token|password|secret"`); no `corpus/raw` content committed.
 - [ ] Deviation log reviewed: nothing `OPEN` or `ACCEPTED` without a decision.
 - [ ] `docs/OPEN_DECISIONS.md` has no `OPEN` item that affects the delivered system.
