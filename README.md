@@ -129,26 +129,34 @@ kubectl create job --from=cronjob/reindex manual-reindex-1 -n rahbar     # or: m
 
 ## API
 
-| Method and path | Purpose |
-| --- | --- |
-| `POST /api/ask` | Body `{"question": "..."}` (3 to 500 characters). Returns the answer, citations, retrieved passages, confidence and provider. |
-| `GET /healthz` | Liveness. Touches nothing else. |
-| `GET /readyz` | Readiness. 200 only if Chroma is reachable, the collection is non-empty, Redis is reachable and the embedding model matches. Otherwise 503 naming the failing dependency. |
-| `GET /metrics` | Prometheus text format. |
+| Method and path | Purpose | Status codes |
+| --- | --- | --- |
+| `POST /api/ask` | Body `{"question": "..."}`, 3 to 500 characters. Returns the answer, its citations, the retrieved passages, a confidence and the provider name. One question per request: there is no conversation memory. | `200` in every case where the pipeline ran, including an abstention or the canned fallback (a model failure is never a 500). `422` when the body is invalid (missing or out-of-range `question`). `503` `{"detail":"index unavailable"}` when Chroma, the collection, the embedding pin or the vector dimension is not usable. |
+| `GET /healthz` | Liveness: `{"status":"alive","version":"..."}`. Touches no other service. | `200` |
+| `GET /readyz` | Readiness. Ready only if Chroma is reachable, the collection is non-empty, the embedding model matches the collection's, Redis is reachable and the dimension matches. Each check is bounded by 2 s. | `200` `{"status":"ready","checks":{...}}`, or `503` `{"status":"not_ready","failed":["embed_pin"],"checks":{...}}` naming the failing check (`chroma`, `collection`, `embed_pin`, `redis`, `embed_dimension`) |
+| `GET /metrics` | Prometheus text format; metric names are fixed (`docs/architecture/architecture.md` 4.14). | `200` |
+
+Response headers on every reply:
+
+| Header | Values | Meaning |
+| --- | --- | --- |
+| `X-Request-ID` | the caller's `X-Request-ID`, else a generated id | Repeated in every JSON log line of that request and in the body's `request_id`. |
+| `X-Outcome` (`/api/ask`) | `answered`, `abstained`, `fallback`, `cached` | `abstained`: below the relevance floor (no model call) or the model said the documents do not cover it. `fallback`: two invalid model outputs or a provider failure; a fixed canned answer. `cached`: served from the semantic cache. |
+| `X-Cache` (`/api/ask`) | `HIT`, `MISS`, `SKIP` | `SKIP` when the cache was not consulted (no vector or no index id). Only answered, validated responses are ever stored. |
 
 ```json
 {
   "request_id": "demo-1",
-  "answer": "...",
-  "citations": [{"source": "academic-rules-handbook-jun-2026.pdf", "section": "5.4 Academic Warning", "page": 21}],
+  "answer": "60%",
+  "citations": [{"source": "fee-structure-page.html", "section": "Fee Refund Policy", "page": 1}],
   "answered_from_context": true,
   "confidence": "high",
-  "retrieved": [{"chunk_id": "...", "source": "...", "section": "...", "page": 21, "score": 0.81}],
-  "provider": "ollama"
+  "retrieved": [{"chunk_id": "fee-structure-page-p001-c002", "source": "fee-structure-page.html", "section": "Fee Refund Policy", "page": 1, "score": 0.776}],
+  "provider": "ollama-host"
 }
 ```
 
-`answered_from_context: false` means the system declined. Response headers `X-Cache` and `X-Outcome` report cache status and outcome.
+An illustrative reply (chunk ids are `<source stem>-p<page>-c<seq>`; an HTML page is page 1). `answered_from_context: false` means the system declined. `provider` is the configured `LLM_PROVIDER` value in every outcome. Every citation names a passage in that request's own `retrieved` list; one that does not is rejected.
 
 ## Configuration
 
@@ -157,13 +165,14 @@ All configuration is environment variables, supplied on the cluster by one Confi
 | Key | Default | Meaning |
 | --- | --- | --- |
 | `EMBED_MODEL` | `nomic-embed-text` | The embedding pin, read by both the indexer and the API. |
-| `LLM_PROVIDER` | `ollama-host` | `stub`, `extractive`, `ollama-host`, `ollama-incluster` or `hosted`. |
+| `LLM_PROVIDER` | `ollama-host` | `stub`, `extractive`, `ollama-host` or `ollama-incluster`. `hosted` is not built and stops the pod at start-up with a clear message ([ADR 0004](docs/adr/0004-llm-provider-and-data-governance.md)). |
 | `LLM_MODEL` | `llama3.2:3b` | |
 | `TOP_K` | `5` | Passages retrieved per question. |
-| `RELEVANCE_FLOOR` | calibrated | Minimum similarity of the best passage, else abstain. |
-| `CACHE_THRESHOLD` | calibrated | Minimum similarity for a cache hit. |
+| `RELEVANCE_FLOOR` | `0.70` | Minimum similarity of the best passage, else abstain. Measured: midpoint of the gap between 0.658 and 0.746. |
+| `CACHE_THRESHOLD` | `0.96` | Minimum similarity for a cache hit. Lowest of three tried values with no false hit. |
 | `TEMPERATURE` | `0.2` | Low, because the output is JSON and facts. |
-| `CHUNK_SIZE`, `CHUNK_OVERLAP` | measured | Chunking, chosen from three measured configurations. |
+| `CHUNK_SIZE`, `CHUNK_OVERLAP` | `400`, `50` | Words. Chosen from three measured configurations (`docs/PIPELINE.md`). |
+| `LLM_TIMEOUT_SECONDS` | `300` | Model call limit; the Ingress read timeout must exceed it. |
 
 The full list is in [`docs/architecture/architecture.md`](docs/architecture/architecture.md#44-configuration). Secrets are never committed: `.env*`, `*secret*.yaml` and keys are gitignored, and the only Secret manifest in Git is a placeholder.
 
@@ -203,7 +212,7 @@ The full list is in [`docs/architecture/architecture.md`](docs/architecture/arch
 | [`docs/PIPELINE.md`](docs/PIPELINE.md) | Indexing and retrieval measurements |
 | [`docs/FAILURE-ANALYSIS.md`](docs/FAILURE-ANALYSIS.md) | Breaking the pipeline one stage at a time |
 | [`docs/ENGINEERING-NOTES.md`](docs/ENGINEERING-NOTES.md) | Seven engineering questions answered against this code |
-| [`docs/adr/`](docs/adr/) | Architecture decision records |
+| [`docs/adr/`](docs/adr/) | Architecture decision records: indexer as a Job, chunking, cache store, provider and data governance |
 | [`docs/AI-USAGE.md`](docs/AI-USAGE.md) | Which AI tools helped, with what, and what we changed |
 
 ## Development
@@ -220,18 +229,17 @@ Work happens on feature branches off `dev`; `main` is protected (pull request, p
 
 ## Project status
 
-The foundation is in place; the system is being built. This table is updated as work merges.
+The RAG lane (API, indexer, evaluation) is built and measured; the cluster and delivery work is in progress. Measured on the real corpus with `llama3.2:3b`: recall@5 0.875, citation validity 100% (16 of 16), abstention correctness 100% (2 of 2), fallback rate 0 (`eval/results.json`).
 
 | Area | State |
 | --- | --- |
-| Repository, branch protection, tooling, dependency list | Done |
-| Corpus: 9 public documents, manifest, seven required properties | Done (PR open) |
-| Architecture and requirements | Done |
-| Dockerfiles and Kubernetes manifests | Not started |
-| Indexing pipeline (extract, clean, chunk, embed, store) | Not started |
-| Retriever, providers, cache, validation | Not started |
-| Evaluation and CI gate | Not started |
-| CI/CD workflows | Not started |
+| Corpus: 9 public documents, manifest, seven required properties | Done |
+| Indexing pipeline (extract, OCR, clean, chunk, embed, store, stage-and-swap) | Done: 981 chunks in 9 min 39 s |
+| Retriever, version scope, providers, validation, semantic cache | Done |
+| Evaluation: golden set, runner, baselines, fixture baseline for CI | Done |
+| Failure analysis, ADRs, pipeline report, engineering notes (RAG lane) | Done |
+| Dockerfiles for api and indexer | Done |
+| Kubernetes manifests, ui image, CI/CD workflows, evidence | In progress (Ahmad) |
 
 Plan and ownership: [`docs/WORKPLAN.md`](docs/WORKPLAN.md).
 
