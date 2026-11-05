@@ -143,11 +143,13 @@ Test plan: tests ship with each step; the tester subagent re-runs everything and
 
 | Round | Date | Command | Result | Notes |
 | --- | --- | --- | --- | --- |
+| 1 | 2026-11-05 | make test, make lint, AC table, live asks | FAIL | D-T1 malformed metadata leaked exceptions; D-T2 AC-8 numbers not in register; 35 edge tests added |
+| 2 | 2026-11-05 | same, commit 5cd8f64 | PASS | AC-1..8 pass; 248 indexer, 90 eval, 80 api tests; no coverage number (pytest-cov not installed) |
 
 ## 13. Sign-offs
 
 | Gate | Date | Approved by | Notes |
 | --- | --- | --- | --- |
 | Spec and plan | 2026-11-05 | Zain (pre-approved) | |
-| Tester verdict PASS | | | rounds: |
+| Tester verdict PASS | 2026-11-05 | independent subagent | rounds: 2 |
 | Merged | | | PR # |
