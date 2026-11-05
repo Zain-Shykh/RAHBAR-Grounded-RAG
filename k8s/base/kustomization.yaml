@@ -1,0 +1,12 @@
+# secret.placeholder.yaml is deliberately NOT listed (I-13).
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - namespace.yaml
+  - serviceaccounts.yaml
+  - configmap.yaml
+  - api.yaml
+  - ui.yaml
+  - chroma-statefulset.yaml
+  - redis.yaml
+  - services.yaml
