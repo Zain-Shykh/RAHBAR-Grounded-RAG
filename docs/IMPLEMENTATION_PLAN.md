@@ -70,7 +70,7 @@ Hybrid retrieval, the `hosted` provider, the in-cluster Ollama mode, authenticat
 | 7 | Embed and store, full indexer run | Z-06 | Fri 14:00 | DONE | #12 |
 | 8 | Retriever, index state, version scope | Z-07 | Fri 17:00 | DONE | PR (see log) |
 | 9 | Prompt, validation, CI-mode components | Z-08 | Fri 20:00 | DONE | PR (see log) |
-| 10 | Generation, orchestration, readiness, metrics | Z-09 | Sat 13:00 | DONE | PR (see log) |
+| 10 | Generation, orchestration, readiness, metrics | Z-09 | Sat 13:00 | DONE | #15 |
 | 11 | Semantic cache | Z-10 | Sat 16:00 | NOT STARTED | |
 | 12 | Tuning, calibration, baselines | Z-12 | Sat 19:00 | NOT STARTED | |
 | 13 | Failure analysis | Z-14 | Sun 11:00 | NOT STARTED | |
