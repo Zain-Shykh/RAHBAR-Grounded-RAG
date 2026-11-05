@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 from ...config import Settings
-from ...schemas import Answer, Passage
+from ...schemas import Passage
+from .base import GenerationResult
 
 
 class OllamaProvider:
@@ -12,7 +13,9 @@ class OllamaProvider:
     def __init__(self, settings: Settings) -> None:
         self.settings = settings   # ollama_url, llm_model, temperature
 
-    def generate(self, question: str, passages: list[Passage]) -> Answer:
+    def generate(
+        self, question: str, passages: list[Passage], *, hint: str | None = None
+    ) -> GenerationResult:
         # STARTER-TODO(3.4): build the augmented prompt (instructions, numbered evidence,
         # then the question), call POST {ollama_url}/api/chat with the Answer schema as
         # the output format, and turn the reply into an Answer. Section 3.4 lists what
