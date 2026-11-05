@@ -5,7 +5,7 @@
 | Phase | 13, from `docs/IMPLEMENTATION_PLAN.md` |
 | Work plan task | Z-14 |
 | Branch | `feat/rag-z14-failure-analysis` |
-| Stage | TESTING |
+| Stage | READY FOR PR |
 | Started | 2026-11-05 |
 | Approved (spec and plan) | 2026-11-05, pre-approved by Zain (no gate for this run) |
 | Depends on | phases 10 to 12 merged; `eval/baseline.json` (recall@5 0.875) |
@@ -125,11 +125,13 @@ Experiments ran as designed (D-83 to D-85). Raw captures are in the job tmp dire
 
 | Round | Date | Command | Result | Notes |
 | --- | --- | --- | --- | --- |
+| 1 | 2026-11-05 | make test, make lint, coverage (api 97%, indexer 97%), retrieval_only recall, check_submission, capture cross-check | FAIL | AC-1..AC-6 pass; D1 to D4: four claims in FAILURE-ANALYSIS.md had no capture (two `/metrics` quotes, version recall under the broken scope, the fallbacks metric). Recaptured two, reworded two. |
+| 2 | 2026-11-05 | same checks, D1 to D4, 11 spot checks, diff against dev | PASS | no defects; `git diff dev -- api indexer eval` only the pre-work; 6 of 6 failure stages |
 
 ## 13. Sign-offs
 
 | Gate | Date | Approved by | Notes |
 | --- | --- | --- | --- |
 | Spec and plan (the one gate) | 2026-11-05 | Zain (pre-approved) | |
-| Tester verdict PASS | | | rounds: |
+| Tester verdict PASS | 2026-11-05 | independent subagent | rounds: 2 |
 | Merged | | | PR # |
