@@ -81,6 +81,7 @@ Copy this block to the end of section 7, increment the number, and fill every li
 | DEV-004 | `Passage` gains optional `doc_version` and `superseded` | S3 | ABSORBED | 5.7.2 | 2026-11-05 |
 | DEV-005 | A citation may name a retrieved section by its leading clause number | S3 | ABSORBED | 5.7.3 rule 2 | 2026-11-05 |
 | DEV-006 | Cache maintenance runs on the next request or readiness probe, not inside the index refresh | S3 | ABSORBED | 5.9.4 item 3 | 2026-11-05 |
+| DEV-007 | The model timeout and the Ingress timeout must exceed 90 s and 120 s on the host CPU | S3 | OPEN | 4.4, 5.7.4 | 2026-11-05 |
 
 ## 7. Log
 
@@ -245,3 +246,27 @@ Places where the architecture has flagged a real chance of deviation (architectu
 **Plan:** absorbed into architecture 5.9.4 item 3.
 
 **Decision:** taken by Claude, pre-approved by Zain (D-71).
+
+### DEV-007 The model timeout and the Ingress timeout must exceed 90 s and 120 s on the host CPU
+
+| | |
+| --- | --- |
+| Status | OPEN (decision for Zain and Ahmad) |
+| Severity | S3 |
+| Date | 2026-11-05 |
+| Raised by | Claude (phase 12) |
+| Architecture reference | 4.4 (`LLM_TIMEOUT_SECONDS` 90, "below the Ingress timeout (120 s)"), 5.7.4 |
+| Files changed | none (a ConfigMap and Ingress value for Ahmad; the code default stays 90) |
+| Related | `docs/IMPLEMENTATION_PLAN.md` H-7, results register "Generation p50 / p95" |
+
+**The architecture says:** the model call times out after 90 s, below a 120 s Ingress timeout.
+
+**What was built instead:** nothing in code. The shipped baseline (`eval/results.json`) was measured with `LLM_TIMEOUT_SECONDS=300`, and the client in `eval/run_eval.py` now waits 300 s.
+
+**Why:** on this CPU `llama3.2:3b` took 123 s (q04) and 139 s (q09) for two of 18 uncached golden questions on the first full run (p50 39.0 s, p95 138.6 s; a warm re-run of q04 took 41 s). With the 90 s default each of those would have ended as a `provider_error` fallback, and through an Ingress with a 120 s read timeout the client would have received a 504 first.
+
+**Impact:** a cluster run with the architecture's values can show fallbacks and 504s on long prompts that the committed baseline does not have (fallback rate is gated only by reporting, citation validity and abstention are not affected). Cached answers (0.1 to 0.3 s) and floor abstentions are unaffected.
+
+**Plan:** either (A) set `LLM_TIMEOUT_SECONDS=300` in the ConfigMap and the Ingress `proxy-read-timeout` to at least 310 s (what the baseline used; Ahmad, H-7), amending 4.4; or (B) keep 90 and accept fallbacks on the slowest questions, and say so in the engineering note. Recommended: A.
+
+**Decision:** (Zain) accept A / B.
