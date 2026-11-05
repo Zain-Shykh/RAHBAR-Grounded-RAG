@@ -78,7 +78,7 @@ Helm charts, a service mesh, an operator, an Ingress TLS setup, Prometheus or Gr
 
 | # | Phase | Work plan task | Est | Status | PR |
 | --- | --- | --- | --- | --- | --- |
-| K1 | `ui` image and base workloads on minikube | A-01, A-02, A-03 | 5 h | DONE (with deviations DEV-008, DEV-009) | PR_K1 |
+| K1 | `ui` image and base workloads on minikube | A-01, A-02, A-03 | 5 h | DONE (with deviations DEV-008, DEV-009) | #20 |
 | K2 | Indexer Job, CronJob, corpus delivery, real index in the cluster | A-04 (milestone I-2) | 3 h | NOT STARTED | |
 | K3 | Ingress, HPA, rollout hardening | A-05 | 2 h | NOT STARTED | |
 | K4 | NetworkPolicies and proof | A-06 | 3 h | NOT STARTED | |
@@ -128,7 +128,7 @@ Append-only, newest at the bottom. One line per event: date, phase, what happene
 
 ```
 2026-11-05  PLAN  Platform plan written. RAG lane phases 0 to 14 DONE; Ahmad's lane has no commits on origin (k8s/base empty, no workflows, no ui/Dockerfile, no evidence). Zain's sessions take over A-01 to A-11, A-13, A-14. A-00 and A-12 stay with Ahmad.
-2026-11-05  K1  DONE (PR_K1). k8s base running on minikube: api x3 0/1 (readyz 503 failed=[collection], healthz 200), ui, chroma-0, redis Ready, PVCs Bound; images api 388 MB, indexer 592 MB, ui 73.7 MB; kubeconform 16 resources valid, 0 Secret in build. Data survives pod deletion (Chroma collection, Redis key). A-5 verified (api pod deletion 11.4 s vs 0.9 s without preStop). Found: Service `chroma` injects CHROMA_PORT=tcp://... and crash-loops Chroma -> enableServiceLinks false (DEV-008). fsGroup is a no-op on minikube hostPath, /data is 0777 (DEV-009). Evidence docs/evidence/k01-*.txt. Note: api rollout stalls while no index exists (maxUnavailable 0, new pods never Ready): expected until K2.
+2026-11-05  K1  DONE (#20). k8s base running on minikube: api x3 0/1 (readyz 503 failed=[collection], healthz 200), ui, chroma-0, redis Ready, PVCs Bound; images api 388 MB, indexer 592 MB, ui 73.7 MB; kubeconform 16 resources valid, 0 Secret in build. Data survives pod deletion (Chroma collection, Redis key). A-5 verified (api pod deletion 11.4 s vs 0.9 s without preStop). Found: Service `chroma` injects CHROMA_PORT=tcp://... and crash-loops Chroma -> enableServiceLinks false (DEV-008). fsGroup is a no-op on minikube hostPath, /data is 0777 (DEV-009). Evidence docs/evidence/k01-*.txt. Note: api rollout stalls while no index exists (maxUnavailable 0, new pods never Ready): expected until K2.
 ```
 
 ---
