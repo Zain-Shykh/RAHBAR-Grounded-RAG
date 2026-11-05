@@ -798,3 +798,69 @@ Entry template:
 - Claude recommends: A. Deterministic, nothing echoed from the question.
 - Decision: A. Decided by: Claude, pre-approved by Zain.
 - Decided on: 2026-11-05
+
+### D-65 Orchestrator return shape
+- Status: DECIDED
+- Raised: 2026-11-05 by Claude (phase 10)
+- Area: api
+- Related: phase 10 spec, architecture 5.5.3, AD-15
+- Question: The route must set `X-Outcome` and `X-Cache`, but `answer_question` returns `AskResponse`, which has no such fields (JSON contract frozen). How does the route learn them?
+- Options: A. `answer_question` returns `AskResult(response, outcome, cache)`; the route sets headers. B. A request-scoped context variable. C. Extra private fields on `AskResponse`.
+- Claude recommends: A. Explicit, testable, no change to the frozen contract.
+- Decision: A. Decided by: Claude, pre-approved by Zain.
+- Decided on: 2026-11-05
+
+### D-66 Two names for the request latency histogram
+- Status: DECIDED
+- Raised: 2026-11-05 by Claude (phase 10)
+- Area: api
+- Related: architecture 4.14, AD-24, `routes/metrics.py`
+- Question: The 4.14 table names `rahbar_request_duration_seconds` but says "existing kit metric names stay as they are in the code", and the kit names it `rahbar_request_seconds`. Which?
+- Options: A. Keep only the kit name. B. Rename to the table name (a deviation). C. Expose both, same observation.
+- Claude recommends: C. Satisfies both readings of an internal inconsistency at the cost of one extra histogram; logged in the spec, no behaviour change.
+- Decision: C. Decided by: Claude, pre-approved by Zain.
+- Decided on: 2026-11-05
+
+### D-67 Redis check in `/readyz` before the cache exists
+- Status: DECIDED
+- Raised: 2026-11-05 by Claude (phase 10)
+- Area: api
+- Related: phase 10 plan, architecture 4.8, R-PRB-2
+- Question: What does `/readyz` report for Redis until phase 11 builds the cache?
+- Options: A. `redis: "skipped"`, never failing. B. Real PING now (a pod would be unready without a cache that is not used yet). C. Omit the key.
+- Claude recommends: A. Honest about not checking, does not block bring-up; phase 11 replaces it with the real check.
+- Decision: A. Decided by: Claude, pre-approved by Zain.
+- Decided on: 2026-11-05
+
+### D-68 `X-Cache` value while no cache exists
+- Status: DECIDED
+- Raised: 2026-11-05 by Claude (phase 10)
+- Area: api
+- Related: architecture 5.5.3, 5.5.4
+- Question: `MISS` implies a lookup happened. What does the response say before phase 11?
+- Options: A. `SKIP` (log `cache=skipped`). B. `MISS`.
+- Claude recommends: A. No lookup is made; phase 11 produces `MISS` and `HIT`.
+- Decision: A. Decided by: Claude, pre-approved by Zain.
+- Decided on: 2026-11-05
+
+### D-69 Which passages a citation may name, and the provider name
+- Status: DECIDED
+- Raised: 2026-11-05 by Claude (phase 10)
+- Area: api
+- Related: architecture 5.7.3, 5.8, 5.5.3, R-GEN-5
+- Question: (a) Validate citations against all retrieved passages or only those shown to the model (at or above the floor)? (b) The response `provider` is the configured name: `ollama-host` or the class name `ollama`?
+- Options: (a) A. shown only. B. all retrieved. (b) A. `settings.llm_provider`. B. class constant.
+- Claude recommends: (a) A, a model cannot legitimately cite a block it never saw. (b) A, "the configured provider name" (5.5.3).
+- Decision: (a) A, (b) A. Decided by: Claude, pre-approved by Zain.
+- Decided on: 2026-11-05
+
+### D-70 Retry policy details
+- Status: DECIDED
+- Raised: 2026-11-05 by Claude (phase 10)
+- Area: api
+- Related: architecture 5.7.4, 5.12.4, AD-13, AD-21
+- Question: Which provider failures are transient, and what happens when the semaphore wait expires?
+- Options: A. Transient: timeout, connect, read and protocol errors. Not transient: HTTP status errors, a bad envelope, a semaphore wait timeout (fallback at once). Total attempts capped at 2. B. Retry HTTP 5xx too. C. Retry the busy case.
+- Claude recommends: A. Matches "retry once only if transient (timeout, connection reset)"; retrying a busy host would double the wait.
+- Decision: A. Decided by: Claude, pre-approved by Zain.
+- Decided on: 2026-11-05
