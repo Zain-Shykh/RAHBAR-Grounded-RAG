@@ -167,7 +167,7 @@ def test_markdown_and_unknown_suffix(tmp_path: object) -> None:
     d = Path(str(tmp_path))
     (d / "f.md").write_text("---\ndoc_version: 1\n---\n# H\n\nbody", encoding="utf-8")
     doc = ex.extract(str(d / "f.md"), "1", False)
-    assert doc.pages[0].text == "# H\n\nbody" and doc.pages[0].page == 1
+    assert doc.pages[0].text == "H\n\nbody" and doc.pages[0].page == 1
     with pytest.raises(ValueError):
         ex.extract(str(d / "f.docx"), "1", False)
     with pytest.raises(FileNotFoundError):
@@ -178,3 +178,9 @@ def test_footer_with_and_without_page_number_match() -> None:
     pages = [f"body {w}\nmore {w}\nlast {w}\nBook Title 2026" + (f" {i}" if i % 2 else "")
              for i, w in enumerate(["aa", "bb", "cc", "dd", "ee", "ff"])]
     assert all("Book Title" not in p for p in remove_repeating_lines(pages))
+
+
+def test_md_heading_markers_are_dropped() -> None:
+    from pipeline.extract import strip_md_markers
+    assert strip_md_markers("# T\n\n## 1. Attendance\ntext # not a heading\n####### seven") == \
+        "T\n\n1. Attendance\ntext # not a heading\n####### seven"
