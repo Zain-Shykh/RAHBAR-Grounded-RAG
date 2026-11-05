@@ -5,7 +5,7 @@
 | Phase | 11, from `docs/IMPLEMENTATION_PLAN.md` |
 | Work plan task | Z-10 |
 | Branch | `feat/rag-z10-semantic-cache` |
-| Stage | IMPLEMENTING |
+| Stage | READY FOR PR |
 | Started | 2026-11-05 |
 | Approved (spec and plan) | 2026-11-05, pre-approved by Zain (no gate for this run) |
 | Depends on | phase 2 (Redis Stack 7.4.0-v8 verified), phase 8 (`IndexState`, `index_id`), phase 10 (the seam in `services/answer.py`, `/readyz`, metrics) |
@@ -183,13 +183,21 @@ Each step is its own commit and leaves `make test` green. If Redis Stack misbeha
 
 | Round | Date | Command | Result | Notes |
 | --- | --- | --- | --- | --- |
+| 1 | 2026-11-05 | `make test && make lint`; `REDIS_URL=redis://localhost:6379 pytest -q --cov=app`; live API; `calibrate_cache.py`; Redis stop/start | PASS, AC-1..AC-11 | 17 tester tests added (`test_cache_adversarial.py` 8, `test_cache_redis_adversarial.py` 9). api 271 passed + 19 skipped without Redis, 290 passed with `REDIS_URL`; indexer 248; eval 90. No defects. |
 
-Coverage of `app`: `__`%
+Tester evidence (commit 890022a): AC-1 live MISS 32.8 s then HIT 0.098 s (about 330 times faster), same answer, different request_id. AC-5 Redis stopped: `/readyz` 503 `failed:["redis"]` in 6 ms, `/api/ask` 200 `X-Cache: MISS`, warning logged, recovered after `docker start`. AC-10 re-ran: 0.88 8/9 hits 7/9 false; 0.92 7/9, 4/9; 0.96 4/9, 0/9. I-3, I-10, I-16 hold; nothing under `indexer/` mentions Redis; no secret in the diff.
+
+Observations (low, no defect):
+- O-1: 0.96 clears the worst near-miss (0.9583, undergraduate vs graduate attendance) by 0.0017 and only 4 of 9 paraphrases hit. Same-scope near-duplicates are not covered by the scope tag. To note in `PIPELINE.md`; phase 12 re-checks after final chunking.
+- O-2: during the 5 s backoff `maintain` is silent; the warning is logged on the first failure, which is enough for AC-5.
+- A request holding an old snapshot just after a swap can call `maintain(old)` and drop the new index; the next request recreates it and entries rebuild as misses. Bounded by `INDEX_REFRESH_SECONDS`, harmless, accepted.
+
+Coverage of `app`: 97% (`cache.py` 94% with Redis tests, `answer.py` 100%)
 
 ## 13. Sign-offs
 
 | Gate | Date | Approved by | Notes |
 | --- | --- | --- | --- |
 | Spec and plan (the one gate) | 2026-11-05 | Zain (pre-approved, no gate this run) | |
-| Tester verdict PASS | | | rounds: |
+| Tester verdict PASS | 2026-11-05 | independent subagent | rounds: 1 |
 | Merged | | | PR # |

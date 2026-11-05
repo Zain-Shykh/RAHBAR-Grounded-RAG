@@ -32,8 +32,8 @@ Extra "don't" items from the text (not listed as deductions but explicitly forbi
 - [ ] Do not log to a file; stdout JSON only [R-OBS-1].
 - [ ] Do not let `/healthz` touch Chroma, Redis or the LLM [R-PRB-1].
 - [ ] Do not make `ui` able to reach `chroma` [R-SEC-4].
-- [ ] Do not cache follow-ups, abstentions, out-of-scope answers or failed validations [R-CAC-4].
-- [ ] Do not forget cache invalidation on re-index [R-CAC-5].
+- [x] Do not cache follow-ups, abstentions, out-of-scope answers or failed validations [R-CAC-4].
+- [x] Do not forget cache invalidation on re-index [R-CAC-5].
 - [ ] Do not let a user see a 500 from malformed model output [R-GEN-2].
 - [ ] Do not pass model or retrieved text to `eval`, or build SQL from it [R-SEC-5].
 - [ ] Do not assert on model wording in CI; assert on metrics [R-EVA-8].
@@ -82,14 +82,14 @@ Extra "don't" items from the text (not listed as deductions but explicitly forbi
 - [x] Embed: pinned model, dimension recorded (768 for nomic-embed-text).
 - [x] Store: id, text, vector, metadata. Metadata has `source`, `section`, `page`, `doc_version`, `superseded` on every chunk.
 - [x] Collection metadata records embed model name + dimension [R-PIN-2].
-- [ ] Cache expired when the Job runs [R-CAC-5].
+- [x] Cache expired when the Job runs [R-CAC-5].
 - [ ] Three (size, overlap) configs measured on recall@5; table in `docs/PIPELINE.md`; shipped one justified.
 - [ ] `docs/PIPELINE.md` contains: OCR list, before/after table example, unrecovered loss, cleaning rules, storage amplification, model/dim/pin location, chunk count, metadata schema, how docs reach the Job.
 
 ### B4. Query pipeline and generation [R-QRY-*, R-GEN-*, R-LLM-*]
 
 - [ ] Validate 3 to 500 chars (422 otherwise; kit does this).
-- [ ] Semantic cache lookup (skipped for follow-ups); threshold from ConfigMap.
+- [x] Semantic cache lookup (skipped for follow-ups); threshold from ConfigMap.
 - [ ] Embed with pinned model.
 - [ ] `ChromaRetriever` top-k with `superseded=false` filter unless user asks about older version.
 - [ ] Prompt: instructions, numbered delimited evidence, question.
@@ -102,7 +102,7 @@ Extra "don't" items from the text (not listed as deductions but explicitly forbi
 - [ ] Provider interface with `LLM_PROVIDER`; `ollama-host` fully working; swap = one file.
 - [ ] Temperature in ConfigMap with one-line justification.
 - [ ] ADR: cache choice (Redis vs second Chroma collection) [R-CAC-1].
-- [ ] Cache threshold chosen with data: 2 or 3 tried, false hit that ruled one out recorded [R-CAC-3].
+- [x] Cache threshold chosen with data: 2 or 3 tried, false hit that ruled one out recorded [R-CAC-3].
 
 ### B5. Kubernetes [R-K8S-*]
 
