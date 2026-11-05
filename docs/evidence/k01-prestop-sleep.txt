@@ -1,0 +1,18 @@
+$ kubectl explain pod.spec.containers.lifecycle.preStop.sleep
+KIND:       Pod
+VERSION:    v1
+
+FIELD: sleep <SleepAction>
+
+
+DESCRIPTION:
+    Sleep represents a duration that the container should sleep.
+
+server version: v1.37.0
+$ kubectl delete pod/api-794bb447b9-2ppvl (timed)
+pod "api-794bb447b9-2ppvl" deleted from rahbar namespace
+deletion took 11.427190067 s (preStop sleep 10 + uvicorn shutdown)
+
+# control: ui pod has no preStop
+pod "ui-6d5b48c974-bpd5r" deleted from rahbar namespace
+deletion took .947840087 s

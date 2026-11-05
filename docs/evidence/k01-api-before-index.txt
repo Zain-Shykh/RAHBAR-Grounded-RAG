@@ -1,0 +1,40 @@
+$ kubectl get pods,pvc -n rahbar
+NAME                         READY   STATUS    RESTARTS   AGE
+pod/api-794bb447b9-2ppvl     0/1     Running   0          53s
+pod/api-794bb447b9-5n7nr     0/1     Running   0          53s
+pod/api-794bb447b9-v58n4     0/1     Running   0          53s
+pod/chroma-0                 1/1     Running   0          53s
+pod/redis-85454df54f-zbrs9   1/1     Running   0          53s
+pod/ui-6d5b48c974-bpd5r      1/1     Running   0          53s
+
+NAME                                         STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE
+persistentvolumeclaim/cache-data             Bound    pvc-c1fc4a13-21d8-4be3-90ce-2ef280758caf   1Gi        RWO            standard       <unset>                 53s
+persistentvolumeclaim/chroma-data-chroma-0   Bound    pvc-4c1885df-40e7-45f3-88d7-4dd778e1dc2b   2Gi        RWO            standard       <unset>                 53s
+
+# time to Ready (pod creation to Ready condition), seconds
+api-794bb447b9-2ppvl Ready=False 0
+api-794bb447b9-5n7nr Ready=False 0
+api-794bb447b9-v58n4 Ready=False 0
+chroma-0 Ready=True 3
+redis-85454df54f-zbrs9 Ready=True 3
+ui-6d5b48c974-bpd5r Ready=True 3
+
+$ kubectl port-forward -n rahbar deploy/api 8000:8000 &
+$ curl -si localhost:8000/healthz
+HTTP/1.1 200 OK
+date: Thu, 05 Nov 2026 17:53:54 GMT
+server: uvicorn
+content-length: 36
+content-type: application/json
+x-request-id: e24ce51b4a844aaf9652f1c843e55834
+
+{"status":"alive","version":"0.1.0"}
+$ curl -si localhost:8000/readyz
+HTTP/1.1 503 Service Unavailable
+date: Thu, 05 Nov 2026 17:53:54 GMT
+server: uvicorn
+content-length: 173
+content-type: application/json
+x-request-id: 2061109829f94cdfad7e77ad7684aec4
+
+{"status":"not_ready","failed":["collection"],"checks":{"chroma":"ok","collection":"failed","embed_pin":"not_checked","redis":"not_checked","embed_dimension":"not_checked"}}
