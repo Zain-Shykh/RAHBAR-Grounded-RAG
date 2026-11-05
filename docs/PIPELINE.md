@@ -55,3 +55,11 @@ Thresholds you tried, the false hit that ruled one out, the one you shipped.
 
 ## Evaluation method
 How recall@k matches retrieved passages to golden ones (by source and section? by chunk id?).
+
+## Embed and store (phase 7)
+
+**Pin.** `EMBED_MODEL` (ConfigMap, read by the indexer and the API) is `nomic-embed-text`, 768 dimensions, cosine. The indexer writes `embed_model` and `dimension` into the collection metadata; the API compares at `/readyz`. Embedded text is `search_document: <section>\n<text>`; the stored document is the chunk text only. CI uses `hashing-bow-768` (offline, same dimension).
+
+**Store.** Stage-and-swap: build `rahbar_next`, check `count()`, delete `rahbar`, rename. A failure before the delete leaves the live index. Collection metadata: `hnsw:space`, `embed_model`, `dimension`, `index_id`, `built_at`, `chunk_count`, `chunk_size`, `chunk_overlap`, `doc_versions`. Record metadata: `source`, `section`, `page`, `doc_version`, `superseded`.
+
+**Real corpus at 400/50.** 981 chunks: Academic Rules Handbook 238, Student Handbook 245, Aug 2023 rules 152, Annual Report 2023-24 182, Annual Report 2019-20 65, Prospectus 44, faculty policy 40, grading page 8, fee page 7. Amplification 1.04. Wall time 9 min 39 s (embedding 422 s), indexer peak memory 438 MB; Ollama runs on the host. Re-running replaces the collection and changes `index_id`.

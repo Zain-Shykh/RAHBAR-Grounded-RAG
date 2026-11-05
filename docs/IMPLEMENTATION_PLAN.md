@@ -67,7 +67,7 @@ Hybrid retrieval, the `hosted` provider, the in-cluster Ollama mode, authenticat
 | 4 | Extract and clean | Z-04 | Thu 16:30 | DONE | #6 |
 | 5 | Evaluation runner | Z-11 | Thu 18:30 | DONE | #8 |
 | 6 | Chunker | Z-05 | Fri 12:00 | DONE | #10 |
-| 7 | Embed and store, full indexer run | Z-06 | Fri 14:00 | NOT STARTED | |
+| 7 | Embed and store, full indexer run | Z-06 | Fri 14:00 | DONE | #12 |
 | 8 | Retriever, index state, version scope | Z-07 | Fri 17:00 | NOT STARTED | |
 | 9 | Prompt, validation, CI-mode components | Z-08 | Fri 20:00 | NOT STARTED | |
 | 10 | Generation, orchestration, readiness, metrics | Z-09 | Sat 13:00 | NOT STARTED | |
@@ -82,11 +82,11 @@ Hours spent so far (fill in at each phase end): planned 37.5 h, actual `____`.
 ## 2. Current focus
 
 ```
-Phase:        7  Embed, store, full indexer run
+Phase:        8  Retriever, index state, version scope
 Stage:        not started   (SPEC DRAFT, APPROVED, IMPLEMENTING, TESTING, READY FOR PR, MERGED)
-Branch:       (none yet; feat/rag-z06-embed-store)
-Spec:         (none yet; docs/specs/phase-07-embed-store.md)
-Next action:  fresh session: stage 0 then stage 1 of docs/WORKFLOW.md for phase 7. Consider first the follow-up for two-column Handbook text (COLUMN_SPLITS for the two Handbook PDFs, like D-044)
+Branch:       (none yet; feat/rag-z07-retriever)
+Spec:         (none yet; docs/specs/phase-08-retriever.md)
+Next action:  fresh session: stage 0 then stage 1 for phase 8. The api copies indexer/pipeline/embedding/{hashing,ollama}.py (AD-09); the golden vector in indexer/tests/test_embed_hashing.py is the parity check. Rebuild the dev index with the indexer if needed (about 10 min, Ollama up).
 Waiting on:   nothing
 Last updated: 2026-11-05
 ```
@@ -104,7 +104,7 @@ Things this lane owes Ahmad or needs from him. Tick when delivered. Newest at th
 | H-1 | Zain to Ahmad | `rahbar-api` and `rahbar-indexer` Dockerfiles merged to `dev` (he needs images to run) | 1 | [x] |
 | H-2 | Zain to Ahmad | Verified Redis Stack image tag, its UID, and every path it needs writable | 2 | [x] |
 | H-3 | Zain to Ahmad | Verified Chroma behaviour notes (user, writable paths) if anything differs from assumption R-01 | 2 | [x] |
-| H-4 | Zain to Ahmad | Indexer peak memory (for the Job limit), and the real corpus indexing time | 7 | [ ] |
+| H-4 | Zain to Ahmad | Indexer peak memory (for the Job limit), and the real corpus indexing time | 7 | [x] |
 | H-5 | Zain to Ahmad | `eval/run_eval.py` working with the fixture golden set | 5 | [x] |
 | H-6 | Zain to Ahmad | Hashing embedder and extractive provider merged (CI-mode) | 9 | [ ] |
 | H-7 | Zain to Ahmad | Final ConfigMap values: `CHUNK_SIZE`, `CHUNK_OVERLAP`, `RELEVANCE_FLOOR`, `CACHE_THRESHOLD`, `TEMPERATURE` with one-line justifications | 12 | [ ] |
@@ -159,6 +159,10 @@ Append-only, newest at the bottom. One line per event: date, phase, what happene
 2026-11-05  P06  TESTING round 1: FAIL, T-1 clause splitter cut a table row. Fixed 188d572.
 2026-11-05  P06  TESTING round 2: PASS, AC-1..AC-9, 183 indexer tests. READY FOR PR. Known loss: two-column Handbook text (follow-up: column splits for the two Handbook PDFs, like D-044).
 2026-11-05  P06  MERGED: PR #10 (f7eede5). chunk() and scripts/chunk_report.py on dev; 1044 chunks at 400/50, amplification 1.04; 4 golden strings changed; DEV-003, D-049..D-051. No hand-off. DONE.
+2026-11-05  P07  Follow-ups from the P06 review: Handbook spread pages split (D-052, 89e1751, golden still 0 missing, q05/q06 strings stay because numbered items inside Roman sections are their own sections); DEV-001..003 absorbed into architecture 5.4.2 and AD-22 (29deba4).
+2026-11-05  P07  SPEC DRAFT, APPROVED (pre-approved): spec and plan, D-053..D-056 (Claude, pre-approved by Zain). 7700adb
+2026-11-05  P07  IMPLEMENTING done: hashing and Ollama embedders, stage-and-swap store, run.py with waits, stage logs and exit codes, scripts/check_index.py. Real run twice on corpus/raw: 981 chunks, 9 min 39 s, peak 438 MB, index_id changed. 
+2026-11-05  P07  TESTING round 1: PASS, AC-1..AC-9, 23 edge tests added, 248 indexer tests. READY FOR PR.
 ```
 
 ---
@@ -480,7 +484,7 @@ None.
 
 ## Phase 7: Embed, store, full indexer run (Z-06)
 
-**Status:** NOT STARTED · **Branch:** `feat/rag-z06-embed-store` · **Est:** 2 h · **Priority:** P0
+**Status:** DONE (PR #12) · **Branch:** `feat/rag-z06-embed-store` · **Est:** 2 h · **Priority:** P0
 
 ### Objective
 The indexer builds a real, correctly labelled collection in Chroma using stage-and-swap, from the real corpus with Ollama.
@@ -507,14 +511,14 @@ Architecture 5.3 (embedding contract, hashing embedder), 5.4.1 (run sequence), 5
 Cache invalidation (the `index_id` makes it automatic). Any API code.
 
 ### Acceptance criteria
-- [ ] `python -m pipeline.run --dummy` still works against local Chroma.
-- [ ] With `make dev-services` and Ollama running: `CORPUS_DIR=corpus/raw CHROMA_PORT=8100 python -m pipeline.run` completes; the collection `rahbar` exists with all metadata keys, `chunk_count` equal to the real count, and no `rahbar_next` left.
-- [ ] A second run replaces the collection and changes `index_id`.
-- [ ] A forced failure (test: embed raises on the second batch) leaves the previous `rahbar` collection and its `index_id` intact.
-- [ ] Hashing embedder golden-vector test present.
-- [ ] Logs are JSON, one line per stage, with timings, OCR page counts, chunk counts and amplification.
-- [ ] Peak memory (`/usr/bin/time -v`) and wall time recorded in the results register; H-4 delivered.
-- [ ] `make test && make lint` green.
+- [x] `python -m pipeline.run --dummy` still works against local Chroma.
+- [x] With `make dev-services` and Ollama running: `CORPUS_DIR=corpus/raw CHROMA_PORT=8100 python -m pipeline.run` completes; the collection `rahbar` exists with all metadata keys, `chunk_count` equal to the real count, and no `rahbar_next` left.
+- [x] A second run replaces the collection and changes `index_id`.
+- [x] A forced failure (test: embed raises on the second batch) leaves the previous `rahbar` collection and its `index_id` intact.
+- [x] Hashing embedder golden-vector test present.
+- [x] Logs are JSON, one line per stage, with timings, OCR page counts, chunk counts and amplification.
+- [x] Peak memory (`/usr/bin/time -v`) and wall time recorded in the results register; H-4 delivered.
+- [x] `make test && make lint` green.
 
 ### Verify
 ```bash
