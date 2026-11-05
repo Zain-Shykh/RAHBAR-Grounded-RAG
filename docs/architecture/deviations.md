@@ -199,7 +199,7 @@ Places where the architecture has flagged a real chance of deviation (architectu
 
 | | |
 | --- | --- |
-| Status | OPEN (absorb) |
+| Status | ABSORBED |
 | Severity | S3 |
 | Date | 2026-11-05 |
 | Raised by | Claude (phase 10) |
@@ -217,4 +217,4 @@ Places where the architecture has flagged a real chance of deviation (architectu
 
 **Plan:** absorb into 5.7.3 rule 2.
 
-**Decision:** taken by Claude to fix a code defect found live (pre-approved run); Zain to confirm in the PR.
+**Decision:** taken by Claude to fix a code defect found live; accepted by Zain 2026-11-05; absorbed into architecture 5.7.3 rule 2.

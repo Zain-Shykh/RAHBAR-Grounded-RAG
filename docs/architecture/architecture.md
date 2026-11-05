@@ -956,7 +956,7 @@ Ollama call: `POST {OLLAMA_URL}/api/chat` with `model=LLM_MODEL`, `messages`, `s
 `validate.py` checks, in order:
 
 1. The text parses as JSON and satisfies `Answer`.
-2. Every citation resolves to a retrieved passage, matching `source` exactly and `section` exactly (page is filled from the passage if the model omitted it or disagrees).
+2. Every citation resolves to a retrieved passage, matching `source` exactly and `section` exactly, or, failing an exact match, `section` is a prefix of exactly one distinct retrieved `section` of the same `source`, ending at a space, dot or colon, and not an all-digit parent number (`4.3` for `4.3 The normal course load is 5 courses.`; DEV-005). The citation is rewritten to the passage's exact `source`, `section` and `page`, so a response only carries retrieved strings. An ambiguous or mid-word prefix is rejected.
 3. If `answered_from_context` is true, there is at least one citation. If it is false, citations are emptied.
 4. `answer` is non-empty.
 
