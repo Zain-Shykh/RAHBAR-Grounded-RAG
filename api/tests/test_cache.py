@@ -302,5 +302,18 @@ def test_indexer_has_no_redis() -> None:
     assert not any("redis" in x.lower() for x in (root / "requirements.txt").read_text().splitlines())
 
 
+def test_default_threshold_is_the_calibrated_one(monkeypatch) -> None:
+    from app.config import get_settings
+
+    monkeypatch.delenv("CACHE_THRESHOLD", raising=False)
+    assert Settings().cache_threshold == 0.96 == get_settings().cache_threshold
+    monkeypatch.setenv("CACHE_THRESHOLD", "0.9")
+    monkeypatch.setenv("CACHE_TTL_SECONDS", "5")
+    monkeypatch.setenv("REDIS_HOST", "h")
+    monkeypatch.setenv("REDIS_PORT", "7")
+    s = get_settings()
+    assert (s.cache_threshold, s.cache_ttl_seconds, s.redis_host, s.redis_port) == (0.9, 5, "h", 7)
+
+
 def test_index_prefix_is_the_documented_one() -> None:
     assert INDEX_PREFIX == "idx:cache:"

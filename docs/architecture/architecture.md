@@ -266,7 +266,7 @@ Annotations: `nginx.ingress.kubernetes.io/proxy-read-timeout: "120"` (model call
 | `REDIS_HOST`, `REDIS_PORT` | `redis`, `6379` | api | |
 | `TOP_K` | `5` | api | Recall@5 is the headline metric. |
 | `RELEVANCE_FLOOR` | `0.50` (to be calibrated, section 5.6.3) | api | Cosine similarity of the best passage. |
-| `CACHE_THRESHOLD` | `0.92` (to be calibrated, section 5.9.3) | api | Lowest value with zero false hits on the test set. |
+| `CACHE_THRESHOLD` | `0.96` (calibrated in phase 11, section 5.9.3) | api | Lowest value with zero false hits on the test set. |
 | `CACHE_TTL_SECONDS` | `86400` | api | A safety net. Real invalidation is by `index_id`. |
 | `TEMPERATURE` | `0.2` | api | JSON and facts want 0 to 0.3. Not 0, so that the one retry can produce a different output than the first try. |
 | `LLM_NUM_CTX` | `8192` | api | Five chunks of 400 words plus instructions exceed Ollama's small default context. |

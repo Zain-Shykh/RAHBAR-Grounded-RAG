@@ -193,7 +193,7 @@ class MemoryCache:
 
     name = "memory"
 
-    def __init__(self, threshold: float = 0.92) -> None:
+    def __init__(self, threshold: float = 0.96) -> None:
         self._threshold = threshold
         self._entries: dict[str, list[tuple[str, list[float], str]]] = {}
         self._dim: dict[str, int] = {}
