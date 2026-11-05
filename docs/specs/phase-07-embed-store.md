@@ -5,7 +5,7 @@
 | Phase | 7, from `docs/IMPLEMENTATION_PLAN.md` |
 | Work plan task | Z-06 |
 | Branch | `feat/rag-z06-embed-store` |
-| Stage | TESTING |
+| Stage | READY FOR PR |
 | Started | 2026-11-05 |
 | Approved (spec and plan) | 2026-11-05, Zain (pre-approved: no gate this session) |
 | Depends on | phases 2 (services verified), 4 (extract, clean), 6 (chunk); follow-ups D-052 (Handbook spreads), DEV-001..003 absorbed |
@@ -42,7 +42,7 @@
 ```python
 # embed.py
 def embed(texts: list[str], settings: IndexerSettings) -> list[list[float]]   # one vector per text, same order
-def document_text(chunk: Chunk, model: str) -> str   # prefix rule (5.3): nomic -> "search_document: <section>\n<text>", hashing -> same string, prefix ignored by the embedder
+def document_text(chunk: Chunk) -> str   # always "search_document: <section>\n<text>"; the hashing embedder strips the prefix (5.3). No model argument (O-1)
 # embedding/ollama.py
 def embed_ollama(texts: list[str], model: str, url: str, batch_size: int, *, sleep=time.sleep) -> list[list[float]]
 # embedding/hashing.py
@@ -84,7 +84,7 @@ Config (env, defaults only; not new ConfigMap keys except `EMBED_BATCH_SIZE`, al
 | --- | --- | --- | --- |
 | AC-1 | integration | `python -m pipeline.run --dummy` against `localhost:8100` | dev Chroma |
 | AC-2 | integration | real run, then `scripts/check_index.py` | dev Chroma, Ollama, `corpus/raw` |
-| AC-3 | integration | second run, `check_index.py --expect-new-index-id <id>` | same |
+| AC-3 | integration | second run, `check_index.py --not-index-id <id>` | same |
 | AC-4 | unit | `indexer/tests/test_store.py` (in-memory fake client), `test_run.py::test_embed_failure_keeps_live` | nothing |
 | AC-5 | unit | `indexer/tests/test_embed_hashing.py` | nothing |
 | AC-6 | unit | `indexer/tests/test_embed_ollama.py` (`httpx.MockTransport`) | nothing |
@@ -160,11 +160,12 @@ About 2 h of work plus the real run (OCR about 2 min, embedding of about 1000 ch
 
 | Round | Date | Command | Result | Notes |
 | --- | --- | --- | --- | --- |
+| 1 | 2026-11-05 | `make test`, `make lint`, tiny-corpus runs, fresh real run (981 chunks, index_id `20261105T052938Z-2a8943`, 10:01, 437 936 kB), `check_index.py --not-index-id`, `chunk_report.py --golden` (0 missing) | PASS, AC-1..AC-9 | Tester added `test_phase07_edges.py` (23 cases: non-ASCII, batch edges, malformed Ollama bodies, crash between delete and rename, same-stem id collision, empty corpus). Nits: D-1 flag name in section 7, O-1 `document_text` signature: both fixed in the spec. Coverage not measured (pytest-cov not installed). 3 concurrent runs left a consistent collection; the CronJob's `Forbid` is the guard. |
 
 ## 13. Sign-offs
 
 | Gate | Date | Approved by | Notes |
 | --- | --- | --- | --- |
 | Spec and plan (the one gate) | 2026-11-05 | Zain (pre-approved) | |
-| Tester verdict PASS | | | rounds: |
+| Tester verdict PASS | 2026-11-05 | independent subagent | rounds: 1 |
 | Merged | | | PR # |
