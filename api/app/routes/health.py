@@ -25,8 +25,15 @@ def healthz(request: Request) -> dict[str, str]:
     return {"status": "alive", "version": request.app.state.settings.app_version}
 
 
+_inflight = threading.Lock()   # one probe thread at a time: a hung Chroma must not pile up threads
+
+
 def _within(seconds: float, fn: Callable[[], Any]) -> tuple[bool, Any]:
-    """Run fn in a daemon thread. (finished, result or exception). A hung call is abandoned."""
+    """Run fn in a daemon thread. (finished, result or exception). A hung call is abandoned
+    and keeps the slot until it returns; meanwhile new probes report not finished."""
+    lock = _inflight
+    if not lock.acquire(blocking=False):
+        return False, None
     box: list[Any] = []
 
     def run() -> None:
@@ -34,6 +41,8 @@ def _within(seconds: float, fn: Callable[[], Any]) -> tuple[bool, Any]:
             box.append(fn())
         except Exception as exc:
             box.append(exc)
+        finally:
+            lock.release()
 
     t = threading.Thread(target=run, daemon=True)
     t.start()

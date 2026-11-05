@@ -15,6 +15,16 @@ from app.services.index_state import IndexState
 from tests.fakes import FakeClient, FakeCollection, meta, rows
 
 
+@pytest.fixture(autouse=True)
+def fresh_probe_slot(monkeypatch: pytest.MonkeyPatch) -> None:
+    """A test that hangs Chroma leaves a thread holding the probe slot; give each test its own."""
+    import threading
+
+    import app.routes.health as health
+
+    monkeypatch.setattr(health, "_inflight", threading.Lock())
+
+
 def make_client(monkeypatch: pytest.MonkeyPatch, fake: FakeClient, **settings: Any):
     monkeypatch.setenv("RETRIEVER", "stub")
     monkeypatch.setenv("LLM_PROVIDER", "stub")
@@ -151,3 +161,22 @@ def test_healthz_touches_nothing(monkeypatch) -> None:
         app.state.provider = Boom()
         r = c.get("/healthz")
     assert r.status_code == 200 and r.json()["status"] == "alive"
+
+
+def test_hung_chroma_does_not_stack_probe_threads(monkeypatch) -> None:
+    import app.routes.health as health
+
+    calls: list[int] = []
+
+    class Hang(FakeClient):
+        def get_collection(self, name: str):
+            calls.append(1)
+            time.sleep(1)
+
+    monkeypatch.setattr(health, "CHECK_TIMEOUT", 0.1)
+    app, s, state = make_client(monkeypatch, Hang(None))
+    with TestClient(app) as c:
+        app.state.index_state = state
+        codes = [c.get("/readyz").status_code for _ in range(5)]
+    assert codes == [503] * 5
+    assert len(calls) == 1      # probes 2..5 found the slot busy and did not start a thread
