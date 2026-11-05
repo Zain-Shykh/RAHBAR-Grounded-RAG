@@ -6,7 +6,7 @@
 Accepted · 2026-11-05
 
 ## Context
-RAHBAR has two paths: a slow, heavy path that turns nine documents into 981 vectors, and a fast, light path that answers a question. On the real corpus the heavy path took **9 min 39 s** (41 OCR pages in 4 min 17 s, embedding 422 s) and **438 MB** peak memory (`/usr/bin/time -v`, two runs); the light path needs about 0.1 s of retrieval. The API runs as three replicas (HPA 3 to 8) over one Chroma volume, so anything the API does at start-up, it does three or more times, at the same moment, to the same store.
+RAHBAR has two paths: a slow, heavy path that turns nine documents into 981 vectors, and a fast, light path that answers a question. On the real corpus the heavy path took **9 min 39 s** (embedding alone 422 s; the 41 OCR pages about 88 s; only the wall total is quoted because the register's stage times do not add up to it) and **438 MB** peak memory (`/usr/bin/time -v`, two runs); the light path needs about 0.1 s of retrieval. The API runs as three replicas (HPA 3 to 8) over one Chroma volume, so anything the API does at start-up, it does three or more times, at the same moment, to the same store.
 
 The assignment forbids indexing at API start-up (R-IDX-10, R-K8S-JOB, deduction R-DED-3, −10).
 

@@ -72,7 +72,7 @@ Write the RAG-lane documents from the measurements already in the results regist
 | AC-3 | checker, tester | checker section J; tester reads the cited lines | nothing |
 | AC-4 | checker, tester | checker section J; tester compares to `api/app/` | nothing |
 | AC-5 | manual | `grep -rn` for the placeholder over the repo | nothing |
-| AC-6 | unit | `api/tests/test_providers.py::test_hosted_is_a_clear_config_error` | nothing |
+| AC-6 | unit | `api/tests/test_ollama_provider.py::test_hosted_is_a_clear_config_error` | nothing |
 | AC-7 | checker | `python3 scripts/check_submission.py` | nothing |
 | AC-8 | tester | brief in `docs/WORKFLOW.md` section 6, adapted to documents | nothing |
 
@@ -112,12 +112,13 @@ About 3 h (plan: 3 h).
 
 ## 11. Implementation notes
 
-(filled during implementation)
+Hosted provider removed, not built (D-87). ADR 0001 written here (D-86). The results register's stage times (extract+clean+chunk 4 min 17 s, embed 422 s, store 1.3 s = 11 min 20 s) do not add up to its 9 min 39 s wall time; documents quote only the total and the 422 s embedding. Zain should re-check that register row. The checker's remaining failures are Ahmad's (evidence, workflows, k8s, ui image) and four shared docs that mention the starter placeholder in prose.
 
 ## 12. Test report
 
 | Round | Date | Command | Result | Notes |
 | --- | --- | --- | --- | --- |
+| 1 | 2026-11-05 | tester brief (WORKFLOW 6, adapted) | FAIL | D1 OCR timing, D2 cluster policies stated as built, D3 provider default, D4 AD-26 cite, D5 readiness timeout, D6 README hosted step and median range; all fixed in the next commit |
 
 ## 13. Sign-offs
 

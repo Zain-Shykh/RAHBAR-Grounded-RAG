@@ -112,13 +112,6 @@ make ask Q="What CGPA puts a student on academic warning?"
 make ask Q="What are the hostel rules?"          # the corpus deliberately lacks this: it declines
 ```
 
-Hosted LLM mode only: the key is created from the command line and never written to a file.
-
-```bash
-export LLM_API_KEY=...
-kubectl create secret generic rahbar-secret -n rahbar --from-literal=LLM_API_KEY="$LLM_API_KEY"   # or: make secret
-```
-
 Re-index without redeploying:
 
 ```bash
@@ -133,7 +126,7 @@ kubectl create job --from=cronjob/reindex manual-reindex-1 -n rahbar     # or: m
 | --- | --- | --- | --- |
 | POST | `/api/ask` | Body `{"question": "..."}`, 3 to 500 characters. Returns the answer, its citations, the retrieved passages, a confidence and the provider name. One question per request: there is no conversation memory. | `200` in every case where the pipeline ran, including an abstention or the canned fallback (a model failure is never a 500). `422` when the body is invalid (missing or out-of-range `question`). `503` `{"detail":"index unavailable"}` when Chroma, the collection, the embedding pin or the vector dimension is not usable. |
 | GET | `/healthz` | Liveness: `{"status":"alive","version":"..."}`. Touches no other service. | `200` |
-| GET | `/readyz` | Readiness. Ready only if Chroma is reachable, the collection is non-empty, the embedding model matches the collection's, Redis is reachable and the dimension matches. Each check is bounded by 2 s. | `200` `{"status":"ready","checks":{...}}`, or `503` `{"status":"not_ready","failed":["embed_pin"],"checks":{...}}` naming the failing check (`chroma`, `collection`, `embed_pin`, `redis`, `embed_dimension`) |
+| GET | `/readyz` | Readiness. Ready only if Chroma is reachable, the collection is non-empty, the embedding model matches the collection's, Redis is reachable and the dimension matches. The Chroma-side checks are bounded by 2 s, Redis by 1 s socket timeouts. | `200` `{"status":"ready","checks":{...}}`, or `503` `{"status":"not_ready","failed":["embed_pin"],"checks":{...}}` naming the failing check (`chroma`, `collection`, `embed_pin`, `redis`, `embed_dimension`) |
 | GET | `/metrics` | Prometheus text format; metric names are fixed (`docs/architecture/architecture.md` 4.14). | `200` |
 
 Response headers on every reply:
@@ -141,7 +134,7 @@ Response headers on every reply:
 | Header | Values | Meaning |
 | --- | --- | --- |
 | `X-Request-ID` | the caller's `X-Request-ID`, else a generated id | Repeated in every JSON log line of that request and in the body's `request_id`. |
-| `X-Outcome` (`/api/ask`) | `answered`, `abstained`, `fallback`, `cached` | `abstained`: below the relevance floor (no model call) or the model said the documents do not cover it. `fallback`: two invalid model outputs or a provider failure; a fixed canned answer. `cached`: served from the semantic cache. |
+| `X-Outcome` (`/api/ask`) | `answered`, `abstained`, `fallback`, `cached` | `abstained`: below the relevance floor (no model call) or the model said the documents do not cover it. `fallback`: two invalid model outputs, a provider failure or a failed query embedding; a fixed canned answer. `cached`: served from the semantic cache. |
 | `X-Cache` (`/api/ask`) | `HIT`, `MISS`, `SKIP` | `SKIP` when the cache was not consulted (no vector or no index id). Only answered, validated responses are ever stored. |
 
 ```json
@@ -165,7 +158,7 @@ All configuration is environment variables, supplied on the cluster by one Confi
 | Key | Default | Meaning |
 | --- | --- | --- |
 | `EMBED_MODEL` | `nomic-embed-text` | The embedding pin, read by both the indexer and the API. |
-| `LLM_PROVIDER` | `ollama-host` | `stub`, `extractive`, `ollama-host` or `ollama-incluster`. `hosted` is not built and stops the pod at start-up with a clear message ([ADR 0004](docs/adr/0004-llm-provider-and-data-governance.md)). |
+| `LLM_PROVIDER` | `stub` in code, `ollama-host` in the ConfigMap | `stub`, `extractive`, `ollama-host` or `ollama-incluster`. `hosted` is not built and stops the pod at start-up with a clear message ([ADR 0004](docs/adr/0004-llm-provider-and-data-governance.md)). |
 | `LLM_MODEL` | `llama3.2:3b` | |
 | `TOP_K` | `5` | Passages retrieved per question. |
 | `RELEVANCE_FLOOR` | `0.70` | Minimum similarity of the best passage, else abstain. Measured: midpoint of the gap between 0.658 and 0.746. |
