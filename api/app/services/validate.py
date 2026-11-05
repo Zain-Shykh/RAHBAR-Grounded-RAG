@@ -35,7 +35,7 @@ def validate(raw: str | Answer, passages: list[Passage]) -> Answer:
     else:
         try:
             data = json.loads(raw)
-        except (ValueError, TypeError) as e:
+        except (ValueError, TypeError, RecursionError) as e:   # deep nesting: RecursionError
             raise InvalidModelOutput("not_json") from e
         try:
             ans = Answer.model_validate(data)
