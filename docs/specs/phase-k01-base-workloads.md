@@ -5,7 +5,7 @@
 | Phase | K1, from `docs/IMPLEMENTATION_PLAN_PLATFORM.md` |
 | Work plan task | A-01, A-02, A-03 |
 | Branch | `feat/k8s-k01-base-workloads` |
-| Stage | TESTING |
+| Stage | READY FOR PR |
 | Started | 2026-11-05 |
 | Approved (spec and plan) | pre-approved by Zain, platform plan 0.1 |
 | Depends on | RAG phases 0 to 14 DONE; H-2, H-3, H-7, H-11 (texts in `IMPLEMENTATION_PLAN.md` log) |
@@ -108,11 +108,12 @@ Test plan: independent testing subagent (WORKFLOW 6) re-runs all commands. Rollb
 
 | Round | Date | Command | Result | Notes |
 | --- | --- | --- | --- | --- |
+| 1 | 2026-11-05 | independent subagent, commit 597c098, all AC re-run | PASS (AC-1..AC-9) | Only defect D1 (Low): `kubectl apply` prints `statefulset.apps/chroma configured` every time, `kubectl diff` empty (volumeClaimTemplates defaulting noise). No action. `make images` not re-run by tester. |
 
 ## 13. Sign-offs
 
 | Gate | Date | Approved by | Notes |
 | --- | --- | --- | --- |
 | Spec and plan | 2026-11-05 | pre-approved by Zain (platform plan 0.1) | no gate |
-| Tester verdict PASS | | | rounds: |
+| Tester verdict PASS | 2026-11-05 | independent subagent | rounds: 1 |
 | Merged | | | PR # |
