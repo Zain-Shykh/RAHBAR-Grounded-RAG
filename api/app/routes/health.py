@@ -25,27 +25,32 @@ def healthz(request: Request) -> dict[str, str]:
     return {"status": "alive", "version": request.app.state.settings.app_version}
 
 
-_inflight = threading.Lock()   # one probe thread at a time: a hung Chroma must not pile up threads
+_guard = threading.Lock()
+_job: tuple[threading.Thread, list[Any]] | None = None   # the one probe thread in flight
 
 
 def _within(seconds: float, fn: Callable[[], Any]) -> tuple[bool, Any]:
-    """Run fn in a daemon thread. (finished, result or exception). A hung call is abandoned
-    and keeps the slot until it returns; meanwhile new probes report not finished."""
-    lock = _inflight
-    if not lock.acquire(blocking=False):
-        return False, None
-    box: list[Any] = []
+    """Run fn in a daemon thread and wait up to `seconds`: (finished, result or exception).
 
-    def run() -> None:
-        try:
-            box.append(fn())
-        except Exception as exc:
-            box.append(exc)
-        finally:
-            lock.release()
+    One probe thread at a time. A probe that arrives while one is running joins it and shares its
+    result, so concurrent probes do not each start a thread and a hung Chroma cannot pile up
+    threads; while the hung call lives, every probe times out and reports not finished.
+    """
+    global _job
+    with _guard:
+        if _job is None or not _job[0].is_alive():
+            box: list[Any] = []
 
-    t = threading.Thread(target=run, daemon=True)
-    t.start()
+            def run() -> None:
+                try:
+                    box.append(fn())
+                except Exception as exc:
+                    box.append(exc)
+
+            t = threading.Thread(target=run, daemon=True)
+            t.start()
+            _job = (t, box)
+        t, box = _job
     t.join(seconds)
     return (not t.is_alive()), (box[0] if box else None)
 

@@ -17,12 +17,10 @@ from tests.fakes import FakeClient, FakeCollection, meta, rows
 
 @pytest.fixture(autouse=True)
 def fresh_probe_slot(monkeypatch: pytest.MonkeyPatch) -> None:
-    """A test that hangs Chroma leaves a thread holding the probe slot; give each test its own."""
-    import threading
-
+    """A test that hangs Chroma leaves its probe thread running; start each test without it."""
     import app.routes.health as health
 
-    monkeypatch.setattr(health, "_inflight", threading.Lock())
+    monkeypatch.setattr(health, "_job", None)
 
 
 def make_client(monkeypatch: pytest.MonkeyPatch, fake: FakeClient, **settings: Any):
@@ -180,3 +178,26 @@ def test_hung_chroma_does_not_stack_probe_threads(monkeypatch) -> None:
         codes = [c.get("/readyz").status_code for _ in range(5)]
     assert codes == [503] * 5
     assert len(calls) == 1      # probes 2..5 found the slot busy and did not start a thread
+
+
+def test_concurrent_probes_share_one_check_and_both_see_ready(monkeypatch) -> None:
+    import threading
+
+    calls: list[int] = []
+
+    class Slow(FakeClient):
+        def get_collection(self, name: str):
+            calls.append(1)
+            time.sleep(0.3)
+            return super().get_collection(name)
+
+    app, s, state = make_client(monkeypatch, Slow(FakeCollection(rows(), meta())))
+    with TestClient(app) as c:
+        app.state.index_state = state
+        out: list[int] = []
+        ts = [threading.Thread(target=lambda: out.append(c.get("/readyz").status_code)) for _ in range(4)]
+        for t in ts:
+            t.start()
+        for t in ts:
+            t.join()
+    assert out == [200] * 4 and len(calls) == 1
