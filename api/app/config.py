@@ -51,7 +51,7 @@ class Settings:
     cache_ttl_seconds: int = 86400
     llm_num_ctx: int = 8192
     llm_max_tokens: int = 512
-    llm_timeout_seconds: int = 90
+    llm_timeout_seconds: int = 300
     llm_max_concurrency: int = 2
     index_refresh_seconds: int = 10
     app_version: str = "0.1.0"
@@ -79,7 +79,7 @@ def get_settings() -> Settings:
         cache_ttl_seconds=_int("CACHE_TTL_SECONDS", 86400),
         llm_num_ctx=_int("LLM_NUM_CTX", 8192),
         llm_max_tokens=_int("LLM_MAX_TOKENS", 512),
-        llm_timeout_seconds=_int("LLM_TIMEOUT_SECONDS", 90),
+        llm_timeout_seconds=_int("LLM_TIMEOUT_SECONDS", 300),
         llm_max_concurrency=_int("LLM_MAX_CONCURRENCY", 2),
         index_refresh_seconds=_int("INDEX_REFRESH_SECONDS", 10),
         app_version=os.environ.get("APP_VERSION", "0.1.0"),

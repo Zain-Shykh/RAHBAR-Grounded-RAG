@@ -73,7 +73,7 @@ Hybrid retrieval, the `hosted` provider, the in-cluster Ollama mode, authenticat
 | 10 | Generation, orchestration, readiness, metrics | Z-09 | Sat 13:00 | DONE | #15 |
 | 11 | Semantic cache | Z-10 | Sat 16:00 | DONE (with deviation DEV-006) | #16 |
 | 12 | Tuning, calibration, baselines | Z-12 | Sat 19:00 | DONE (with open deviation DEV-007) | #17 |
-| 13 | Failure analysis | Z-14 | Sun 11:00 | NOT STARTED | |
+| 13 | Failure analysis | Z-14 | Sun 11:00 | DONE (DEV-007 absorbed) | #18 |
 | 14 | Documents and ADRs | Z-15 | Sun 14:00 | NOT STARTED | |
 | 15 | Integration support and final verification | joint | Sun 14:00 to 18:00 | NOT STARTED | |
 
@@ -82,12 +82,12 @@ Hours spent so far (fill in at each phase end): planned 37.5 h, actual `____`.
 ## 2. Current focus
 
 ```
-Phase:        13  Failure analysis
+Phase:        14  Documents and ADRs
 Stage:        not started   (SPEC DRAFT, APPROVED, IMPLEMENTING, TESTING, READY FOR PR, MERGED)
-Branch:       (none yet; feat/rag-z14-failure-analysis)
-Spec:         (none yet; docs/specs/phase-13-failure-analysis.md)
-Next action:  fresh session: stage 0 then stage 1 for phase 13. Shipped numbers: chunking 400/50, floor 0.70, threshold 0.96; real baseline recall@5 0.875, citation validity 1.0, abstention 1.0 (eval/baseline.json). The local real index in `rahbar-dev-chroma` is the 400/50 index (981 chunks). DEV-007 (model and Ingress timeouts) is open for Zain.
-Waiting on:   Zain (DEV-007), Ahmad (H-7, H-8 values into the ConfigMap and the ci overlay)
+Branch:       (none yet; docs/rag-z15-docs)
+Spec:         (none yet; docs/specs/phase-14-docs-adrs.md)
+Next action:  fresh session: stage 0 then stage 1 for phase 14. Failure analysis is written from real runs (docs/FAILURE-ANALYSIS.md, 6 of 6 stages named by the checker, four measured). Shipped numbers: chunking 400/50, floor 0.70, threshold 0.96, LLM timeout 300 s; real baseline recall@5 0.875 (eval/baseline.json).
+Waiting on:   Ahmad (H-7, H-8, H-13 values into the ConfigMap, Ingress and the ci overlay)
 Last updated: 2026-11-05
 ```
 
@@ -110,6 +110,8 @@ Things this lane owes Ahmad or needs from him. Tick when delivered. Newest at th
 | H-11 | Zain to Ahmad | Real `/healthz` and `/readyz` merged (his A-13 pin demonstration needs it). Text in the log | 10 | [x] |
 | H-12 | Zain to Ahmad | Cache is merged: Redis settings, env vars, index name, `X-Cache` values, demo steps. Text in the log | 11 | [x] |
 | H-7 | Zain to Ahmad | Final ConfigMap values: `CHUNK_SIZE`, `CHUNK_OVERLAP`, `RELEVANCE_FLOOR`, `CACHE_THRESHOLD`, `TEMPERATURE` with one-line justifications. Text in the log | 12 | [x] |
+| H-13 | Zain to Ahmad | DEV-007 accepted (option A): ConfigMap `LLM_TIMEOUT_SECONDS=300` and Ingress `nginx.ingress.kubernetes.io/proxy-read-timeout: "310"` (at least 310 s; the Ingress must stay above the model timeout). Replaces the 90 s and 120 s in the architecture | 13 | [ ] |
+| H-14 | Zain to Ahmad | The pin demonstration capture is reusable as his A-13 evidence: `/readyz` 503 body and the API log line are in `docs/FAILURE-ANALYSIS.md` stage C (local run, `EMBED_MODEL=hashing-bow-768` on the api only). On the cluster set the same key in the api ConfigMap only, wait for the rollout, `kubectl get pods` (0/1) and `curl /readyz`, then revert | 13 | [ ] |
 | H-8 | Zain to Ahmad | `eval/fixtures/baseline.fixture.json` committed (and the `ci` overlay floor). Text in the log | 12 | [x] |
 | H-9 | Ahmad to Zain | ConfigMap, Redis Stack and Chroma manifests running in minikube (milestone I-1) | n/a | [ ] |
 | H-10 | Ahmad to Zain | Real corpus on `corpus-data` PVC and the Job runnable in the cluster (milestone I-2) | n/a | [ ] |
@@ -190,6 +192,11 @@ Append-only, newest at the bottom. One line per event: date, phase, what happene
 2026-11-05  P12  DEV-007 logged: two questions took 123 s and 139 s, over the architecture's 90 s model and 120 s Ingress timeouts; the baseline was measured with LLM_TIMEOUT_SECONDS=300. Needs Zain's decision (A or B).
 2026-11-05  P12  H-7 TEXT for Ahmad (api and indexer ConfigMap values, measured on the real corpus; the Job MUST use the same chunk values or the baseline does not apply): CHUNK_SIZE=400 and CHUNK_OVERLAP=50 (words; three pairs tie on recall@5 0.875 because the chunker splits at headings first; the architecture default stays); RELEVANCE_FLOOR=0.70 (midpoint of the hostel maximum 0.658 and the lowest answerable score 0.746; the code default is now 0.70, the old 0.50 let both hostel questions reach the model); TOP_K=5 (unchanged; recall@3 equals recall@5 on the golden set, so 5 only adds headroom for paraphrases; the gate metric is recall@5); CACHE_THRESHOLD=0.96 (phase 11: lowest of 0.88, 0.92, 0.96 with zero false hits; the worst near-miss scored 0.958); TEMPERATURE=0.2 (unchanged: facts and JSON want a low value, not 0 so the one retry can differ; phase 13 tests 1.2 on purpose); EMBED_MODEL=nomic-embed-text, LLM_PROVIDER=ollama-host, LLM_MODEL=llama3.2:3b. Timeouts: LLM_TIMEOUT_SECONDS=300 and the Ingress proxy-read-timeout at least 310 s if DEV-007 option A is chosen (the baseline was measured that way); with the architecture's 90 s the two slowest questions fall back. Add one-line YAML comments for TEMPERATURE, RELEVANCE_FLOOR and CACHE_THRESHOLD (R-GEN-7).
 2026-11-05  P12  H-8 TEXT for Ahmad: `eval/fixtures/baseline.fixture.json` and `eval/fixtures/results.fixture.json` are committed (recall@5 0.800, citation validity 1.0, abstention 1.0, fallback 0). They were produced with EMBED_MODEL=hashing-bow-768, LLM_PROVIDER=extractive, CHUNK_SIZE=400, CHUNK_OVERLAP=50 and RELEVANCE_FLOOR=0.20: the `ci` overlay must set RELEVANCE_FLOOR=0.20, because the lexical embedder scores 0.00 to 0.43 and the default 0.70 would make every fixture question abstain. The CI command is unchanged: `python eval/run_eval.py --api http://localhost --host rahbar.local --golden eval/fixtures/golden.fixture.yaml --baseline eval/fixtures/baseline.fixture.json --out eval/fixtures/results.fixture.json`.
+2026-11-05  P13  Pre-work: DEV-007 accepted (option A), architecture 4.4, 5.7.4 and Ingress text amended, ABSORBED, H-13; golden path stored relative (test added) and both committed files fixed by hand; `LLM_TIMEOUT_SECONDS` code default 300.
+2026-11-05  P13  Spec pushed; decisions D-015 (A, C, E, F), D-83 (no experiment flag in the repo), D-84 (A on a reduced corpus in `rahbar_exp_a`), D-85 (flush the cache).
+2026-11-05  P13  A: policy PDF, no OCR: indexer exit 0, 0 chunks (8 of 8 pages), best score 0.911 to 0.613, abstained below floor. C: EMBED_MODEL on api only: /readyz 503 failed embed_pin, /api/ask 503, /healthz 200; bypassing the pin gives scores 0.034 to 0.045 on a question that scores 0.908. E: filter removed: 2023 clause ranks first (0.896 vs 0.895), 9 of 15 current-scope questions have a superseded chunk in the top 5; the model still answered from the 2026 clause. F: TEMPERATURE=1.2 on 4 questions: no retry, no fallback, valid citations; wording and length differ; no measurable degradation.
+2026-11-05  P13  Restore: recall@3 = recall@5 = 0.875 on the live index, equal to eval/baseline.json by type; `git diff` has no experiment code; checker shows 6 of 6 failure stages.
+2026-11-05  P13  H-14 for Ahmad: the pin capture is reusable (docs/FAILURE-ANALYSIS.md stage C).
 ```
 
 ---
@@ -222,6 +229,7 @@ Numbers this lane must measure. The agent fills them in as they are produced; th
 | Real-run outcomes per question (phase 12, 400/50, floor 0.70, llama3.2:3b) | Answered with valid citation: q01-q09, q11-q13, q15, q18. Model abstained (`answered_from_context=false`, no valid-citation claim): q10, q14. Floor abstained, no model call: q16, q17. Fallbacks 0. Answers are correct but terse ("No", "60%", "10", "6", "Average"): the Phase 10 sentence instruction and a schema `description` on `Answer.answer` (tried, reverted) do not change this on a 3B model, so the prompt was left as is and recall, citation validity and abstention are unchanged by it (D-79). A larger model or the `hosted` provider is the lever | 12 | `eval/run_eval.py`, `scripts/calibrate_cache.py`, API logs |
 | Cache demo paraphrase pairs at `CACHE_THRESHOLD` 0.96 (phase 12, live) | (1) "What minimum attendance does the Prospectus 2026 require for graduate programs?" (MISS, 20.8 s) then "What is the minimum attendance requirement for graduate students under the 2026 prospectus?" (cosine 0.9736): HIT, 0.20 s, same answer "75%". (2) "What is the tuition fee per credit hour for BS programs for 2026-27?" then "What is the BS tuition fee per credit hour for 2026-27?" (0.9865): HIT, answer "Rs. 12,000". Control: "What is the fee per credit hour for BS in 2026-27?" (0.9504) is a MISS, as 0.96 intends. Abstentions are never cached (q10, q14, q16, q17 MISS every time) | 12 | `eval/run_eval.py`, `scripts/calibrate_cache.py`, API logs |
 | Fixture baseline (CI mode, phase 12) | `hashing-bow-768`, `extractive`, `CORPUS_DIR=eval/fixtures`, floor 0.20: recall@3 = recall@5 0.800 (f01 missed: the lexical embedder), citation validity 1.0 (5 of 5), abstention 1.0, fallback 0, gate passes against its own baseline twice. Needed a Markdown fix: the extractor kept `##`, so no heading was found and recall was 0 (D-82). Floor 0.20 sits above the fixture abstain score 0.00 and below the lowest answerable top 0.316; the real floor 0.70 would abstain every fixture question | 12 | `eval/run_eval.py`, `scripts/calibrate_cache.py`, API logs |
+| Failure analysis numbers (phase 13) | A: policy chunks 40 to 0, top score 0.911 to 0.613, abstained below floor; C: `/readyz` 503 `failed:["embed_pin"]`, same-dimension wrong model scores 0.034 to 0.045 against 0.908; E: 9 of 15 current-scope questions with a superseded chunk in the top 5, q12 stale clause 0.896 against 0.895, model answered from the 2026 clause anyway; F: TEMPERATURE 1.2, 4 questions, 0 retries, 0 fallbacks, tokens out 106/110/97/364 against 164/108/103/292 at 0.2. Restore recall@5 0.875 | 13 | `docs/FAILURE-ANALYSIS.md` |
 | Generation p50 / p95 seconds per question | Whole request, uncached, 18 golden questions, llama3.2:3b on this CPU, first run after a cold model load: p50 39.0 s, p95 138.6 s (q04 123 s and q09 139 s were the slowest; a warm re-run of four questions took 14 to 41 s). Floor abstentions take 0.1 to 0.3 s; fallback rate 0. Phase 12 | 12 | `eval/run_eval.py`, `eval/retrieval_only.py recall` |
 | Coverage of `api/app` (`pytest --cov=app`) | Phase 11: 97% (1060 statements, 36 missed; `services/cache.py` 92%, `answer.py` 100%), api 263 passed + 10 skipped (Redis integration, run with `REDIS_URL`).  Phase 10: 97% (853 statements, 22 missed; only `providers/llm/hosted.py` is 0%). Phase 9: 95% (644 statements, 33 missed; `providers/llm/{ollama,hosted}.py` 0% because they are unbuilt stubs). Target 60% | 9 | `cd api && ../.venv/bin/pytest -q --cov=app` |
 | Cache hit vs miss latency, live (phase 11; real index, llama3.2:3b, Redis Stack) | q07 MISS 48 106 ms then HIT 187 ms and 165 ms (same answer, different request_id); q06 MISS 36 570 ms, HIT 123 ms; after a real re-index q07 MISS 72 925 ms then HIT 169 ms. A hit costs about one query embedding (about 100 to 190 ms), roughly 250 times faster than a miss. Abstentions (q16, q17) and a fallback (q17 once) were never stored: Redis entries 2 to 5 after 3 answered answers. Redis stopped: `/readyz` 503 `failed:["redis"]`, `/healthz` 200, `/api/ask` 200 `X-Cache: MISS` with the warning `cache unavailable`; Redis restarted: `/readyz` 200 and entries intact (AOF) | 11 | `scripts/live_check_phase11.py ask q07 q07 q07` |
@@ -818,7 +826,7 @@ H-7, H-8.
 
 ## Phase 13: Failure analysis (Z-14)
 
-**Status:** NOT STARTED · **Branch:** `feat/rag-z14-failure-analysis` · **Est:** 2 h · **Priority:** P0
+**Status:** DONE · **Branch:** `feat/rag-z14-failure-analysis` · **Est:** 2 h · **Priority:** P0
 
 ### Objective
 Break four stages on purpose, one at a time, and record symptom, diagnosis, stage, remedy, and the number that would have shown it.

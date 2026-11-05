@@ -218,3 +218,8 @@ def test_update_baseline_allowed_on_recall_drop_only(monkeypatch, tmp_path):
     code, out, bl = run_main(monkeypatch, tmp_path, GOLD, miss, "--update-baseline",
                              baseline={"recall_at_5": 1.0})
     assert code == 1 and json.loads(bl.read_text())["recall_at_5"] == 0.0
+
+
+def test_golden_label_is_repo_relative(tmp_path):
+    assert r.golden_label(r.HERE / "golden.yaml") == "eval/golden.yaml"
+    assert r.golden_label(tmp_path / "g.yaml") == (tmp_path / "g.yaml").resolve().as_posix()

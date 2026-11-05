@@ -197,6 +197,6 @@
       "seconds": 52.84
     }
   ],
-  "golden": "/home/zain-shykh/Desktop/SCD_ASSIGNMENTS/assign_2/.claude/worktrees/rag-z12-tuning/eval/golden.yaml",
+  "golden": "eval/golden.yaml",
   "questions": 18
 }

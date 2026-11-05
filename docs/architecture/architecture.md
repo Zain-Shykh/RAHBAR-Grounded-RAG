@@ -247,7 +247,7 @@ One Ingress, class `nginx`, one host `rahbar.local` (the line `<minikube ip> rah
 | `/api` | Prefix | `api:8000`, no rewrite (the app's routes already begin with `/api`) |
 | `/` | Prefix | `ui:80` |
 
-Annotations: `nginx.ingress.kubernetes.io/proxy-read-timeout: "120"` (model calls on a laptop CPU exceed the 60 s default) and `proxy-body-size: "16k"`.
+Annotations: `nginx.ingress.kubernetes.io/proxy-read-timeout: "310"` (at least 310 s, above `LLM_TIMEOUT_SECONDS`; model calls on a laptop CPU took up to 139 s, DEV-007) and `proxy-body-size: "16k"`.
 
 `/healthz`, `/readyz` and `/metrics` are not routed through the Ingress. They are reached in-cluster by probes, or by `kubectl port-forward` for evidence.
 
@@ -271,7 +271,7 @@ Annotations: `nginx.ingress.kubernetes.io/proxy-read-timeout: "120"` (model call
 | `TEMPERATURE` | `0.2` | api | JSON and facts want 0 to 0.3. Not 0, so that the one retry can produce a different output than the first try. |
 | `LLM_NUM_CTX` | `8192` | api | Five chunks of 400 words plus instructions exceed Ollama's small default context. |
 | `LLM_MAX_TOKENS` | `512` | api | Caps generation time. |
-| `LLM_TIMEOUT_SECONDS` | `90` | api | Below the Ingress timeout (120 s). |
+| `LLM_TIMEOUT_SECONDS` | `300` | api | Below the Ingress timeout (at least 310 s). Measured: slowest uncached answer 139 s on the host CPU (DEV-007). |
 | `LLM_MAX_CONCURRENCY` | `2` | api | AD-21. |
 | `INDEX_REFRESH_SECONDS` | `10` | api | Polling interval for collection metadata (AD-20, AD-04). |
 | `CHUNK_SIZE`, `CHUNK_OVERLAP` | `400`, `50` (to be chosen by measurement, section 5.4.2) | indexer | Unit: words (AD-10). |
@@ -1057,7 +1057,7 @@ Ollama runs on the laptop, outside the cluster, listening on `0.0.0.0:11434` (`O
 | api | `POST /api/embed` | `{"model": EMBED_MODEL, "input": ["search_query: ..."]}` | every uncached question |
 | api | `POST /api/chat` | `model`, `messages`, `stream=false`, `format=<schema>`, `options` | generation |
 
-Embedding and generation use two different models loaded by the same Ollama. Ollama keeps both resident while memory allows (`OLLAMA_KEEP_ALIVE` is a host setting). The first request after a cold start is slow; the 90 s timeout covers it, and the CI-less demo runs one warm-up question first.
+Embedding and generation use two different models loaded by the same Ollama. Ollama keeps both resident while memory allows (`OLLAMA_KEEP_ALIVE` is a host setting). The first request after a cold start is slow; the 300 s timeout covers it, and the CI-less demo runs one warm-up question first.
 
 #### 5.12.3 Data governance (ADR 0004)
 

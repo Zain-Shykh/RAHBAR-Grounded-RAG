@@ -49,7 +49,7 @@ Entry template:
 | D-012 | Follow-up question detection | api | PROVISIONAL | cache, answer service |
 | D-013 | Docker Hub account and repo names | ci-cd | OPEN | cd.yml |
 | D-014 | Branch protection: required checks and admin enforcement | process | OPEN | merging |
-| D-015 | Which four failure stages to break | docs | OPEN | FAILURE-ANALYSIS.md |
+| D-015 | Which four failure stages to break | docs | DECIDED | FAILURE-ANALYSIS.md |
 | D-016 | Duplicate content: Prospectus 2026 vs Handbook 2026 | corpus, indexer | DECIDED | golden set, retrieval |
 | D-017 | OCR settings and quality threshold | indexer | PROVISIONAL | extract stage |
 | D-018 | LLM provider scope | api | PROVISIONAL | provider code |
@@ -269,8 +269,8 @@ Entry template:
 - Question: Four of A to F are required. Which four?
 - Claude recommends: A (scanned PDF without OCR), C (change `EMBED_MODEL` on the API only, which doubles as the pin demo), E (remove the superseded filter, version question), F (temperature 1.2). Chosen because each has a clear metric. B and D are cheap extras if time remains.
 - Blocks: FAILURE-ANALYSIS.md.
-- Decision:
-- Decided on:
+- Decision: A, C, E and F as recommended (A: scanned policy without OCR; C: `EMBED_MODEL` on the API only, which doubles as the pin demonstration; E: superseded filter removed; F: `TEMPERATURE=1.2`). B and D are not run. Decided by: Claude, pre-approved by Zain.
+- Decided on: 2026-11-05
 
 ### D-016 Duplicate content: Prospectus 2026 vs Handbook 2026
 - Status: DECIDED
@@ -995,4 +995,37 @@ Entry template:
 - Options: A. Drop the leading `#` marks of Markdown headings in the extractor, keep `golden.fixture.yaml` as it is; set the CI overlay `RELEVANCE_FLOOR` to 0.20 (above the fixture abstain score 0.00, below the lowest answerable top 0.316). B. Rewrite the fixture golden labels to what the chunker produced. C. Floor 0.70 in CI (every fixture question abstains).
 - Claude recommends: A. The golden file stays as written; the bug is the extractor's. A real Markdown source with `##` headings is also affected.
 - Decision: A. Decided by: Claude, pre-approved by Zain. H-8 tells Ahmad to set `RELEVANCE_FLOOR=0.20` in the `ci` overlay.
+- Decided on: 2026-11-05
+
+### D-83 How each failure experiment is applied without touching shipped code
+- Status: DECIDED
+- Raised: 2026-11-05 by Claude (phase 13)
+- Area: eval, docs
+- Related: D-015, architecture 5.14, plan phase 13 ("no experiment flag changes default behaviour")
+- Question: How is each break applied so that no default changes and nothing is merged?
+- Options: A. No flag in the repo at all: A is a script in the job's tmp directory that patches `pipeline.extract._ocr_page` in memory and runs the real pipeline on a corpus copy into a separate collection `rahbar_exp_a`; C is an environment variable on the API process; E is an uncommitted one-line edit of `scope.py` reverted with `git checkout` straight after; F is an environment variable. B. A default-off `EXPERIMENT_NO_OCR` flag in `extract.py`. C. Temporary branch per experiment.
+- Claude recommends: A. Nothing to review, nothing to leave behind, `git diff` is the proof. B adds a code path that can be switched on by mistake in the cluster.
+- Decision: A. Decided by: Claude, pre-approved by Zain.
+- Decided on: 2026-11-05
+
+### D-84 Experiment A uses a reduced corpus and a separate collection
+- Status: DECIDED
+- Raised: 2026-11-05 by Claude (phase 13)
+- Area: indexer, eval
+- Related: D-83, results register ("Indexer wall time" 9 min 39 s)
+- Question: Re-indexing the whole corpus without OCR takes about 7 minutes of embedding and would overwrite the live index. What do we index?
+- Options: A. The policy PDF plus the fee page (no OCR) copied to a temporary directory, into collection `rahbar_exp_a`, with the same chunk settings; the live collection `rahbar` is untouched. B. The full corpus into the live collection, then rebuild it afterwards (about 20 minutes, and a window with a broken index). 
+- Claude recommends: A. The symptom (zero chunks for the source, indexer log) does not depend on the other documents; the baseline index stays intact so the restore check is trivial.
+- Decision: A. Decided by: Claude, pre-approved by Zain.
+- Decided on: 2026-11-05
+
+### D-85 The semantic cache must be flushed before experiments C, E and F
+- Status: DECIDED
+- Raised: 2026-11-05 by Claude (phase 13)
+- Area: api
+- Related: architecture 5.9, D-83
+- Question: The cache key is the question embedding plus the scope tag, not `TEMPERATURE`, `TOP_K` or the retrieval code. A cached answer would hide the break. 
+- Options: A. `FLUSHALL` on the dev Redis container before each run and ask questions not asked since. B. Use only never-asked questions.
+- Claude recommends: A (dev container only, data volume is a local cache). The finding itself goes in FAILURE-ANALYSIS.md: a cache that outlives a bad setting can keep serving the old answers (or the bad ones) until the TTL or a re-index.
+- Decision: A. Decided by: Claude, pre-approved by Zain.
 - Decided on: 2026-11-05
