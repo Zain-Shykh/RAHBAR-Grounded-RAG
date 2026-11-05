@@ -5,7 +5,7 @@
 | Phase | 13, from `docs/IMPLEMENTATION_PLAN.md` |
 | Work plan task | Z-14 |
 | Branch | `feat/rag-z14-failure-analysis` |
-| Stage | SPEC DRAFT |
+| Stage | TESTING |
 | Started | 2026-11-05 |
 | Approved (spec and plan) | 2026-11-05, pre-approved by Zain (no gate for this run) |
 | Depends on | phases 10 to 12 merged; `eval/baseline.json` (recall@5 0.875) |
@@ -119,7 +119,7 @@ No new unit tests (no new code). Tester runs `make test && make lint`, checks ev
 
 ## 11. Implementation notes
 
-(filled during the run)
+Experiments ran as designed (D-83 to D-85). Raw captures are in the job tmp directory (indexer log of A, `/readyz` body and log of C, `answered` lines of E and F, restore output). Decisions taken: the cache was flushed before C, E and F; F was compared with a second run of the same four questions at 0.2 (not planned, added because the answers were not stored in `eval/results.json`). `TOP_K=1` for C was not run. No new code, no deviation; DEV-007 was accepted and absorbed before the experiments, and the `LLM_TIMEOUT_SECONDS` code default moved to 300 to match.
 
 ## 12. Test report
 
