@@ -171,7 +171,13 @@ Each step is its own commit and leaves `make test` green. If Redis Stack misbeha
 
 ## 11. Implementation notes
 
-<!-- Filled during IMPLEMENT. -->
+- **Where `maintain` runs:** `answer_question` and `/readyz`, not `IndexState` (D-71, DEV-006, absorbed into 5.9.4 item 3). `/readyz` forces a re-create before it checks the index is listed, so a dropped cache index heals on the next probe.
+- **`X-Cache` with Redis down is `MISS`** (D-72), log `cache=miss`, counter `miss`, warning `cache unavailable` with the operation and error. The 5 s backoff (D-74) means a dead Redis costs one 1 s timeout per 5 s window, not per request.
+- **Redis client parsing:** `FT.SEARCH` is sent with `execute_command` and its RESP2 reply is parsed by hand (`[count, key, [field, value, ...]]`, bytes). Verified on 7.4.0-v8 by `test_cache_redis.py` (10 tests) and live.
+- **Write gate** (`cacheable`) is pure and re-checks citations against `retrieved` (D-75); `answer_question` also stores only when the cache was usable at lookup time and a vector exists.
+- **Threshold moved here from phase 12** (D-73). Real nomic against Redis Stack on 9 paraphrase and 9 near-miss pairs. Shipped `CACHE_THRESHOLD=0.96` (architecture 4.4 cell updated, `config.py` default). The table is in `IMPLEMENTATION_PLAN.md` section 5.
+- **Makefile `lint`** gained the two new scripts (shared file, listed in the PR).
+- **Spec detail changed:** none of the acceptance criteria. AC-4's live part used the real indexer run (981 chunks, new `index_id`).
 
 ## 12. Test report
 
