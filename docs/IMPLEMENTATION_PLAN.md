@@ -68,13 +68,13 @@ Hybrid retrieval, the `hosted` provider, the in-cluster Ollama mode, authenticat
 | 5 | Evaluation runner | Z-11 | Thu 18:30 | DONE | #8 |
 | 6 | Chunker | Z-05 | Fri 12:00 | DONE | #10 |
 | 7 | Embed and store, full indexer run | Z-06 | Fri 14:00 | DONE | #12 |
-| 8 | Retriever, index state, version scope | Z-07 | Fri 17:00 | DONE | PR (see log) |
-| 9 | Prompt, validation, CI-mode components | Z-08 | Fri 20:00 | DONE | PR (see log) |
+| 8 | Retriever, index state, version scope | Z-07 | Fri 17:00 | DONE | #19 |
+| 9 | Prompt, validation, CI-mode components | Z-08 | Fri 20:00 | DONE | #19 |
 | 10 | Generation, orchestration, readiness, metrics | Z-09 | Sat 13:00 | DONE | #15 |
 | 11 | Semantic cache | Z-10 | Sat 16:00 | DONE (with deviation DEV-006) | #16 |
 | 12 | Tuning, calibration, baselines | Z-12 | Sat 19:00 | DONE (with open deviation DEV-007) | #17 |
 | 13 | Failure analysis | Z-14 | Sun 11:00 | DONE (DEV-007 absorbed) | #18 |
-| 14 | Documents and ADRs | Z-15 | Sun 14:00 | DONE | PR (see log) |
+| 14 | Documents and ADRs | Z-15 | Sun 14:00 | DONE | #19 |
 | 15 | Integration support and final verification | joint | Sun 14:00 to 18:00 | NOT STARTED | |
 
 Hours spent so far (fill in at each phase end): planned 37.5 h, actual `____`.
