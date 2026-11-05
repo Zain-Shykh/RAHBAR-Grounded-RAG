@@ -1,10 +1,61 @@
 # Failure analysis
 
-<!-- STARTER-TODO(5.5): break four of the six stages on purpose, one at a time, restore each,
-     and fill in one block per stage. Delete this comment when done. -->
+Four of the six stages were broken on purpose, one at a time, on the real stack (Chroma 1.0.12 and Redis Stack in Docker, Ollama with `llama3.2:3b` and `nomic-embed-text`, the 981-chunk index of the real corpus, 2026-11-05). Each break was a local environment variable, an in-memory patch in a throw-away script, or a one-line edit reverted with `git checkout`. Nothing was committed and no default changed (spec `docs/specs/phase-13-failure-analysis.md`, D-83). Stages B and D were not run.
 
-## Stage ? · name
-- **What we broke:**
-- **Symptom:**
-- **Diagnosis, as if we had not caused it:** which metric, log line or command shows it
-- **Remedy:**
+**Only stage F is the model's fault.** Stages A to E are ours: extraction, retrieval, the embedding pin and the scope filter. When an answer is wrong, check A to E first (architecture 5.14). The experiments also show that the model stage was the one that did *not* visibly break.
+
+The baseline used for comparison is `eval/baseline.json` (recall@3 = recall@5 0.875, citation validity 1.0, abstention 1.0) and the live index.
+
+## Stage A · Extraction (scanned PDF without OCR)
+
+- **What we broke:** `faculty-entrepreneurship-and-technical-start-ups-policy.pdf` (8 pages, all scanned) was indexed with `pipeline.extract._ocr_page` replaced by a function returning `""`, using the real pipeline (`python -m pipeline.run` style, `indexer/pipeline/run.py`) on a copy of that PDF and the fee page, into a separate collection `rahbar_exp_a` with the same chunk settings (400/50). The live collection was not touched (D-84).
+- **Symptom:** the indexer exits with status 0 and stores 7 chunks, all from the fee page. The policy contributes none. The question "What are the eligibility criteria for a faculty member to start a technical start-up?" returns HTTP 200 with `"answered_from_context": false` and the canned "The documents in the corpus do not cover this question.", `X-Outcome: abstained`. The retrieved list holds only `fee-structure-page.html` chunks.
+- **Diagnosis, as if we had not caused it:** a user sees an abstention on a question about a document we say we hold. Step 1, the response: `retrieved` has no chunk of that source, and the top scores are low. Step 2, the `answered` log line for that `request_id`: `scores [0.613, 0.5669, 0.5607, 0.5562, 0.5514]`, `outcome: abstained`, all `chunk_ids` from `fee-structure-page`. Step 3, `/metrics`: `rahbar_abstentions_total{reason="below_floor"} 1` and `rahbar_top_score_bucket{le="0.6"} 0` against `{le="0.7"} 1`, so the best score was between 0.6 and 0.7, under the floor 0.70. Step 4, the index: `scripts/check_index.py` lists chunks per source and the policy is missing (40 at baseline); the indexer log has the two lines that name it: `"extracted", "source": "faculty-entrepreneurship-and-technical-start-ups-policy.pdf", "pages": 8, "ocr_pages": 8` and `"document produced no chunks"`. A user cannot see this from the API alone: the answer looks like a legitimate "not in the documents".
+- **Stage:** A, extraction (ours).
+- **Remedy:** the cause is OCR returning nothing: check the indexer log for `ocr failed` lines (a missing `tesseract` package in the image produces one per page) and fix the image. Then re-run the indexer. To catch it earlier: make the Job fail (non-zero exit) when a document in `corpus/_index.json` yields zero chunks, and have `check_index.py` require at least one chunk per listed source. Today both only log a line (`indexer/pipeline/run.py`), which is the gap this experiment exposed. Not implemented here (no new code in this phase); it is listed as a recommendation.
+- **The number:** policy chunks 40 at baseline against 0; `ocr_pages=8` with `chunks=0`; best score for the policy question 0.911 (all five chunks from the policy: "Eligibility criteria for a technical start-up" 0.911, "Evaluation criteria" 0.867, "Scope" 0.794) against 0.613 (five fee-page chunks) without OCR. Same question, same code, same floor; only the extraction changed.
+
+## Stage C · Retrieval and the embedding pin (`EMBED_MODEL` changed on the API only)
+
+- **What we broke:** the API started with `EMBED_MODEL=hashing-bow-768` while the collection `rahbar` was built with `nomic-embed-text`. The indexer was not changed. `hashing-bow-768` was chosen on purpose: it has the same dimension (768) as `nomic-embed-text`, so the vector store accepts the query without any error. This is the pin demonstration (architecture 5.3, invariant on one embedding model). `TOP_K=1` was not run.
+- **Symptom:** `/readyz` returns 503, the pod would be `0/1 READY`, `/api/ask` returns 503 `{"detail":"index unavailable"}`, while `/healthz` still returns 200 `{"status":"alive"}` (it touches no other service), so the pod is not restarted in a loop.
+- **Diagnosis, as if we had not caused it:** `kubectl get pods` shows `0/1`; `curl /readyz` gives the body below, which names the failing check; the API log has one ERROR line with both model names. `/metrics` still shows `rahbar_index_info{chunks="981",embed_model="nomic-embed-text",index_id="20261105T102247Z-5a3b5a"} 1.0`, so the pod knows which model built the index. The fix is a config diff: ConfigMap `EMBED_MODEL` on the api against the one on the indexer.
+- **Stage:** C, retrieval (ours); the pin is what turned a silent quality failure into a loud one.
+- **Remedy:** set the same `EMBED_MODEL` on both (one ConfigMap key), or re-run the indexer with the new model (stage-and-swap, the API becomes ready on the new index without a restart).
+- **The numbers (captured):**
+
+`/readyz`, HTTP 503:
+
+```json
+{"status":"not_ready","failed":["embed_pin"],"checks":{"chroma":"ok","collection":"ok","embed_pin":"failed","redis":"not_checked","embed_dimension":"not_checked"}}
+```
+
+API log line (JSON, stdout):
+
+```json
+{"ts": "2026-11-05T15:32:53Z", "level": "ERROR", "logger": "rahbar.index_state", "msg": "embedding pin conflict", "request_id": "-", "collection_embed_model": "nomic-embed-text", "api_embed_model": "hashing-bow-768", "collection": "rahbar", "action": "not ready until the indexer re-runs with the same model"}
+```
+
+  What the pin prevented: with the check bypassed (a script calling Chroma directly with the 768-dimension hashing vector), the query "Are mobile phones and smart watches allowed in the examination hall?" raises no error and returns these best matches: score 0.045 `academic-rules-handbook` "Shah Latif Town (on National Highway)", 0.039 "5.20 Application to recheck a final exam", 0.038 `fee-structure-page` "Miscellaneous Fees", 0.035 and 0.034 address chunks. With the right model the same question gives 0.908 "1. Mobile Phones, Smart Watches and all electronic" in the Student Handbook. Same dimension, no error, completely wrong neighbours: recall would be 0 and the only visible symptom would be abstentions (every score under the floor) or, with a low floor, nonsense context.
+
+## Stage E · Source scope (the `superseded` filter removed)
+
+- **What we broke:** in `api/app/services/scope.py`, the default scope `Scope({"superseded": False}, "current")` was changed to `Scope(None, "current")` (a one-line local edit, reverted with `git checkout`). The API was then restarted and asked the version-sensitive question "What is the deadline to withdraw from a course?" (golden q12). The August 2023 rules say "last day of classes"; the June 2026 Handbook says "last day of the makeup week of every semester".
+- **Symptom:** the superseded 2023 clause is the best match and goes into the prompt. Real run, `llama3.2:3b`, cache flushed, 48.8 s: the model **still answered with the 2026 rule** ("The deadline to withdraw from a course is the last day of the makeup week of every semester.", citing the 2026 Handbook 4.25 and 6.8), `answered_from_context: true`, valid citations. So on this question the model absorbed the damage; the stale clause was a latent risk, not a wrong answer. Nothing in the output says so.
+- **Diagnosis, as if we had not caused it:** the answer looks correct, so there is no user-visible symptom here. What shows it is the `answered` log line: `"scope": "current"` but `chunk_ids` starting with `undergraduate-academic-rules-aug-2023-p016-c095`, a source that must never appear under `current`. Recall by type does not show it: version-type recall@5 stayed 1.000 (both versions are in the top 5). The check that would is "superseded chunks in the top 5 for a `current` scope", which is not a metric today; the retrieval-only contamination count below is how it was measured.
+- **Stage:** E, source selection (ours).
+- **Remedy:** restore the filter (it lives in one function, `scope()`, unit-tested in `api/tests`). Add a guard test or a metric counting retrieved passages with `superseded=true` under a `current` scope; it must be 0.
+- **The numbers:** top 5 for q12 with the filter: 0.895 Handbook 4.25 first, no 2023 chunk. Without it: 0.896 `undergraduate-academic-rules-aug-2023` 4.25 first, 0.895 Handbook 4.25 second (a 0.001 difference decides the order). Across the golden set under the broken scope, 9 of the 15 questions with `current` scope had at least one superseded chunk in the top 5 (q01 ranks 4 and 5, q02 ranks 2 and 3, q03, q05, q07, q08, q12 rank 1, q15, q18); after the revert 0 of 15 (q13 asks for 2023 on purpose and is allowed). In the `answered` line: `"chunk_ids": ["undergraduate-academic-rules-aug-2023-p016-c095", "academic-rules-handbook-jun-2026-p023-c124", ...]`, `"scores": [0.8956, 0.895, ...]`.
+
+## Stage F · Generation (`TEMPERATURE=1.2`)
+
+- **What we broke:** the API started with `TEMPERATURE=1.2` (default 0.2), cache flushed, four uncached golden questions asked one at a time (q06, q07, q03, q04), then the same four at the default 0.2 for comparison.
+- **Symptom:** on this model, at this sample size, **none that matters**. 4 of 4 answered with valid citations; zero retries (`will retry` appears 0 times in the log), no `rahbar_fallbacks_total` series at all (it was never incremented), no abstention. The structured output (`format=<Answer schema>`) kept the JSON valid even at 1.2. What changed is wording and length: q04 ("what counts as unacceptable use of Generative AI") came back as a full clause at 1.2 ("using Generative AI tools to circumvent the requirements of an assessment or create assessments that they then claim as their own original work.") against "1, 2, 6, 7, 8" at 0.2. Output tokens: 106, 110, 97, 364 at 1.2 against 164, 108, 103, 292 at 0.2, no consistent direction. Request seconds 25.0, 38.8, 30.6, 150.8 at 1.2 against 34.1, 15.2, 13.2, 56.1 at 0.2; the second run came right after the first, so the model was already loaded; this difference is not attributable to temperature.
+- **Diagnosis, as if we had not caused it:** if temperature drift were hurting answers, it would show in `rahbar_fallbacks_total{reason="invalid_output"|"bad_citation"}` (retries and canned responses), in the `rahbar_tokens{direction="out"}` histogram shifting upward, and in the golden-set citation validity falling below 1.0 in `eval/run_eval.py`. None of the three moved in this run. The honest conclusion is that four questions cannot show a real degradation; the claim of the architecture (5.14: validation failures, rambling) is a risk, not something we reproduced.
+- **Stage:** F, generation. The only stage that is the model's fault, and the only one in which we could not make it break.
+- **Remedy:** keep `TEMPERATURE=0.2` (facts and JSON want a low value, not 0, so the one retry can differ; H-7). Watch the three signals above after any change of model or temperature, and run the golden set before shipping it.
+- **A side finding:** the semantic cache key is the question embedding and the scope tag. It does not contain `TEMPERATURE`, `TOP_K` or the code of the scope function. Answers produced under a bad setting stay served until the TTL (86 400 s) or a re-index. The dev cache was flushed (`FLUSHALL` on the dev container, D-85) before every run, otherwise the break would have been hidden.
+
+## Restore check
+
+After the last revert: Redis flushed, collection `rahbar_exp_a` deleted, `scope.py` restored with `git checkout`, no API process left. `eval/retrieval_only.py recall` on the live index gives recall@3 0.875, recall@5 0.875 (ordinary 0.909 n=11, version 1.000 n=2, exact 0.500 n=2, injection 1.000 n=1), the same as `eval/baseline.json` to the digit. `git diff dev -- api indexer eval` contains only the pre-work (golden path, timeout default); no experiment code.
