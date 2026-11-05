@@ -83,6 +83,7 @@ Entry template:
 | D-046 | Eval section match folds dashes | eval | DECIDED | run_eval.py recall_at_k, DEV-002 |
 | D-047 | Eval behaviour when an /api/ask call fails | eval | DECIDED | run_eval.py main |
 | D-048 | Guard --update-baseline against a failed gate | eval | DECIDED | run_eval.py main |
+| D-052 | Handbook PDFs are two-page spreads: split by file like D-044 | indexer | DECIDED | extract |
 
 ---
 
@@ -649,3 +650,15 @@ Entry template:
 - 2026-11-04: phase 4 questions answered. D-044, D-045 added, both DECIDED.
 - 2026-11-04: phase 5 questions answered. D-046 to D-048 added, all DECIDED.
 - 2026-11-05: phase 6 decisions. D-049 to D-051 added, all DECIDED (Claude, pre-approved by Zain).
+
+### D-052 Handbook PDFs are two-page spreads: split by file like D-044
+- Status: DECIDED
+- Raised: 2026-11-05 by Claude (phase 7, Zain's phase 6 review)
+- Area: indexer
+- Related: D-044, DEV-003, phase 6 spec known losses
+- Finding: the Student Handbook (even pages) and the Academic Rules Handbook (pages 4, 6, 8, 54) hold two printed pages on one clipped MediaBox (width 410 and 420; content to x 756 and 796). pdfplumber read both halves line by line. Measured: left page ends x 363 / 377, right page starts x 445 / 462.
+- Options: A. Add both files to `COLUMN_SPLITS` (gutter x 404 and 400); the last crop runs to the farthest word, not the page width. B. Generic detector. C. Leave it.
+- Claude recommends: A (as D-044). Odd pages are unchanged (the right crop is empty).
+- Decision: A. Decided by: Claude, pre-approved by Zain (phase 6 review).
+- Result: `chunk_report.py --golden` still 0 missing. Golden section strings of q05, q06 not restored: numbered items inside a Roman section still become their own sections (DEV-003). q09, q10 are not Handbook items.
+- Decided on: 2026-11-05
