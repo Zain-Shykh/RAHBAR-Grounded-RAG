@@ -75,9 +75,9 @@ Copy this block to the end of section 7, increment the number, and fill every li
 
 | ID | Title | Severity | Status | Architecture reference | Date |
 | --- | --- | --- | --- | --- | --- |
-| DEV-001 | PDF extraction uses pdfplumber default text mode, not layout mode | S3 | OPEN | 5.4.2 (extract) | 2026-11-04 |
-| DEV-002 | Eval section match also folds dashes and applies NFKC | S3 | OPEN | 5.13.2, AD-22 | 2026-11-04 |
-| DEV-003 | Chunker heading rules: isolated short line added, numbered rule tightened, section cut at 80 characters | S3 | OPEN | 5.4.2 (chunk), AD-22 | 2026-11-05 |
+| DEV-001 | PDF extraction uses pdfplumber default text mode, not layout mode | S3 | ABSORBED | 5.4.2 (extract) | 2026-11-04 |
+| DEV-002 | Eval section match also folds dashes and applies NFKC | S3 | ABSORBED | 5.13.2, AD-22 | 2026-11-04 |
+| DEV-003 | Chunker heading rules: isolated short line added, numbered rule tightened, section cut at 80 characters | S3 | ABSORBED | 5.4.2 (chunk), AD-22 | 2026-11-05 |
 
 ## 7. Log
 
@@ -87,7 +87,7 @@ Copy this block to the end of section 7, increment the number, and fill every li
 
 | | |
 | --- | --- |
-| Status | OPEN |
+| Status | ABSORBED (2026-11-05, architecture 5.4.2 and AD-22) |
 | Severity | S3 |
 | Date | 2026-11-04 |
 | Raised by | Claude (phase 5, found in phase 4 evidence) |
@@ -127,7 +127,7 @@ Places where the architecture has flagged a real chance of deviation (architectu
 
 | | |
 | --- | --- |
-| Status | OPEN |
+| Status | ABSORBED (2026-11-05, architecture 5.4.2 and AD-22) |
 | Severity | S3 |
 | Date | 2026-11-04 |
 | Raised by | Claude (phase 5) |
@@ -151,7 +151,7 @@ Places where the architecture has flagged a real chance of deviation (architectu
 
 | | |
 | --- | --- |
-| Status | OPEN |
+| Status | ABSORBED (2026-11-05, architecture 5.4.2 and AD-22) |
 | Severity | S3 |
 | Date | 2026-11-05 |
 | Raised by | Claude (phase 6) |
@@ -169,4 +169,4 @@ Places where the architecture has flagged a real chance of deviation (architectu
 
 **Plan:** absorb: add the four rules and the 80-character cut to architecture 5.4.2 and AD-22 in the next version.
 
-**Decision:** pre-approved by Zain 2026-11-05 (D-049); amend architecture later.
+**Decision:** pre-approved by Zain 2026-11-05 (D-049); ACCEPTED by Zain 2026-11-05 after the phase 6 review; absorbed into architecture 5.4.2 and AD-22 the same day.

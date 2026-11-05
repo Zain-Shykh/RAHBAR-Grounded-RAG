@@ -19,6 +19,10 @@ OCR_MIN_CHARS = 30
 # pdfplumber would read it line by line across them. Measured gutters: x 216-224, 393-401.
 COLUMN_SPLITS: dict[str, tuple[float, ...]] = {
     "prospectus-2026-academic-rules-and-regulations.pdf": (220.0, 397.0),
+    # The two Handbooks are two-page spreads on one clipped MediaBox: the left page ends
+    # at x 377, the right page starts at x 445 and runs past the page width (D-052).
+    "student-handbook-jun-2026.pdf": (404.0,),
+    "academic-rules-handbook-jun-2026.pdf": (400.0,),
 }
 _CLAUSE = re.compile(r"^\d+(\.\d+)*[.)]?\s+\S")
 
@@ -178,8 +182,9 @@ def _ocr_page(path: str, n: int) -> str:
 def _page_text(page: pdfplumber.page.Page, splits: tuple[float, ...]) -> str:
     if not splits:
         return page.extract_text() or ""
-    edges = [0.0, *splits, float(page.width)]
-    cols = [page.crop((a, 0, b, page.height)).extract_text() or ""
+    right = max([float(page.width), *(float(w["x1"]) + 1 for w in page.extract_words())])
+    edges = [0.0, *splits, right]  # content may run past the MediaBox (spread pages)
+    cols = [page.crop((a, 0, b, page.height), strict=False).extract_text() or ""
             for a, b in zip(edges, edges[1:], strict=False)]
     return "\n\n".join(c for c in cols if c)
 

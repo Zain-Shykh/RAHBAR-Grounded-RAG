@@ -79,9 +79,9 @@ Extra "don't" items from the text (not listed as deductions but explicitly forbi
 - [x] Extract: HTML tables handled; PDF tables kept row-wise (`pdftotext -layout` or pdfplumber).
 - [x] Clean: documented rules + one thing deliberately not stripped.
 - [x] Chunk: sections, then paragraphs, then sentences; overlap; target size; unit stated.
-- [ ] Embed: pinned model, dimension recorded (768 for nomic-embed-text).
-- [ ] Store: id, text, vector, metadata. Metadata has `source`, `section`, `page`, `doc_version`, `superseded` on every chunk.
-- [ ] Collection metadata records embed model name + dimension [R-PIN-2].
+- [x] Embed: pinned model, dimension recorded (768 for nomic-embed-text).
+- [x] Store: id, text, vector, metadata. Metadata has `source`, `section`, `page`, `doc_version`, `superseded` on every chunk.
+- [x] Collection metadata records embed model name + dimension [R-PIN-2].
 - [ ] Cache expired when the Job runs [R-CAC-5].
 - [ ] Three (size, overlap) configs measured on recall@5; table in `docs/PIPELINE.md`; shipped one justified.
 - [ ] `docs/PIPELINE.md` contains: OCR list, before/after table example, unrecovered loss, cleaning rules, storage amplification, model/dim/pin location, chunk count, metadata schema, how docs reach the Job.

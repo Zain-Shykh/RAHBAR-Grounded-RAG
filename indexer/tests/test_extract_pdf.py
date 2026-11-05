@@ -68,14 +68,19 @@ from pipeline import extract as ex  # noqa: E402
 
 
 class FakePage:
-    def __init__(self, text: str = "", cols: list[str] | None = None) -> None:
+    def __init__(self, text: str = "", cols: list[str] | None = None, words_x1: float = 0.0) -> None:
         self.text, self.cols, self.width, self.height = text, cols or [], 600.0, 800.0
+        self.words_x1 = words_x1
         self.crops: list[tuple[float, ...]] = []
 
     def extract_text(self) -> str | None:
         return self.text or None
 
-    def crop(self, box: tuple[float, ...]) -> FakePage:
+    def extract_words(self) -> list[dict[str, float]]:
+        return [{"x1": self.words_x1}] if self.words_x1 else []
+
+    def crop(self, box: tuple[float, ...], strict: bool = True) -> FakePage:
+        assert strict is False  # spread pages crop beyond the MediaBox
         self.crops.append(box)
         return FakePage(self.cols[len(self.crops) - 1])
 
@@ -136,6 +141,24 @@ def test_column_split_reads_columns_in_order(monkeypatch: pytest.MonkeyPatch) ->
     t = doc.pages[0].text
     assert t.index("left col") < t.index("mid col") < t.index("right col")
     assert "interleaved" not in t
+
+
+@pytest.mark.parametrize("name,gutter", [("student-handbook-jun-2026.pdf", 404.0),
+                                         ("academic-rules-handbook-jun-2026.pdf", 400.0)])
+def test_handbook_spread_split_into_two_pages(monkeypatch: pytest.MonkeyPatch, name: str, gutter: float) -> None:
+    page = FakePage("interleaved " * 5, cols=["left page " * 5, "right page " * 5], words_x1=756.0)
+    _patch(monkeypatch, [page], [])
+    doc = ex.extract(f"/x/{name}", "2026", False)
+    assert page.crops == [(0.0, 0, gutter, 800.0), (gutter, 0, 757.0, 800.0)]
+    t = doc.pages[0].text
+    assert t.index("left page") < t.index("right page") and "interleaved" not in t
+
+
+def test_single_page_handbook_keeps_page_width(monkeypatch: pytest.MonkeyPatch) -> None:
+    page = FakePage("x", cols=["only left " * 5, ""], words_x1=363.0)
+    _patch(monkeypatch, [page], [])
+    doc = ex.extract("/x/student-handbook-jun-2026.pdf", "2026", False)
+    assert page.crops[-1][2] == 600.0 and doc.pages[0].text.startswith("only left")
 
 
 def test_markdown_and_unknown_suffix(tmp_path: object) -> None:
