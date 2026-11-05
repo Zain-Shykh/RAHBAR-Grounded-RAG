@@ -256,7 +256,7 @@ Places where the architecture has flagged a real chance of deviation (architectu
 | Date | 2026-11-05 |
 | Raised by | Claude (phase 12) |
 | Architecture reference | 4.4 (`LLM_TIMEOUT_SECONDS` 90, "below the Ingress timeout (120 s)"), 5.7.4 |
-| Files changed | none (a ConfigMap and Ingress value for Ahmad; the code default stays 90) |
+| Files changed | `api/app/config.py` (default 300 to match the amended architecture), ConfigMap and Ingress value for Ahmad (H-13) |
 | Related | `docs/IMPLEMENTATION_PLAN.md` H-7, results register "Generation p50 / p95" |
 
 **The architecture says:** the model call times out after 90 s, below a 120 s Ingress timeout.
