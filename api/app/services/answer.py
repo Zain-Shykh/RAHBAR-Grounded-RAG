@@ -26,7 +26,7 @@ def answer_question(
     # citation matches a retrieved passage (3.4). Keep this function thin: put each
     # step in its own module under services/ so each can be unit-tested.
     passages = retriever.retrieve(question, k=settings.top_k)
-    answer = provider.generate(question, passages)
+    answer = provider.generate(question, passages).answer
 
     log.info(
         "answered",

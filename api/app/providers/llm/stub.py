@@ -7,22 +7,29 @@ real model. It is deterministic: the same input always gives the same output.
 from __future__ import annotations
 
 from ...schemas import Answer, Citation, Passage
+from .base import GenerationResult
 
 
 class StubProvider:
     name = "stub"
 
-    def generate(self, question: str, passages: list[Passage]) -> Answer:
+    def generate(
+        self, question: str, passages: list[Passage], *, hint: str | None = None
+    ) -> GenerationResult:
         if not passages:
-            return Answer(
-                reasoning="stub: nothing was retrieved",
-                answer="(stub) No passages were retrieved for this question.",
-                citations=[],
-                answered_from_context=False,
-                confidence="low",
+            return GenerationResult(
+                Answer(
+                    reasoning="stub: nothing was retrieved",
+                    answer="(stub) No passages were retrieved for this question.",
+                    citations=[],
+                    answered_from_context=False,
+                    confidence="low",
+                ),
+                0,
+                0,
             )
         top = passages[0]
-        return Answer(
+        answer = Answer(
             reasoning="stub: cites the first retrieved passage",
             answer=f"(stub) A model would answer here from {len(passages)} passages. "
             f"The first one says: {top.text}",
@@ -30,3 +37,4 @@ class StubProvider:
             answered_from_context=True,
             confidence="low",
         )
+        return GenerationResult(answer, 0, 0)

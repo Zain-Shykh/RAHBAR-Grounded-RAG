@@ -26,6 +26,9 @@ class Passage(BaseModel):
     section: str
     page: int | None = None
     score: float = Field(description="Similarity, higher is closer (1 - cosine distance).")
+    # Optional, for the prompt header only (D-61). Not part of AskResponse.
+    doc_version: str | None = None
+    superseded: bool | None = None
 
 
 class Citation(BaseModel):

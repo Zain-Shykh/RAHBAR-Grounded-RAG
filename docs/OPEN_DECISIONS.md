@@ -754,3 +754,47 @@ Entry template:
 - Claude recommends: A. No shared file touched.
 - Decision: A. Decided by: Claude, pre-approved by Zain.
 - Decided on: 2026-11-05
+
+### D-61 Passage carries version and status
+- Status: DECIDED
+- Raised: 2026-11-05 by Claude (phase 9)
+- Area: api
+- Related: phase 9 spec, architecture 5.7.1, DEV-004
+- Question: The prompt header needs `version` and `status` but `Passage` has neither. How?
+- Options: A. Optional `doc_version` and `superseded` on `Passage`, filled by `ChromaRetriever`. B. Omit them from the header (breaks 5.7.1). C. A second Chroma lookup per request.
+- Claude recommends: A. Backward compatible, internal only, no extra call.
+- Decision: A. Decided by: Claude, pre-approved by Zain.
+- Decided on: 2026-11-05
+
+### D-62 Extractive sentence selection
+- Status: DECIDED
+- Raised: 2026-11-05 by Claude (phase 9)
+- Area: api
+- Related: phase 9 spec, architecture 5.15, AD-07
+- Question: Architecture 5.15 leaves sentence scoring open. Which rule?
+- Options: A. Distinct question-word overlap per sentence; best passage by its best sentence; cite that one passage. B. Embedding similarity (needs a model, breaks CI mode). C. The whole top passage (long, cites more than it used).
+- Claude recommends: A. Deterministic, no model, cites only what it used.
+- Decision: A. Decided by: Claude, pre-approved by Zain.
+- Decided on: 2026-11-05
+
+### D-63 `ollama-*` provider before phase 10
+- Status: DECIDED
+- Raised: 2026-11-05 by Claude (phase 9)
+- Area: api
+- Related: phase 9 spec
+- Question: What does `get_provider('ollama-host')` do before the HTTP client exists?
+- Options: A. Raise `NotImplementedError` from `get_provider` naming phase 10. B. Return the kit class whose `generate` raises on the first request.
+- Claude recommends: A. Fails at startup with a clear message, not on a user request.
+- Decision: A. Decided by: Claude, pre-approved by Zain.
+- Decided on: 2026-11-05
+
+### D-64 Abstention text has no topic phrase
+- Status: DECIDED
+- Raised: 2026-11-05 by Claude (phase 9)
+- Area: api
+- Related: phase 9 spec, architecture 5.10
+- Question: 5.10 says "plus, when possible, the topic phrase". Add it?
+- Options: A. Fixed text only. B. Echo a phrase extracted from the question (puts untrusted text into the answer).
+- Claude recommends: A. Deterministic, nothing echoed from the question.
+- Decision: A. Decided by: Claude, pre-approved by Zain.
+- Decided on: 2026-11-05

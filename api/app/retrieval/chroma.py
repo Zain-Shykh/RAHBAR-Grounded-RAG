@@ -77,5 +77,7 @@ class ChromaRetriever:
             page = md.get("page")
             out.append(Passage(chunk_id=cid, text=doc, source=md["source"], section=md["section"],
                                page=page if isinstance(page, int) and page > 0 else None,
-                               score=1.0 - float(dist)))
+                               score=1.0 - float(dist),
+                               doc_version=md.get("doc_version"),
+                               superseded=md.get("superseded")))
         return out
