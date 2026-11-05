@@ -2,6 +2,11 @@
 
 from __future__ import annotations
 
+import time
+from collections.abc import Callable
+
+import httpx
+
 from .config import IndexerSettings
 from .embedding.hashing import MODEL as HASHING_MODEL
 from .embedding.hashing import embed_hashing
@@ -36,3 +41,25 @@ def embed(texts: list[str], settings: IndexerSettings) -> list[list[float]]:
     if bad:
         raise ValueError(f"vector length {sorted(bad)} differs from the model dimension {dimension(model)}")
     return vectors
+
+
+def wait_for_ollama(settings: IndexerSettings, timeout: float, *,
+                    sleep: Callable[[float], None] = time.sleep,
+                    transport: httpx.BaseTransport | None = None) -> None:
+    """Wait until GET /api/tags lists the embedding model. Not needed for the hashing model."""
+    if settings.embed_model == HASHING_MODEL:
+        return
+    want = settings.embed_model
+    deadline = time.monotonic() + timeout
+    while True:
+        try:
+            with httpx.Client(timeout=5.0, transport=transport) as client:
+                names = [m.get("name", "") for m in client.get(f"{settings.ollama_url.rstrip('/')}/api/tags").json()["models"]]
+            if any(n == want or (":" not in want and n == f"{want}:latest") for n in names):
+                return
+            problem = f"model {want!r} not in {names}"
+        except Exception as exc:
+            problem = repr(exc)
+        if time.monotonic() >= deadline:
+            raise TimeoutError(f"Ollama not ready after {timeout:.0f} s: {problem}")
+        sleep(2.0)
