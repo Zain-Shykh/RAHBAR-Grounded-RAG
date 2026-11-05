@@ -103,7 +103,6 @@ None are blocking. All decisions are recorded as D-76 to D-80 (decided by Claude
 
 | Step | What | Files | Verify | Commit |
 | --- | --- | --- | --- | --- |
-| 1 | 2026-11-05 | `make test`, `make lint`, `--cov=app`, `retrieval_only.py recall` on the live index, live fixture gate (no `--update-baseline`), 2 real questions, 4 added test groups | PASS, AC-1 to AC-9 | Defect T12-D1 (NaN best score passed the floor, I-5): fixed in `answer.py` (`not (best >= floor)`), xfail removed. Two doc nits (q10 scores 0.821 and 0.811; stale chunk line in PIPELINE.md) fixed. After fixes: api 282 passed, indexer 257, eval 90. Coverage api 97%, indexer 97% |
 | 0 | DEV-004 absorbed; malformed row to 503 (done) | architecture, deviations, `chroma.py`, test | `make test` | done |
 | 1 | This spec; scores in `retrieval_only.py` | spec, `eval/retrieval_only.py` | `make lint` | `docs(spec): phase 12 tuning spec and plan` |
 | 2 | Three chunking runs (background) | `eval/tuning/*.json` | recall output | `test(eval): chunking experiment results` |
