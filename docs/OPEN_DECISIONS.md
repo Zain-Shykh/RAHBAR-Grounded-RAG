@@ -84,6 +84,10 @@ Entry template:
 | D-047 | Eval behaviour when an /api/ask call fails | eval | DECIDED | run_eval.py main |
 | D-048 | Guard --update-baseline against a failed gate | eval | DECIDED | run_eval.py main |
 | D-052 | Handbook PDFs are two-page spreads: split by file like D-044 | indexer | DECIDED | extract |
+| D-053 | Embedding package layout and parity with the api | indexer | DECIDED | embed, AD-09 |
+| D-054 | What store validates before touching Chroma | indexer | DECIDED | store |
+| D-055 | How the live indexer run is proven | indexer, process | DECIDED | phase 7 test plan |
+| D-056 | Wait timeouts and batch size as config | indexer | DECIDED | config.py |
 
 ---
 
@@ -661,4 +665,48 @@ Entry template:
 - Claude recommends: A (as D-044). Odd pages are unchanged (the right crop is empty).
 - Decision: A. Decided by: Claude, pre-approved by Zain (phase 6 review).
 - Result: `chunk_report.py --golden` still 0 missing. Golden section strings of q05, q06 not restored: numbered items inside a Roman section still become their own sections (DEV-003). q09, q10 are not Handbook items.
+- Decided on: 2026-11-05
+
+### D-53 Embedding package layout and parity with the api
+- Status: DECIDED
+- Raised: 2026-11-05 by Claude (phase 7)
+- Area: indexer
+- Related: phase 7 spec
+- Question: Where do the two embedders live, and how is parity with the api kept (AD-09)?
+- Options: A. `indexer/pipeline/embedding/{ollama,hashing}.py` plus `embed.py` dispatcher, golden-vector test; the api copies the files in phase 8. B. One module. C. Shared package (breaks the two build contexts, AD-09).
+- Claude recommends: A. Matches the plan and AD-09; a golden vector of eight numbers is the parity check.
+- Decision: A. Decided by: Claude, pre-approved by Zain.
+- Decided on: 2026-11-05
+
+### D-54 What store validates before touching Chroma
+- Status: DECIDED
+- Raised: 2026-11-05 by Claude (phase 7)
+- Area: indexer
+- Related: phase 7 spec
+- Question: Chroma silently upserts duplicate ids in some versions and accepts ragged vectors until query time. What does store check?
+- Options: A. Fail fast (`StoreError`, exit 1) on length mismatch, duplicate ids, empty text, vectors not all the model dimension. B. Trust the pipeline. C. Drop bad chunks with a warning.
+- Claude recommends: A. A partial index is the worst result (5.4.5, store row); failing before any write is free.
+- Decision: A. Decided by: Claude, pre-approved by Zain.
+- Decided on: 2026-11-05
+
+### D-55 How the live indexer run is proven
+- Status: DECIDED
+- Raised: 2026-11-05 by Claude (phase 7)
+- Area: indexer
+- Related: phase 7 spec
+- Question: Real-run checks need Chroma, Ollama and the corpus, which CI lacks. Pytest that skips, or a script?
+- Options: A. `scripts/check_index.py` run by developer and tester, never skipped (as D-045). B. Pytest that skips without services. C. Both.
+- Claude recommends: A. `make test` stays offline and nothing is silently skipped.
+- Decision: A. Decided by: Claude, pre-approved by Zain.
+- Decided on: 2026-11-05
+
+### D-56 Wait timeouts and batch size as config
+- Status: DECIDED
+- Raised: 2026-11-05 by Claude (phase 7)
+- Area: indexer
+- Related: phase 7 spec
+- Question: The plan wants Chroma and Ollama waits (120 s, 60 s) and `EMBED_BATCH_SIZE`. Which become ConfigMap keys?
+- Options: A. `EMBED_BATCH_SIZE` is already in architecture 4.4; the two waits are env defaults only, no new ConfigMap key. B. Add both to the ConfigMap (a change for Ahmad, C-2).
+- Claude recommends: A. Fewer contract changes; defaults are the architecture's numbers.
+- Decision: A. Decided by: Claude, pre-approved by Zain.
 - Decided on: 2026-11-05
