@@ -1029,3 +1029,47 @@ Entry template:
 - Claude recommends: A (dev container only, data volume is a local cache). The finding itself goes in FAILURE-ANALYSIS.md: a cache that outlives a bad setting can keep serving the old answers (or the bad ones) until the TTL or a re-index.
 - Decision: A. Decided by: Claude, pre-approved by Zain.
 - Decided on: 2026-11-05
+
+### D-86 ADR 0001 is written by this session, not Ahmad
+- Status: DECIDED
+- Raised: 2026-11-05 by Claude (phase 14)
+- Area: docs
+- Related: WORKPLAN (ADR 0001 is Ahmad's), R-JOB-4, checker "ADR filename mentions the indexer Job"
+- Question: The plan gives ADR 0001 to Ahmad, but the checker reads it first and he has not written it.
+- Options: A. Write `docs/adr/0001-indexer-as-job.md` now from the architecture and the real code, header "authored by Zain's session, Ahmad to review and rewrite in his words". B. Leave it missing and report it. C. Empty placeholder.
+- Claude recommends: A. It clears a checker failure and the R-DED-3 evidence line. It cites only code and architecture; Ahmad adds the manifest lines.
+- Decision: A. Decided by: Claude, pre-approved by Zain.
+- Decided on: 2026-11-05
+
+### D-87 The hosted provider stub is removed, not built
+- Status: DECIDED
+- Raised: 2026-11-05 by Claude (phase 14)
+- Area: api
+- Related: IMPLEMENTATION_PLAN 0.5 (hosted is a non-goal), architecture 5.12, R-LLM-1 ("support at least one mode fully"), R-LLM-4
+- Question: `api/app/providers/llm/hosted.py` raises `NotImplementedError`, which the checker counts as a stub.
+- Options: A. Delete the file; `get_provider` raises a clear `ValueError` for `hosted`; ADR 0004 says hosted is not built and what it would cost. B. Write a minimal OpenAI-compatible provider (about 50 lines) with no live test (no key, no card). C. Keep the stub.
+- Claude recommends: A. The assignment needs one mode fully (`ollama-host` is that); the plan forbids building hosted; an untested provider that sends corpus text off-site is a risk, not a feature.
+- Decision: A. Decided by: Claude, pre-approved by Zain. Not an assignment conflict: R-LLM-1 asks for one mode; R-LLM-6 lists `hosted.py` in the kit layout only.
+- Decided on: 2026-11-05
+
+### D-88 Engineering notes: what this lane answers
+- Status: DECIDED
+- Raised: 2026-11-05 by Claude (phase 14)
+- Area: docs
+- Related: WORKPLAN (Zain: Q5; Ahmad: Q1 to Q4, Q6), plan phase 14 (Q5, Q7), R-ENG-1..7
+- Question: Which of the seven questions are written here?
+- Options: A. Q5, Q6 (the guardrail is our code) and Q7 in full; Q1 to Q4 get the RAG-lane facts plus a marked "Ahmad" section. B. Only Q5 and Q7. C. All seven with guessed Kubernetes content.
+- Claude recommends: A. C would invent Ahmad's manifests and fail the "own files" rule.
+- Decision: A. Decided by: Claude, pre-approved by Zain.
+- Decided on: 2026-11-05
+
+### D-89 Starter placeholder in prose: reword in lane-owned files, list the rest
+- Status: DECIDED
+- Raised: 2026-11-05 by Claude (phase 14)
+- Area: docs
+- Related: R-SUB-5, `scripts/check_submission.py` (counts the literal string in any text file except `STARTER.md`, the checker, `*.example.*` and `corpus/raw/`)
+- Question: Prose that merely names the placeholder (plan, specs, requirements, rubric, workplan, workflow) trips the checker.
+- Options: A. Reword to "the starter placeholder" in files this lane owns (plan, specs, PIPELINE, AI-USAGE); list `requirements.md`, `rubric_checklist.md`, `WORKPLAN.md`, `WORKFLOW.md` for Zain. B. Edit everything. C. Change the checker (not ours).
+- Claude recommends: A.
+- Decision: A. Decided by: Claude, pre-approved by Zain.
+- Decided on: 2026-11-05

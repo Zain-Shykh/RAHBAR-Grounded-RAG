@@ -68,13 +68,13 @@ Hybrid retrieval, the `hosted` provider, the in-cluster Ollama mode, authenticat
 | 5 | Evaluation runner | Z-11 | Thu 18:30 | DONE | #8 |
 | 6 | Chunker | Z-05 | Fri 12:00 | DONE | #10 |
 | 7 | Embed and store, full indexer run | Z-06 | Fri 14:00 | DONE | #12 |
-| 8 | Retriever, index state, version scope | Z-07 | Fri 17:00 | DONE | PR (see log) |
-| 9 | Prompt, validation, CI-mode components | Z-08 | Fri 20:00 | DONE | PR (see log) |
+| 8 | Retriever, index state, version scope | Z-07 | Fri 17:00 | DONE | #19 |
+| 9 | Prompt, validation, CI-mode components | Z-08 | Fri 20:00 | DONE | #19 |
 | 10 | Generation, orchestration, readiness, metrics | Z-09 | Sat 13:00 | DONE | #15 |
 | 11 | Semantic cache | Z-10 | Sat 16:00 | DONE (with deviation DEV-006) | #16 |
 | 12 | Tuning, calibration, baselines | Z-12 | Sat 19:00 | DONE (with open deviation DEV-007) | #17 |
 | 13 | Failure analysis | Z-14 | Sun 11:00 | DONE (DEV-007 absorbed) | #18 |
-| 14 | Documents and ADRs | Z-15 | Sun 14:00 | NOT STARTED | |
+| 14 | Documents and ADRs | Z-15 | Sun 14:00 | DONE | #19 |
 | 15 | Integration support and final verification | joint | Sun 14:00 to 18:00 | NOT STARTED | |
 
 Hours spent so far (fill in at each phase end): planned 37.5 h, actual `____`.
@@ -82,12 +82,12 @@ Hours spent so far (fill in at each phase end): planned 37.5 h, actual `____`.
 ## 2. Current focus
 
 ```
-Phase:        14  Documents and ADRs
+Phase:        15  Integration support and final verification
 Stage:        not started   (SPEC DRAFT, APPROVED, IMPLEMENTING, TESTING, READY FOR PR, MERGED)
-Branch:       (none yet; docs/rag-z15-docs)
-Spec:         (none yet; docs/specs/phase-14-docs-adrs.md)
-Next action:  fresh session: stage 0 then stage 1 for phase 14. Failure analysis is written from real runs (docs/FAILURE-ANALYSIS.md, 6 of 6 stages named by the checker, four measured). Shipped numbers: chunking 400/50, floor 0.70, threshold 0.96, LLM timeout 300 s; real baseline recall@5 0.875 (eval/baseline.json).
-Waiting on:   Ahmad (H-7, H-8, H-13 values into the ConfigMap, Ingress and the ci overlay)
+Branch:       (none yet)
+Spec:         (none yet)
+Next action:  fresh session: stage 0 then stage 1 for phase 15. Phase 14 is DONE: ADRs 0001 to 0004, PIPELINE, ENGINEERING-NOTES (Q5, Q6, Q7 + lane facts), README API table. ADR 0001 needs Ahmad's review. Remaining checker failures are Ahmad's (evidence, workflows, k8s manifests, ui/Dockerfile) and 6 placeholder mentions in requirements.md, rubric_checklist.md, WORKFLOW.md, WORKPLAN.md (Zain to reword).
+Waiting on:   Ahmad (H-7, H-8, H-13, H-14; ADR 0001 review; Q1 to Q4 and his half of Q6)
 Last updated: 2026-11-05
 ```
 
@@ -197,6 +197,8 @@ Append-only, newest at the bottom. One line per event: date, phase, what happene
 2026-11-05  P13  A: policy PDF, no OCR: indexer exit 0, 0 chunks (8 of 8 pages), best score 0.911 to 0.613, abstained below floor. C: EMBED_MODEL on api only: /readyz 503 failed embed_pin, /api/ask 503, /healthz 200; bypassing the pin gives scores 0.034 to 0.045 on a question that scores 0.908. E: filter removed: 2023 clause ranks first (0.896 vs 0.895), 9 of 15 current-scope questions have a superseded chunk in the top 5; the model still answered from the 2026 clause. F: TEMPERATURE=1.2 on 4 questions: no retry, no fallback, valid citations; wording and length differ; no measurable degradation.
 2026-11-05  P13  Restore: recall@3 = recall@5 = 0.875 on the live index, equal to eval/baseline.json by type; `git diff` has no experiment code; checker shows 6 of 6 failure stages.
 2026-11-05  P13  H-14 for Ahmad: the pin capture is reusable (docs/FAILURE-ANALYSIS.md stage C).
+2026-11-05  P14  Spec pushed, decisions D-86 (ADR 0001 written here, Ahmad to review), D-87 (hosted stub removed, ValueError), D-88 (notes: Q5, Q6, Q7 full, Q1 to Q4 lane facts), D-89 (placeholder mentions reworded in lane files).
+2026-11-05  P14  ADRs 0001 to 0004, PIPELINE embedding and document delivery, ENGINEERING-NOTES, README API table, AI-USAGE; hosted.py removed with a test. Tester round 1 FAIL (6 doc defects, fixed), round 2 PASS (5 low, fixed). Checker: 6 failures left, none this lane's: Ahmad's evidence, workflows, k8s, ui/Dockerfile, and the placeholder word in requirements.md, rubric_checklist.md, WORKFLOW.md, WORKPLAN.md (shared, listed for Zain). Register note: stage times (4 min 17 s + 422 s + 1.3 s) do not add up to the 9 min 39 s wall time; re-check.
 ```
 
 ---
@@ -863,7 +865,7 @@ Tell Ahmad if he can reuse the pin demonstration capture for his evidence.
 
 ## Phase 14: Documents and ADRs (Z-15)
 
-**Status:** NOT STARTED · **Branch:** `docs/rag-z15-docs` · **Est:** 3 h · **Priority:** P0
+**Status:** DONE · **Branch:** `feat/rag-z15-docs` · **Est:** 3 h · **Priority:** P0
 
 ### Objective
 Write the RAG-lane documents from real measurements, in your own words, with file and line references.
@@ -876,7 +878,7 @@ Requirements R-IDX (report items), R-ENG-5, R-ENG-7, R-AI-1; `docs/PIPELINE.md`,
 - `docs/adr/0002-chunking.md`, `0003-cache-store.md`, `0004-llm-provider-and-data-governance.md` (use the template; 0004 also records the provider interface extension, the embedder duplication, data leaving the pod in `hosted` mode, Ollama on `0.0.0.0`, no auth on Chroma and Redis). ADR 0001 is Ahmad's.
 - `docs/ENGINEERING-NOTES.md`: **Q5** (recall@5 by type: where worst, why, which technique) and **Q7** if the worst-hour failure was in this lane. Every answer cites real files and line numbers. A generic answer scores zero.
 - `docs/AI-USAGE.md`: this lane's entries, specific about what the AI wrote and what was changed.
-- Remove every `STARTER-TODO` comment in files this lane owns.
+- Remove every starter placeholder comment in files this lane owns.
 
 ### Design notes
 - Numbers come from the results register, not from memory. If a number is missing, run the measurement; do not invent it.
@@ -890,13 +892,13 @@ Ahmad's documents. README apply order.
 - [ ] ADRs 0002, 0003, 0004 exist with their topic words in the file names.
 - [ ] Q5 (and Q7 if applicable) answered with file and line references.
 - [ ] `AI-USAGE.md` entries present and specific.
-- [ ] `grep -rn STARTER-TODO api indexer eval corpus docs/PIPELINE.md docs/FAILURE-ANALYSIS.md` returns nothing for this lane's files.
+- [ ] `grep -rn "STARTER-TOD[O]" api indexer eval corpus docs/PIPELINE.md docs/FAILURE-ANALYSIS.md` returns nothing for this lane's files.
 - [ ] `python3 scripts/check_submission.py` has no failures in sections G, H, J attributable to this lane.
 
 ### Verify
 ```bash
 python3 scripts/check_submission.py | grep -E "FAIL|✗" | head
-grep -rn STARTER-TODO --exclude-dir=.venv --exclude-dir=.git . | head
+grep -rn "STARTER-TOD[O]" --exclude-dir=.venv --exclude-dir=.git . | head
 ```
 
 ### Hand-off
@@ -921,7 +923,7 @@ Make the lanes meet: real index in the cluster, gate green in CI, and a clean su
 
 **I-4 (Sun 14:00).** Final verification, then the submission list:
 - [ ] `make test && make lint && make check` clean (report remaining warnings).
-- [ ] `grep -rn STARTER-TODO --exclude-dir=.venv .` returns nothing; no `NotImplementedError` left.
+- [ ] `grep -rn "STARTER-TOD[O]" --exclude-dir=.venv .` returns nothing; no `NotImplementedError` left.
 - [ ] No secret in Git history (scan: `git log -p | grep -iE "api[_-]?key|token|password|secret"`); no `corpus/raw` content committed.
 - [ ] Deviation log reviewed: nothing `OPEN` or `ACCEPTED` without a decision.
 - [ ] `docs/OPEN_DECISIONS.md` has no `OPEN` item that affects the delivered system.

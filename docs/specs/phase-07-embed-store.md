@@ -19,7 +19,7 @@
 - Architecture: 5.3 (embedding contract), 5.4.1 (run sequence), 5.4.2, 5.4.3 (record and collection metadata), 5.4.4 (swap), 4.4 (`EMBED_BATCH_SIZE`), AD-02, AD-06, AD-09, AD-23. Invariants: only the indexer writes Chroma; one pinned model; five metadata fields on every chunk.
 - Requirements: R-IDX-4 (one vector per chunk, pinned model), R-IDX-5 (id, text, vector, metadata stored), R-PIN-2 (model and dimension in collection metadata).
 - Verified in phase 2: `create_collection` with metadata, `modify(name=)` keeps metadata (A-2), 500 records per `add` (A-3), `/api/embed` returns 768-dim vectors for a batch of 32 (A-6).
-- Existing code: `indexer/pipeline/{extract,clean,chunk,verify,run,config,models,dummy}.py` done; `embed.py` and `store.py` are `STARTER-TODO`. The api has no embedding code yet (phase 8 copies it); the parity test is a golden vector here.
+- Existing code: `indexer/pipeline/{extract,clean,chunk,verify,run,config,models,dummy}.py` done; `embed.py` and `store.py` are starter placeholder. The api has no embedding code yet (phase 8 copies it); the parity test is a golden vector here.
 - Open decisions: D-053..D-056 (this phase, section 8).
 
 ## 3. Scope

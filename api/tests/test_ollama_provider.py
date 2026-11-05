@@ -154,3 +154,10 @@ def test_get_provider_builds_ollama() -> None:
     for name in ("ollama-host", "ollama-incluster"):
         prov = get_provider(Settings(llm_provider=name))
         assert isinstance(prov, OllamaProvider) and prov.name == name
+
+
+def test_hosted_is_a_clear_config_error() -> None:
+    with pytest.raises(ValueError, match="hosted.*not implemented"):
+        get_provider(Settings(llm_provider="hosted"))
+    with pytest.raises(ValueError, match="unknown LLM_PROVIDER"):
+        get_provider(Settings(llm_provider="nope"))

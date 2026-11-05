@@ -20,7 +20,7 @@
 - Requirements: R-EVA-1 to R-EVA-9.
 - Rubric: section A items on evaluation (abstention 100%, citation validity, CI gate, baseline committed). Nothing here is measured yet; phase 12 produces `baseline.json`.
 - Decisions: D-046 (fold dashes), D-047 (abort on ask error), D-048 (guard `--update-baseline`), all DECIDED 2026-11-04.
-- Existing code: `eval/run_eval.py` (129 lines). Given: `load_golden`, `ask`, `main`, three constants. STARTER-TODO: `recall_at_k`, `citation_validity`, `summarise`, `gate`. No `eval/tests/` yet. Golden sets: `eval/golden.yaml` (18 real questions, phase 3), `eval/fixtures/golden.fixture.yaml` (6 CI questions).
+- Existing code: `eval/run_eval.py` (129 lines). Given: `load_golden`, `ask`, `main`, three constants. starter placeholder: `recall_at_k`, `citation_validity`, `summarise`, `gate`. No `eval/tests/` yet. Golden sets: `eval/golden.yaml` (18 real questions, phase 3), `eval/fixtures/golden.fixture.yaml` (6 CI questions).
 - Contract C-6 (WORKPLAN 3): CLI flags and exit codes 0 pass, 1 gate failed, 2 not implemented. Unchanged.
 - Finding on golden q05 (checked against the real PDF `student-handbook-jun-2026.pdf` with pdfplumber): the sentence "unavoidable reason are to immediately (within two days)" is on PDF page 30, so the comment `# p.30` is **correct** (phase 4 changed it from 29). PDF page 31 carries identical text (the PDF repeats the page), so a chunk from either page matches `source` and `section`; no change to `eval/golden.yaml`. The printed contents page says 27 for the section, which is the printed page number, not the PDF index.
 
@@ -91,7 +91,7 @@ Exit codes: 0 pass, 1 gate failed **or run aborted** (message says which), 2 not
 
 ## 6. Acceptance criteria
 
-- [ ] **AC-1**: `recall_at_k`, `citation_validity`, `summarise`, `gate` implemented; no `NotImplementedError` and no `STARTER-TODO` left in `eval/run_eval.py`.
+- [ ] **AC-1**: `recall_at_k`, `citation_validity`, `summarise`, `gate` implemented; no `NotImplementedError` and no starter placeholder left in `eval/run_eval.py`.
 - [ ] **AC-2**: Section matching: `1.21` matches `1.21 Attendance`; `5` matches `5.4 Academic Warning`; `1.2` does not match `1.21`; `1.21` matches `1.21: Attendance` and `1.21.1`; case and extra whitespace ignored; `VI – SEMESTER RULES` matches `VI - SEMESTER RULES`; a different `source` never matches.
 - [ ] **AC-3**: `recall_at_k` returns `None` for an empty `relevant`; returns 0.5 when one of two golden items is in the top k; a match at rank 4 counts for k=5 but not k=3; fewer than k retrieved does not crash.
 - [ ] **AC-4**: `citation_validity` returns `None` with no citations, 1.0 when all match, 0.5 when one of two does not; a citation with the right source but a different section is invalid.
@@ -110,7 +110,7 @@ All tests are pure data or `httpx.MockTransport`; no network, model or cluster.
 
 | AC | Level | Test or command | Needs |
 | --- | --- | --- | --- |
-| AC-1 | unit | `grep -n "NotImplementedError\|STARTER-TODO" eval/run_eval.py` returns nothing; `test_run_eval.py` imports and calls all four | nothing |
+| AC-1 | unit | `grep -n "NotImplementedError\|STARTER-TOD[O]" eval/run_eval.py` returns nothing; `test_run_eval.py` imports and calls all four | nothing |
 | AC-2 | unit | `test_run_eval.py::test_section_matches` (parametrised) | nothing |
 | AC-3 | unit | `::test_recall_at_k_*` | nothing |
 | AC-4 | unit | `::test_citation_validity_*` | nothing |

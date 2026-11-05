@@ -19,7 +19,7 @@
 - Architecture: 5.4.2 (chunk row, id rule, amplification), 5.4.3 (record), AD-10 (words), AD-22 (section text and matching), AD-28 (id). Invariant: every chunk has the five fields (I-5 style rule in CLAUDE.md).
 - Requirements: R-IDX-3, R-IDX-6, R-IDX-8. Rubric: metadata fields present, unit stated, amplification reported.
 - Decisions made in this phase: D-049, D-050, D-051 (all "Claude, pre-approved by Zain"). Deviation: DEV-003.
-- Existing code: `indexer/pipeline/models.py` (`Document`, `Page`, `Chunk`, `Chunk.metadata()`); `chunk.py` is the STARTER-TODO(3.1) stub; `run.py` and `dummy.py` do not call `chunk` yet (phase 7 wires it). `eval/run_eval.py::section_matches` is the matcher the golden strings must satisfy.
+- Existing code: `indexer/pipeline/models.py` (`Document`, `Page`, `Chunk`, `Chunk.metadata()`); `chunk.py` is the starter placeholder stub; `run.py` and `dummy.py` do not call `chunk` yet (phase 7 wires it). `eval/run_eval.py::section_matches` is the matcher the golden strings must satisfy.
 - Real text (cleaned, inspected with a throwaway script, nothing committed):
   - Clause documents (Academic Rules Handbook, Aug 2023 rules): every clause starts `4.3 The normal ...` on one line, so one clause is one section.
   - Student Handbook: Roman sections (`V - EXAMINATION RULES`), lone-integer headings (`5. Unacceptable Uses of ...`), but two-column pages are interleaved (`7. Students who ... VII - LIBRARY SERVICES AND RULES` on one line). Headings found mid-line are not recoverable; recorded as a known loss.
