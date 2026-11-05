@@ -5,7 +5,7 @@
 | Phase | 10, from `docs/IMPLEMENTATION_PLAN.md` |
 | Work plan task | Z-09 |
 | Branch | `feat/rag-z09-generation` |
-| Stage | TESTING |
+| Stage | READY FOR PR |
 | Started | 2026-11-05 |
 | Approved (spec and plan) | 2026-11-05, pre-approved by Zain (no gate for this run) |
 | Depends on | phases 8 and 9 (retriever, index state, prompt, validate, extractive provider) |
@@ -99,19 +99,19 @@ def answer_question(question: str, retriever: Retriever, provider: LLMProvider,
 
 ## 6. Acceptance criteria
 
-- [ ] **AC-1**: Real stack (Chroma, real index, Ollama): a golden question returns 200 with a cited answer whose citations all appear in `retrieved`; headers `X-Outcome: answered`, `X-Cache: SKIP`, `X-Request-ID`.
-- [ ] **AC-2**: Below-floor question: `answered_from_context=false`, `X-Outcome: abstained`, zero provider calls, log `abstain_reason=below_floor` (unit test); the hostel question on the real model is recorded (abstains or not) without tuning.
-- [ ] **AC-3**: `/readyz` 200 with a good index; 503 with `failed: ["embed_pin"]` when `EMBED_MODEL` differs, with the pin-conflict log; 503 `collection` for an empty or missing collection; 503 `chroma` when Chroma is unreachable or hangs more than 2 s; 503 `embed_dimension` after a dimension conflict.
-- [ ] **AC-4**: `/healthz` returns `{"status": "alive", "version": ...}` and makes no outbound call (test with every dependency raising on use).
-- [ ] **AC-5**: `/metrics` exposes every name of 4.14 (test asserts the list); counters move: `rahbar_abstentions_total{reason="below_floor"}`, `rahbar_fallbacks_total{reason=...}`, `rahbar_tokens`, `rahbar_top_score`.
-- [ ] **AC-6**: Each `/api/ask` emits one `answered` JSON line with the fields in section 5 (test captures the log).
-- [ ] **AC-7**: Scripted fake provider: invalid then valid output answers after one retry (retry call carries the hint); invalid twice returns the canned fallback, HTTP 200, `X-Outcome: fallback`, `fallbacks{invalid_output}`; bad citation twice gives `{bad_citation}`; a transient `ProviderError` then success answers; a transient error twice and a non-transient error give `{provider_error}`; model abstention is `abstained` with `abstentions{model}`.
-- [ ] **AC-8**: `EmbedError` gives a fallback `provider_error`, no retrieval, 200; `IndexUnavailable` from the index or retriever gives 503 `{"detail": "index unavailable"}`, never a 500 traceback.
-- [ ] **AC-9**: OllamaProvider (mock transport): request body has `stream=false`, `format` equal to `Answer.model_json_schema()`, `options` with temperature, num_ctx, num_predict; tokens read from `prompt_eval_count`/`eval_count`; timeout and connect errors are transient `ProviderError`, HTTP 500 is not; non-JSON content raises `InvalidModelOutput`; the semaphore limits concurrent calls to `LLM_MAX_CONCURRENCY` and a wait longer than the timeout raises `ProviderError`.
-- [ ] **AC-10**: `follow_up=True` is accepted and bypasses the cache seam (`X-Cache: SKIP`); nothing is ever cached or stored by this phase.
-- [ ] **AC-11**: `make test && make lint` green; coverage of `app` at least 60% (target 90%); no Chroma write and no indexing in `main.py` (check_submission "G" lines pass).
-- [ ] **AC-12**: Live checks recorded in the results register: A-6 on the real model; 3 golden questions; the hostel-curfew question; a live injection check with the planted line from `eval/fixtures/academic-rules-2026.md`; each with latency.
-- [ ] **AC-13**: Poisoned-evidence unit test: a fake provider that obeys the planted text yields an answer whose citations still must match, and the prompt contains the evidence only inside delimited blocks.
+- [x] **AC-1**: Real stack (Chroma, real index, Ollama): a golden question returns 200 with a cited answer whose citations all appear in `retrieved`; headers `X-Outcome: answered`, `X-Cache: SKIP`, `X-Request-ID`.
+- [x] **AC-2**: Below-floor question: `answered_from_context=false`, `X-Outcome: abstained`, zero provider calls, log `abstain_reason=below_floor` (unit test); the hostel question on the real model is recorded (abstains or not) without tuning.
+- [x] **AC-3**: `/readyz` 200 with a good index; 503 with `failed: ["embed_pin"]` when `EMBED_MODEL` differs, with the pin-conflict log; 503 `collection` for an empty or missing collection; 503 `chroma` when Chroma is unreachable or hangs more than 2 s; 503 `embed_dimension` after a dimension conflict.
+- [x] **AC-4**: `/healthz` returns `{"status": "alive", "version": ...}` and makes no outbound call (test with every dependency raising on use).
+- [x] **AC-5**: `/metrics` exposes every name of 4.14 (test asserts the list); counters move: `rahbar_abstentions_total{reason="below_floor"}`, `rahbar_fallbacks_total{reason=...}`, `rahbar_tokens`, `rahbar_top_score`.
+- [x] **AC-6**: Each `/api/ask` emits one `answered` JSON line with the fields in section 5 (test captures the log).
+- [x] **AC-7**: Scripted fake provider: invalid then valid output answers after one retry (retry call carries the hint); invalid twice returns the canned fallback, HTTP 200, `X-Outcome: fallback`, `fallbacks{invalid_output}`; bad citation twice gives `{bad_citation}`; a transient `ProviderError` then success answers; a transient error twice and a non-transient error give `{provider_error}`; model abstention is `abstained` with `abstentions{model}`.
+- [x] **AC-8**: `EmbedError` gives a fallback `provider_error`, no retrieval, 200; `IndexUnavailable` from the index or retriever gives 503 `{"detail": "index unavailable"}`, never a 500 traceback.
+- [x] **AC-9**: OllamaProvider (mock transport): request body has `stream=false`, `format` equal to `Answer.model_json_schema()`, `options` with temperature, num_ctx, num_predict; tokens read from `prompt_eval_count`/`eval_count`; timeout and connect errors are transient `ProviderError`, HTTP 500 is not; non-JSON content raises `InvalidModelOutput`; the semaphore limits concurrent calls to `LLM_MAX_CONCURRENCY` and a wait longer than the timeout raises `ProviderError`.
+- [x] **AC-10**: `follow_up=True` is accepted and bypasses the cache seam (`X-Cache: SKIP`); nothing is ever cached or stored by this phase.
+- [x] **AC-11**: `make test && make lint` green; coverage of `app` at least 60% (target 90%); no Chroma write and no indexing in `main.py` (check_submission "G" lines pass).
+- [x] **AC-12**: Live checks recorded in the results register: A-6 on the real model; 3 golden questions; the hostel-curfew question; a live injection check with the planted line from `eval/fixtures/academic-rules-2026.md`; each with latency.
+- [x] **AC-13**: Poisoned-evidence unit test: a fake provider that obeys the planted text yields an answer whose citations still must match, and the prompt contains the evidence only inside delimited blocks.
 
 ## 7. Test strategy and traceability
 
@@ -184,13 +184,16 @@ About 4 h against 4 h in the work plan.
 
 | Round | Date | Command | Result | Notes |
 | --- | --- | --- | --- | --- |
+| 1 | 2026-11-05 | `make test`, `make lint`, `pytest --cov=app`, live uvicorn on :8765 (real Ollama, 1 call), :8766 (`EMBED_MODEL=other`), :8767 (Chroma down), `check_submission.py` | PASS, AC-1..AC-13 | Independent tester (commit 9698d57). 12 tests added (`api/tests/test_tester_probes3.py`): 5000 duplicate citations, 3000 valid plus 1 fabricated, retry hint content, mixed transient/invalid reason mapping, token sums over attempts, label cardinality, Chroma failing mid-request is 503, 422 carries X-Request-ID, odd provider exception is a 200 fallback, no question text in the `answered` line. Live: `/readyz` 503 `embed_pin` with the 5.3 log line; Chroma down gives `/readyz` 503 `chroma`, `/api/ask` 503 `index unavailable`, `/healthz` 200 throughout; invariants I-1 (no Chroma write), I-16 and "no eval" checked by grep. |
 
-Coverage of `app`: `__`%
+Defect D-1 (low): the DEV-005 prefix rule accepted a bare parent number ("1" for the only retrieved "1.17 ..."). Fixed in `citation_matches` (all-digit citations are rejected), test `test_bare_parent_number_is_rejected_tester_d1`. Note: a non-`IndexUnavailable` exception from a malformed Chroma row in `_passages` would be a 500; outside the ACs, left for phase 12.
+
+Coverage of `app`: 97% (853 statements, 22 missed). api 219 tests after the D-1 fix.
 
 ## 13. Sign-offs
 
 | Gate | Date | Approved by | Notes |
 | --- | --- | --- | --- |
 | Spec and plan (the one gate) | 2026-11-05 | Zain (pre-approved, no gate) | recommended options |
-| Tester verdict PASS | | | rounds: |
+| Tester verdict PASS | 2026-11-05 | independent subagent | rounds: 1 |
 | Merged | | | PR # |

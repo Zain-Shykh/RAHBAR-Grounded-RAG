@@ -25,6 +25,12 @@ def test_a_truncated_heading_ending_at_a_word_boundary_is_accepted() -> None:
     assert citation_matches(Citation(source="a.pdf", section="4.3 The normal"), ps) is ps[0]
 
 
+def test_bare_parent_number_is_rejected_tester_d1() -> None:
+    ps = [ps_(1, "1.17 Normal course load")]
+    assert citation_matches(Citation(source="a.pdf", section="1"), ps) is None
+    assert citation_matches(Citation(source="a.pdf", section="1.17"), ps) is ps[0]
+
+
 @pytest.mark.parametrize("cited", ["4", "4.", "4.3 Th", "5.1", "", "  "])
 def test_non_matching_or_loose_prefixes_are_rejected(cited: str) -> None:
     ps = [ps_(1, "4.3 The normal course load is 5 courses."), ps_(2, "4.31 Other")]

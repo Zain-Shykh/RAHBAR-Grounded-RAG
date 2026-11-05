@@ -33,7 +33,7 @@ def citation_matches(c: Citation, passages: list[Passage]) -> Passage | None:
         if p.section == c.section:
             return p
     cited = c.section.strip()
-    if not cited:
+    if not cited or cited.isdigit():   # a bare parent number ("1" for "1.17 ...") is not a citation
         return None
     pre = [p for p in same if p.section.startswith(cited) and p.section[len(cited):len(cited) + 1] in (" ", ".", ":")]
     return pre[0] if len({p.section for p in pre}) == 1 else None
