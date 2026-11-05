@@ -2,7 +2,7 @@
 
 The phased build plan for everything Zain builds in RAHBAR: the API, the indexing pipeline, the evaluation harness, tuning, and the RAG documents. It is also the **only progress tracker for Zain's lane**: phase status, acceptance ticks and the progress log all live in this file.
 
-Ahmad's lane (Kubernetes, UI, CI/CD, evidence) is in [`WORKPLAN.md`](WORKPLAN.md) sections 5 and following. This file implements WORKPLAN tasks Z-01 to Z-15.
+Ahmad's lane (Kubernetes, UI, CI/CD, evidence) is in [`WORKPLAN.md`](WORKPLAN.md) sections 5 and following. This file implements WORKPLAN tasks Z-01 to Z-15. Ahmad is unavailable, so the Kubernetes, Docker, CI/CD, evidence and platform-document tasks (A-01 to A-11, A-13, A-14) are built from [`IMPLEMENTATION_PLAN_PLATFORM.md`](IMPLEMENTATION_PLAN_PLATFORM.md) (phases K1 to K11). **Phase 15 below is deliberately last: it runs after K11.**
 
 | | |
 | --- | --- |
@@ -82,11 +82,11 @@ Hours spent so far (fill in at each phase end): planned 37.5 h, actual `____`.
 ## 2. Current focus
 
 ```
-Phase:        15  Integration support and final verification
+Phase:        15  Integration support and final verification (WAIT: run it only after platform phases K1 to K11 are DONE, see IMPLEMENTATION_PLAN_PLATFORM.md)
 Stage:        not started   (SPEC DRAFT, APPROVED, IMPLEMENTING, TESTING, READY FOR PR, MERGED)
 Branch:       (none yet)
 Spec:         (none yet)
-Next action:  fresh session: stage 0 then stage 1 for phase 15. Phase 14 is DONE: ADRs 0001 to 0004, PIPELINE, ENGINEERING-NOTES (Q5, Q6, Q7 + lane facts), README API table. ADR 0001 needs Ahmad's review. Remaining checker failures are Ahmad's (evidence, workflows, k8s manifests, ui/Dockerfile) and 6 placeholder mentions in requirements.md, rubric_checklist.md, WORKFLOW.md, WORKPLAN.md (Zain to reword).
+Next action:  work on IMPLEMENTATION_PLAN_PLATFORM.md first (K1 to K11). Then, in a fresh session, stage 0 then stage 1 for phase 15. Phase 14 is DONE: ADRs 0001 to 0004, PIPELINE, ENGINEERING-NOTES (Q5, Q6, Q7 + lane facts), README API table. ADR 0001 needs Ahmad's review. Remaining checker failures are Ahmad's (evidence, workflows, k8s manifests, ui/Dockerfile) and 6 placeholder mentions in requirements.md, rubric_checklist.md, WORKFLOW.md, WORKPLAN.md (Zain to reword).
 Waiting on:   Ahmad (H-7, H-8, H-13, H-14; ADR 0001 review; Q1 to Q4 and his half of Q6)
 Last updated: 2026-11-05
 ```

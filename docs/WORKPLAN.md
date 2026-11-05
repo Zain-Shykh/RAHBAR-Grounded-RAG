@@ -128,6 +128,8 @@ Zain total: about 37.5 h.
 
 ## 5. Ahmad: Platform lane
 
+> **Status update (5 Nov 2026):** Ahmad is unavailable. Tasks A-01 to A-11, A-13 and A-14 are built from [`IMPLEMENTATION_PLAN_PLATFORM.md`](IMPLEMENTATION_PLAN_PLATFORM.md) (phases K1 to K11), which is now the only progress tracker for them. A-00 (onboarding) and A-12 (UI polish) remain Ahmad's. The table below stays as the original task definition.
+
 | ID | Task | Main files | Depends on | Est | Prio | Done when | Status |
 | --- | --- | --- | --- | ---: | :---: | --- | :---: |
 | A-00 | **Onboarding.** Follow `docs/SETUP.md` end to end on WSL 2: tools, `make install`, `make test`, `make lint`, `make dev`, Ollama with both models, `make fetch`, `make cluster`. Fix `SETUP.md` where it was wrong or unclear. | `docs/SETUP.md` | none | 2 h | P0 | `make test` and `make lint` green; `make dev` shows the stub chat; `kubectl get nodes` Ready; `minikube ssh "curl http://host.minikube.internal:11434/api/tags"` answers. | [ ] |
