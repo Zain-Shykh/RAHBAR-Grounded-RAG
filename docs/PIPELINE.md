@@ -44,8 +44,15 @@ Unit: **words** (whitespace split, AD-10). Defaults 400 words and 50 overlap; th
 
 **Measured at 400 / 50 on the nine real documents** (`scripts/chunk_report.py`, 2026-11-05): 1044 chunks; stored words 85 094 over 82 099 source words, **storage amplification 1.04** (1.00 for the Aug 2023 rules, Prospectus, fee, grading and policy; 1.01 Academic Rules Handbook; 1.04 Student Handbook; 1.03 and 1.06 the Annual Reports). Median chunk size 25 words (Aug 2023 rules) to 117 (Annual Report 2023-24); the largest is 400.
 
-| Size (tokens) | Overlap (tokens) | recall@5 | Chunks stored |
-| --- | --- | --- | --- |
+**Chunking experiment (phase 12, 2026-11-05).** Same nine documents, same golden set (18 questions, 16 with relevant passages), real `nomic-embed-text`, scope `current`; recall from `eval/retrieval_only.py recall` (the `retrieved` list the API builds before the model is called, scored by the same `run_eval.summarise` as the gate; raw output in `eval/tuning/`). Size and overlap are in words (AD-10), not tokens.
+
+| Size (words) | Overlap (words) | recall@3 | recall@5 | recall@5 by type (ordinary / version / exact / injection) | Chunks stored | Amplification |
+| ---: | ---: | ---: | ---: | --- | ---: | ---: |
+| 200 | 25 | 0.875 | 0.875 | 0.909 / 1.0 / 0.5 / 1.0 | 1103 | 1.06 |
+| **400** | **50** | **0.875** | **0.875** | 0.909 / 1.0 / 0.5 / 1.0 | **981** | **1.04** |
+| 600 | 100 | 0.875 | 0.875 | 0.909 / 1.0 / 0.5 / 1.0 | 952 | 1.03 |
+
+**Shipped: 400 / 50.** The three configurations are indistinguishable on recall and on the score of every question to within 0.011 (q04 0.889 at 200/25, 0.878 at the others), and they miss the same two questions (q10 and q14, see the exact-term finding in the results register). The reason is the chunker, not luck: it splits at headings first, so most chunks are one clause (median 25 to 117 words) and the size limit only matters for the few long sections; a 600-word limit changes 3% of the chunks, a 200-word limit 12%. With recall tied, nothing measured justifies leaving the architecture default: 600/100 stores 3% fewer chunks but lengthens the worst-case prompt by half on a CPU model whose latency is prompt-bound, and 200/25 adds 12% more chunks and more duplicated text for no gain (D-81). The conclusion for the design is that on this corpus heading structure matters more than the size knob.
 
 ## Embedding
 Model, vector dimension, where the pin lives, how the API checks it.
