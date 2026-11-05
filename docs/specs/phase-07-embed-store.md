@@ -5,7 +5,7 @@
 | Phase | 7, from `docs/IMPLEMENTATION_PLAN.md` |
 | Work plan task | Z-06 |
 | Branch | `feat/rag-z06-embed-store` |
-| Stage | SPEC DRAFT |
+| Stage | TESTING |
 | Started | 2026-11-05 |
 | Approved (spec and plan) | 2026-11-05, Zain (pre-approved: no gate this session) |
 | Depends on | phases 2 (services verified), 4 (extract, clean), 6 (chunk); follow-ups D-052 (Handbook spreads), DEV-001..003 absorbed |
@@ -139,7 +139,22 @@ About 2 h of work plus the real run (OCR about 2 min, embedding of about 1000 ch
 
 ## 11. Implementation notes
 
-(filled during IMPLEMENT)
+- `wait_for_ollama` lives in `embed.py` (not `store.py` as section 4 said); `wait_for_chroma` is in `store.py`. `run_pipeline` calls `dimension(EMBED_MODEL)` first, so an unknown model fails before any wait.
+- `scripts/check_index.py` and one word in the Makefile lint line are the only shared-file/extra changes. No deviation from the architecture in this phase's code (DEV-001..003 absorbed earlier in the PR).
+- Real run (nomic-embed-text, Ollama on the host, Chroma 1.0.12 on `localhost:8100`, `/usr/bin/time -v`):
+
+| | Run 1 | Run 2 |
+| --- | --- | --- |
+| index_id | `20261105T050817Z-730b0c` | `20261105T051808Z-7dc6b0` |
+| chunks | 981 | 981 |
+| wall time | 9:38.7 (indexer log 578.3 s) | 9:39.2 |
+| peak RSS (indexer process) | 437 860 kB | 437 732 kB |
+| exit | 0 | 0 |
+
+  Stage times (run 1): extract+clean+chunk 4 min 17 s (OCR of 41 pages about 130 s of it), embed 422 s for 31 batches of 32 (about 0.43 s per chunk), store 1.3 s. Amplification 1.04 (75 644 stored words / 73 051 source words). Chunks per document: Academic Rules Handbook 238, Annual Report 2019-20 65, Annual Report 2023-24 182, Faculty policy 40, Fee page 7, Grading page 8, Prospectus 44, Student Handbook 245, Aug 2023 rules 152. The Handbook spread fix (D-052) changed counts from the phase 6 report (1044 at 400/50) to 981.
+- Collection metadata after run 2: `hnsw:space=cosine, embed_model=nomic-embed-text, dimension=768, chunk_count=981, chunk_size=400, chunk_overlap=50`, `built_at`, `doc_versions` (9 documents). `scripts/check_index.py`: PASS, only `rahbar` in Chroma.
+- Sanity query (`search_query:` prefix): "days to tell the Academic Office about missed classes" returns Student Handbook p.30 `7. Students who have missed classes...` first (cosine 0.88); "mobile phones in the examination hall" returns p.26 `1. Mobile Phones...` (0.87).
+- The Ollama memory is not in the indexer's RSS: it runs on the host (H-4 gives both numbers).
 
 ## 12. Test report
 

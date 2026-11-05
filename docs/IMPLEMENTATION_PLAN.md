@@ -170,10 +170,10 @@ Numbers this lane must measure. The agent fills them in as they are produced; th
 | Quantity | Value | Phase | Measured with |
 | --- | --- | --- | --- |
 | Pages needing OCR (per document) | Aug 2023 rules 24 of 26; policy 8 of 8; Academic Rules Handbook 5 of 58; Student Handbook 4 of 64; others 0. 41 pages OCR'd in about 88 s | 4 | indexer log, `scripts/check_golden_extract.py` |
-| Real corpus chunk count at shipped size | - | 7 | collection metadata `chunk_count` |
+| Real corpus chunk count at shipped size | 981 at 400/50 (Handbook spreads split); per document: 238, 65, 182, 40, 7, 8, 44, 245, 152 | 7 | collection metadata `chunk_count`, `scripts/check_index.py` |
 | Storage amplification (stored words / source words) | 1.04 overall at 400/50 (1044 chunks; 85 094 stored, 82 099 source words); 1.00 to 1.06 per document | 6 | `scripts/chunk_report.py` |
-| Indexer peak memory | - | 7 | `/usr/bin/time -v` |
-| Indexer wall time, real corpus | - | 7 | indexer log |
+| Indexer peak memory | 438 MB RSS (437 860 kB and 437 732 kB in two runs); Ollama's model is on the host, not in this number | 7 | `/usr/bin/time -v` |
+| Indexer wall time, real corpus | 9 min 39 s (extract+clean+chunk 4 min 17 s with 41 OCR pages, embed 422 s, store 1.3 s); two runs identical to 0.5 s | 7 | indexer log, `/usr/bin/time -v` |
 | Chunk config 1 (size, overlap) and recall@5 | - | 12 | `eval` |
 | Chunk config 2 | - | 12 | `eval` |
 | Chunk config 3 | - | 12 | `eval` |
