@@ -16,6 +16,9 @@ class IndexerSettings:
     chunk_size: int
     chunk_overlap: int
     ollama_url: str
+    embed_batch_size: int = 32
+    chroma_wait_seconds: float = 120.0
+    ollama_wait_seconds: float = 60.0
 
 
 def get_settings() -> IndexerSettings:
@@ -28,4 +31,7 @@ def get_settings() -> IndexerSettings:
         chunk_size=int(os.environ.get("CHUNK_SIZE", 400)),
         chunk_overlap=int(os.environ.get("CHUNK_OVERLAP", 50)),
         ollama_url=os.environ.get("OLLAMA_URL", "http://host.minikube.internal:11434"),
+        embed_batch_size=int(os.environ.get("EMBED_BATCH_SIZE", 32)),
+        chroma_wait_seconds=float(os.environ.get("CHROMA_WAIT_SECONDS", 120)),
+        ollama_wait_seconds=float(os.environ.get("OLLAMA_WAIT_SECONDS", 60)),
     )
