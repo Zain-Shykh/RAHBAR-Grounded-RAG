@@ -21,11 +21,22 @@ FALLBACK_TEXT = (
 
 
 def citation_matches(c: Citation, passages: list[Passage]) -> Passage | None:
-    """The passage this citation names (exact source and section), or None."""
-    for p in passages:
-        if p.source == c.source and p.section == c.section:
+    """The passage this citation names, or None.
+
+    Exact source and section first. Failing that (DEV-005), the cited section may be the leading
+    clause number of exactly one retrieved section of that source ("4.3" for "4.3 The normal course
+    load ..."): the 3B model abbreviates long headings. `validate` rewrites it to the passage's own
+    section, so the response always carries the exact retrieved string.
+    """
+    same = [p for p in passages if p.source == c.source]
+    for p in same:
+        if p.section == c.section:
             return p
-    return None
+    cited = c.section.strip()
+    if not cited:
+        return None
+    pre = [p for p in same if p.section.startswith(cited) and p.section[len(cited):len(cited) + 1] in (" ", ".", ":")]
+    return pre[0] if len({p.section for p in pre}) == 1 else None
 
 
 def parse_answer(raw: str) -> Answer:

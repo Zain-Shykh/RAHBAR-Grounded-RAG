@@ -194,3 +194,27 @@ Places where the architecture has flagged a real chance of deviation (architectu
 **Plan:** absorb: add the two optional fields to the `Passage` description in architecture 5.7.2.
 
 **Decision:** pre-approved by Zain 2026-11-05 (D-61).
+
+### DEV-005 A citation may name a retrieved section by its leading clause number
+
+| | |
+| --- | --- |
+| Status | OPEN (absorb) |
+| Severity | S3 |
+| Date | 2026-11-05 |
+| Raised by | Claude (phase 10) |
+| Architecture reference | 5.7.3 (validate, rule 2), 5.8 |
+| Files changed | `api/app/services/validate.py` (`citation_matches`), `api/app/services/prompt.py` (answer style line) |
+| Related | `docs/specs/phase-10-generation.md` section 11, live run q01 |
+
+**The architecture says:** every citation resolves to a retrieved passage matching `source` exactly and `section` exactly.
+
+**What was built instead:** exact match first. Failing that, the cited `section` is accepted when it is a prefix of exactly one distinct retrieved `section` of the same `source`, ending at a space, dot or colon (`4.3` for `4.3 The normal course load is 5 courses.`). `validate` rewrites the citation to the passage's exact `source`, `section` and `page`, so the response only ever carries retrieved strings. An ambiguous prefix, a mid-word prefix or an empty section is still rejected.
+
+**Why:** live llama3.2:3b on the real index (q01) copied the clause number and dropped the heading text although the prompt says to copy exactly; exact matching turned a correct, grounded answer into the canned fallback. The accepted forms are the same rule eval uses for golden sections (AD-22), and the output stays exact.
+
+**Impact:** no invariant weakened: a citation to a chunk not retrieved for the request is still rejected (I-9 style check), citation validity in eval stays 100% by construction. No contract change.
+
+**Plan:** absorb into 5.7.3 rule 2.
+
+**Decision:** taken by Claude to fix a code defect found live (pre-approved run); Zain to confirm in the PR.
