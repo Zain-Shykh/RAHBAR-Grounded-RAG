@@ -1,7 +1,5 @@
 # Indexing and retrieval pipeline
 
-<!-- STARTER-TODO(3.1, 3.3, 5.2): fill each section with your numbers, then delete this comment. -->
-
 ## Extraction
 PDF text comes from `pdfplumber` (default mode: a table row stays on one line). A page with fewer than 30 non-space characters is OCR'd (`pdf2image` 200 dpi, one page at a time, `pytesseract` `eng`). HTML uses the stdlib parser, keeps only `div.main-content`, drops scripts, navigation, breadcrumb and footer, and writes each table row as one line with ` | ` between cells. Repeating headers and footers (a line in the top or bottom three lines of at least half the pages, compared with digits ignored) are removed; numbered clause lines never are.
 
@@ -54,8 +52,13 @@ Unit: **words** (whitespace split, AD-10). Defaults 400 words and 50 overlap; th
 
 **Shipped: 400 / 50.** The three configurations are indistinguishable on recall and on the score of every question to within 0.011 (q04 0.889 at 200/25, 0.878 at the others), and they miss the same two questions (q10 and q14, see the exact-term finding in the results register). The reason is the chunker, not luck: it splits at headings first, so most chunks are one clause (median 25 to 117 words) and the size limit only matters for the few long sections; a 600-word limit changes 3% of the chunks, a 200-word limit 12%. With recall tied, nothing measured justifies leaving the architecture default: 600/100 stores 3% fewer chunks but lengthens the worst-case prompt by half on a CPU model whose latency is prompt-bound, and 200/25 adds 12% more chunks and more duplicated text for no gain (D-81). The conclusion for the design is that on this corpus heading structure matters more than the size knob.
 
+## How the documents reach the indexer Job
+The documents are **not baked into the image** and not fetched at start-up. `make fetch` downloads the nine files into `corpus/raw/` (gitignored; `corpus/MANIFEST.md` lists the URL and SHA-256 of each) and `make corpus` copies them onto a PVC, `corpus-data`, mounted read-only at `/corpus` in the Job's pod (`CORPUS_DIR`, AD-08). The Job's first step, `verify` (`indexer/pipeline/verify.py`), checks every file against `/corpus/_index.json` and exits 1 on a mismatch before any work. Reasons: the university's files are not ours to commit or to bake into a registry image, and a changed document should need a data copy and a Job run, not an image rebuild. Cost: a clean cluster needs `make corpus` before the first Job. The CI fixture corpus (`eval/fixtures/`) has no `_index.json` and is read from the repository instead.
+
 ## Embedding
-Model, vector dimension, where the pin lives, how the API checks it.
+**Model:** `nomic-embed-text` served by Ollama on the host, **768 dimensions**, cosine distance (`hnsw:space: cosine`). CI uses `hashing-bow-768`, an offline lexical embedder with the same dimension. **Input:** a chunk is embedded as `search_document: <section>\n<text>` (`indexer/pipeline/embed.py`, `document_text`) in batches of 32 to `POST /api/embed`; a question is embedded as `search_query: <question>` (AD-23). The stored document is the chunk text only.
+
+**Where the pin lives.** One ConfigMap key, `EMBED_MODEL`, read by both the indexer and the API. The indexer writes `embed_model` and `dimension` into the collection metadata (`indexer/pipeline/store.py`, `store`). The API reads the metadata on every snapshot and compares (`api/app/services/index_state.py`, `_check_pin`, `require_pin`): a mismatch logs `embedding pin conflict` with both model names, `/readyz` returns 503 `failed:["embed_pin"]`, and `/api/ask` returns 503 before any query is embedded. A second check (`check_dimension`) refuses a query vector whose length differs from the collection's. The captured demonstration is in `docs/FAILURE-ANALYSIS.md` stage C: without the pin, a same-dimension wrong model scores 0.034 to 0.045 against 0.908, with no error.
 
 ## Relevance floor
 `RELEVANCE_FLOOR` is the cosine similarity of the best retrieved passage below which the API abstains without calling the model (architecture 5.6.3). Measured on the shipped 400/50 index with `eval/retrieval_only.py recall` (the same on all three chunk configurations, `eval/tuning/`):
