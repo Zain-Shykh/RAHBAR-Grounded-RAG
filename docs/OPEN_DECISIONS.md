@@ -864,3 +864,58 @@ Entry template:
 - Claude recommends: A. Matches "retry once only if transient (timeout, connection reset)"; retrying a busy host would double the wait.
 - Decision: A. Decided by: Claude, pre-approved by Zain.
 - Decided on: 2026-11-05
+
+### D-71 Where cache maintenance runs
+- Status: DECIDED
+- Raised: 2026-11-05 by Claude (phase 11)
+- Area: api
+- Related: architecture 5.9.4, D-27
+- Question: When does the pod create `idx:cache:{index_id}` and drop the older ones?
+- Options: A. From `answer_question` and `/readyz`, on each snapshot, cheap no-op when the `index_id` is unchanged. B. Inside `IndexState.get`.
+- Claude recommends: A. Keeps `IndexState` a Chroma-only reader and makes `/readyz` repair a missing index; the readiness probe runs every few seconds so the effect is the same as a refresh hook (5.9.4 item 3).
+- Decision: A. Decided by: Claude, pre-approved by Zain.
+- Decided on: 2026-11-05
+
+### D-72 `X-Cache` when Redis is down
+- Status: DECIDED
+- Raised: 2026-11-05 by Claude (phase 11)
+- Area: api
+- Related: architecture 5.5.2, 5.5.3, AD-15
+- Question: What does the response header say when Redis fails?
+- Options: A. `MISS` (architecture 5.5.2 step 4: treat as a miss, count a miss, log a warning). B. A new value `BYPASS`.
+- Claude recommends: A. The architecture already names the behaviour and the UI knows three values; the warning log carries the cause.
+- Decision: A. Decided by: Claude, pre-approved by Zain.
+- Decided on: 2026-11-05
+
+### D-73 Cache threshold calibration moves from phase 12 to phase 11
+- Status: DECIDED
+- Raised: 2026-11-05 by Claude (phase 11)
+- Area: api
+- Related: architecture 5.9.3, R-CAC-3
+- Question: Who measures `CACHE_THRESHOLD`?
+- Options: A. Phase 11, with real nomic embeddings and Redis Stack, as Zain instructed for this run. B. Phase 12 as the plan says.
+- Claude recommends: A. The cache needs a defended number to ship; phase 12 keeps floor, chunking and baselines and only re-checks the value.
+- Decision: A. Plan phase 12 item 3 is done in phase 11. Decided by: Claude, pre-approved by Zain.
+- Decided on: 2026-11-05
+
+### D-74 Backoff after a Redis failure
+- Status: DECIDED
+- Raised: 2026-11-05 by Claude (phase 11)
+- Area: api
+- Related: architecture 5.9.2, I-16
+- Question: Should every request retry a dead Redis?
+- Options: A. After a failure skip Redis for 5 s (one client timeout of 1 s per 5 s, not per request). B. Retry every request.
+- Claude recommends: A. Keeps the p95 of a degraded system close to the no-cache latency.
+- Decision: A. `backoff_seconds=5.0`. Decided by: Claude, pre-approved by Zain.
+- Decided on: 2026-11-05
+
+### D-75 Store gate re-checks citations
+- Status: DECIDED
+- Raised: 2026-11-05 by Claude (phase 11)
+- Area: api
+- Related: architecture 5.9.2, I-9, I-10
+- Question: Does the cache trust `validate` or check citations again before storing?
+- Options: A. Check again (every citation names a retrieved `source` and `section`). B. Trust `validate`.
+- Claude recommends: A. Cheap, and a cached bad answer is served many times.
+- Decision: A. Decided by: Claude, pre-approved by Zain.
+- Decided on: 2026-11-05
