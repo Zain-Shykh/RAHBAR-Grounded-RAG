@@ -14,6 +14,7 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from .config import get_settings
@@ -51,6 +52,13 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
 
 app = FastAPI(title="RAHBAR API", lifespan=lifespan)
+
+
+@app.exception_handler(IndexUnavailable)
+async def index_unavailable(request: Request, exc: IndexUnavailable) -> JSONResponse:
+    """Infrastructure failure, not model output: 503 with a fixed body, never a traceback (5.5.2)."""
+    log.error("index unavailable", extra={"reason": exc.reason, "error": str(exc)})
+    return JSONResponse(status_code=503, content={"detail": "index unavailable"})
 
 
 @app.middleware("http")
