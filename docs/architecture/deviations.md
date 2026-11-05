@@ -81,7 +81,7 @@ Copy this block to the end of section 7, increment the number, and fill every li
 | DEV-004 | `Passage` gains optional `doc_version` and `superseded` | S3 | ABSORBED | 5.7.2 | 2026-11-05 |
 | DEV-005 | A citation may name a retrieved section by its leading clause number | S3 | ABSORBED | 5.7.3 rule 2 | 2026-11-05 |
 | DEV-006 | Cache maintenance runs on the next request or readiness probe, not inside the index refresh | S3 | ABSORBED | 5.9.4 item 3 | 2026-11-05 |
-| DEV-007 | The model timeout and the Ingress timeout must exceed 90 s and 120 s on the host CPU | S3 | OPEN | 4.4, 5.7.4 | 2026-11-05 |
+| DEV-007 | The model timeout and the Ingress timeout must exceed 90 s and 120 s on the host CPU | S3 | ABSORBED | 4.4, 5.7.4 | 2026-11-05 |
 
 ## 7. Log
 
@@ -251,7 +251,7 @@ Places where the architecture has flagged a real chance of deviation (architectu
 
 | | |
 | --- | --- |
-| Status | OPEN (decision for Zain and Ahmad) |
+| Status | ABSORBED (Zain accepted option A, 2026-11-05; architecture 4.4, 5.7.4 and the Ingress section amended) |
 | Severity | S3 |
 | Date | 2026-11-05 |
 | Raised by | Claude (phase 12) |
@@ -269,4 +269,4 @@ Places where the architecture has flagged a real chance of deviation (architectu
 
 **Plan:** either (A) set `LLM_TIMEOUT_SECONDS=300` in the ConfigMap and the Ingress `proxy-read-timeout` to at least 310 s (what the baseline used; Ahmad, H-7), amending 4.4; or (B) keep 90 and accept fallbacks on the slowest questions, and say so in the engineering note. Recommended: A.
 
-**Decision:** (Zain) accept A / B.
+**Decision:** Zain accepted A: `LLM_TIMEOUT_SECONDS=300` in the ConfigMap and Ingress `proxy-read-timeout` of at least 310 s. Architecture amended.

@@ -86,8 +86,8 @@ Phase:        13  Failure analysis
 Stage:        not started   (SPEC DRAFT, APPROVED, IMPLEMENTING, TESTING, READY FOR PR, MERGED)
 Branch:       (none yet; feat/rag-z14-failure-analysis)
 Spec:         (none yet; docs/specs/phase-13-failure-analysis.md)
-Next action:  fresh session: stage 0 then stage 1 for phase 13. Shipped numbers: chunking 400/50, floor 0.70, threshold 0.96; real baseline recall@5 0.875, citation validity 1.0, abstention 1.0 (eval/baseline.json). The local real index in `rahbar-dev-chroma` is the 400/50 index (981 chunks). DEV-007 (model and Ingress timeouts) is open for Zain.
-Waiting on:   Zain (DEV-007), Ahmad (H-7, H-8 values into the ConfigMap and the ci overlay)
+Next action:  fresh session: stage 0 then stage 1 for phase 13. Shipped numbers: chunking 400/50, floor 0.70, threshold 0.96; real baseline recall@5 0.875, citation validity 1.0, abstention 1.0 (eval/baseline.json). The local real index in `rahbar-dev-chroma` is the 400/50 index (981 chunks). DEV-007 accepted (option A, hand-off H-13).
+Waiting on:   Ahmad (H-7, H-8, H-13 values into the ConfigMap, Ingress and the ci overlay)
 Last updated: 2026-11-05
 ```
 
@@ -110,6 +110,7 @@ Things this lane owes Ahmad or needs from him. Tick when delivered. Newest at th
 | H-11 | Zain to Ahmad | Real `/healthz` and `/readyz` merged (his A-13 pin demonstration needs it). Text in the log | 10 | [x] |
 | H-12 | Zain to Ahmad | Cache is merged: Redis settings, env vars, index name, `X-Cache` values, demo steps. Text in the log | 11 | [x] |
 | H-7 | Zain to Ahmad | Final ConfigMap values: `CHUNK_SIZE`, `CHUNK_OVERLAP`, `RELEVANCE_FLOOR`, `CACHE_THRESHOLD`, `TEMPERATURE` with one-line justifications. Text in the log | 12 | [x] |
+| H-13 | Zain to Ahmad | DEV-007 accepted (option A): ConfigMap `LLM_TIMEOUT_SECONDS=300` and Ingress `nginx.ingress.kubernetes.io/proxy-read-timeout: "310"` (at least 310 s; the Ingress must stay above the model timeout). Replaces the 90 s and 120 s in the architecture | 13 | [ ] |
 | H-8 | Zain to Ahmad | `eval/fixtures/baseline.fixture.json` committed (and the `ci` overlay floor). Text in the log | 12 | [x] |
 | H-9 | Ahmad to Zain | ConfigMap, Redis Stack and Chroma manifests running in minikube (milestone I-1) | n/a | [ ] |
 | H-10 | Ahmad to Zain | Real corpus on `corpus-data` PVC and the Job runnable in the cluster (milestone I-2) | n/a | [ ] |
