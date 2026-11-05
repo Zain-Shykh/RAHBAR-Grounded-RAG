@@ -1014,7 +1014,7 @@ The assignment requires the cache to expire when the indexing Job runs, and requ
 
 1. The indexer stamps a new `index_id` into the collection metadata at every run (5.4.3).
 2. Every cache entry and every cache search index is named by the `index_id` it was built under.
-3. When an API pod's refresh sees a new `index_id`, it creates `idx:cache:{new}`, then drops every other `idx:cache:*` index with `FT.DROPINDEX ... DD` (which deletes its entries). The operation is idempotent, so three pods doing it at once is safe.
+3. When an API pod sees a new `index_id` in its snapshot (on the next question or the next `/readyz` probe, whichever comes first; `SemanticCache.maintain`, DEV-006), it creates `idx:cache:{new}`, then drops every other `idx:cache:*` index with `FT.DROPINDEX ... DD` (which deletes its entries). The operation is idempotent, so three pods doing it at once is safe.
 4. A pod's retriever and its cache both read the same `index_state` snapshot, so within one pod the cache and the index always agree. For up to `INDEX_REFRESH_SECONDS` after a swap, a pod that has not refreshed yet may still serve cached answers built from the old index (and its collection handle may error and trigger a refresh, see 5.6.4). Once it refreshes it only sees the new `index_id`, so the old entries are unreachable. The window is bounded by the refresh interval, and the demonstration waits longer than that.
 5. Entries written by a late pod under an old `index_id` land under a prefix with no search index. They are never found and expire by TTL.
 

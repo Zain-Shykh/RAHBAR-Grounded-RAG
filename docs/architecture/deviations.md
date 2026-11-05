@@ -78,6 +78,9 @@ Copy this block to the end of section 7, increment the number, and fill every li
 | DEV-001 | PDF extraction uses pdfplumber default text mode, not layout mode | S3 | ABSORBED | 5.4.2 (extract) | 2026-11-04 |
 | DEV-002 | Eval section match also folds dashes and applies NFKC | S3 | ABSORBED | 5.13.2, AD-22 | 2026-11-04 |
 | DEV-003 | Chunker heading rules: isolated short line added, numbered rule tightened, section cut at 80 characters | S3 | ABSORBED | 5.4.2 (chunk), AD-22 | 2026-11-05 |
+| DEV-004 | `Passage` gains optional `doc_version` and `superseded` | S3 | OPEN (absorb) | 5.7.2 | 2026-11-05 |
+| DEV-005 | A citation may name a retrieved section by its leading clause number | S3 | ABSORBED | 5.7.3 rule 2 | 2026-11-05 |
+| DEV-006 | Cache maintenance runs on the next request or readiness probe, not inside the index refresh | S3 | ABSORBED | 5.9.4 item 3 | 2026-11-05 |
 
 ## 7. Log
 
@@ -218,3 +221,27 @@ Places where the architecture has flagged a real chance of deviation (architectu
 **Plan:** absorb into 5.7.3 rule 2.
 
 **Decision:** taken by Claude to fix a code defect found live; accepted by Zain 2026-11-05; absorbed into architecture 5.7.3 rule 2.
+
+### DEV-006 Cache maintenance runs on the next request or readiness probe, not inside the index refresh
+
+| | |
+| --- | --- |
+| Status | ABSORBED |
+| Severity | S3 |
+| Date | 2026-11-05 |
+| Raised by | Claude (phase 11) |
+| Architecture reference | 5.9.4 item 3, AD-04 |
+| Files changed | `api/app/services/cache.py` (`maintain`), `api/app/services/answer.py`, `api/app/routes/health.py` |
+| Related | `docs/OPEN_DECISIONS.md` D-71, `docs/specs/phase-11-semantic-cache.md` |
+
+**The architecture says:** "When an API pod's refresh sees a new `index_id`, it creates `idx:cache:{new}`, then drops every other `idx:cache:*` index."
+
+**What was built instead:** `IndexState` stays a Chroma-only reader. `SemanticCache.maintain(index_id, dimension)` is called with the request's snapshot in `answer_question` and with the probe's snapshot in `/readyz`, and does the create-then-drop the first time it sees a new `index_id`. It is a no-op while the `index_id` is unchanged.
+
+**Why:** keeps Chroma and Redis concerns apart, lets `/readyz` heal a missing cache index, and needs no callback from `IndexState`. Readiness probes run every few seconds, so a pod that sees a new `index_id` in a refresh creates and cleans up the cache indexes within one probe period, or on its first question, whichever is first. Entries are keyed by `index_id`, so correctness never depends on the drop; the drop only frees memory.
+
+**Impact:** none on invariants or contracts. Verified live: after a real re-index the earlier question was a `MISS` and `FT._LIST` showed only the new index.
+
+**Plan:** absorbed into architecture 5.9.4 item 3.
+
+**Decision:** taken by Claude, pre-approved by Zain (D-71).
