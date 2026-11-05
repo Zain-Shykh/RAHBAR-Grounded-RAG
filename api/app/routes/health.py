@@ -9,6 +9,7 @@ from typing import Any
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 
+from ..services.cache import CacheError
 from ..services.index_state import IndexUnavailable
 from . import metrics
 
@@ -62,6 +63,8 @@ def readyz(request: Request) -> JSONResponse:
         return JSONResponse({"status": "ready", "checks": {"retriever": "stub"}})
 
     failed: str | None = None
+    cache = getattr(request.app.state, "cache", None)
+    snap = None
     done, result = _within(CHECK_TIMEOUT, lambda: state.get(force=True))
     if not done:
         failed = "chroma"
@@ -70,14 +73,22 @@ def readyz(request: Request) -> JSONResponse:
     elif isinstance(result, Exception):
         failed = "chroma"
     else:
+        snap = result
         metrics.set_index_info(result.embed_model, result.index_id, result.chunk_count)
         problem = state.problem()      # embed_pin or dimension, set by the snapshot and queries
         if problem:
             failed = _REASON_NAME.get(problem, problem)
 
-    # Redis joins in phase 11 (D-67). Until then it is reported, not checked.
+    # Redis sits between embed_pin and embed_dimension in the 4.8 order. It is checked once the
+    # Chroma-side checks have not already decided the failure; the client has 1 s socket timeouts.
     checks = {name: "ok" for name in _ORDER}
-    checks["redis"] = "skipped"
+    if cache is None:
+        checks["redis"] = "skipped"      # no cache wired (stub retriever)
+    elif snap is not None and failed in (None, "embed_dimension"):
+        try:
+            cache.check(snap.index_id, snap.dimension)
+        except CacheError:
+            failed = "redis"
     if failed is None:
         return JSONResponse({"status": "ready", "checks": checks})
     # Checks after the failing one were not decided by it; mark only the failure.

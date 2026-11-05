@@ -35,6 +35,15 @@ INDEX_INFO = Gauge("rahbar_index_info", "The index this pod believes is live (=1
                    ["embed_model", "index_id", "chunks"])
 
 _live_index: tuple[str, str, str] | None = None
+_lookups = [0, 0]   # hits, lookups: this process only
+
+
+def record_lookup(hit: bool) -> None:
+    """One semantic cache lookup: the counter and the per-process hit ratio gauge (4.14)."""
+    CACHE_LOOKUPS.labels(result="hit" if hit else "miss").inc()
+    _lookups[0] += hit
+    _lookups[1] += 1
+    CACHE_HIT_RATIO.set(_lookups[0] / _lookups[1])
 
 
 def set_index_info(embed_model: str, index_id: str, chunks: int) -> None:
