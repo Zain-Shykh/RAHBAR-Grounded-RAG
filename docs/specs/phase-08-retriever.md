@@ -5,7 +5,7 @@
 | Phase | 8, from `docs/IMPLEMENTATION_PLAN.md` |
 | Work plan task | Z-07 |
 | Branch | `feat/rag-z07-retriever` |
-| Stage | IMPLEMENTING |
+| Stage | READY FOR PR |
 | Started | 2026-11-05 |
 | Approved (spec and plan) | 2026-11-05, Zain (pre-approved: no gate this session) |
 | Depends on | phase 7 (real index, `scripts/check_index.py`) |
@@ -85,14 +85,14 @@ New `Settings` keys (defaults from 4.4): `redis_host=redis`, `redis_port=6379`, 
 
 ## 6. Acceptance criteria
 
-- [ ] **AC-1**: Real index: the withdrawal-deadline question (clause 4.25) returns the 2026 handbook first; with "in 2023" it returns the 2023 rules first.
-- [ ] **AC-2**: `scope()` tests: year match, older phrase, default, year matching nothing, year matching a superseded and a current version.
-- [ ] **AC-3**: Re-running the indexer while a script queries in a loop: zero unhandled exceptions in the retriever.
-- [ ] **AC-4**: `EMBED_MODEL=other` against the real index: pin conflict detected and logged with both names; `retrieve` raises `IndexUnavailable`.
-- [ ] **AC-5**: Embedder parity: the golden vector from `indexer/tests/test_embed_hashing.py` passes in the api.
-- [ ] **AC-6**: Stub mode and the existing 11 kit tests pass; `make test && make lint` green.
-- [ ] **AC-7**: `grep -rnE "\.(add|upsert|delete|modify|create_collection|delete_collection)\(" api/app` has no Chroma write.
-- [ ] **AC-8**: Retrieval-only recall@3/@5, overall and by type, on the golden set against the real index, in the results register.
+- [x] **AC-1**: Real index: the withdrawal-deadline question (clause 4.25) returns the 2026 handbook first; with "in 2023" it returns the 2023 rules first.
+- [x] **AC-2**: `scope()` tests: year match, older phrase, default, year matching nothing, year matching a superseded and a current version.
+- [x] **AC-3**: Re-running the indexer while a script queries in a loop: zero unhandled exceptions in the retriever.
+- [x] **AC-4**: `EMBED_MODEL=other` against the real index: pin conflict detected and logged with both names; `retrieve` raises `IndexUnavailable`.
+- [x] **AC-5**: Embedder parity: the golden vector from `indexer/tests/test_embed_hashing.py` passes in the api.
+- [x] **AC-6**: Stub mode and the existing 11 kit tests pass; `make test && make lint` green.
+- [x] **AC-7**: `grep -rnE "\.(add|upsert|delete|modify|create_collection|delete_collection)\(" api/app` has no Chroma write.
+- [x] **AC-8**: Retrieval-only recall@3/@5, overall and by type, on the golden set against the real index, in the results register.
 
 ## 7. Test strategy and traceability
 
@@ -132,7 +132,12 @@ Test plan: tests ship with each step; the tester subagent re-runs everything and
 
 ## 11. Implementation notes
 
-(filled during implement)
+- Hashing queries add no prefix (the indexer copy strips only `search_document: `); Ollama queries add `search_query: `.
+- `ChromaRetriever` tolerates an unknown `EMBED_MODEL` (embedder None, retrieve raises `IndexUnavailable("embed_pin")`) so the pod is not-ready rather than crash-looping.
+- Malformed collection metadata raises `IndexUnavailable("collection")` (tester D-T1).
+- Phase 10 must map `EmbedError` (Ollama down) to a fallback/503; the retriever does not wrap it.
+- Real runs: loop 1 and 2 spanned two swaps, 1689 queries, 0 errors. Early recall (retrieval only): @3 0.875, @5 0.875; misses q10, q14.
+- No deviation from the architecture.
 
 ## 12. Test report
 

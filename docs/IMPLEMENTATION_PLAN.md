@@ -68,7 +68,7 @@ Hybrid retrieval, the `hosted` provider, the in-cluster Ollama mode, authenticat
 | 5 | Evaluation runner | Z-11 | Thu 18:30 | DONE | #8 |
 | 6 | Chunker | Z-05 | Fri 12:00 | DONE | #10 |
 | 7 | Embed and store, full indexer run | Z-06 | Fri 14:00 | DONE | #12 |
-| 8 | Retriever, index state, version scope | Z-07 | Fri 17:00 | NOT STARTED | |
+| 8 | Retriever, index state, version scope | Z-07 | Fri 17:00 | DONE | PR (see log) |
 | 9 | Prompt, validation, CI-mode components | Z-08 | Fri 20:00 | NOT STARTED | |
 | 10 | Generation, orchestration, readiness, metrics | Z-09 | Sat 13:00 | NOT STARTED | |
 | 11 | Semantic cache | Z-10 | Sat 16:00 | NOT STARTED | |
@@ -82,11 +82,11 @@ Hours spent so far (fill in at each phase end): planned 37.5 h, actual `____`.
 ## 2. Current focus
 
 ```
-Phase:        8  Retriever, index state, version scope
+Phase:        9  Prompt, validation, CI-mode components
 Stage:        not started   (SPEC DRAFT, APPROVED, IMPLEMENTING, TESTING, READY FOR PR, MERGED)
-Branch:       (none yet; feat/rag-z07-retriever)
-Spec:         (none yet; docs/specs/phase-08-retriever.md)
-Next action:  fresh session: stage 0 then stage 1 for phase 8. The api copies indexer/pipeline/embedding/{hashing,ollama}.py (AD-09); the golden vector in indexer/tests/test_embed_hashing.py is the parity check. Rebuild the dev index with the indexer if needed (about 10 min, Ollama up).
+Branch:       (none yet; feat/rag-z08-prompt-validate)
+Spec:         (none yet; docs/specs/phase-09-prompt-validate.md)
+Next action:  fresh session: stage 0 then stage 1 for phase 9. Phase 8 gives IndexState.problem(), IndexUnavailable(reason), Scope.tag, EmbedError (phase 10 maps EmbedError and IndexUnavailable to 503/fallback).
 Waiting on:   nothing
 Last updated: 2026-11-05
 ```
@@ -163,6 +163,9 @@ Append-only, newest at the bottom. One line per event: date, phase, what happene
 2026-11-05  P07  SPEC DRAFT, APPROVED (pre-approved): spec and plan, D-053..D-056 (Claude, pre-approved by Zain). 7700adb
 2026-11-05  P07  IMPLEMENTING done: hashing and Ollama embedders, stage-and-swap store, run.py with waits, stage logs and exit codes, scripts/check_index.py. Real run twice on corpus/raw: 981 chunks, 9 min 39 s, peak 438 MB, index_id changed. 
 2026-11-05  P07  TESTING round 1: PASS, AC-1..AC-9, 23 edge tests added, 248 indexer tests. READY FOR PR.
+2026-11-05  P08  SPEC DRAFT, APPROVED (pre-approved): D-57..D-60 (Claude, pre-approved by Zain). docs/specs/phase-08-retriever.md
+2026-11-05  P08  IMPLEMENTING done: api embedders (hashing byte-copy, Ollama), scope(), IndexState (pin, dimension, swap refresh), ChromaRetriever, eval/retrieval_only.py. Real index rebuilt twice (981 chunks). Withdrawal 4.25: 2026 handbook first (0.895), "in 2023" gives the 2023 rules first (0.826). Loops across two index swaps: 1689 queries, 0 errors. EMBED_MODEL=other: pin conflict logged, retrieve refused. Early retrieval-only recall@3 = recall@5 = 0.875.
+2026-11-05  P08  TESTING round 1: FAIL, D-T1 malformed collection metadata leaked JSON/Key/TypeError, D-T2 AC-8 numbers not in register. Fixed; 35 edge tests added.
 ```
 
 ---
@@ -182,8 +185,8 @@ Numbers this lane must measure. The agent fills them in as they are produced; th
 | Chunk config 2 | - | 12 | `eval` |
 | Chunk config 3 | - | 12 | `eval` |
 | Shipped chunk config | - | 12 | |
-| recall@3 / recall@5 overall | - | 12 | `eval` |
-| recall@5 by type: ordinary / version / exact | - | 12 | `eval` |
+| recall@3 / recall@5 overall | EARLY, retrieval only, no LLM, 16 answerable questions, TOP_K 5, 400/50: 0.875 / 0.875 (phase 8; not the baseline, phase 12 re-measures) | 8, 12 | `eval/retrieval_only.py recall` |
+| recall@5 by type: ordinary / version / exact | EARLY (phase 8): ordinary 0.909 (n=11), version 1.000 (n=2), exact 0.500 (n=2), injection 1.000 (n=1); recall@3 identical. Misses: q10 (six-monthly start-up report, wrong section of the right policy), q14 (clause 1.21: dense search cannot match a bare clause number) | 8, 12 | same |
 | Best-score range, answerable questions | - | 12 | `rahbar_top_score`, eval rows |
 | Best-score range, must-abstain questions | - | 12 | same |
 | Shipped `RELEVANCE_FLOOR` | - | 12 | |

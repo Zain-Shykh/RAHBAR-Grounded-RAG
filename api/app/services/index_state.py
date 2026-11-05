@@ -77,10 +77,16 @@ class IndexState:
             raise IndexUnavailable("collection" if missing else "chroma", repr(exc)) from exc
         if chunks == 0:
             raise IndexUnavailable("collection", "collection is empty")
-        versions = sorted({str(d["doc_version"]) for d in json.loads(meta.get("doc_versions", "[]"))})
-        return Snapshot(index_id=str(meta.get("index_id", "")), embed_model=str(meta.get("embed_model", "")),
-                        dimension=int(meta.get("dimension", 0)), doc_versions=versions,
-                        chunk_count=chunks, collection=col, fetched_at=self._clock())
+        try:
+            raw = json.loads(meta.get("doc_versions", "[]"))
+            if not isinstance(raw, list):
+                raise TypeError("doc_versions is not a list")
+            versions = sorted({str(d["doc_version"]) for d in raw})
+            return Snapshot(index_id=str(meta.get("index_id", "")), embed_model=str(meta.get("embed_model", "")),
+                            dimension=int(meta.get("dimension", 0)), doc_versions=versions,
+                            chunk_count=chunks, collection=col, fetched_at=self._clock())
+        except (ValueError, KeyError, TypeError) as exc:   # a foreign or corrupt collection is not a 500
+            raise IndexUnavailable("collection", f"bad collection metadata: {exc!r}") from exc
 
     def get(self, *, force: bool = False) -> Snapshot:
         with self._lock:
