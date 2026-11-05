@@ -643,6 +643,30 @@ Entry template:
 
 ---
 
+### D-90 ui base image tag
+- Status: DECIDED
+- Raised: 2026-11-05 by Claude (phase K1)
+- Area: platform
+- Question: Which pinned nginx-unprivileged tag for the ui image?
+- Decision: `nginxinc/nginx-unprivileged:1.27-alpine` (nginx 1.27.5, 73.7 MB image). Non-root user 101, listens on 8080, pulls cleanly. Decided by: Claude, pre-approved by Zain
+- Decided on: 2026-11-05
+
+### D-91 Redis probes are exec `redis-cli ping`
+- Status: DECIDED
+- Raised: 2026-11-05 by Claude (phase K1)
+- Area: platform
+- Question: Probe form for Redis (H-2 allows `redis-cli ping` or tcpSocket)?
+- Decision: Exec `redis-cli ping` for startup, liveness and readiness: it proves the server answers, not only that the port is open. Decided by: Claude, pre-approved by Zain
+- Decided on: 2026-11-05
+
+### D-92 Pods disable Service links
+- Status: DECIDED
+- Raised: 2026-11-05 by Claude (phase K1)
+- Area: platform
+- Question: Chroma crash-loops because Service `chroma` injects `CHROMA_PORT=tcp://...`. How to avoid?
+- Decision: `enableServiceLinks: false` on every pod (api, ui, chroma, redis). Also stops Service variables from shadowing ConfigMap keys such as `REDIS_PORT`. Logged as DEV-008. Decided by: Claude, pre-approved by Zain
+- Decided on: 2026-11-05
+
 ## Change log
 
 - 2026-11-04: file created with D-001 to D-025.
@@ -1073,3 +1097,4 @@ Entry template:
 - Claude recommends: A.
 - Decision: A. Decided by: Claude, pre-approved by Zain.
 - Decided on: 2026-11-05
+- 2026-11-05: phase K1 decisions. D-090 to D-092 added, all DECIDED (Claude, pre-approved by Zain).

@@ -5,7 +5,7 @@
 | Phase | K1, from `docs/IMPLEMENTATION_PLAN_PLATFORM.md` |
 | Work plan task | A-01, A-02, A-03 |
 | Branch | `feat/k8s-k01-base-workloads` |
-| Stage | IMPLEMENTING (no gate: platform plan 0.1) |
+| Stage | TESTING |
 | Started | 2026-11-05 |
 | Approved (spec and plan) | pre-approved by Zain, platform plan 0.1 |
 | Depends on | RAG phases 0 to 14 DONE; H-2, H-3, H-7, H-11 (texts in `IMPLEMENTATION_PLAN.md` log) |
@@ -75,7 +75,7 @@ All are cluster or command proofs (no Python code changes). Evidence in `docs/ev
 
 ## 8. Open questions
 
-None blocking. Decisions taken (logged in `OPEN_DECISIONS.md` as D-057 to D-059, Decided by Claude, pre-approved by Zain): ui base image tag, redis probe form, base `imagePullPolicy`.
+None blocking. Decisions taken (logged in `OPEN_DECISIONS.md` as D-090 to D-092, Decided by Claude, pre-approved by Zain): ui base image tag, redis probe form, `enableServiceLinks: false` (found during apply, DEV-008).
 
 ## 9. Risks and assumptions
 
@@ -97,7 +97,12 @@ Test plan: independent testing subagent (WORKFLOW 6) re-runs all commands. Rollb
 
 ## 11. Implementation notes
 
-(filled during implementation)
+- First apply: `chroma-0` CrashLoopBackOff (`CHROMA_PORT=tcp://...` from the Service link). Fix `enableServiceLinks: false` on all pods (DEV-008, D-092). A crash-looping StatefulSet pod is not replaced by a rolling update: `kubectl delete pod chroma-0` once.
+- `fsGroup` no-op on minikube hostPath, `/data` is 0777 root (DEV-009).
+- Capability drop written in block style (`drop:\n  - ALL`) so `check_submission.py` sees it.
+- `make images` and `make apply` needed no Makefile change; `make images` works under `sg docker -c`.
+- With no index the api Deployment never becomes available, so a new ReplicaSet stalls (4 pods: 3 old + 1 surge). Expected until K2.
+- Evidence: `docs/evidence/k01-images-and-manifests.txt`, `k01-api-before-index.txt`, `k01-persistence-and-security.txt`, `k01-prestop-sleep.txt`.
 
 ## 12. Test report
 

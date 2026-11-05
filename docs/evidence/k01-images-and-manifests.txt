@@ -1,0 +1,20 @@
+$ sg docker -c "make images"   (builds api, indexer, ui; minikube image load each)
+rahbar-ui:dev  73.7MB
+rahbar-indexer:dev  592MB
+rahbar-api:dev  388MB
+docker.io/library/rahbar-ui:dev
+docker.io/library/rahbar-indexer:dev
+docker.io/library/rahbar-api:dev
+
+$ docker run --read-only --tmpfs /tmp --user 101 -p 18080:8080 rahbar-ui:dev
+GET /        200
+ok
+GET /healthz  200
+
+$ kustomize build k8s/overlays/dev | kubeconform -strict -summary
+Summary: 16 resources found parsing stdin - Valid: 16, Invalid: 0, Errors: 0, Skipped: 0
+$ kustomize build k8s/overlays/dev | grep -c "^kind: Secret"
+0
+$ git ls-files k8s | grep -i secret
+k8s/base/secret.placeholder.yaml
+1

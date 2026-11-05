@@ -82,6 +82,8 @@ Copy this block to the end of section 7, increment the number, and fill every li
 | DEV-005 | A citation may name a retrieved section by its leading clause number | S3 | ABSORBED | 5.7.3 rule 2 | 2026-11-05 |
 | DEV-006 | Cache maintenance runs on the next request or readiness probe, not inside the index refresh | S3 | ABSORBED | 5.9.4 item 3 | 2026-11-05 |
 | DEV-007 | The model timeout and the Ingress timeout must exceed 90 s and 120 s on the host CPU | S3 | ABSORBED | 4.4, 5.7.4 | 2026-11-05 |
+| DEV-008 | Pods set `enableServiceLinks: false` (Service env vars break Chroma) | S3 | ABSORBED | 4.2, 4.4 | 2026-11-05 |
+| DEV-009 | `fsGroup` is a no-op on minikube hostPath volumes; `/data` is writable because the provisioner makes it 0777 | S3 | OPEN, accepted | 4.7, R-01, R-02 | 2026-11-05 |
 
 ## 7. Log
 
@@ -270,3 +272,41 @@ Places where the architecture has flagged a real chance of deviation (architectu
 **Plan:** either (A) set `LLM_TIMEOUT_SECONDS=300` in the ConfigMap and the Ingress `proxy-read-timeout` to at least 310 s (what the baseline used; Ahmad, H-7), amending 4.4; or (B) keep 90 and accept fallbacks on the slowest questions, and say so in the engineering note. Recommended: A.
 
 **Decision:** Zain accepted A: `LLM_TIMEOUT_SECONDS=300` in the ConfigMap and Ingress `proxy-read-timeout` of at least 310 s. Architecture amended.
+
+### DEV-008 Pods set `enableServiceLinks: false`
+
+| | |
+| --- | --- |
+| Status | ABSORBED (taken by Claude, pre-approved by Zain, D-092) |
+| Severity | S3 |
+| Date | 2026-11-05 |
+| Raised by | Claude (phase K1) |
+| Architecture reference | 4.2, 4.4 |
+| Files changed | `k8s/base/api.yaml`, `ui.yaml`, `chroma-statefulset.yaml`, `redis.yaml` |
+
+**The architecture says:** nothing about Service links.
+
+**What was built instead:** every pod sets `enableServiceLinks: false`.
+
+**Why:** the Service `chroma` makes Kubernetes inject `CHROMA_PORT=tcp://10.x.x.x:8000` into every pod in the namespace. The Chroma server reads `CHROMA_`-prefixed variables as its config, so it panicked (`invalid type: found string "tcp://...", expected u16 for key "PORT"`) and crash-looped. The same mechanism could shadow `REDIS_PORT` in the api. Seen on the first apply on minikube.
+
+**Impact:** none on behaviour; DNS names (`chroma`, `redis`) still work. A future Service in the namespace cannot break a pod through env injection.
+
+### DEV-009 `fsGroup` is a no-op on minikube hostPath volumes
+
+| | |
+| --- | --- |
+| Status | OPEN, accepted (no action needed on minikube; real clusters honour `fsGroup`) |
+| Severity | S3 |
+| Date | 2026-11-05 |
+| Raised by | Claude (phase K1) |
+| Architecture reference | 4.7, R-01, R-02 (H-2, H-3 asked for the `fsGroup` mechanism to be confirmed) |
+| Files changed | none (manifests keep `fsGroup: 10001`) |
+
+**The architecture says:** the PVC pods set `fsGroup` so UID 10001 can write `/data`.
+
+**What was observed:** in minikube (provisioner `k8s.io/minikube-hostpath`) `/data` inside both chroma-0 and redis is `drwxrwxrwx 0 0` (owner root, mode 0777). `fsGroup` does not change ownership on a hostPath volume, but the world-writable mode lets UID 10001 write anyway. Writes succeed, data survives pod deletion, the root filesystem stays read-only (`docs/evidence/k01-persistence-and-security.txt`).
+
+**Why it matters:** the proof that `fsGroup` itself chowns the volume is not available here. On a cluster whose volume driver supports `fsGroup` the manifests rely on it, which is documented Kubernetes behaviour; it was not exercised here. The security settings are kept as designed.
+
+**Impact:** none on the demo. Stated honestly in architecture 9.

@@ -78,7 +78,7 @@ Helm charts, a service mesh, an operator, an Ingress TLS setup, Prometheus or Gr
 
 | # | Phase | Work plan task | Est | Status | PR |
 | --- | --- | --- | --- | --- | --- |
-| K1 | `ui` image and base workloads on minikube | A-01, A-02, A-03 | 5 h | NOT STARTED | |
+| K1 | `ui` image and base workloads on minikube | A-01, A-02, A-03 | 5 h | DONE (with deviations DEV-008, DEV-009) | PR_K1 |
 | K2 | Indexer Job, CronJob, corpus delivery, real index in the cluster | A-04 (milestone I-2) | 3 h | NOT STARTED | |
 | K3 | Ingress, HPA, rollout hardening | A-05 | 2 h | NOT STARTED | |
 | K4 | NetworkPolicies and proof | A-06 | 3 h | NOT STARTED | |
@@ -97,11 +97,11 @@ Hours spent so far (fill in at each phase end): planned 33.5 h, actual `____`.
 ## 2. Current focus
 
 ```
-Phase:        K1  ui image and base workloads on minikube
+Phase:        K2  Indexer Job, CronJob, corpus delivery, real index in the cluster
 Stage:        not started   (SPEC DRAFT, IMPLEMENTING, TESTING, READY FOR PR, MERGED)
 Branch:       (none yet)
 Spec:         (none yet)
-Next action:  fresh session: stage 0 then stage 1 for K1. The cluster is up (minikube 29 h, Calico, metrics-server and ingress addons enabled by `make cluster`); nothing is deployed.
+Next action:  fresh session: stage 0 then stage 1 for K2. K1 is merged: namespace rahbar runs api x3 (0/1 until the index exists), ui, chroma-0, redis with PVCs; images rahbar-{api,indexer,ui}:dev are loaded in minikube. Ollama must be started for K2 (OLLAMA_HOST=0.0.0.0 ollama serve), stop it after.
 Waiting on:   Zain: Docker Hub account and token (needed from K8, create it early). Ahmad: nothing blocks.
 Last updated: 2026-11-05
 ```
@@ -128,6 +128,7 @@ Append-only, newest at the bottom. One line per event: date, phase, what happene
 
 ```
 2026-11-05  PLAN  Platform plan written. RAG lane phases 0 to 14 DONE; Ahmad's lane has no commits on origin (k8s/base empty, no workflows, no ui/Dockerfile, no evidence). Zain's sessions take over A-01 to A-11, A-13, A-14. A-00 and A-12 stay with Ahmad.
+2026-11-05  K1  DONE (PR_K1). k8s base running on minikube: api x3 0/1 (readyz 503 failed=[collection], healthz 200), ui, chroma-0, redis Ready, PVCs Bound; images api 388 MB, indexer 592 MB, ui 73.7 MB; kubeconform 16 resources valid, 0 Secret in build. Data survives pod deletion (Chroma collection, Redis key). A-5 verified (api pod deletion 11.4 s vs 0.9 s without preStop). Found: Service `chroma` injects CHROMA_PORT=tcp://... and crash-loops Chroma -> enableServiceLinks false (DEV-008). fsGroup is a no-op on minikube hostPath, /data is 0777 (DEV-009). Evidence docs/evidence/k01-*.txt. Note: api rollout stalls while no index exists (maxUnavailable 0, new pods never Ready): expected until K2.
 ```
 
 ---
@@ -138,8 +139,8 @@ Numbers this lane must measure. Nothing here is a guess: leave `-` until measure
 
 | Quantity | Value | Phase | Measured with |
 | --- | --- | --- | --- |
-| `ui` image size | - | K1 | `docker image ls` |
-| Time from `make apply` to all pods Ready (no Job yet) | - | K1 | stopwatch, `kubectl get pods -w` |
+| `ui` image size | 73.7 MB (api 388 MB, indexer 592 MB) | K1 | `docker image ls` |
+| Time from `make apply` to all pods Ready (no Job yet) | chroma, redis, ui Ready 3 s after pod creation with images cached (api stays 0/1 by design); first pull of chroma and redis images not timed | K1 | pod `Ready` transition minus creation time |
 | Indexer Job wall time and peak memory in the cluster | - | K2 | `kubectl logs job/indexer`, `kubectl top pod` |
 | Collection chunk count in the cluster (must equal 981) | - | K2 | `scripts/check_index.py` or `/readyz`, `rahbar_index_info` |
 | Api request and limit, actual `kubectl top` per pod, idle and under load | - | K10 | `kubectl top pods -n rahbar` |
@@ -155,7 +156,7 @@ Numbers this lane must measure. Nothing here is a guess: leave `-` until measure
 
 ## Phase K1: `ui` image and base workloads on minikube (A-01, A-02, A-03)
 
-**Status:** NOT STARTED · **Branch:** `feat/k8s-k01-base-workloads` · **Est:** 5 h · **Priority:** P0
+**Status:** DONE · **Branch:** `feat/k8s-k01-base-workloads` · **Est:** 5 h · **Priority:** P0
 
 ### Objective
 Everything except the indexer, the Ingress, the policies and the autoscaler runs in minikube from `kubectl apply -k k8s/overlays/dev`: the three images exist, and `api`, `ui`, `chroma` and `redis` are Ready with persistent storage.
@@ -184,15 +185,15 @@ Architecture 4.1 (topology), 4.2 (workload inventory), 4.3 (Services), 4.4 (Conf
 Indexer, Ingress, HPA, NetworkPolicy, other overlays, anything in `ui/index.html`.
 
 ### Acceptance criteria
-- [ ] `sg docker -c "make images"` builds all three images and loads them into minikube; the `ui` image runs with `--read-only --tmpfs /tmp --user 101` and serves `/` and `/healthz` on 8080.
-- [ ] `kustomize build k8s/overlays/dev | kubeconform -strict -summary` passes.
-- [ ] `kubectl apply -k k8s/overlays/dev` gives: 3 api pods (running, `0/1` Ready until K2), 1 ui pod Ready, `chroma-0` Ready with its PVC bound, `redis` Ready with `cache-data` bound; every container has requests and limits.
-- [ ] Data survives: write a marker to the Chroma PVC (create a throwaway collection through a port-forward), `kubectl delete pod chroma-0`, and show it is still there; same for a key in Redis.
-- [ ] `/readyz` of an api pod returns 503 with `failed: ["collection"]`, `/healthz` returns 200 (via port-forward); saved to `docs/evidence/k01-api-before-index.txt`.
-- [ ] `scripts/check_submission.py` section G has no failure for the objects that exist now.
-- [ ] No secret in Git; `secret.placeholder.yaml` is not in any kustomization (`kustomize build` output has no `Secret`).
-- [ ] A-5 and the PVC `fsGroup` mechanism verified and recorded.
-- [ ] `make test && make lint` green.
+- [x] `sg docker -c "make images"` builds all three images and loads them into minikube; the `ui` image runs with `--read-only --tmpfs /tmp --user 101` and serves `/` and `/healthz` on 8080.
+- [x] `kustomize build k8s/overlays/dev | kubeconform -strict -summary` passes.
+- [x] `kubectl apply -k k8s/overlays/dev` gives: 3 api pods (running, `0/1` Ready until K2), 1 ui pod Ready, `chroma-0` Ready with its PVC bound, `redis` Ready with `cache-data` bound; every container has requests and limits.
+- [x] Data survives: write a marker to the Chroma PVC (create a throwaway collection through a port-forward), `kubectl delete pod chroma-0`, and show it is still there; same for a key in Redis.
+- [x] `/readyz` of an api pod returns 503 with `failed: ["collection"]`, `/healthz` returns 200 (via port-forward); saved to `docs/evidence/k01-api-before-index.txt`.
+- [x] `scripts/check_submission.py` section G has no failure for the objects that exist now.
+- [x] No secret in Git; `secret.placeholder.yaml` is not in any kustomization (`kustomize build` output has no `Secret`).
+- [x] A-5 and the PVC `fsGroup` mechanism verified and recorded.
+- [x] `make test && make lint` green.
 
 ### Verify
 ```bash

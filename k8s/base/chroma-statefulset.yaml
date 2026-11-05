@@ -24,6 +24,7 @@ spec:
     spec:
       serviceAccountName: chroma
       automountServiceAccountToken: false
+      enableServiceLinks: false  # Service env vars (CHROMA_PORT=tcp://...) break Chroma and shadow the ConfigMap
       securityContext:
         runAsNonRoot: true
         runAsUser: 10001
@@ -65,7 +66,8 @@ spec:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
             capabilities:
-              drop: [ALL]
+              drop:
+                - ALL
           volumeMounts:
             - name: chroma-data
               mountPath: /data

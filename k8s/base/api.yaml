@@ -24,6 +24,7 @@ spec:
     spec:
       serviceAccountName: api
       automountServiceAccountToken: false
+      enableServiceLinks: false  # Service env vars (CHROMA_PORT=tcp://...) break Chroma and shadow the ConfigMap
       terminationGracePeriodSeconds: 30
       securityContext:
         runAsNonRoot: true
@@ -75,7 +76,8 @@ spec:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
             capabilities:
-              drop: [ALL]
+              drop:
+                - ALL
           volumeMounts:
             - name: tmp
               mountPath: /tmp
