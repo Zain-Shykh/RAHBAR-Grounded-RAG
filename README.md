@@ -129,12 +129,12 @@ kubectl create job --from=cronjob/reindex manual-reindex-1 -n rahbar     # or: m
 
 ## API
 
-| Method and path | Purpose | Status codes |
-| --- | --- | --- |
-| `POST /api/ask` | Body `{"question": "..."}`, 3 to 500 characters. Returns the answer, its citations, the retrieved passages, a confidence and the provider name. One question per request: there is no conversation memory. | `200` in every case where the pipeline ran, including an abstention or the canned fallback (a model failure is never a 500). `422` when the body is invalid (missing or out-of-range `question`). `503` `{"detail":"index unavailable"}` when Chroma, the collection, the embedding pin or the vector dimension is not usable. |
-| `GET /healthz` | Liveness: `{"status":"alive","version":"..."}`. Touches no other service. | `200` |
-| `GET /readyz` | Readiness. Ready only if Chroma is reachable, the collection is non-empty, the embedding model matches the collection's, Redis is reachable and the dimension matches. Each check is bounded by 2 s. | `200` `{"status":"ready","checks":{...}}`, or `503` `{"status":"not_ready","failed":["embed_pin"],"checks":{...}}` naming the failing check (`chroma`, `collection`, `embed_pin`, `redis`, `embed_dimension`) |
-| `GET /metrics` | Prometheus text format; metric names are fixed (`docs/architecture/architecture.md` 4.14). | `200` |
+| Method | Path | Purpose | Status codes |
+| --- | --- | --- | --- |
+| POST | `/api/ask` | Body `{"question": "..."}`, 3 to 500 characters. Returns the answer, its citations, the retrieved passages, a confidence and the provider name. One question per request: there is no conversation memory. | `200` in every case where the pipeline ran, including an abstention or the canned fallback (a model failure is never a 500). `422` when the body is invalid (missing or out-of-range `question`). `503` `{"detail":"index unavailable"}` when Chroma, the collection, the embedding pin or the vector dimension is not usable. |
+| GET | `/healthz` | Liveness: `{"status":"alive","version":"..."}`. Touches no other service. | `200` |
+| GET | `/readyz` | Readiness. Ready only if Chroma is reachable, the collection is non-empty, the embedding model matches the collection's, Redis is reachable and the dimension matches. Each check is bounded by 2 s. | `200` `{"status":"ready","checks":{...}}`, or `503` `{"status":"not_ready","failed":["embed_pin"],"checks":{...}}` naming the failing check (`chroma`, `collection`, `embed_pin`, `redis`, `embed_dimension`) |
+| GET | `/metrics` | Prometheus text format; metric names are fixed (`docs/architecture/architecture.md` 4.14). | `200` |
 
 Response headers on every reply:
 
