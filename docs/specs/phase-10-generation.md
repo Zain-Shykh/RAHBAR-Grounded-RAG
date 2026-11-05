@@ -5,7 +5,7 @@
 | Phase | 10, from `docs/IMPLEMENTATION_PLAN.md` |
 | Work plan task | Z-09 |
 | Branch | `feat/rag-z09-generation` |
-| Stage | SPEC DRAFT |
+| Stage | TESTING |
 | Started | 2026-11-05 |
 | Approved (spec and plan) | 2026-11-05, pre-approved by Zain (no gate for this run) |
 | Depends on | phases 8 and 9 (retriever, index state, prompt, validate, extractive provider) |
@@ -171,7 +171,14 @@ About 4 h against 4 h in the work plan.
 
 ## 11. Implementation notes
 
-<!-- Filled during IMPLEMENT. -->
+- A-6 re-verified on the real model first: `format=Answer` schema honoured 3/3, `num_ctx` 8192 honoured. Latency varies 20x between runs on this CPU (see register).
+- Steps 1 to 4 as planned. `Passage` list shown to the model is `score >= floor`; citations are checked against that list (D-69).
+- `/readyz` uses one shared probe thread (`routes/health.py::_within`): Chroma's client has no timeout, so a hung call is abandoned after 2 s and later probes join it rather than starting new threads. Found by the automated security review twice; fixed in two commits.
+- `ProviderError` gained `transient`; `validate.parse_answer` was extracted so the provider and the service use one parser.
+- Live runs found two things the unit tests could not: (1) the 3B model abbreviates a long section heading to its clause number, which turned a correct answer into the fallback: DEV-005 (prefix rule, exact string written back); (2) answers are terse ("No", "60%"). A full-sentence line was added to the system prompt; the model mostly ignores it. Left as is; phase 12 can measure it.
+- Live results (A-6, 3 golden questions, hostel, injection) are in the results register in `IMPLEMENTATION_PLAN.md` section 5.
+- Shared files touched: `Makefile` (lint list gains `scripts/live_check_phase10.py`), `docs/architecture/deviations.md`, `docs/OPEN_DECISIONS.md`. No `k8s/`, `ui/`, `.github/`.
+- `scripts/check_submission.py` shows "no retry on validation failure" as a FAIL: its grep does not recognise the retry loop in `services/answer.py` (`_ATTEMPTS`, `retry_hint`). Not changed (not in lane); noted for Ahmad.
 
 ## 12. Test report
 

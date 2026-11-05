@@ -56,7 +56,9 @@ def _generate(
         except InvalidModelOutput as exc:
             hint = retry_hint(exc)
             reason = "bad_citation" if exc.reason.startswith("bad_citation") else "invalid_output"
-            log.warning("model output rejected", extra={"reason": exc.reason, "attempt": attempt + 1})
+            log.warning("model output rejected", extra={
+                "reason": exc.reason, "attempt": attempt + 1,
+                "will retry": attempt + 1 < _ATTEMPTS})
         except ProviderError as exc:
             reason = "provider_error"
             log.warning("provider error", extra={"error": str(exc), "transient": exc.transient,
