@@ -78,7 +78,7 @@ Copy this block to the end of section 7, increment the number, and fill every li
 | DEV-001 | PDF extraction uses pdfplumber default text mode, not layout mode | S3 | ABSORBED | 5.4.2 (extract) | 2026-11-04 |
 | DEV-002 | Eval section match also folds dashes and applies NFKC | S3 | ABSORBED | 5.13.2, AD-22 | 2026-11-04 |
 | DEV-003 | Chunker heading rules: isolated short line added, numbered rule tightened, section cut at 80 characters | S3 | ABSORBED | 5.4.2 (chunk), AD-22 | 2026-11-05 |
-| DEV-004 | `Passage` gains optional `doc_version` and `superseded` | S3 | OPEN (absorb) | 5.7.2 | 2026-11-05 |
+| DEV-004 | `Passage` gains optional `doc_version` and `superseded` | S3 | ABSORBED | 5.7.2 | 2026-11-05 |
 | DEV-005 | A citation may name a retrieved section by its leading clause number | S3 | ABSORBED | 5.7.3 rule 2 | 2026-11-05 |
 | DEV-006 | Cache maintenance runs on the next request or readiness probe, not inside the index refresh | S3 | ABSORBED | 5.9.4 item 3 | 2026-11-05 |
 
@@ -178,7 +178,7 @@ Places where the architecture has flagged a real chance of deviation (architectu
 
 | | |
 | --- | --- |
-| Status | OPEN (absorb) |
+| Status | ABSORBED (2026-11-05, architecture 5.7.2) |
 | Severity | S3 |
 | Date | 2026-11-05 |
 | Raised by | Claude (phase 9) |
@@ -196,7 +196,7 @@ Places where the architecture has flagged a real chance of deviation (architectu
 
 **Plan:** absorb: add the two optional fields to the `Passage` description in architecture 5.7.2.
 
-**Decision:** pre-approved by Zain 2026-11-05 (D-61).
+**Decision:** pre-approved by Zain 2026-11-05 (D-61); ACCEPTED by Zain 2026-11-05 after the phase 9 review; absorbed into architecture 5.7.2 the same day.
 
 ### DEV-005 A citation may name a retrieved section by its leading clause number
 
