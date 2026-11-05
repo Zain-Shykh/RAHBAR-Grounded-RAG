@@ -170,3 +170,27 @@ Places where the architecture has flagged a real chance of deviation (architectu
 **Plan:** absorb: add the four rules and the 80-character cut to architecture 5.4.2 and AD-22 in the next version.
 
 **Decision:** pre-approved by Zain 2026-11-05 (D-049); ACCEPTED by Zain 2026-11-05 after the phase 6 review; absorbed into architecture 5.4.2 and AD-22 the same day.
+
+### DEV-004 `Passage` gains optional `doc_version` and `superseded`
+
+| | |
+| --- | --- |
+| Status | OPEN (absorb) |
+| Severity | S3 |
+| Date | 2026-11-05 |
+| Raised by | Claude (phase 9) |
+| Architecture reference | 5.7.1 (evidence header), AD-14 |
+| Files changed | `api/app/schemas.py`, `api/app/retrieval/chroma.py` |
+| Related | `docs/OPEN_DECISIONS.md` D-61, `docs/specs/phase-09-prompt-validate.md` |
+
+**The architecture says:** the evidence header carries `version` and `status`; the kit `Passage` has no such fields.
+
+**What was built instead:** `Passage.doc_version: str | None` and `Passage.superseded: bool | None`, both default `None`, filled by `ChromaRetriever` from chunk metadata. The prompt omits a header field when its value is `None`. `AskResponse`, `RetrievedRef` and every external JSON shape are unchanged.
+
+**Why:** the prompt needs them (5.7.1) and a second Chroma lookup per request would add a call and a failure mode.
+
+**Impact:** none on invariants or contracts C-1 to C-8; the stub retriever keeps working (fields stay `None`).
+
+**Plan:** absorb: add the two optional fields to the `Passage` description in architecture 5.7.2.
+
+**Decision:** pre-approved by Zain 2026-11-05 (D-61).

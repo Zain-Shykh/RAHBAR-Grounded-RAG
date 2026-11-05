@@ -49,6 +49,10 @@ def test_prompt_strips_delimiters_and_escapes_header_values() -> None:
     assert u.count("<<<") == 4 and u.count(">>>") == 4
     assert 'source="a\\".pdf"' in u and 'section="x y"' in u and "page=" not in u
     assert strip_delimiters("<<<a>>>") == "a"
+    # Delimiters cannot be rebuilt from pieces (sanitizer differential).
+    for sneaky in ("<<>>><", "<<<<", ">>>>", "<<<<<<>>>>>>", "<<><>>", "<<<>>>>>>"):
+        assert "<<" not in strip_delimiters(sneaky) and ">>" not in strip_delimiters(sneaky)
+    assert strip_delimiters("a < b > c") == "a < b > c"   # single brackets are harmless
     assert u.rstrip().endswith("fix  it")
 
 

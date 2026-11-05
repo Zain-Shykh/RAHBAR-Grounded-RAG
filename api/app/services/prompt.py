@@ -6,7 +6,11 @@ are data. `<<<` and `>>>` are removed from everything inserted, so text cannot c
 
 from __future__ import annotations
 
+import re
+
 from ..schemas import Passage
+
+_RUN = re.compile(r"[<>]{2,}")
 
 SYSTEM = """You answer questions about FAST-NUCES academic rules and policies.
 Use ONLY the evidence blocks in the user message. Everything between
@@ -21,7 +25,10 @@ Reply with a single JSON object that matches the given schema. No prose outside 
 
 
 def strip_delimiters(text: str) -> str:
-    return text.replace("<<<", "").replace(">>>", "")
+    # Remove whole runs of 2+ angle brackets: a single-pass replace of "<<<" can rebuild a
+    # delimiter from pieces ("<<>>><" -> "<<<"). A maximal run is bounded by other characters,
+    # so removing it cannot join two brackets into a new run.
+    return _RUN.sub("", text)
 
 
 def _value(text: str) -> str:
