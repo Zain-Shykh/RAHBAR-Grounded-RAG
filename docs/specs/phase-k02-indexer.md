@@ -12,7 +12,7 @@
 
 ## 1. Objective
 
-The real index (981 chunks) exists in the cluster's Chroma, built by the `indexer` Job from documents delivered into the `corpus-data` PVC by `make corpus`. The api pods turn `1/1` because of it. `make index` re-indexes from the CronJob template with no failed request during the swap.
+The real index (980 chunks in the cluster; 981 expected, DEV-010) exists in the cluster's Chroma, built by the `indexer` Job from documents delivered into the `corpus-data` PVC by `make corpus`. The api pods turn `1/1` because of it. `make index` re-indexes from the CronJob template with no failed request during the swap.
 
 ## 2. Context
 
@@ -48,7 +48,7 @@ The real index (981 chunks) exists in the cluster's Chroma, built by the `indexe
 
 ## 6. Acceptance criteria
 
-Same as platform plan K2 section (9 boxes), numbered AC-1..AC-9 in order: corpus delivery, Job completes with 981 chunks, api `1/1`, cited answer plus `X-Cache: HIT`, `make index` with no failed request and new `index_id`, A-1/A-4 recorded, results register and H-9/H-10, evidence files, kubeconform plus `make test && make lint`.
+Same as platform plan K2 section (9 boxes), numbered AC-1..AC-9 in order: corpus delivery, Job completes with 980 chunks (DEV-010), api `1/1`, cited answer plus `X-Cache: HIT`, `make index` with no failed request and new `index_id`, A-1/A-4 recorded, results register and H-9/H-10, evidence files, kubeconform plus `make test && make lint`.
 
 ## 7. Test strategy and traceability
 
@@ -63,7 +63,7 @@ None blocking. Decisions logged: D-093 (replacements vs anchors), D-094 (busybox
 - A-1: `host.minikube.internal` may not resolve in pods; fallback node IP, log a deviation.
 - A-4: `kubectl cp` needs `tar` in the helper; busybox has it.
 - OOMKill at 2Gi or deadline 1800 s too tight on 1 CPU: raise and say why.
-- Re-running `make apply` re-runs the indexer (Job deleted and recreated); documented.
+- Re-running `make apply` re-runs the indexer (Job deleted and recreated), also when a Job is still running: do not run it during an index. Documented.
 
 ## 10. Plan
 
@@ -90,11 +90,12 @@ Rollback: `make down` and revert the step. Estimate 3 h.
 
 | Round | Date | Command | Result | Notes |
 | --- | --- | --- | --- | --- |
+| 1 | 2026-11-06 | independent subagent, commit 3206ac3: make test lint, kubeconform, live cluster checks, Job vs CronJob spec compare, security contexts, diff hygiene | PASS | AC-1..AC-9 PASS, no open defect. Notes: first-answer evidence predates the re-index (index_id and citation count differ now, expected); spec said 981 (fixed); `make apply` kills a running Job (documented) |
 
 ## 13. Sign-offs
 
 | Gate | Date | Approved by | Notes |
 | --- | --- | --- | --- |
 | Spec and plan | 2026-11-06 | pre-approved by Zain | |
-| Tester verdict PASS | | | rounds: |
+| Tester verdict PASS | 2026-11-06 | independent subagent | rounds: 1 |
 | Merged | | | PR # |
