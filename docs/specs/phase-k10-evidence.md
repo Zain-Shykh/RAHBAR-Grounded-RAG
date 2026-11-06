@@ -60,3 +60,15 @@ Rollback: revert the `k8s/base` resource commit; evidence files are additive.
 
 ## 11. Implementation notes
 DEV-013 (requests/limits). The `indexer` Job is immutable: deleted and re-applied, which re-indexed under the new limits. Ollama must run with `OLLAMA_HOST=0.0.0.0` or every answer is a `provider_error` fallback.
+
+## 12. Test report
+| Round | Date | Command | Result | Notes |
+| --- | --- | --- | --- | --- |
+| 1 | 2026-11-06 | independent subagent: make test, lint, manifests, check_submission, evidence read-through | PASS (conditional) | defects D-1 (PR number placeholder), D-2 (HPA scale-down cited from the wrong file), D-3 (citations_total 17 vs 16 wording), D-4 (eval ran before limits applied: noted), D-5 (chroma wording): all fixed |
+
+## 13. Sign-offs
+| Gate | Date | Approved by | Notes |
+| --- | --- | --- | --- |
+| Spec and plan | 2026-11-06 | pre-approved by Zain | no gate in the platform plan |
+| Tester verdict PASS | 2026-11-06 | independent subagent | rounds: 1 |
+| Merged | | | PR #32 |
