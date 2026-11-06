@@ -5,7 +5,7 @@
 | Phase | K9, from `docs/IMPLEMENTATION_PLAN_PLATFORM.md` |
 | Work plan task | A-11 |
 | Branch | `docs/k09-gate-demo` |
-| Stage | IMPLEMENTING |
+| Stage | READY FOR PR |
 | Started | 2026-11-06 |
 | Approved (spec and plan) | pre-approved by Zain (HP-2 done by the orchestrator) |
 | Depends on | K6, K7, K8 |
@@ -26,9 +26,9 @@ Required checks `lint, test, manifests, build, scan, e2e-eval` (strict), 1 appro
 Demo branch `demo/k09-red-gate` from `dev`: invalid `apiVersion` in a `k8s/` manifest turns `manifests` red (K6 rehearsal), PR base `main`. `gh pr merge --merge` without `--admin` must be refused. Fix pushed to the same branch; checks green; PR still blocked by the missing approval. Close the PR unmerged, delete the branch.
 
 ## 6. Acceptance criteria
-- [ ] **AC-1**: `k09-branch-protection.txt` shows the six checks, one approval, no force push/deletion.
-- [ ] **AC-2**: `k09-blocked-merge.txt` (red PR, refused merge) and `k09-green-pr.txt` (green, still blocked on review) with PR numbers.
-- [ ] **AC-3**: D-014 DECIDED; `make test && make lint` green.
+- [x] **AC-1**: `k09-branch-protection.txt` shows the six checks, one approval, no force push/deletion.
+- [x] **AC-2**: `k09-blocked-merge.txt` (red PR, refused merge) and `k09-green-pr.txt` (green, still blocked on review) with PR numbers.
+- [x] **AC-3**: D-014 DECIDED; `make test && make lint` green.
 
 ## 7. Test strategy and traceability
 Manual on GitHub: `gh api`, `gh pr checks`, `gh pr view --json`, `gh pr merge`. Evidence under `docs/evidence/`.

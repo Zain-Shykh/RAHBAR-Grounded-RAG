@@ -48,7 +48,7 @@ Entry template:
 | D-011 | Handling of the "older version" question | api | PROVISIONAL | retriever filter logic |
 | D-012 | Follow-up question detection | api | PROVISIONAL | cache, answer service |
 | D-013 | Docker Hub account and repo names | ci-cd | DECIDED | cd.yml |
-| D-014 | Branch protection: required checks and admin enforcement | process | OPEN | merging |
+| D-014 | Branch protection: required checks and admin enforcement | process | DECIDED | merging |
 | D-015 | Which four failure stages to break | docs | DECIDED | FAILURE-ANALYSIS.md |
 | D-016 | Duplicate content: Prospectus 2026 vs Handbook 2026 | corpus, indexer | DECIDED | golden set, retrieval |
 | D-017 | OCR settings and quality threshold | indexer | PROVISIONAL | extract stage |
@@ -251,15 +251,15 @@ Entry template:
 - Decided on: 2026-11-06
 
 ### D-014 Branch protection: required checks and admin enforcement
-- Status: OPEN
+- Status: DECIDED
 - Raised: 2026-11-04 by Claude
 - Area: process
 - Related: R-DEV-2, R-DED-12
 - Question: Once ci.yml exists, add its job names as required status checks. Enforce on admins now or only before submission? (Enforcement now stops accidental direct pushes by the owner too.)
 - Claude recommends: enforce on admins as soon as CI exists; it removes the risk of another −4.
 - Blocks: merging.
-- Decision:
-- Decided on:
+- Decision: required checks lint, test, manifests, build, scan, e2e-eval (strict), one approval (dismiss stale), conversation resolution, no force push or deletion, enforce_admins OFF because Ahmad, the only second approver, is unavailable; checks still gate a red PR, and the owner can override for the final dev to main merge (recorded honestly in the evidence). Decided by: Claude, pre-approved by Zain; applied by the orchestrator.
+- Decided on: 2026-11-06
 
 ### D-015 Which four failure stages to break
 - Status: OPEN

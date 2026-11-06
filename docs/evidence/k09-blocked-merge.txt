@@ -1,0 +1,168 @@
+# PR #30 https://github.com/Zain-Shykh/RAHBAR-Grounded-RAG/pull/30 (base main, invalid apiVersion apps/v99 in k8s/base/ui.yaml)
+$ gh pr checks 30
+manifests	fail	6s	https://github.com/Zain-Shykh/RAHBAR-Grounded-RAG/actions/runs/42269897845/job/128071431914	
+build	skipping	0	https://github.com/Zain-Shykh/RAHBAR-Grounded-RAG/actions/runs/42269897845/job/128072037769	
+e2e-eval	skipping	0	https://github.com/Zain-Shykh/RAHBAR-Grounded-RAG/actions/runs/42269897845/job/128072037485	
+scan	skipping	0	https://github.com/Zain-Shykh/RAHBAR-Grounded-RAG/actions/runs/42269897845/job/128072037373	
+lint	pass	1m7s	https://github.com/Zain-Shykh/RAHBAR-Grounded-RAG/actions/runs/42269897845/job/128071431768	
+test	pass	1m1s	https://github.com/Zain-Shykh/RAHBAR-Grounded-RAG/actions/runs/42269897845/job/128071432232	
+
+$ gh pr view 30 --json mergeable,mergeStateStatus,statusCheckRollup,reviewDecision
+{
+    "mergeStateStatus": "BEHIND",
+    "mergeable": "MERGEABLE",
+    "reviewDecision": "REVIEW_REQUIRED",
+    "statusCheckRollup": [
+        {
+            "__typename": "CheckRun",
+            "completedAt": "2026-11-06T18:22:14Z",
+            "conclusion": "SUCCESS",
+            "detailsUrl": "https://github.com/Zain-Shykh/RAHBAR-Grounded-RAG/actions/runs/42269897845/job/128071431768",
+            "name": "lint",
+            "startedAt": "2026-11-06T18:21:07Z",
+            "status": "COMPLETED",
+            "workflowName": "ci"
+        },
+        {
+            "__typename": "CheckRun",
+            "completedAt": "2026-11-06T18:22:09Z",
+            "conclusion": "SUCCESS",
+            "detailsUrl": "https://github.com/Zain-Shykh/RAHBAR-Grounded-RAG/actions/runs/42269897845/job/128071432232",
+            "name": "test",
+            "startedAt": "2026-11-06T18:21:08Z",
+            "status": "COMPLETED",
+            "workflowName": "ci"
+        },
+        {
+            "__typename": "CheckRun",
+            "completedAt": "2026-11-06T18:21:13Z",
+            "conclusion": "FAILURE",
+            "detailsUrl": "https://github.com/Zain-Shykh/RAHBAR-Grounded-RAG/actions/runs/42269897845/job/128071431914",
+            "name": "manifests",
+            "startedAt": "2026-11-06T18:21:07Z",
+            "status": "COMPLETED",
+            "workflowName": "ci"
+        },
+        {
+            "__typename": "CheckRun",
+            "completedAt": "2026-11-06T18:22:14Z",
+            "conclusion": "SKIPPED",
+            "detailsUrl": "https://github.com/Zain-Shykh/RAHBAR-Grounded-RAG/actions/runs/42269897845/job/128072037769",
+            "name": "build",
+            "startedAt": "2026-11-06T18:22:15Z",
+            "status": "COMPLETED",
+            "workflowName": "ci"
+        },
+        {
+            "__typename": "CheckRun",
+            "completedAt": "2026-11-06T18:22:14Z",
+            "conclusion": "SKIPPED",
+            "detailsUrl": "https://github.com/Zain-Shykh/RAHBAR-Grounded-RAG/actions/runs/42269897845/job/128072037373",
+            "name": "scan",
+            "startedAt": "2026-11-06T18:22:15Z",
+            "status": "COMPLETED",
+            "workflowName": "ci"
+        },
+        {
+            "__typename": "CheckRun",
+            "completedAt": "2026-11-06T18:22:14Z",
+            "conclusion": "SKIPPED",
+            "detailsUrl": "https://github.com/Zain-Shykh/RAHBAR-Grounded-RAG/actions/runs/42269897845/job/128072037485",
+            "name": "e2e-eval",
+            "startedAt": "2026-11-06T18:22:15Z",
+            "status": "COMPLETED",
+            "workflowName": "ci"
+        }
+    ]
+}
+
+$ gh pr merge 30 --merge   # no --admin
+X Pull request Zain-Shykh/RAHBAR-Grounded-RAG#30 is not mergeable: the head branch is not up to date with the base branch.
+To have the pull request merged after all the requirements have been met, add the `--auto` flag.
+To use administrator privileges to immediately merge the pull request, add the `--admin` flag.
+exit=1
+
+# NOTE: first attempt refused as BEHIND: strict mode needs the branch up to date with main, and origin/main holds two old merge commits (PR #1, #2) that dev lacks. Phase 15 must merge main into dev first. Second attempt after merging origin/main into the demo branch:
+
+$ gh pr checks 30   # after merge of main
+manifests	fail	6s	https://github.com/Zain-Shykh/RAHBAR-Grounded-RAG/actions/runs/42270182986/job/128072412278	
+build	skipping	0	https://github.com/Zain-Shykh/RAHBAR-Grounded-RAG/actions/runs/42270182986/job/128072890625	
+e2e-eval	skipping	0	https://github.com/Zain-Shykh/RAHBAR-Grounded-RAG/actions/runs/42270182986/job/128072891155	
+scan	skipping	0	https://github.com/Zain-Shykh/RAHBAR-Grounded-RAG/actions/runs/42270182986/job/128072892909	
+lint	pass	46s	https://github.com/Zain-Shykh/RAHBAR-Grounded-RAG/actions/runs/42270182986/job/128072412073	
+test	pass	52s	https://github.com/Zain-Shykh/RAHBAR-Grounded-RAG/actions/runs/42270182986/job/128072412202	
+
+$ gh pr view 30 --json mergeable,mergeStateStatus,statusCheckRollup,reviewDecision
+{
+    "mergeStateStatus": "BLOCKED",
+    "mergeable": "MERGEABLE",
+    "reviewDecision": "REVIEW_REQUIRED",
+    "statusCheckRollup": [
+        {
+            "__typename": "CheckRun",
+            "completedAt": "2026-11-06T18:23:45Z",
+            "conclusion": "SUCCESS",
+            "detailsUrl": "https://github.com/Zain-Shykh/RAHBAR-Grounded-RAG/actions/runs/42270182986/job/128072412073",
+            "name": "lint",
+            "startedAt": "2026-11-06T18:22:59Z",
+            "status": "COMPLETED",
+            "workflowName": "ci"
+        },
+        {
+            "__typename": "CheckRun",
+            "completedAt": "2026-11-06T18:23:51Z",
+            "conclusion": "SUCCESS",
+            "detailsUrl": "https://github.com/Zain-Shykh/RAHBAR-Grounded-RAG/actions/runs/42270182986/job/128072412202",
+            "name": "test",
+            "startedAt": "2026-11-06T18:22:59Z",
+            "status": "COMPLETED",
+            "workflowName": "ci"
+        },
+        {
+            "__typename": "CheckRun",
+            "completedAt": "2026-11-06T18:23:06Z",
+            "conclusion": "FAILURE",
+            "detailsUrl": "https://github.com/Zain-Shykh/RAHBAR-Grounded-RAG/actions/runs/42270182986/job/128072412278",
+            "name": "manifests",
+            "startedAt": "2026-11-06T18:23:00Z",
+            "status": "COMPLETED",
+            "workflowName": "ci"
+        },
+        {
+            "__typename": "CheckRun",
+            "completedAt": "2026-11-06T18:23:51Z",
+            "conclusion": "SKIPPED",
+            "detailsUrl": "https://github.com/Zain-Shykh/RAHBAR-Grounded-RAG/actions/runs/42270182986/job/128072890625",
+            "name": "build",
+            "startedAt": "2026-11-06T18:23:52Z",
+            "status": "COMPLETED",
+            "workflowName": "ci"
+        },
+        {
+            "__typename": "CheckRun",
+            "completedAt": "2026-11-06T18:23:51Z",
+            "conclusion": "SKIPPED",
+            "detailsUrl": "https://github.com/Zain-Shykh/RAHBAR-Grounded-RAG/actions/runs/42270182986/job/128072892909",
+            "name": "scan",
+            "startedAt": "2026-11-06T18:23:52Z",
+            "status": "COMPLETED",
+            "workflowName": "ci"
+        },
+        {
+            "__typename": "CheckRun",
+            "completedAt": "2026-11-06T18:23:51Z",
+            "conclusion": "SKIPPED",
+            "detailsUrl": "https://github.com/Zain-Shykh/RAHBAR-Grounded-RAG/actions/runs/42270182986/job/128072891155",
+            "name": "e2e-eval",
+            "startedAt": "2026-11-06T18:23:52Z",
+            "status": "COMPLETED",
+            "workflowName": "ci"
+        }
+    ]
+}
+
+$ gh pr merge 30 --merge   # no --admin
+X Pull request Zain-Shykh/RAHBAR-Grounded-RAG#30 is not mergeable: the base branch policy prohibits the merge.
+To have the pull request merged after all the requirements have been met, add the `--auto` flag.
+To use administrator privileges to immediately merge the pull request, add the `--admin` flag.
+exit=1

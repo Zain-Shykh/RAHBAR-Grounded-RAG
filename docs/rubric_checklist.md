@@ -224,5 +224,5 @@ At least four of six, each with symptom, diagnosis, stage, remedy, and "how I'd 
 - [ ] A better HPA signal than CPU (in-flight requests or queue depth); describe or build [R-BON-3].
 - [ ] `hosted` provider implemented alongside `ollama-host` (Secret handling exercised).
 - [ ] Extra version pairs in the corpus (Annual Reports, EE PLOs 12 vs 11, calendar) used in golden questions.
-- [ ] Enable admin enforcement on `main` branch protection before submission.
+- [ ] Admin enforcement on `main` is OFF by decision D-014 (no second approver available); say so in the submission notes.
 - [ ] Extra golden questions beyond 15 for a tighter metric.
