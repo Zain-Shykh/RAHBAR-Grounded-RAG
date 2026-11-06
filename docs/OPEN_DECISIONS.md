@@ -1120,3 +1120,14 @@ Entry template:
 - Claude recommends: A. Smallest, pinned, has tar and a shell.
 - Decision: A. Decided by: Claude, pre-approved by Zain.
 - Decided on: 2026-11-06
+
+### D-095 PodDisruptionBudget for the api: `minAvailable: 2`
+- Status: DECIDED
+- Raised: 2026-11-06 by Claude (phase K3)
+- Area: k8s
+- Related: architecture 4.9, R-RES-4
+- Question: Ship a PDB, and with which value?
+- Options: A. `minAvailable: 2` (one voluntary disruption at a time with 3 replicas). B. `maxUnavailable: 1`. C. No PDB.
+- Claude recommends: A. Matches the plan; does not block rollouts (they are not evictions).
+- Decision: A. Decided by: Claude, pre-approved by Zain.
+- Decided on: 2026-11-06

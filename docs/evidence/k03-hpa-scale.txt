@@ -1,0 +1,26 @@
+$ kubectl get hpa api -n rahbar
+NAME   REFERENCE        TARGETS              MINPODS   MAXPODS   REPLICAS   AGE
+api    Deployment/api   cpu: <unknown>/70%   3         8         3          2m31s
+
+NOTE: CPU does not rise with generation load (the api waits on the model, I/O-bound; ENGINEERING-NOTES Q3), so the target is lowered to force a scale-up.
+$ kubectl patch hpa api -n rahbar -p <cpu averageUtilization: 5>
+horizontalpodautoscaler.autoscaling/api patched
+(a loop of cached questions through the Ingress runs as light CPU load)
+18:18:29
+api   Deployment/api   cpu: <unknown>/5%   3     8     3     2m31s
+18:18:44
+api   Deployment/api   cpu: <unknown>/5%   3     8     3     2m46s
+18:18:59
+api   Deployment/api   cpu: <unknown>/5%   3     8     3     3m1s
+18:19:14
+api   Deployment/api   cpu: <unknown>/5%   3     8     3     3m16s
+18:19:29
+api   Deployment/api   cpu: <unknown>/5%   3     8     3     3m31s
+18:19:44
+api   Deployment/api   cpu: 32%/5%   3     8     3     3m47s
+18:20:00
+api   Deployment/api   cpu: 32%/5%   3     8     6     4m2s
+18:20:15
+api   Deployment/api   cpu: 32%/5%   3     8     8     4m17s
+18:20:30
+api   Deployment/api   cpu: 32%/5%   3     8     8     4m32s
