@@ -24,3 +24,94 @@ api   Deployment/api   cpu: 32%/5%   3     8     6     4m2s
 api   Deployment/api   cpu: 32%/5%   3     8     8     4m17s
 18:20:30
 api   Deployment/api   cpu: 32%/5%   3     8     8     4m32s
+18:20:45
+api   Deployment/api   cpu: 20%/5%   3     8     8     4m47s
+18:21:00
+api   Deployment/api   cpu: 20%/5%   3     8     8     5m2s
+18:21:15
+api   Deployment/api   cpu: 20%/5%   3     8     8     5m17s
+18:21:30
+api   Deployment/api   cpu: 20%/5%   3     8     8     5m32s
+18:21:45
+api   Deployment/api   cpu: 13%/5%   3     8     8     5m47s
+18:22:00
+api   Deployment/api   cpu: 13%/5%   3     8     8     6m2s
+18:22:15
+api   Deployment/api   cpu: 13%/5%   3     8     8     6m18s
+
+$ kubectl patch hpa api -n rahbar -p <cpu averageUtilization: 70>  (revert)
+horizontalpodautoscaler.autoscaling/api patched
+(scale-down waits for the default 300 s stabilization window)
+18:22:31
+api   Deployment/api   cpu: 13%/70%   3     8     8     6m33s
+18:22:46
+api   Deployment/api   cpu: 13%/70%   3     8     8     6m48s
+18:23:01
+api   Deployment/api   cpu: 13%/70%   3     8     8     7m3s
+18:23:16
+api   Deployment/api   cpu: 13%/70%   3     8     8     7m18s
+18:23:31
+api   Deployment/api   cpu: 13%/70%   3     8     8     7m33s
+18:23:46
+api   Deployment/api   cpu: 4%/70%   3     8     8     7m48s
+18:24:01
+api   Deployment/api   cpu: 4%/70%   3     8     8     8m3s
+18:24:16
+api   Deployment/api   cpu: 4%/70%   3     8     8     8m18s
+18:24:31
+api   Deployment/api   cpu: 4%/70%   3     8     8     8m33s
+18:24:46
+api   Deployment/api   cpu: 4%/70%   3     8     8     8m48s
+18:25:01
+api   Deployment/api   cpu: 4%/70%   3     8     8     9m3s
+18:25:16
+api   Deployment/api   cpu: 4%/70%   3     8     8     9m18s
+18:25:31
+api   Deployment/api   cpu: 4%/70%   3     8     8     9m33s
+18:25:46
+api   Deployment/api   cpu: 5%/70%   3     8     8     9m49s
+18:26:02
+api   Deployment/api   cpu: 5%/70%   3     8     8     10m
+18:26:17
+api   Deployment/api   cpu: 5%/70%   3     8     8     10m
+18:26:32
+api   Deployment/api   cpu: 5%/70%   3     8     8     10m
+18:26:47
+api   Deployment/api   cpu: 5%/70%   3     8     8     10m
+18:27:02
+api   Deployment/api   cpu: 5%/70%   3     8     8     11m
+18:27:17
+api   Deployment/api   cpu: 5%/70%   3     8     8     11m
+18:27:32
+api   Deployment/api   cpu: 5%/70%   3     8     8     11m
+18:27:47
+api   Deployment/api   cpu: 5%/70%   3     8     3     11m
+18:28:02
+api   Deployment/api   cpu: 5%/70%   3     8     3     12m
+18:28:17
+api   Deployment/api   cpu: 5%/70%   3     8     3     12m
+18:28:32
+api   Deployment/api   cpu: 5%/70%   3     8     3     12m
+18:28:47
+api   Deployment/api   cpu: 5%/70%   3     8     3     12m
+18:29:02
+api   Deployment/api   cpu: 5%/70%   3     8     3     13m
+18:29:17
+api   Deployment/api   cpu: 5%/70%   3     8     3     13m
+
+$ kubectl describe hpa api -n rahbar | tail -15
+  ----            ------  ------            -------
+  AbleToScale     True    ReadyForNewScale  recommended size matches current size
+  ScalingActive   True    ValidMetricFound  the HPA was able to successfully calculate a replica count from cpu resource utilization (percentage of request)
+  ScalingLimited  True    TooFewReplicas    the desired replica count is less than the minimum replica count
+  ScaledToZero    False   NotScaledToZero   the HPA controller did not scale the workload to zero
+Events:
+  Type     Reason                        Age                From                       Message
+  ----     ------                        ----               ----                       -------
+  Warning  FailedGetResourceMetric       11m (x2 over 11m)  horizontal-pod-autoscaler  failed to get cpu utilization: unable to get metrics for resource cpu: no metrics returned from resource metrics API
+  Warning  FailedComputeMetricsReplicas  11m (x2 over 11m)  horizontal-pod-autoscaler  invalid metrics (1 invalid out of 1), first error is: failed to get cpu resource metric value: failed to get cpu utilization: unable to get metrics for resource cpu: no metrics returned from resource metrics API
+  Warning  FailedGetResourceMetric       10m (x4 over 10m)  horizontal-pod-autoscaler  failed to get cpu utilization: did not receive metrics for targeted pods (pods might be unready)
+  Warning  FailedComputeMetricsReplicas  10m (x4 over 10m)  horizontal-pod-autoscaler  invalid metrics (1 invalid out of 1), first error is: failed to get cpu resource metric value: failed to get cpu utilization: did not receive metrics for targeted pods (pods might be unready)
+  Normal   SuccessfulRescale             9m49s              horizontal-pod-autoscaler  New size: 6; reason: cpu resource utilization (percentage of request) above target
+  Normal   SuccessfulRescale             9m34s              horizontal-pod-autoscaler  New size: 8; reason: cpu resource utilization (percentage of request) above target
+  Normal   SuccessfulRescale             2m4s               horizontal-pod-autoscaler  New size: 3; reason: All metrics below target
