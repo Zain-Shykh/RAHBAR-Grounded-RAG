@@ -1,0 +1,65 @@
+# kubectl top of the indexer pod during a manual re-index (make index), sampled every 30 s; OOMKilled check at the end
+# captured 2026-11-06T18:49Z on minikube (Calico, docker driver), namespace rahbar, dev overlay
+
+$ kubectl top pods -n rahbar --containers | grep reindex   (every 30 s)
+18:49:41
+18:50:12
+18:50:42
+reindex-1793990975-tk78m   indexer   998m   198Mi   
+18:51:12
+reindex-1793990975-tk78m   indexer   998m   198Mi   
+18:51:42
+reindex-1793990975-tk78m   indexer   1001m   206Mi   
+18:52:12
+reindex-1793990975-tk78m   indexer   1001m   206Mi   
+18:52:42
+reindex-1793990975-tk78m   indexer   1000m   214Mi   
+18:53:12
+reindex-1793990975-tk78m   indexer   1000m   214Mi   
+18:53:42
+reindex-1793990975-tk78m   indexer   1000m   428Mi   
+18:54:13
+reindex-1793990975-tk78m   indexer   1000m   428Mi   
+18:54:43
+reindex-1793990975-tk78m   indexer   824m   344Mi   
+18:55:13
+reindex-1793990975-tk78m   indexer   824m   344Mi   
+18:55:43
+reindex-1793990975-tk78m   indexer   2m    353Mi   
+18:56:13
+reindex-1793990975-tk78m   indexer   2m    353Mi   
+18:56:43
+reindex-1793990975-tk78m   indexer   2m    359Mi   
+18:57:13
+reindex-1793990975-tk78m   indexer   2m    359Mi   
+18:57:43
+reindex-1793990975-tk78m   indexer   1m    364Mi   
+18:58:14
+reindex-1793990975-tk78m   indexer   1m    364Mi   
+18:58:44
+reindex-1793990975-tk78m   indexer   1m    366Mi   
+18:59:14
+reindex-1793990975-tk78m   indexer   1m    366Mi   
+18:59:44
+$ kubectl get pod -n rahbar -l job-name=reindex-1793990975 -o jsonpath='{.items[0].status.containerStatuses[0].state.terminated.reason}{" exit="}{.items[0].status.containerStatuses[0].state.terminated.exitCode}{"\n"}'
+Completed exit=0
+
+$ kubectl get pods -n rahbar -o jsonpath='{range .items[*]}{.metadata.name}{"  lastState.terminated="}{.status.containerStatuses[0].lastState.terminated.reason}{"\n"}{end}'
+api-6896667d9f-mlf52  lastState.terminated=
+api-6896667d9f-sd4cq  lastState.terminated=
+api-6896667d9f-vfbmf  lastState.terminated=
+chroma-0  lastState.terminated=
+indexer-mr98n  lastState.terminated=
+redis-85454df54f-gzfxb  lastState.terminated=
+reindex-1793990975-tk78m  lastState.terminated=
+ui-5d994769c6-q7kw9  lastState.terminated=
+
+$ kubectl get events -n rahbar | grep -ci oomkill || true
+0
+
+$ kubectl logs -n rahbar job/$(kubectl get jobs -n rahbar --no-headers | grep reindex- | awk '{print $1}') --tail=3 | cut -c1-400
+{"ts": "2026-11-06T18:59:13Z", "logger": "rahbar.indexer", "msg": "embedded", "vectors": 980, "model": "nomic-embed-text", "batches": 31, "seconds": 294.7}
+{"ts": "2026-11-06T18:59:15Z", "logger": "rahbar.indexer", "msg": "stored", "chunks": 980, "index_id": "20261106T185913Z-762907", "collection": "rahbar", "replaced": true, "seconds": 1.7}
+{"ts": "2026-11-06T18:59:15Z", "logger": "rahbar.indexer", "msg": "indexer finished", "chunks": 980, "seconds": 578.8}
+
+peak sampled: cpu 1001m, memory 428Mi (limit 2Gi, request 512Mi)

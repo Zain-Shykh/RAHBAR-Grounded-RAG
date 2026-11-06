@@ -1197,3 +1197,15 @@ Entry template:
 - Claude recommends: A.
 - Decision: A. Decided by: Claude, pre-approved by Zain. The `prod` overlay stays validated by kubeconform only.
 - Decided on: 2026-11-06
+
+### D-102 K10: how requests/limits and the v2 image were chosen
+- Status: DECIDED
+- Raised: 2026-11-07 by Claude (phase K10)
+- Area: platform, evidence
+- Related: R-RES-2, R-ROL-2, DEV-013
+- Question: Which numbers go into `k8s/base`, and how is a second image version produced for the rollout demonstration?
+- Options: A. Request = steady measurement plus margin, limit = 2 to 4x the highest sample, keep the api CPU request at 100m (HPA denominator); v2 = the rebuilt image under tag `v2` with `APP_VERSION=2.0.0`, undo restores the manifest state. B. Keep the design numbers and only document the measurements. C. Build a code-changed second image (extra build, no extra proof).
+- Claude recommends: A. The plan asks the manifests to match what was measured; a tag plus an env var shows a visible `/healthz` difference without touching code.
+- Decision: A. Decided by: Claude, pre-approved by Zain.
+- Decided on: 2026-11-07
+

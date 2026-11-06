@@ -1,0 +1,141 @@
+# the measured requests/limits applied to the cluster (kubectl apply -k k8s/overlays/dev) and a re-index run under the new indexer limits
+# captured 2026-11-06T19:17Z on minikube (Calico, docker driver), namespace rahbar, dev overlay
+
+$ kubectl apply -k k8s/overlays/dev
+namespace/rahbar unchanged
+serviceaccount/api unchanged
+serviceaccount/chroma unchanged
+serviceaccount/indexer unchanged
+serviceaccount/redis unchanged
+serviceaccount/ui unchanged
+configmap/rahbar-config unchanged
+service/api unchanged
+service/chroma unchanged
+service/redis unchanged
+service/ui unchanged
+persistentvolumeclaim/cache-data unchanged
+persistentvolumeclaim/corpus-data unchanged
+deployment.apps/api configured
+deployment.apps/redis configured
+deployment.apps/ui configured
+statefulset.apps/chroma configured
+cronjob.batch/reindex configured
+poddisruptionbudget.policy/api configured
+horizontalpodautoscaler.autoscaling/api unchanged
+ingress.networking.k8s.io/rahbar unchanged
+networkpolicy.networking.k8s.io/allow-dns-egress unchanged
+networkpolicy.networking.k8s.io/api-egress unchanged
+networkpolicy.networking.k8s.io/api-ingress unchanged
+networkpolicy.networking.k8s.io/chroma-ingress unchanged
+networkpolicy.networking.k8s.io/default-deny-all unchanged
+networkpolicy.networking.k8s.io/indexer-egress unchanged
+networkpolicy.networking.k8s.io/redis-ingress unchanged
+networkpolicy.networking.k8s.io/ui-ingress unchanged
+The Job "indexer" is invalid: spec.template: Invalid value: {"labels":{"app.kubernetes.io/name":"indexer","app.kubernetes.io/part-of":"rahbar","batch.kubernetes.io/controller-uid":"f350f63f-d06f-48d4-a8ab-ea6f266e88ff","batch.kubernetes.io/job-name":"indexer","controller-uid":"f350f63f-d06f-48d4-a8ab-ea6f266e88ff","job-name":"indexer"},"Spec":{"Volumes":[{"Name":"corpus","HostPath":null,"EmptyDir":null,"GCEPersistentDisk":null,"AWSElasticBlockStore":null,"GitRepo":null,"Secret":null,"NFS":null,"ISCSI":null,"Glusterfs":null,"PersistentVolumeClaim":{"ClaimName":"corpus-data","ReadOnly":true},"RBD":null,"FlexVolume":null,"Cinder":null,"CephFS":null,"Flocker":null,"DownwardAPI":null,"FC":null,"AzureFile":null,"ConfigMap":null,"VsphereVolume":null,"Quobyte":null,"AzureDisk":null,"PhotonPersistentDisk":null,"Projected":null,"PortworxVolume":null,"ScaleIO":null,"StorageOS":null,"CSI":null,"Ephemeral":null,"Image":null},{"Name":"tmp","HostPath":null,"EmptyDir":{"Medium":"","SizeLimit":null,"Mode":null},"GCEPersistentDisk":null,"AWSElasticBlockStore":null,"GitRepo":null,"Secret":null,"NFS":null,"ISCSI":null,"Glusterfs":null,"PersistentVolumeClaim":null,"RBD":null,"FlexVolume":null,"Cinder":null,"CephFS":null,"Flocker":null,"DownwardAPI":null,"FC":null,"AzureFile":null,"ConfigMap":null,"VsphereVolume":null,"Quobyte":null,"AzureDisk":null,"PhotonPersistentDisk":null,"Projected":null,"PortworxVolume":null,"ScaleIO":null,"StorageOS":null,"CSI":null,"Ephemeral":null,"Image":null}],"InitContainers":null,"Containers":[{"Name":"indexer","Image":"rahbar-indexer:dev","Command":null,"Args":null,"WorkingDir":"","Ports":null,"EnvFrom":[{"Prefix":"","ConfigMapRef":{"Name":"rahbar-config","Optional":null},"SecretRef":null}],"Env":null,"Resources":{"Limits":{"cpu":"1","memory":"1Gi"},"Requests":{"cpu":"250m","memory":"384Mi"},"Claims":null},"ResizePolicy":null,"RestartPolicy":null,"RestartPolicyRules":null,"VolumeMounts":[{"Name":"corpus","ReadOnly":true,"RecursiveReadOnly":null,"MountPath":"/corpus","SubPath":"","MountPropagation":null,"SubPathExpr":"","BindMountOptions":null},{"Name":"tmp","ReadOnly":false,"RecursiveReadOnly":null,"MountPath":"/tmp","SubPath":"","MountPropagation":null,"SubPathExpr":"","BindMountOptions":null}],"VolumeDevices":null,"LivenessProbe":null,"ReadinessProbe":null,"StartupProbe":null,"Lifecycle":null,"TerminationMessagePath":"/dev/termination-log","TerminationMessagePolicy":"File","ImagePullPolicy":"IfNotPresent","SecurityContext":{"Capabilities":{"Add":null,"Drop":["ALL"]},"Privileged":null,"SELinuxOptions":null,"WindowsOptions":null,"RunAsUser":null,"RunAsGroup":null,"RunAsNonRoot":null,"ReadOnlyRootFilesystem":true,"AllowPrivilegeEscalation":false,"ProcMount":null,"SeccompProfile":null,"AppArmorProfile":null},"Stdin":false,"StdinOnce":false,"TTY":false}],"EphemeralContainers":null,"RestartPolicy":"OnFailure","TerminationGracePeriodSeconds":30,"ActiveDeadlineSeconds":null,"DNSPolicy":"ClusterFirst","NodeSelector":null,"ServiceAccountName":"indexer","DeprecatedServiceAccount":"indexer","AutomountServiceAccountToken":false,"NodeName":"","HostNetwork":false,"HostPID":false,"HostIPC":false,"ShareProcessNamespace":null,"SecurityContext":{"SELinuxOptions":null,"WindowsOptions":null,"RunAsUser":10001,"RunAsGroup":10001,"RunAsNonRoot":true,"SupplementalGroups":null,"SupplementalGroupsPolicy":null,"FSGroup":null,"Sysctls":null,"FSGroupChangePolicy":null,"SeccompProfile":{"Type":"RuntimeDefault","LocalhostProfile":null},"AppArmorProfile":null,"SELinuxChangePolicy":null},"ImagePullSecrets":null,"Hostname":"","Subdomain":"","Affinity":null,"SchedulerName":"default-scheduler","Tolerations":null,"HostAliases":null,"PriorityClassName":"","Priority":null,"DNSConfig":null,"ReadinessGates":null,"RuntimeClassName":null,"EnableServiceLinks":false,"PreemptionPolicy":null,"Overhead":null,"TopologySpreadConstraints":null,"SetHostnameAsFQDN":null,"OS":null,"HostUsers":null,"SchedulingGates":null,"ResourceClaims":null,"Resources":null,"HostnameOverride":null,"SchedulingGroup":null,"EvictionResponders":null}}: field is immutable
+
+$ kubectl rollout status deploy/api deploy/ui deploy/redis -n rahbar --timeout=300s; kubectl rollout status sts/chroma -n rahbar --timeout=300s
+Waiting for deployment "api" rollout to finish: 1 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 1 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 1 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 2 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 2 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 2 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "api" rollout to finish: 1 old replicas are pending termination...
+deployment "api" successfully rolled out
+deployment "ui" successfully rolled out
+deployment "redis" successfully rolled out
+statefulset rolling update complete 1 pods at revision chroma-685b5d559d...
+
+$ kubectl get pods -n rahbar
+NAME                       READY   STATUS      RESTARTS   AGE
+api-8c87c57d7-bj4jx        1/1     Running     0          25s
+api-8c87c57d7-j7qb2        1/1     Running     0          36s
+api-8c87c57d7-zqvjs        1/1     Running     0          29s
+chroma-0                   1/1     Running     0          35s
+indexer-mr98n              0/1     Completed   0          8h
+redis-6f989b5dd-9smxg      1/1     Running     0          35s
+reindex-1793990975-tk78m   0/1     Completed   0          28m
+ui-7dfd7fc7cf-khqkc        1/1     Running     0          36s
+
+$ kubectl get cronjob reindex -n rahbar -o jsonpath='{.spec.jobTemplate.spec.template.spec.containers[0].resources}{"\n"}'
+{"limits":{"cpu":"1","memory":"1Gi"},"requests":{"cpu":"250m","memory":"384Mi"}}
+
+$ kubectl get deploy,sts -n rahbar -o custom-columns=NAME:.metadata.name,REQ_CPU:.spec.template.spec.containers[0].resources.requests.cpu,REQ_MEM:.spec.template.spec.containers[0].resources.requests.memory,LIM_CPU:.spec.template.spec.containers[0].resources.limits.cpu,LIM_MEM:.spec.template.spec.containers[0].resources.limits.memory
+NAME     REQ_CPU   REQ_MEM   LIM_CPU   LIM_MEM
+api      100m      128Mi     500m      256Mi
+redis    50m       64Mi      250m      256Mi
+ui       10m       16Mi      100m      32Mi
+chroma   50m       192Mi     500m      512Mi
+
+# the Job "indexer" is immutable (expected, see Makefile apply): delete it and re-apply, so the cluster runs the new limits; the Job re-indexes (sampled below)
+$ kubectl delete job indexer -n rahbar && kubectl apply -k k8s/overlays/dev | grep -i job
+job.batch "indexer" deleted from rahbar namespace
+cronjob.batch/reindex unchanged
+job.batch/indexer created
+
+$ kubectl top pods -n rahbar --containers | grep indexer   (every 30 s)
+19:17:55
+19:18:25
+19:18:56
+indexer-m2cmb           indexer   994m   236Mi   
+19:19:26
+indexer-m2cmb           indexer   994m   236Mi   
+19:19:56
+indexer-m2cmb           indexer   1000m   240Mi   
+19:20:26
+indexer-m2cmb           indexer   1000m   240Mi   
+19:20:56
+indexer-m2cmb           indexer   1001m   253Mi   
+19:21:26
+indexer-m2cmb           indexer   1001m   253Mi   
+19:21:56
+indexer-m2cmb           indexer   999m   186Mi   
+19:22:26
+indexer-m2cmb           indexer   999m   186Mi   
+19:22:57
+indexer-m2cmb           indexer   1001m   484Mi   
+19:23:27
+indexer-m2cmb           indexer   1001m   484Mi   
+19:23:57
+indexer-m2cmb           indexer   512m   394Mi   
+19:24:27
+indexer-m2cmb           indexer   512m   394Mi   
+19:24:57
+indexer-m2cmb           indexer   2m    403Mi   
+19:25:27
+indexer-m2cmb           indexer   2m    403Mi   
+19:25:57
+indexer-m2cmb           indexer   1m    408Mi   
+19:26:27
+indexer-m2cmb           indexer   1m    408Mi   
+19:26:58
+indexer-m2cmb           indexer   1m    412Mi   
+19:27:28
+indexer-m2cmb           indexer   1m    412Mi   
+19:27:58
+$ kubectl get job indexer -n rahbar; kubectl get pod -n rahbar -l job-name=indexer -o jsonpath='{.items[0].status.containerStatuses[0].state.terminated.reason}{" exit="}{.items[0].status.containerStatuses[0].state.terminated.exitCode}{"\n"}'; kubectl get events -n rahbar | grep -ci oomkill
+NAME      STATUS     COMPLETIONS   DURATION   AGE
+indexer   Complete   1/1           9m59s      10m
+Completed exit=0
+0
+
+$ kubectl logs -n rahbar job/indexer --tail=2 | cut -c1-300
+{"ts": "2026-11-06T19:27:51Z", "logger": "rahbar.indexer", "msg": "stored", "chunks": 980, "index_id": "20261106T192749Z-9ae03c", "collection": "rahbar", "replaced": true, "seconds": 1.9}
+{"ts": "2026-11-06T19:27:51Z", "logger": "rahbar.indexer", "msg": "indexer finished", "chunks": 980, "seconds": 595.4}
+
+$ kubectl get pods,hpa -n rahbar
+NAME                           READY   STATUS      RESTARTS   AGE
+pod/api-8c87c57d7-bj4jx        1/1     Running     0          10m
+pod/api-8c87c57d7-j7qb2        1/1     Running     0          10m
+pod/api-8c87c57d7-zqvjs        1/1     Running     0          10m
+pod/chroma-0                   1/1     Running     0          10m
+pod/indexer-m2cmb              0/1     Completed   0          10m
+pod/redis-6f989b5dd-9smxg      1/1     Running     0          10m
+pod/reindex-1793990975-tk78m   0/1     Completed   0          38m
+pod/ui-7dfd7fc7cf-khqkc        1/1     Running     0          10m
+
+NAME                                      REFERENCE        TARGETS       MINPODS   MAXPODS   REPLICAS   AGE
+horizontalpodautoscaler.autoscaling/api   Deployment/api   cpu: 3%/70%   3         8         3          6h12m
+
+peak sampled under the new limits: cpu 1001m, memory 484Mi (request 384Mi, limit 1Gi)

@@ -1,0 +1,64 @@
+# api Service endpoints: 3 IPs, scaled to 5, back to 3, with a request loop (cached question, 0.5 s) running
+# captured 2026-11-06T18:46Z on minikube (Calico, docker driver), namespace rahbar, dev overlay
+
+$ kubectl get endpoints api -n rahbar
+Warning: v1 Endpoints is deprecated in v1.33+; use discovery.k8s.io/v1 EndpointSlice
+NAME   ENDPOINTS                                                     AGE
+api    10.244.120.124:8000,10.244.120.126:8000,10.244.120.127:8000   24h
+
+$ kubectl get endpointslices -n rahbar -l kubernetes.io/service-name=api
+NAME        ADDRESSTYPE   PORTS   ENDPOINTS                                      AGE
+api-mxcfs   IPv4          8000    10.244.120.124,10.244.120.126,10.244.120.127   24h
+
+$ kubectl scale deploy/api -n rahbar --replicas=5
+deployment.apps/api scaled
+
+$ kubectl rollout status deploy/api -n rahbar --timeout=120s
+Waiting for deployment "api" rollout to finish: 3 of 5 updated replicas are available...
+Waiting for deployment "api" rollout to finish: 4 of 5 updated replicas are available...
+deployment "api" successfully rolled out
+
+$ kubectl get endpoints api -n rahbar
+Warning: v1 Endpoints is deprecated in v1.33+; use discovery.k8s.io/v1 EndpointSlice
+NAME   ENDPOINTS                                                                 AGE
+api    10.244.120.124:8000,10.244.120.126:8000,10.244.120.127:8000 + 2 more...   24h
+
+$ kubectl get pods -n rahbar -l app.kubernetes.io/name=api -o wide
+NAME                   READY   STATUS    RESTARTS   AGE     IP               NODE       NOMINATED NODE   READINESS GATES
+api-6896667d9f-6dkgf   1/1     Running   0          4s      10.244.120.69    minikube   <none>           <none>
+api-6896667d9f-mlf52   1/1     Running   0          3m17s   10.244.120.126   minikube   <none>           <none>
+api-6896667d9f-sd4cq   1/1     Running   0          3m12s   10.244.120.127   minikube   <none>           <none>
+api-6896667d9f-tgcq2   1/1     Running   0          4s      10.244.120.68    minikube   <none>           <none>
+api-6896667d9f-vfbmf   1/1     Running   0          3m21s   10.244.120.124   minikube   <none>           <none>
+
+$ kubectl scale deploy/api -n rahbar --replicas=3
+deployment.apps/api scaled
+
+$ kubectl get endpoints api -n rahbar
+Warning: v1 Endpoints is deprecated in v1.33+; use discovery.k8s.io/v1 EndpointSlice
+NAME   ENDPOINTS                                                     AGE
+api    10.244.120.124:8000,10.244.120.126:8000,10.244.120.127:8000   24h
+
+$ request loop result
+request loop: 34 requests, status counts:
+     34 200
+non-200: 0
+# the default output above truncates 5 addresses ("+ 2 more..."); repeating the scale to 5 with the full list
+$ kubectl scale deploy/api -n rahbar --replicas=5
+deployment.apps/api scaled
+
+$ kubectl rollout status deploy/api -n rahbar --timeout=120s
+Waiting for deployment "api" rollout to finish: 3 of 5 updated replicas are available...
+Waiting for deployment "api" rollout to finish: 4 of 5 updated replicas are available...
+deployment "api" successfully rolled out
+
+$ kubectl get endpointslices -n rahbar -l kubernetes.io/service-name=api -o jsonpath='{range .items[*].endpoints[*]}{.addresses[0]}{"  ready="}{.conditions.ready}{"\n"}{end}'
+10.244.120.124  ready=true
+10.244.120.126  ready=true
+10.244.120.127  ready=true
+10.244.120.73  ready=true
+10.244.120.76  ready=true
+
+$ kubectl scale deploy/api -n rahbar --replicas=3
+deployment.apps/api scaled
+

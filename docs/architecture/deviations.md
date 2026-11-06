@@ -85,6 +85,7 @@ Copy this block to the end of section 7, increment the number, and fill every li
 | DEV-008 | Pods set `enableServiceLinks: false` (Service env vars break Chroma) | S3 | ABSORBED | 4.2, 4.4 | 2026-11-05 |
 | DEV-009 | `fsGroup` is a no-op on minikube hostPath volumes; `/data` is writable because the provisioner makes it 0777 | S3 | OPEN, accepted | 4.7, R-01, R-02 | 2026-11-05 |
 | DEV-010 | The in-cluster index has 980 chunks, not 981: Tesseract in the indexer image OCRs the 8-page faculty policy into 39 chunks (host run: 40) | S3 | OPEN, accepted | 5.4, AD-08 | 2026-11-06 |
+| DEV-013 | Requests and limits in 4.2 replaced by the values measured in K10 (`docs/evidence/resources.md`) | S3 | CLOSED, absorbed | 4.2, R-RES-2 | 2026-11-07 |
 
 ## 7. Log
 
@@ -367,3 +368,23 @@ Places where the architecture has flagged a real chance of deviation (architectu
 **Why it matters:** it lets CD be exercised from `dev` before the final merge; no `:latest`, no push from feature branches.
 
 **Impact:** none on the submission; the run that counts for R-SUB-2 is the first push to `main` (Phase 15). Absorbed in architecture 4.15 at K11.
+
+### DEV-013 Requests and limits in architecture 4.2 replaced by measured values
+
+| | |
+| --- | --- |
+| Status | CLOSED, absorbed (architecture 4.2 table edited in the same PR) |
+| Severity | S3 |
+| Date | 2026-11-07 |
+| Raised by | Claude (phase K10) |
+| Architecture reference | 4.2 (workload table), R-RES-2 |
+| Files changed | `k8s/base/api.yaml`, `ui.yaml`, `redis.yaml`, `chroma-statefulset.yaml`, `indexer-job.yaml` |
+
+**The architecture says:** api 100m/256Mi to 500m/512Mi, ui 25m/32Mi to 100m/64Mi, chroma 100m/256Mi to 500m/1Gi, redis 100m/256Mi to 500m/512Mi, indexer 250m/512Mi to 1/2Gi.
+
+**What was built:** api 100m/128Mi to 500m/256Mi, ui 10m/16Mi to 100m/32Mi, chroma 50m/192Mi to 500m/512Mi, redis 50m/64Mi to 250m/256Mi, indexer 250m/384Mi to 1/1Gi. Each number is justified by a measurement in `docs/evidence/resources.md`.
+
+**Why it matters:** the plan (K10) asks that the requests follow what `kubectl top` showed; the design numbers were estimates.
+
+**Impact:** none on behaviour; the HPA percentage is unchanged because the api CPU request stays 100m.
+

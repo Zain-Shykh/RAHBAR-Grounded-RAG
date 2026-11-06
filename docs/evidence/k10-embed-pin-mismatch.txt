@@ -1,0 +1,71 @@
+# embedding pin: EMBED_MODEL changed in the ConfigMap, api restarted -> 0/1, /readyz 503 embed_pin, log line, revert -> 1/1 (format of docs/FAILURE-ANALYSIS.md stage C)
+# captured 2026-11-06T19:02Z on minikube (Calico, docker driver), namespace rahbar, dev overlay
+
+$ kubectl get cm rahbar-config -n rahbar -o jsonpath='{.data.EMBED_MODEL}{"\n"}'
+nomic-embed-text
+
+$ kubectl patch cm rahbar-config -n rahbar --type=merge -p '{"data":{"EMBED_MODEL":"hashing-bow-768"}}'
+configmap/rahbar-config patched
+
+$ kubectl rollout restart deploy/api -n rahbar
+deployment.apps/api restarted
+
+$ kubectl get pods -n rahbar -l app.kubernetes.io/name=api
+NAME                   READY   STATUS    RESTARTS   AGE
+api-6896667d9f-nxqcp   1/1     Running   0          75s
+api-6896667d9f-pkdzk   1/1     Running   0          80s
+api-6896667d9f-zffrt   1/1     Running   0          48s
+api-b74745c7c-jgb9q    0/1     Running   0          17s
+
+$ curl -s -i http://localhost:18000/readyz
+HTTP/1.1 503 Service Unavailable
+date: Fri, 06 Nov 2026 19:03:00 GMT
+server: uvicorn
+content-length: 163
+content-type: application/json
+x-request-id: 9ebdf3d776604adfb5b64e3a3f4a9b8d
+
+{"status":"not_ready","failed":["embed_pin"],"checks":{"chroma":"ok","collection":"ok","embed_pin":"failed","redis":"not_checked","embed_dimension":"not_checked"}}
+$ curl -s -i http://localhost:18000/healthz
+HTTP/1.1 200 OK
+date: Fri, 06 Nov 2026 19:03:00 GMT
+server: uvicorn
+content-length: 36
+content-type: application/json
+x-request-id: cfb3e62032bb4cf6b0cfc55cddb4637c
+
+{"status":"alive","version":"0.1.0"}
+$ kubectl logs -n rahbar api-b74745c7c-jgb9q | grep 'embedding pin conflict'
+{"ts": "2026-11-06T19:02:44Z", "level": "ERROR", "logger": "rahbar.index_state", "msg": "embedding pin conflict", "request_id": "-", "collection_embed_model": "nomic-embed-text", "api_embed_model": "hashing-bow-768", "collection": "rahbar", "action": "not ready until the indexer re-runs with the same model"}
+
+$ kubectl rollout status deploy/api -n rahbar --timeout=20s || true
+Waiting for deployment "api" rollout to finish: 1 out of 3 new replicas have been updated...
+error: timed out waiting for the condition
+
+$ kubectl patch cm rahbar-config -n rahbar --type=merge -p '{"data":{"EMBED_MODEL":"nomic-embed-text"}}'
+configmap/rahbar-config patched
+
+$ kubectl rollout restart deploy/api -n rahbar
+deployment.apps/api restarted
+
+$ kubectl rollout status deploy/api -n rahbar --timeout=300s
+Waiting for deployment "api" rollout to finish: 1 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 1 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 1 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 2 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 2 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 2 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "api" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "api" rollout to finish: 1 old replicas are pending termination...
+deployment "api" successfully rolled out
+
+$ kubectl get pods -n rahbar -l app.kubernetes.io/name=api
+NAME                   READY   STATUS    RESTARTS   AGE
+api-7cd86cfdd5-bg4sp   1/1     Running   0          17s
+api-7cd86cfdd5-f9s5l   1/1     Running   0          21s
+api-7cd86cfdd5-hvs8m   1/1     Running   0          25s
+
+$ kubectl get cm rahbar-config -n rahbar -o jsonpath='{.data.EMBED_MODEL}{"\n"}'
+nomic-embed-text
+
