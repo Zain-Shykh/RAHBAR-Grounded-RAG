@@ -80,7 +80,7 @@ Helm charts, a service mesh, an operator, an Ingress TLS setup, Prometheus or Gr
 | --- | --- | --- | --- | --- | --- |
 | K1 | `ui` image and base workloads on minikube | A-01, A-02, A-03 | 5 h | DONE (with deviations DEV-008, DEV-009) | #20 |
 | K2 | Indexer Job, CronJob, corpus delivery, real index in the cluster | A-04 (milestone I-2) | 3 h | DONE (with deviation DEV-010) | #21 |
-| K3 | Ingress, HPA, rollout hardening | A-05 | 2 h | NOT STARTED | |
+| K3 | Ingress, HPA, rollout hardening | A-05 | 2 h | DONE | #22 |
 | K4 | NetworkPolicies and proof | A-06 | 3 h | NOT STARTED | |
 | K5 | Overlays `ci` and `prod`, manifest validation | A-07 | 2 h | NOT STARTED | |
 | K6 | CI part 1: lint, test, manifests, build, scan | A-08 | 3 h | NOT STARTED | |
@@ -97,11 +97,11 @@ Hours spent so far (fill in at each phase end): planned 33.5 h, actual `____`.
 ## 2. Current focus
 
 ```
-Phase:        K3  Ingress, HPA, rollout hardening
+Phase:        K4  NetworkPolicies and proof
 Stage:        not started   (SPEC DRAFT, IMPLEMENTING, TESTING, READY FOR PR, MERGED)
 Branch:       (none yet)
 Spec:         (none yet)
-Next action:  fresh session: stage 0 then stage 1 for K3. K2 is merged: namespace rahbar runs api x3 (1/1), ui, chroma-0, redis, the real index (980 chunks, index_id changes on `make index`) and CronJob reindex; Ollama on the host is stopped (start it only when a cache-miss question must be answered: OLLAMA_HOST=0.0.0.0 ollama serve). Host gateway IP for K4: 192.168.49.1. `make apply` deletes and re-runs the indexer Job (13 min with Ollama running): use `kubectl apply -k k8s/overlays/dev` for manifest-only changes.
+Next action:  fresh session: stage 0 then stage 1 for K4. K3 is merged: Ingress rahbar (192.168.49.2, host rahbar.local), HPA api 3-8 at 70%, PDB api minAvailable 2. On this laptop `minikube ip` needs `sg docker -c` (or INGRESS_IP=192.168.49.2); cached/cache-lookup questions need Ollama running (query embedding). K2 state: namespace rahbar runs api x3 (1/1), ui, chroma-0, redis, the real index (980 chunks, index_id changes on `make index`) and CronJob reindex; Ollama on the host is stopped (start it only when a cache-miss question must be answered: OLLAMA_HOST=0.0.0.0 ollama serve). Host gateway IP for K4: 192.168.49.1. `make apply` deletes and re-runs the indexer Job (13 min with Ollama running): use `kubectl apply -k k8s/overlays/dev` for manifest-only changes.
 Waiting on:   Zain: Docker Hub account and token (needed from K8, create it early). Ahmad: nothing blocks.
 Last updated: 2026-11-06
 ```
@@ -130,6 +130,7 @@ Append-only, newest at the bottom. One line per event: date, phase, what happene
 2026-11-05  PLAN  Platform plan written. RAG lane phases 0 to 14 DONE; Ahmad's lane has no commits on origin (k8s/base empty, no workflows, no ui/Dockerfile, no evidence). Zain's sessions take over A-01 to A-11, A-13, A-14. A-00 and A-12 stay with Ahmad.
 2026-11-05  K1  DONE (#20). k8s base running on minikube: api x3 0/1 (readyz 503 failed=[collection], healthz 200), ui, chroma-0, redis Ready, PVCs Bound; images api 388 MB, indexer 592 MB, ui 73.7 MB; kubeconform 16 resources valid, 0 Secret in build. Data survives pod deletion (Chroma collection, Redis key). A-5 verified (api pod deletion 11.4 s vs 0.9 s without preStop). Found: Service `chroma` injects CHROMA_PORT=tcp://... and crash-loops Chroma -> enableServiceLinks false (DEV-008). fsGroup is a no-op on minikube hostPath, /data is 0777 (DEV-009). Evidence docs/evidence/k01-*.txt. Note: api rollout stalls while no index exists (maxUnavailable 0, new pods never Ready): expected until K2.
 2026-11-06  K2  DONE (#21). corpus-data PVC, Job `indexer`, CronJob `reindex` (spec copied from the Job by a kustomize replacement, D-093), make corpus/apply/down. A-1: host.minikube.internal = 192.168.49.1 from a pod, Ollama answered. A-4: kubectl cp into busybox helper OK (11 files). Job Complete 1/1 in 13 min, peak 483 Mi, 980 chunks (DEV-010). api 0/1 -> 1/1 by itself, no restart. Cited answer "80%" (prospectus, Attendance Requirement), repeat X-Cache HIT. `make index` 9 min 24 s, index_id changed, 90 requests during the swap all 200. Run 1 of the Job was marked DeadlineExceeded after the laptop slept ~15 h with the pod already finished; re-run clean (inhibit sleep for long waits). Evidence docs/evidence/k02-*.txt.
+2026-11-06  K3  DONE (#22). k8s/base ingress.yaml, hpa.yaml, pdb.yaml (D-095). Ingress rahbar address 192.168.49.2; `/` returns the UI HTML; `make ask` through the Ingress returns a cited answer; /metrics and /api/healthz not routed to the api. HPA idle `cpu: 4%/70%`, 3-8. Forced test (target 5%, cached-question loop): 3 -> 6 -> 8 replicas in 30 s, back to 3 about 5 min after revert. `<unknown>` shows for about 1 min after pods restart (metrics lag), then a number. `rollout restart deploy/api` under a 0.5 s loop through the Ingress: 0 non-200 of 42. endpoints api = 3 IPs. kubeconform 22 resources valid. Evidence docs/evidence/k03-*.txt.
 ```
 
 ---
@@ -145,8 +146,8 @@ Numbers this lane must measure. Nothing here is a guess: leave `-` until measure
 | Indexer Job wall time and peak memory in the cluster | 13 min 18 s Job (798 s in the pipeline: embed 414 s, OCR 76 s for the 8-page policy), `make index` 9 min 24 s; peak 483 Mi of 2 Gi (run 1: 484 Mi), CPU at the 1-core limit while chunking/OCR | K2 | `kubectl logs job/indexer`, `kubectl top pod` |
 | Collection chunk count in the cluster (must equal 981) | 980 (DEV-010: OCR'd faculty policy 39 vs 40 chunks); `index_id` 20261106T103106Z-41fe5d, after `make index` 20261106T125625Z-ba262b | K2 | `scripts/check_index.py` or `/readyz`, `rahbar_index_info` |
 | Api request and limit, actual `kubectl top` per pod, idle and under load | - | K10 | `kubectl top pods -n rahbar` |
-| HPA reading (current/target) idle and under load | - | K3, K10 | `kubectl get hpa -n rahbar` |
-| Failed requests during `rollout restart` of the api | - | K3 | request loop |
+| HPA reading (current/target) idle and under load | idle `cpu: 4%/70%` (3 replicas); cached-question loop with target forced to 5%: `32%/5%`, 3 to 6 to 8 replicas in 30 s; back to 3 about 5 min after the revert (K3; K10 repeats) | K3, K10 | `kubectl get hpa -n rahbar` |
+| Failed requests during `rollout restart` of the api | 0 of 42 (cached question through the Ingress every 0.5 s) | K3 | request loop |
 | `ci` e2e-eval wall time on kind | - | K7 | Actions run |
 | Fixture eval result in CI (recall@5, citation validity, abstention) | - | K7 | `eval/fixtures/results.fixture.json` |
 | Image sizes on Docker Hub (api, indexer, ui) and the SHA tag | - | K8 | Docker Hub page |
@@ -267,7 +268,7 @@ H-9 and H-10 to the RAG plan (tick them in `IMPLEMENTATION_PLAN.md` section 3 an
 
 ## Phase K3: Ingress, HPA, rollout hardening (A-05)
 
-**Status:** NOT STARTED · **Branch:** `feat/k8s-k03-ingress-hpa` · **Est:** 2 h · **Priority:** P0
+**Status:** DONE · **Branch:** `feat/k8s-k03-ingress-hpa` · **Est:** 2 h · **Priority:** P0
 
 ### Objective
 Questions reach the API through one Ingress host, the api scales on CPU between 3 and 8 pods with a real percentage, and a rolling update drops no request.
@@ -292,13 +293,13 @@ Architecture 4.3 (Ingress, annotations), 4.9 (rollouts, scaling, graceful shutdo
 NetworkPolicies, TLS.
 
 ### Acceptance criteria
-- [ ] `kubectl get ingress -n rahbar` shows `rahbar.local` with an address; `make ask Q="..."` returns a cited answer through the Ingress; `curl -H 'Host: rahbar.local' http://$(minikube ip)/` returns the UI HTML.
-- [ ] `kubectl get hpa -n rahbar` shows a real `x%/70%`, min 3, max 8.
-- [ ] A forced scale test shows replicas rising above 3 and falling back, output saved.
-- [ ] A request loop during `kubectl rollout restart deploy/api` shows zero failed requests (the count is in the results register).
-- [ ] `kubectl get endpoints api -n rahbar` lists 3 pod IPs.
-- [ ] `kustomize build k8s/overlays/dev | kubeconform -strict` passes; `make test && make lint` green.
-- [ ] `docs/evidence/k03-hpa.txt`, `k03-rollout-loop.txt` and `k03-ingress.txt` saved.
+- [x] `kubectl get ingress -n rahbar` shows `rahbar.local` with an address; `make ask Q="..."` returns a cited answer through the Ingress; `curl -H 'Host: rahbar.local' http://$(minikube ip)/` returns the UI HTML.
+- [x] `kubectl get hpa -n rahbar` shows a real `x%/70%`, min 3, max 8.
+- [x] A forced scale test shows replicas rising above 3 and falling back, output saved.
+- [x] A request loop during `kubectl rollout restart deploy/api` shows zero failed requests (the count is in the results register).
+- [x] `kubectl get endpoints api -n rahbar` lists 3 pod IPs.
+- [x] `kustomize build k8s/overlays/dev | kubeconform -strict` passes; `make test && make lint` green.
+- [x] `docs/evidence/k03-hpa.txt`, `k03-rollout-loop.txt` and `k03-ingress.txt` saved.
 
 ### Verify
 ```bash
