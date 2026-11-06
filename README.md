@@ -2,6 +2,7 @@
 
 **Grounded question answering over university documents, running on Kubernetes.**
 
+[![ci](https://github.com/Zain-Shykh/RAHBAR-Grounded-RAG/actions/workflows/ci.yml/badge.svg)](https://github.com/Zain-Shykh/RAHBAR-Grounded-RAG/actions/workflows/ci.yml)
 ![Python](https://img.shields.io/badge/python-3.12-blue)
 ![Kubernetes](https://img.shields.io/badge/kubernetes-minikube-326ce5)
 ![FastAPI](https://img.shields.io/badge/api-FastAPI-009688)

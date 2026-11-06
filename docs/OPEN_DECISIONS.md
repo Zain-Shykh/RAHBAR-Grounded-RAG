@@ -1142,3 +1142,25 @@ Entry template:
 - Claude recommends: A. One copy of the fixtures. The cost is that this overlay needs `kustomize build --load-restrictor LoadRestrictionsNone ... | kubectl apply -f -` (not `kubectl apply -k`); `make manifests` and the workflows do that. `_index.json` is not needed: `discover()` falls back to the front matter and `verify` is skipped when it is absent, so no file is generated.
 - Decision: A. Decided by: Claude, pre-approved by Zain.
 - Decided on: 2026-11-06
+
+### D-097 CI `test` job runs the Redis tests against a service container
+- Status: DECIDED
+- Raised: 2026-11-06 by Claude (phase K6)
+- Area: ci
+- Related: R-CI-1; `api/tests/test_cache_redis*.py`
+- Question: Run the 19 tests that need `REDIS_URL` in CI?
+- Options: A. `redis/redis-stack-server:7.4.0-v8` service container. B. Leave them skipped.
+- Claude recommends: A. Same image as `make dev-services`; real cache coverage. Fall back to B only if flaky.
+- Decision: A. Decided by: Claude, pre-approved by Zain.
+- Decided on: 2026-11-06
+
+### D-098 Actions pinned by commit SHA; `scan` is one job with three Trivy steps
+- Status: DECIDED
+- Raised: 2026-11-06 by Claude (phase K6)
+- Area: ci
+- Related: rubric (unpinned actions), K9 required checks
+- Question: Pin by tag or SHA, and matrix or single job for scan?
+- Options: A. SHA with the tag in a comment; single `scan` job. B. Tags; matrix.
+- Claude recommends: A. Tags are mutable; a matrix renames the check (`scan (api)`), which would break the required check name `scan`.
+- Decision: A. Decided by: Claude, pre-approved by Zain.
+- Decided on: 2026-11-06
