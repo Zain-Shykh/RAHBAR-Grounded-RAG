@@ -10,3 +10,18 @@ resources:
   - chroma-statefulset.yaml
   - redis.yaml
   - services.yaml
+  - corpus-pvc.yaml
+  - indexer-job.yaml
+  - reindex-cronjob.yaml
+# The CronJob runs exactly the Job's spec (D-093).
+replacements:
+  - source:
+      kind: Job
+      name: indexer
+      fieldPath: spec
+    targets:
+      - select:
+          kind: CronJob
+          name: reindex
+        fieldPaths:
+          - spec.jobTemplate.spec

@@ -1098,3 +1098,25 @@ Entry template:
 - Decision: A. Decided by: Claude, pre-approved by Zain.
 - Decided on: 2026-11-05
 - 2026-11-05: phase K1 decisions. D-090 to D-092 added, all DECIDED (Claude, pre-approved by Zain).
+
+### D-093 Job and CronJob share one pod spec via kustomize `replacements`
+- Status: DECIDED
+- Raised: 2026-11-06 by Claude (phase K2)
+- Area: k8s
+- Related: R-K8S-CRON ("same image and arguments"), architecture 4.2
+- Question: How do the Job and the CronJob avoid drifting?
+- Options: A. `replacements` copies the Job `spec` into the CronJob `jobTemplate.spec`. B. YAML anchors (do not cross documents). C. Duplicate and test equality.
+- Claude recommends: A. One source, drift impossible.
+- Decision: A. Decided by: Claude, pre-approved by Zain.
+- Decided on: 2026-11-06
+
+### D-094 `corpus-loader` helper pod uses pinned `busybox:1.37.0`, manifest in `k8s/tools/`
+- Status: DECIDED
+- Raised: 2026-11-06 by Claude (phase K2)
+- Area: k8s
+- Related: AD-08, assumption A-4
+- Question: Which image has `tar` for `kubectl cp`, and where does the manifest live (not in the kustomization)?
+- Options: A. busybox pinned, `k8s/tools/corpus-loader.yaml`. B. The indexer image (592 MB, has tar). C. alpine.
+- Claude recommends: A. Smallest, pinned, has tar and a shell.
+- Decision: A. Decided by: Claude, pre-approved by Zain.
+- Decided on: 2026-11-06

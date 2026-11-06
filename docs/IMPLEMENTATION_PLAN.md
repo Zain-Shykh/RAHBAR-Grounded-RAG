@@ -113,8 +113,8 @@ Things this lane owes Ahmad or needs from him. Tick when delivered. Newest at th
 | H-13 | Zain to Ahmad | DEV-007 accepted (option A): ConfigMap `LLM_TIMEOUT_SECONDS=300` and Ingress `nginx.ingress.kubernetes.io/proxy-read-timeout: "310"` (at least 310 s; the Ingress must stay above the model timeout). Replaces the 90 s and 120 s in the architecture | 13 | [ ] |
 | H-14 | Zain to Ahmad | The pin demonstration capture is reusable as his A-13 evidence: `/readyz` 503 body and the API log line are in `docs/FAILURE-ANALYSIS.md` stage C (local run, `EMBED_MODEL=hashing-bow-768` on the api only). On the cluster set the same key in the api ConfigMap only, wait for the rollout, `kubectl get pods` (0/1) and `curl /readyz`, then revert | 13 | [ ] |
 | H-8 | Zain to Ahmad | `eval/fixtures/baseline.fixture.json` committed (and the `ci` overlay floor). Text in the log | 12 | [x] |
-| H-9 | Ahmad to Zain | ConfigMap, Redis Stack and Chroma manifests running in minikube (milestone I-1) | n/a | [ ] |
-| H-10 | Ahmad to Zain | Real corpus on `corpus-data` PVC and the Job runnable in the cluster (milestone I-2) | n/a | [ ] |
+| H-9 | Ahmad to Zain | ConfigMap, Redis Stack and Chroma manifests running in minikube (milestone I-1) | n/a | [x] |
+| H-10 | Ahmad to Zain | Real corpus on `corpus-data` PVC and the Job runnable in the cluster (milestone I-2) | n/a | [x] |
 
 ---
 
@@ -199,6 +199,7 @@ Append-only, newest at the bottom. One line per event: date, phase, what happene
 2026-11-05  P13  H-14 for Ahmad: the pin capture is reusable (docs/FAILURE-ANALYSIS.md stage C).
 2026-11-05  P14  Spec pushed, decisions D-86 (ADR 0001 written here, Ahmad to review), D-87 (hosted stub removed, ValueError), D-88 (notes: Q5, Q6, Q7 full, Q1 to Q4 lane facts), D-89 (placeholder mentions reworded in lane files).
 2026-11-05  P14  ADRs 0001 to 0004, PIPELINE embedding and document delivery, ENGINEERING-NOTES, README API table, AI-USAGE; hosted.py removed with a test. Tester round 1 FAIL (6 doc defects, fixed), round 2 PASS (5 low, fixed). Checker: 6 failures left, none this lane's: Ahmad's evidence, workflows, k8s, ui/Dockerfile, and the placeholder word in requirements.md, rubric_checklist.md, WORKFLOW.md, WORKPLAN.md (shared, listed for Zain). Register note: stage times (4 min 17 s + 422 s + 1.3 s) do not add up to the 9 min 39 s wall time; re-check.
+2026-11-06  K2 (platform lane)  H-9 and H-10 done: manifests run in minikube (K1) and the real corpus is on the `corpus-data` PVC; the indexer Job built 980 chunks in the cluster (DEV-010: 39 vs 40 chunks for the OCR'd faculty policy), api pods turned 1/1, cited answer and cache HIT proven. Evidence `docs/evidence/k02-*.txt`.
 ```
 
 ---

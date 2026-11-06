@@ -11,12 +11,13 @@ BIN := $(abspath $(VENV))/bin
 # docker driver, run `minikube tunnel` in another terminal and use INGRESS_IP=127.0.0.1.
 INGRESS_IP ?= $(shell minikube ip 2>/dev/null)
 HOST ?= rahbar.local
+CORPUS_SRC ?= corpus/raw
 # Local data services (phase 2). Tags verified in docs/specs/phase-02-local-services.md.
 CHROMA_IMAGE ?= chromadb/chroma:1.0.12
 REDIS_IMAGE ?= redis/redis-stack-server:7.4.0-v8
 
 .DEFAULT_GOAL := help
-.PHONY: help install test lint dev dev-services dev-services-stop dev-services-reset cluster images apply secret index ask fetch eval eval-fixtures check
+.PHONY: help install test lint dev dev-services dev-services-stop dev-services-reset cluster images corpus apply down secret index ask fetch eval eval-fixtures check
 
 help: ## list the targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  make %-14s %s\n", $$1, $$2}'
@@ -69,8 +70,23 @@ images: ## build the three images and load them into minikube (needs yours: Dock
 	minikube image load rahbar-indexer:$(TAG)
 	minikube image load rahbar-ui:$(TAG)
 
-apply: ## apply the dev overlay (needs yours: manifests)
+corpus: ## copy $(CORPUS_SRC) (default corpus/raw) into the corpus-data PVC (namespace, PVC, helper pod, kubectl cp)
+	kubectl apply -f k8s/base/namespace.yaml -f k8s/base/corpus-pvc.yaml
+	kubectl apply -f k8s/base/serviceaccounts.yaml
+	kubectl delete pod corpus-loader -n $(NS) --ignore-not-found
+	kubectl apply -f k8s/tools/corpus-loader.yaml
+	kubectl wait --for=condition=Ready pod/corpus-loader -n $(NS) --timeout=120s
+	kubectl cp $(CORPUS_SRC)/. $(NS)/corpus-loader:/corpus
+	kubectl cp $(CORPUS_SRC)/../MANIFEST.md $(NS)/corpus-loader:/corpus/MANIFEST.md
+	kubectl exec -n $(NS) corpus-loader -- ls -l /corpus
+	kubectl delete pod corpus-loader -n $(NS) --wait=false
+
+apply: ## apply the dev overlay; a finished indexer Job is deleted first (immutable template), so it runs again
+	kubectl delete job indexer -n $(NS) --ignore-not-found
 	kubectl apply -k k8s/overlays/dev
+
+down: ## delete the namespace and everything in it (PVCs too)
+	kubectl delete namespace $(NS) --ignore-not-found
 
 secret: ## create the LLM key Secret from the LLM_API_KEY variable; never from a file
 	@test -n "$$LLM_API_KEY" || { echo "export LLM_API_KEY=... first"; exit 1; }

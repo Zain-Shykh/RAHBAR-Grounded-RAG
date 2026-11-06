@@ -79,7 +79,7 @@ Helm charts, a service mesh, an operator, an Ingress TLS setup, Prometheus or Gr
 | # | Phase | Work plan task | Est | Status | PR |
 | --- | --- | --- | --- | --- | --- |
 | K1 | `ui` image and base workloads on minikube | A-01, A-02, A-03 | 5 h | DONE (with deviations DEV-008, DEV-009) | #20 |
-| K2 | Indexer Job, CronJob, corpus delivery, real index in the cluster | A-04 (milestone I-2) | 3 h | NOT STARTED | |
+| K2 | Indexer Job, CronJob, corpus delivery, real index in the cluster | A-04 (milestone I-2) | 3 h | DONE (with deviation DEV-010) | #21 |
 | K3 | Ingress, HPA, rollout hardening | A-05 | 2 h | NOT STARTED | |
 | K4 | NetworkPolicies and proof | A-06 | 3 h | NOT STARTED | |
 | K5 | Overlays `ci` and `prod`, manifest validation | A-07 | 2 h | NOT STARTED | |
@@ -97,13 +97,13 @@ Hours spent so far (fill in at each phase end): planned 33.5 h, actual `____`.
 ## 2. Current focus
 
 ```
-Phase:        K2  Indexer Job, CronJob, corpus delivery, real index in the cluster
+Phase:        K3  Ingress, HPA, rollout hardening
 Stage:        not started   (SPEC DRAFT, IMPLEMENTING, TESTING, READY FOR PR, MERGED)
 Branch:       (none yet)
 Spec:         (none yet)
-Next action:  fresh session: stage 0 then stage 1 for K2. K1 is merged: namespace rahbar runs api x3 (0/1 until the index exists), ui, chroma-0, redis with PVCs; images rahbar-{api,indexer,ui}:dev are loaded in minikube. Ollama must be started for K2 (OLLAMA_HOST=0.0.0.0 ollama serve), stop it after.
+Next action:  fresh session: stage 0 then stage 1 for K3. K2 is merged: namespace rahbar runs api x3 (1/1), ui, chroma-0, redis, the real index (980 chunks, index_id changes on `make index`) and CronJob reindex; Ollama on the host is stopped (start it only when a cache-miss question must be answered: OLLAMA_HOST=0.0.0.0 ollama serve). Host gateway IP for K4: 192.168.49.1. `make apply` deletes and re-runs the indexer Job (13 min with Ollama running): use `kubectl apply -k k8s/overlays/dev` for manifest-only changes.
 Waiting on:   Zain: Docker Hub account and token (needed from K8, create it early). Ahmad: nothing blocks.
-Last updated: 2026-11-05
+Last updated: 2026-11-06
 ```
 
 Update this block at the end of every work session, even if the phase is unfinished.
@@ -117,7 +117,7 @@ Update this block at the end of every work session, even if the phase is unfinis
 | HP-1 | Zain (human) | Create the Docker Hub account and an access token (read, write, delete scope on the repos). Run `gh secret set DOCKERHUB_USERNAME` and `gh secret set DOCKERHUB_TOKEN` with the `!` prefix. Decide the Docker Hub namespace (decision D-013) | before K8 | [ ] |
 | HP-2 | Zain (human) | Approve changing branch protection on `main` (required checks, admin enforcement) when K9 asks | K9 | [ ] |
 | HP-3 | RAG lane to platform | H-7 to H-14 values: ConfigMap values, `ci` overlay floor 0.20, `LLM_TIMEOUT_SECONDS=300`, Ingress timeout at least 310 s, Redis settings, health and metrics paths. Texts are in the progress log of `IMPLEMENTATION_PLAN.md`. Already delivered, listed here so nothing is missed | K1 to K5 | [x] |
-| HP-4 | Platform to RAG lane | Final status of H-9 (manifests running in minikube) and H-10 (real corpus on the PVC, Job runnable) recorded in `IMPLEMENTATION_PLAN.md` section 3 | K2 | [ ] |
+| HP-4 | Platform to RAG lane | Final status of H-9 (manifests running in minikube) and H-10 (real corpus on the PVC, Job runnable) recorded in `IMPLEMENTATION_PLAN.md` section 3 | K2 | [x] |
 | HP-5 | Platform to Ahmad (when back) | `ui/Dockerfile` is done and merged; A-12 (UI polish and version label) and A-00 (onboarding) are his | K11 | [ ] |
 
 ---
@@ -129,6 +129,7 @@ Append-only, newest at the bottom. One line per event: date, phase, what happene
 ```
 2026-11-05  PLAN  Platform plan written. RAG lane phases 0 to 14 DONE; Ahmad's lane has no commits on origin (k8s/base empty, no workflows, no ui/Dockerfile, no evidence). Zain's sessions take over A-01 to A-11, A-13, A-14. A-00 and A-12 stay with Ahmad.
 2026-11-05  K1  DONE (#20). k8s base running on minikube: api x3 0/1 (readyz 503 failed=[collection], healthz 200), ui, chroma-0, redis Ready, PVCs Bound; images api 388 MB, indexer 592 MB, ui 73.7 MB; kubeconform 16 resources valid, 0 Secret in build. Data survives pod deletion (Chroma collection, Redis key). A-5 verified (api pod deletion 11.4 s vs 0.9 s without preStop). Found: Service `chroma` injects CHROMA_PORT=tcp://... and crash-loops Chroma -> enableServiceLinks false (DEV-008). fsGroup is a no-op on minikube hostPath, /data is 0777 (DEV-009). Evidence docs/evidence/k01-*.txt. Note: api rollout stalls while no index exists (maxUnavailable 0, new pods never Ready): expected until K2.
+2026-11-06  K2  DONE (#21). corpus-data PVC, Job `indexer`, CronJob `reindex` (spec copied from the Job by a kustomize replacement, D-093), make corpus/apply/down. A-1: host.minikube.internal = 192.168.49.1 from a pod, Ollama answered. A-4: kubectl cp into busybox helper OK (11 files). Job Complete 1/1 in 13 min, peak 483 Mi, 980 chunks (DEV-010). api 0/1 -> 1/1 by itself, no restart. Cited answer "80%" (prospectus, Attendance Requirement), repeat X-Cache HIT. `make index` 9 min 24 s, index_id changed, 90 requests during the swap all 200. Run 1 of the Job was marked DeadlineExceeded after the laptop slept ~15 h with the pod already finished; re-run clean (inhibit sleep for long waits). Evidence docs/evidence/k02-*.txt.
 ```
 
 ---
@@ -141,8 +142,8 @@ Numbers this lane must measure. Nothing here is a guess: leave `-` until measure
 | --- | --- | --- | --- |
 | `ui` image size | 73.7 MB (api 388 MB, indexer 592 MB) | K1 | `docker image ls` |
 | Time from `make apply` to all pods Ready (no Job yet) | chroma, redis, ui Ready 3 s after pod creation with images cached (api stays 0/1 by design); first pull of chroma and redis images not timed | K1 | pod `Ready` transition minus creation time |
-| Indexer Job wall time and peak memory in the cluster | - | K2 | `kubectl logs job/indexer`, `kubectl top pod` |
-| Collection chunk count in the cluster (must equal 981) | - | K2 | `scripts/check_index.py` or `/readyz`, `rahbar_index_info` |
+| Indexer Job wall time and peak memory in the cluster | 13 min 18 s Job (798 s in the pipeline: embed 414 s, OCR 76 s for the 8-page policy), `make index` 9 min 24 s; peak 483 Mi of 2 Gi (run 1: 484 Mi), CPU at the 1-core limit while chunking/OCR | K2 | `kubectl logs job/indexer`, `kubectl top pod` |
+| Collection chunk count in the cluster (must equal 981) | 980 (DEV-010: OCR'd faculty policy 39 vs 40 chunks); `index_id` 20261106T103106Z-41fe5d, after `make index` 20261106T125625Z-ba262b | K2 | `scripts/check_index.py` or `/readyz`, `rahbar_index_info` |
 | Api request and limit, actual `kubectl top` per pod, idle and under load | - | K10 | `kubectl top pods -n rahbar` |
 | HPA reading (current/target) idle and under load | - | K3, K10 | `kubectl get hpa -n rahbar` |
 | Failed requests during `rollout restart` of the api | - | K3 | request loop |
@@ -211,7 +212,7 @@ None. Record "k8s base running" in the progress log.
 
 ## Phase K2: Indexer Job, CronJob, corpus delivery, real index in the cluster (A-04, milestone I-2)
 
-**Status:** NOT STARTED · **Branch:** `feat/k8s-k02-indexer` · **Est:** 3 h · **Priority:** P0 · **Delivers:** H-9 and H-10 to the RAG plan
+**Status:** DONE (with deviation DEV-010) · **Branch:** `feat/k8s-k02-indexer` · **Est:** 3 h · **Priority:** P0 · **Delivers:** H-9 and H-10 to the RAG plan
 
 ### Objective
 The real index of 981 chunks exists in the cluster's Chroma, built by the indexer Job from documents delivered into the `corpus-data` PVC, and the api pods become Ready because of it.
@@ -238,15 +239,15 @@ Architecture 4.2 (indexer and reindex rows), 4.5 (storage and corpus delivery, A
 Ingress, HPA, NetworkPolicy, CI.
 
 ### Acceptance criteria
-- [ ] `make corpus` copies the nine documents plus `_index.json` and `MANIFEST.md` into `corpus-data` (listing saved) and removes the helper pod.
-- [ ] The indexer Job completes (`kubectl get job indexer -n rahbar` shows `1/1`), the logs show every stage, the collection has 981 chunks and the `index_id` appears in `/readyz` or `rahbar_index_info`.
-- [ ] api pods become `1/1 Ready` after the index exists; before it they were `0/1`.
-- [ ] A question through `kubectl port-forward` to an api pod returns a cited answer (`answered_from_context: true`, citations in `retrieved`), and a repeat question shows `X-Cache: HIT`.
-- [ ] `make index` creates a Job from the CronJob (`kubectl create job --from=cronjob/reindex`), it completes, `index_id` changes, and no request failed while a loop of questions ran against the API during the swap.
-- [ ] A-1 and A-4 are verified and recorded in architecture section 9; any deviation is logged.
-- [ ] Wall time, peak memory and chunk count recorded in the results register; H-9 and H-10 ticked in `IMPLEMENTATION_PLAN.md` section 3.
-- [ ] `docs/evidence/k02-indexer-job.txt` (Job description, logs excerpt, chunk count) and `docs/evidence/k02-first-answer.txt` saved.
-- [ ] `kubeconform -strict` still passes; `make test && make lint` green.
+- [x] `make corpus` copies the nine documents plus `_index.json` and `MANIFEST.md` into `corpus-data` (listing saved) and removes the helper pod.
+- [x] The indexer Job completes (`kubectl get job indexer -n rahbar` shows `1/1`), the logs show every stage, the collection has 980 chunks (981 expected, DEV-010) and the `index_id` appears in `/readyz` or `rahbar_index_info`.
+- [x] api pods become `1/1 Ready` after the index exists; before it they were `0/1`.
+- [x] A question through `kubectl port-forward` to an api pod returns a cited answer (`answered_from_context: true`, citations in `retrieved`), and a repeat question shows `X-Cache: HIT`.
+- [x] `make index` creates a Job from the CronJob (`kubectl create job --from=cronjob/reindex`), it completes, `index_id` changes, and no request failed while a loop of questions ran against the API during the swap.
+- [x] A-1 and A-4 are verified and recorded in architecture section 9; any deviation is logged.
+- [x] Wall time, peak memory and chunk count recorded in the results register; H-9 and H-10 ticked in `IMPLEMENTATION_PLAN.md` section 3.
+- [x] `docs/evidence/k02-indexer-job.txt` (Job description, logs excerpt, chunk count) and `docs/evidence/k02-first-answer.txt` saved.
+- [x] `kubeconform -strict` still passes; `make test && make lint` green.
 
 ### Verify
 ```bash

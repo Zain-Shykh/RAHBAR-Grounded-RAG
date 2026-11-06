@@ -1,0 +1,14 @@
+# Filled by `make corpus` (AD-08). Read-only for the indexer Job and the reindex CronJob.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: corpus-data
+  namespace: rahbar
+  labels:
+    app.kubernetes.io/name: indexer
+    app.kubernetes.io/part-of: rahbar
+spec:
+  accessModes: [ReadWriteOnce]
+  resources:
+    requests:
+      storage: 1Gi
