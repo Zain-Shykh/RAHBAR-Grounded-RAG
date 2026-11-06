@@ -5,7 +5,7 @@
 | Phase | K2, from `docs/IMPLEMENTATION_PLAN_PLATFORM.md` |
 | Work plan task | A-04 (milestone I-2) |
 | Branch | `feat/k8s-k02-indexer` |
-| Stage | TESTING |
+| Stage | MERGED |
 | Started | 2026-11-06 |
 | Approved (spec and plan) | pre-approved by Zain, platform plan 0.1 |
 | Depends on | K1 (#20); H-4 (indexer peak 438 MB, 9 min 40 s on host) |
@@ -98,4 +98,4 @@ Rollback: `make down` and revert the step. Estimate 3 h.
 | --- | --- | --- | --- |
 | Spec and plan | 2026-11-06 | pre-approved by Zain | |
 | Tester verdict PASS | 2026-11-06 | independent subagent | rounds: 1 |
-| Merged | | | PR # |
+| Merged | 2026-11-06 | Claude, pre-approved by Zain | PR #21 |

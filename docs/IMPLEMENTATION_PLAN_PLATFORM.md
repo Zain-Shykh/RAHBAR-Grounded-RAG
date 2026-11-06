@@ -79,7 +79,7 @@ Helm charts, a service mesh, an operator, an Ingress TLS setup, Prometheus or Gr
 | # | Phase | Work plan task | Est | Status | PR |
 | --- | --- | --- | --- | --- | --- |
 | K1 | `ui` image and base workloads on minikube | A-01, A-02, A-03 | 5 h | DONE (with deviations DEV-008, DEV-009) | #20 |
-| K2 | Indexer Job, CronJob, corpus delivery, real index in the cluster | A-04 (milestone I-2) | 3 h | DONE (with deviation DEV-010) | PR_NUM |
+| K2 | Indexer Job, CronJob, corpus delivery, real index in the cluster | A-04 (milestone I-2) | 3 h | DONE (with deviation DEV-010) | #21 |
 | K3 | Ingress, HPA, rollout hardening | A-05 | 2 h | NOT STARTED | |
 | K4 | NetworkPolicies and proof | A-06 | 3 h | NOT STARTED | |
 | K5 | Overlays `ci` and `prod`, manifest validation | A-07 | 2 h | NOT STARTED | |
@@ -129,7 +129,7 @@ Append-only, newest at the bottom. One line per event: date, phase, what happene
 ```
 2026-11-05  PLAN  Platform plan written. RAG lane phases 0 to 14 DONE; Ahmad's lane has no commits on origin (k8s/base empty, no workflows, no ui/Dockerfile, no evidence). Zain's sessions take over A-01 to A-11, A-13, A-14. A-00 and A-12 stay with Ahmad.
 2026-11-05  K1  DONE (#20). k8s base running on minikube: api x3 0/1 (readyz 503 failed=[collection], healthz 200), ui, chroma-0, redis Ready, PVCs Bound; images api 388 MB, indexer 592 MB, ui 73.7 MB; kubeconform 16 resources valid, 0 Secret in build. Data survives pod deletion (Chroma collection, Redis key). A-5 verified (api pod deletion 11.4 s vs 0.9 s without preStop). Found: Service `chroma` injects CHROMA_PORT=tcp://... and crash-loops Chroma -> enableServiceLinks false (DEV-008). fsGroup is a no-op on minikube hostPath, /data is 0777 (DEV-009). Evidence docs/evidence/k01-*.txt. Note: api rollout stalls while no index exists (maxUnavailable 0, new pods never Ready): expected until K2.
-2026-11-06  K2  DONE (PR_NUM). corpus-data PVC, Job `indexer`, CronJob `reindex` (spec copied from the Job by a kustomize replacement, D-093), make corpus/apply/down. A-1: host.minikube.internal = 192.168.49.1 from a pod, Ollama answered. A-4: kubectl cp into busybox helper OK (11 files). Job Complete 1/1 in 13 min, peak 483 Mi, 980 chunks (DEV-010). api 0/1 -> 1/1 by itself, no restart. Cited answer "80%" (prospectus, Attendance Requirement), repeat X-Cache HIT. `make index` 9 min 24 s, index_id changed, 90 requests during the swap all 200. Run 1 of the Job was marked DeadlineExceeded after the laptop slept ~15 h with the pod already finished; re-run clean (inhibit sleep for long waits). Evidence docs/evidence/k02-*.txt.
+2026-11-06  K2  DONE (#21). corpus-data PVC, Job `indexer`, CronJob `reindex` (spec copied from the Job by a kustomize replacement, D-093), make corpus/apply/down. A-1: host.minikube.internal = 192.168.49.1 from a pod, Ollama answered. A-4: kubectl cp into busybox helper OK (11 files). Job Complete 1/1 in 13 min, peak 483 Mi, 980 chunks (DEV-010). api 0/1 -> 1/1 by itself, no restart. Cited answer "80%" (prospectus, Attendance Requirement), repeat X-Cache HIT. `make index` 9 min 24 s, index_id changed, 90 requests during the swap all 200. Run 1 of the Job was marked DeadlineExceeded after the laptop slept ~15 h with the pod already finished; re-run clean (inhibit sleep for long waits). Evidence docs/evidence/k02-*.txt.
 ```
 
 ---
