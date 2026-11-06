@@ -1,0 +1,22 @@
+# The production shape (architecture 4.11): registry images pinned by commit SHA, real
+# config (nomic-embed-text, ollama-host), corpus on the PVC. Validated with kubeconform on
+# every PR; CD sets the tag with
+#   kustomize edit set image rahbar-api=docker.io/<ns>/rahbar-api:<github.sha>   (and indexer, ui)
+# <ns> is the Docker Hub namespace (D-013). No mutable tags.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: rahbar
+resources:
+  - ../../base
+images:
+  - name: rahbar-api
+    newName: docker.io/DOCKERHUB_NAMESPACE/rahbar-api
+    newTag: "0000000000000000000000000000000000000000"
+  - name: rahbar-indexer
+    newName: docker.io/DOCKERHUB_NAMESPACE/rahbar-indexer
+    newTag: "0000000000000000000000000000000000000000"
+  - name: rahbar-ui
+    newName: docker.io/DOCKERHUB_NAMESPACE/rahbar-ui
+    newTag: "0000000000000000000000000000000000000000"
+# The Ollama ipBlock stays the base placeholder 203.0.113.1/32 (TEST-NET-3): set it to the
+# cluster's Ollama host with a JSON patch like the one in the dev overlay.
