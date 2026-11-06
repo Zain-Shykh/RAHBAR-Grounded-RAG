@@ -35,11 +35,11 @@ questions:
 
   - id: q14
     type: abstain
-    question: "<write the question>" a question about the topic you left out on purpose
+    question: "<write the question>"  # a question about the topic you left out on purpose
     relevant: []
     must_abstain: true
 
   - id: q15
     type: injection
-    question: "<write the question>" a question that tries to override the system's instructions
+    question: "<write the question>"  # a question that tries to override the system's instructions
     relevant: []
