@@ -26,7 +26,8 @@ jobs:
             api/requirements-dev.txt
             indexer/requirements-dev.txt
       - run: make install
-      - run: make lint
+      - name: ruff and mypy (make lint)
+        run: make lint
 
   test:
     runs-on: ubuntu-24.04

@@ -83,7 +83,7 @@ Helm charts, a service mesh, an operator, an Ingress TLS setup, Prometheus or Gr
 | K3 | Ingress, HPA, rollout hardening | A-05 | 2 h | DONE | #22 |
 | K4 | NetworkPolicies and proof | A-06 | 3 h | DONE | #23 |
 | K5 | Overlays `ci` and `prod`, manifest validation | A-07 | 2 h | DONE (with deviation DEV-011) | #24 |
-| K6 | CI part 1: lint, test, manifests, build, scan | A-08 | 3 h | NOT STARTED | |
+| K6 | CI part 1: lint, test, manifests, build, scan | A-08 | 3 h | DONE | #25 |
 | K7 | CI part 2: e2e-eval on kind | A-09 | 4 h | NOT STARTED | |
 | K8 | CD: Docker Hub, build-push, deploy | A-10 | 3 h | NOT STARTED | |
 | K9 | Branch protection and the gate demonstration | A-11 | 1.5 h | NOT STARTED | |
@@ -97,11 +97,11 @@ Hours spent so far (fill in at each phase end): planned 33.5 h, actual `____`.
 ## 2. Current focus
 
 ```
-Phase:        K6  CI part 1: lint, test, manifests, build, scan
+Phase:        K7  CI part 2: e2e-eval on kind
 Stage:        not started   (SPEC DRAFT, IMPLEMENTING, TESTING, READY FOR PR, MERGED)
 Branch:       (none yet)
 Spec:         (none yet)
-Next action:  fresh session: stage 0 then stage 1 for K6. K5 is merged: overlays dev, ci, prod build and validate (`make manifests`, which builds with `--load-restrictor LoadRestrictionsNone`: the ci overlay's fixtures generator reads eval/fixtures, D-096). ci overlay: images rahbar-*:ci, ConfigMap patch (hashing-bow-768, extractive, floor 0.20), corpus-fixtures ConfigMap mounted at /corpus in Job and CronJob, Ollama egress removed; apply it with `kustomize build --load-restrictor LoadRestrictionsNone k8s/overlays/ci | kubectl apply -f -` (not `apply -k`). Rehearsal passed (16 chunks, eval gate exit 0) but on minikube, not kind (disk was full; kind v0.24.0 binary is NOT installed any more, CI has its own). prod overlay: docker.io/DOCKERHUB_NAMESPACE/rahbar-*:<40 zeros>, CD sets the real values. The `ci` Ingress is part of the overlay (not exercised in the rehearsal). Laptop disk is ~96% full: free space before building images. Cluster: api x3, ui, chroma-0, redis, real index (980 chunks); Ollama on the host is stopped.
+Next action:  fresh session: stage 0 then stage 1 for K7. K6 is merged: `.github/workflows/ci.yml` has the five jobs `lint`, `test`, `manifests`, `build`, `scan` (actions pinned by SHA; build saves the three images as the `images` artifact tagged with the commit SHA; `scan` downloads it). Add `e2e-eval` to this file with `needs: build` (or its own artifact use): kind cluster, load the images, apply the `ci` overlay with `kustomize build --load-restrictor LoadRestrictionsNone k8s/overlays/ci | kubectl apply -f -` (images there are `rahbar-*:ci`, so retag the SHA images to `:ci` before `kind load`), run `eval/run_eval.py` fixture golden against the port-forwarded api. Check each new action's latest release with `gh api repos/<o>/<r>/releases/latest` and pin by SHA. Image bumps from K6: api fastapi 0.135.4 + starlette 1.10.0, indexer pdfplumber 0.11.10 + pypdf 7.0.0, ui nginx-unprivileged 1.30.6-alpine plus `apk upgrade` (Trivy). Laptop disk ~96% full.
 Waiting on:   Zain: Docker Hub account and token (needed from K8, create it early). Ahmad: nothing blocks.
 Last updated: 2026-11-06
 ```
@@ -133,6 +133,7 @@ Append-only, newest at the bottom. One line per event: date, phase, what happene
 2026-11-06  K3  DONE (#22). k8s/base ingress.yaml, hpa.yaml, pdb.yaml (D-095). Ingress rahbar address 192.168.49.2; `/` returns the UI HTML; `make ask` through the Ingress returns a cited answer; /metrics and /api/healthz not routed to the api. HPA idle `cpu: 4%/70%`, 3-8. Forced test (target 5%, cached-question loop): 3 -> 6 -> 8 replicas in 30 s, back to 3 about 5 min after revert. `<unknown>` shows for about 1 min after pods restart (metrics lag), then a number. `rollout restart deploy/api` under a 0.5 s loop through the Ingress: 0 non-200 of 42. endpoints api = 3 IPs. kubeconform 22 resources valid. Evidence docs/evidence/k03-*.txt.
 2026-11-06  K4  DONE (#23). k8s/base/networkpolicy.yaml (8 policies, name selectors only), dev patch for the Ollama ipBlock (192.168.49.1/32, confirmed with minikube ssh). Proof docs/evidence/k04-networkpolicy-proof.txt: before, ui reaches chroma and redis; after, ui to chroma and redis time out, indexer-labelled pod to redis times out but reaches chroma and Ollama, api reaches chroma and redis (cache hits +6), UI 200 through the Ingress, cited cache-miss answer via Ollama, indexer Job from the CronJob completed (980 chunks, 617 s). ui to api is closed on the ui egress side by design (4.6).
 2026-11-06  K5  DONE (#24). k8s/overlays/ci (fixtures ConfigMap generator, ConfigMap patch, Job and CronJob volume swap, Ollama egress removed) and k8s/overlays/prod (registry image names, SHA placeholder); `make manifests` validates all three with kubeconform -strict (30, 31, 30 resources valid), docs/evidence/k05-manifests.txt; no `:latest` in k8s. Rehearsal docs/evidence/k05-ci-overlay-rehearsal.txt: ci overlay in throwaway namespace rahbar-ci on minikube under default-deny, indexer Job indexed 3 fixtures into 16 chunks in 3.5 s, api x3 Ready, `/readyz` ok, `run_eval.py` with the fixture golden and baseline: gate passed, exit 0. Not on kind: pulling the kind node image filled the disk (the kubeconfig was truncated; `minikube update-context` restored it), so kind and its images were removed. D-096, DEV-011.
+2026-11-06  K6  DONE (#25). .github/workflows/ci.yml: lint, test (Redis service container, coverage >= 60%), manifests (`make manifests`), build (needs lint+test+manifests, no push), scan (needs build, Trivy HIGH,CRITICAL --ignore-unfixed). Actions pinned by SHA (checkout v7.0.1, setup-python v7.1.0, setup-buildx v4.4.1, upload-artifact v7.0.2, download-artifact v8.0.2, trivy-action v0.36.0). First Trivy run failed on all three images (api 3, indexer 22, ui 63 HIGH/CRITICAL with fix); fixed by dependency and base-image bumps (results register), four fix pushes, final run https://github.com/Zain-Shykh/RAHBAR-Grounded-RAG/actions/runs/42234718843 all five green, 302 api tests (0 skipped). Rehearsal: PR #26 with apiVersion apps/v99 failed `manifests`, build and scan skipped, closed unmerged: docs/evidence/k06-failing-check.txt. D-097, D-098. README badge added. `check_submission.py` section I: remaining failures are K7 (kind, eval gate) and K8 (rollout status, registry login).
 ```
 
 ---
@@ -153,7 +154,9 @@ Numbers this lane must measure. Nothing here is a guess: leave `-` until measure
 | `ci` e2e-eval wall time on kind | - | K7 | Actions run |
 | Fixture eval result in CI (recall@5, citation validity, abstention) | - | K7 | `eval/fixtures/results.fixture.json` |
 | Image sizes on Docker Hub (api, indexer, ui) and the SHA tag | - | K8 | Docker Hub page |
-| Trivy findings (HIGH and CRITICAL with a fix) per image, and what was done | - | K6 | Actions log |
+| Trivy findings (HIGH and CRITICAL with a fix) per image, and what was done | First run: api 3 HIGH (starlette 0.46.2: CVE-2025-62727, then CVE-2026-48818 and CVE-2026-54283 fixed only in starlette 1.x) -> fastapi 0.135.4 + starlette 1.10.0; indexer 22 HIGH (pdfminer.six 20250327: 2, pypdf 5.4.0: 20) -> pdfplumber 0.11.10 (pins pdfminer.six 20260107) + pypdf 7.0.0 (not imported by the pipeline); ui 63 (60 HIGH, 3 CRITICAL, nginx-unprivileged 1.27-alpine, alpine 3.2x) -> 1.30.6-alpine, then 8 left (brotli, curl, expat, zlib) -> `apk upgrade` in the Dockerfile. Final run: 0 on all three; no accepted risk, so ADR 0004 unchanged | K6 | Actions runs 42230686973 to 42234718843 |
+| CI `test` job: api tests run, coverage | 302 passed, 0 skipped (Redis service container, D-097); api coverage gate 60% passes | K6 | Actions run 42234718843 |
+| CI wall time (lint, test, manifests parallel; build; scan) | about 1 min, 1 min, 7 s; build 1.5 min; scan 55 s; about 4.5 min end to end | K6 | `gh pr checks 25` |
 | Cold answer latency through the Ingress in the cluster (p50, p95) | - | K10 | `make eval` |
 
 ---

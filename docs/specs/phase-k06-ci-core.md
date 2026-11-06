@@ -5,7 +5,7 @@
 | Phase | K6, from `docs/IMPLEMENTATION_PLAN_PLATFORM.md` |
 | Work plan task | A-08 |
 | Branch | `ci/k06-ci-core` |
-| Stage | IMPLEMENTING |
+| Stage | TESTING |
 | Started | 2026-11-06 |
 | Approved (spec and plan) | pre-approved by Zain, platform plan 0.1 |
 | Depends on | K5 (`make manifests`, DEV-011 / D-096) |
@@ -31,13 +31,13 @@ In: `.github/workflows/ci.yml`, README badge, evidence, results register. Out: e
 - `scan`: `needs: build`; loads the tar; Trivy per image, HIGH,CRITICAL, `--ignore-unfixed`, exit 1. Three steps (not a matrix) so the job keeps its name.
 
 ## 6. Acceptance criteria
-- [ ] AC-1 PR into dev shows the five jobs, all green on the final commit.
-- [ ] AC-2 A broken manifest fails `manifests` (`docs/evidence/k06-failing-check.txt`, PR closed).
-- [ ] AC-3 `permissions:` block, pinned actions, `needs:` on build and scan, no `:latest`.
-- [ ] AC-4 Trivy ran on all three images; findings and action in the results register.
-- [ ] AC-5 `check_submission.py` section I has no failure for what exists.
-- [ ] AC-6 README badge points at ci.yml.
-- [ ] AC-7 `make test && make lint` green.
+- [x] AC-1 PR into dev shows the five jobs, all green on the final commit.
+- [x] AC-2 A broken manifest fails `manifests` (`docs/evidence/k06-failing-check.txt`, PR closed).
+- [x] AC-3 `permissions:` block, pinned actions, `needs:` on build and scan, no `:latest`.
+- [x] AC-4 Trivy ran on all three images; findings and action in the results register.
+- [x] AC-5 `check_submission.py` section I has no failure for what exists.
+- [x] AC-6 README badge points at ci.yml.
+- [x] AC-7 `make test && make lint` green.
 
 ## 7. Test strategy
 `actionlint` locally; real runs on Actions; throwaway branch with an invalid `apiVersion`; tester subagent re-checks.

@@ -1,0 +1,14 @@
+$ kubectl exec -n rahbar deploy/api -- python -c "import starlette,fastapi;print(starlette.__version__,fastapi.__version__)"
+1.10.0 0.135.4
+$ kubectl get pods -n rahbar
+NAME                     READY   STATUS        RESTARTS   AGE
+api-6f867f8545-fzhwt     1/1     Terminating   0          82m
+api-6f867f8545-l679s     1/1     Terminating   0          83m
+api-75b9c58b4-7qfp4      1/1     Running       0          11s
+api-75b9c58b4-8mkxw      1/1     Running       0          20s
+api-75b9c58b4-ql7fh      1/1     Running       0          16s
+chroma-0                 1/1     Running       0          20h
+indexer-mr98n            0/1     Completed     0          4h23m
+redis-85454df54f-gzfxb   1/1     Running       0          20h
+ui-6cb986f797-ff4cg      1/1     Running       0          20s
+(api pods 1/1 means /readyz passed: collection present, embed model matches. Images rebuilt locally from the K6 Dockerfiles and requirements, loaded with minikube image load, then kubectl rollout restart.)

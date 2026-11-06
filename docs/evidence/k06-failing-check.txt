@@ -1,0 +1,16 @@
+$ gh pr checks 26   # throwaway PR, base dev, head ci/k06-rehearsal-broken (api.yaml apiVersion apps/v99)
+manifests	fail	5s	https://github.com/Zain-Shykh/RAHBAR-Grounded-RAG/actions/runs/42235467712/job/127951783985	
+build	skipping	0	https://github.com/Zain-Shykh/RAHBAR-Grounded-RAG/actions/runs/42235467712/job/127952376741	
+scan	skipping	0	https://github.com/Zain-Shykh/RAHBAR-Grounded-RAG/actions/runs/42235467712/job/127952376646	
+lint	pass	1m7s	https://github.com/Zain-Shykh/RAHBAR-Grounded-RAG/actions/runs/42235467712/job/127951784358	
+test	pass	1m3s	https://github.com/Zain-Shykh/RAHBAR-Grounded-RAG/actions/runs/42235467712/job/127951783640	
+
+$ gh run view 42235467712 --log-failed   # excerpt
+== dev
+stdin - Deployment api failed validation: could not find schema for Deployment
+Summary: 30 resources found parsing stdin - Valid: 29, Invalid: 0, Errors: 1, Skipped: 0
+make: *** [Makefile:61: manifests] Error 1
+##[error]Process completed with exit code 2.
+
+Run: https://github.com/Zain-Shykh/RAHBAR-Grounded-RAG/actions/runs/42235467712
+PR 26 closed without merging; branch deleted.
