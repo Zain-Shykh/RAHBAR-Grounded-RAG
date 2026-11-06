@@ -5,7 +5,7 @@
 | Phase | K4, from `docs/IMPLEMENTATION_PLAN_PLATFORM.md` |
 | Work plan task | A-06 |
 | Branch | `feat/k8s-k04-networkpolicy` |
-| Stage | IMPLEMENTING |
+| Stage | TESTING |
 | Started | 2026-11-06 |
 | Approved (spec and plan) | pre-approved by Zain, platform plan 0.1 |
 | Depends on | K1 to K3 (system works before the deny is applied) |
@@ -28,11 +28,11 @@ Eight policies named as in 4.6. Selectors: `app.kubernetes.io/name` and namespac
 - `ui` to `api` is allowed (assignment) and checked.
 
 ## 6. Acceptance criteria
-- [ ] AC-1: `kubectl get netpol -n rahbar` lists 8.
-- [ ] AC-2: pods Ready, UI loads via Ingress, `make ask` answers incl. a cache-miss question, an indexer Job completes.
-- [ ] AC-3: `docs/evidence/k04-networkpolicy-proof.txt` shows before/after as required.
-- [ ] AC-4: kubeconform -strict passes; selectors restricted as above.
-- [ ] AC-5: `make test && make lint` green.
+- [x] AC-1: `kubectl get netpol -n rahbar` lists 8.
+- [x] AC-2: pods Ready, UI loads via Ingress, `make ask` answers incl. a cache-miss question, an indexer Job completes.
+- [x] AC-3: `docs/evidence/k04-networkpolicy-proof.txt` shows before/after as required.
+- [x] AC-4: kubeconform -strict passes; selectors restricted as above.
+- [x] AC-5: `make test && make lint` green.
 
 ## 7. Test strategy
 Cluster-level; evidence file. Tester subagent re-runs the Verify commands.

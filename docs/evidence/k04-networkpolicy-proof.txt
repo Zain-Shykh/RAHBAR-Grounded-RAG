@@ -1,0 +1,328 @@
+# K4 NetworkPolicy proof, 2026-11-06T18:38:36+05:00. Namespace rahbar, minikube + Calico.
+## BEFORE: no NetworkPolicy applied
+$ kubectl get netpol -n rahbar
+No resources found in rahbar namespace.
+exit=0
+$ kubectl exec -n rahbar deploy/ui -- wget -T3 -qO- http://chroma:8000/api/v2/heartbeat
+{"nanosecond heartbeat":1793972316427131892}exit=0
+$ kubectl exec -n rahbar deploy/ui -- nc -zv -w3 redis 6379
+redis (10.108.124.57:6379) open
+exit=0
+$ kubectl exec -n rahbar deploy/api -- python -c import urllib.request;print(urllib.request.urlopen('http://chroma:8000/api/v2/heartbeat',timeout=3).read())
+b'{"nanosecond heartbeat":1793972317529350243}'
+exit=0
+
+## AFTER: policies applied
+
+$ kubectl apply -k k8s/overlays/dev
+namespace/rahbar unchanged
+serviceaccount/api unchanged
+serviceaccount/chroma unchanged
+serviceaccount/indexer unchanged
+serviceaccount/redis unchanged
+serviceaccount/ui unchanged
+configmap/rahbar-config unchanged
+service/api unchanged
+service/chroma unchanged
+service/redis unchanged
+service/ui unchanged
+persistentvolumeclaim/cache-data unchanged
+persistentvolumeclaim/corpus-data unchanged
+deployment.apps/api unchanged
+deployment.apps/redis unchanged
+deployment.apps/ui unchanged
+statefulset.apps/chroma configured
+cronjob.batch/reindex unchanged
+poddisruptionbudget.policy/api configured
+horizontalpodautoscaler.autoscaling/api unchanged
+job.batch/indexer unchanged
+ingress.networking.k8s.io/rahbar unchanged
+networkpolicy.networking.k8s.io/allow-dns-egress created
+networkpolicy.networking.k8s.io/api-egress created
+networkpolicy.networking.k8s.io/api-ingress created
+networkpolicy.networking.k8s.io/chroma-ingress created
+networkpolicy.networking.k8s.io/default-deny-all created
+networkpolicy.networking.k8s.io/indexer-egress created
+networkpolicy.networking.k8s.io/redis-ingress created
+networkpolicy.networking.k8s.io/ui-ingress created
+exit=0
+
+$ kubectl get netpol -n rahbar
+NAME               POD-SELECTOR                     AGE
+allow-dns-egress   <none>                           5s
+api-egress         app.kubernetes.io/name=api       5s
+api-ingress        app.kubernetes.io/name=api       5s
+chroma-ingress     app.kubernetes.io/name=chroma    5s
+default-deny-all   <none>                           5s
+indexer-egress     app.kubernetes.io/name=indexer   5s
+redis-ingress      app.kubernetes.io/name=redis     5s
+ui-ingress         app.kubernetes.io/name=ui        5s
+exit=0
+
+$ kubectl get pods -n rahbar
+NAME                       READY   STATUS      RESTARTS   AGE
+api-6f867f8545-fzhwt       1/1     Running     0          20m
+api-6f867f8545-l679s       1/1     Running     0          20m
+api-6f867f8545-t8877       1/1     Running     0          20m
+chroma-0                   1/1     Running     0          19h
+indexer-mr98n              0/1     Completed   0          3h20m
+redis-85454df54f-gzfxb     1/1     Running     0          19h
+reindex-1793969226-sm8xn   0/1     Completed   0          51m
+ui-6d5b48c974-cjw8d        1/1     Running     0          19h
+exit=0
+
+$ kubectl exec -n rahbar deploy/ui -- wget -T3 -qO- http://chroma:8000/api/v2/heartbeat
+wget: download timed out
+command terminated with exit code 1
+exit=1
+
+$ kubectl exec -n rahbar deploy/ui -- nc -zv -w3 redis 6379
+nc: redis (10.108.124.57:6379): Operation timed out
+command terminated with exit code 1
+exit=1
+
+$ kubectl exec -n rahbar deploy/ui -- wget -T3 -qO- http://api:8000/healthz
+wget: download timed out
+command terminated with exit code 1
+exit=1
+
+$ kubectl exec -n rahbar deploy/api -- python -c import urllib.request;print(urllib.request.urlopen('http://chroma:8000/api/v2/heartbeat',timeout=3).read())
+b'{"nanosecond heartbeat":1793972340021781883}'
+exit=0
+
+$ kubectl exec -n rahbar deploy/api -- python -c import socket;s=socket.create_connection(('redis',6379),timeout=3);print('redis open')
+redis open
+exit=0
+
+$ kubectl apply -f /tmp/idx.yaml
+pod/idx-probe created
+exit=0
+
+$ kubectl logs -n rahbar idx-probe
+chroma:
+{"nanosecond heartbeat":1793972340984600968}
+redis:
+nc: redis (10.108.124.57:6379): Operation timed out
+rc=1
+ollama:
+192.168.49.1 (192.168.49.1:11434) open
+rc=0
+exit=0
+
+# Note: ui to api timed out above by design. Architecture 4.6: ui has "no egress beyond DNS"; api-ingress admits ui
+# (assignment wording) but nothing opens the ui egress side, so the edge is unused, as the diagram says.
+# The idx-probe pod carries the label app.kubernetes.io/name=indexer, the exact selector of indexer-egress,
+# so it gets the same policy as the indexer Job and CronJob pods. Chroma and Ollama allowed, Redis blocked.
+
+## REGRESSION under policy
+
+$ curl -s -o /dev/null -w UI via ingress HTTP %{http_code}\n -H Host: rahbar.local http://192.168.49.2/
+UI via ingress HTTP 200
+exit=0
+
+$ make ask Q=What is the minimum attendance required to sit the final exam?
+{
+    "request_id": "6b29ef5acd8f02e43386796b1253d97a",
+    "answer": "80%",
+    "citations": [
+        {
+            "source": "prospectus-2026-academic-rules-and-regulations.pdf",
+            "section": "1. Attendance Requirement",
+            "page": 1
+        },
+        {
+            "source": "academic-rules-handbook-jun-2026.pdf",
+            "section": "1.21 Students are required to maintain 100% attendance in",
+            "page": 10
+        },
+        {
+            "source": "academic-rules-handbook-jun-2026.pdf",
+            "section": "1.22 Failure to meet attendance requirements in a course will",
+            "page": 10
+        }
+    ],
+    "answered_from_context": true,
+    "confidence": "high",
+    "retrieved": [
+        {
+            "chunk_id": "prospectus-2026-academic-rules-and-regulations-p001-c001",
+            "source": "prospectus-2026-academic-rules-and-regulations.pdf",
+            "section": "1. Attendance Requirement",
+            "page": 1,
+            "score": 0.81712449
+        },
+        {
+            "chunk_id": "academic-rules-handbook-jun-2026-p010-c051",
+            "source": "academic-rules-handbook-jun-2026.pdf",
+            "section": "1.21 Students are required to maintain 100% attendance in",
+            "page": 10,
+            "score": 0.78272694
+        },
+        {
+            "chunk_id": "academic-rules-handbook-jun-2026-p010-c052",
+            "source": "academic-rules-handbook-jun-2026.pdf",
+            "section": "1.22 Failure to meet attendance requirements in a course will",
+            "page": 10,
+            "score": 0.75009775
+        },
+        {
+            "chunk_id": "academic-rules-handbook-jun-2026-p027-c151",
+            "source": "academic-rules-handbook-jun-2026.pdf",
+            "section": "5.24 A student who has not viewed his final exam paper in the",
+            "page": 27,
+            "score": 0.74947917
+        },
+        {
+            "chunk_id": "academic-rules-handbook-jun-2026-p025-c139",
+            "source": "academic-rules-handbook-jun-2026.pdf",
+            "section": "5.12 A student is expected to take mid and final examination as per",
+            "page": 25,
+            "score": 0.7186445
+        }
+    ],
+    "provider": "ollama-host"
+}
+exit=0
+
+$ make ask Q=What is the minimum attendance required to sit the final exam?
+{
+    "request_id": "3ec05d749ecb72429d2fc42c519dee4f",
+    "answer": "80%",
+    "citations": [
+        {
+            "source": "prospectus-2026-academic-rules-and-regulations.pdf",
+            "section": "1. Attendance Requirement",
+            "page": 1
+        },
+        {
+            "source": "academic-rules-handbook-jun-2026.pdf",
+            "section": "1.21 Students are required to maintain 100% attendance in",
+            "page": 10
+        },
+        {
+            "source": "academic-rules-handbook-jun-2026.pdf",
+            "section": "1.22 Failure to meet attendance requirements in a course will",
+            "page": 10
+        }
+    ],
+    "answered_from_context": true,
+    "confidence": "high",
+    "retrieved": [
+        {
+            "chunk_id": "prospectus-2026-academic-rules-and-regulations-p001-c001",
+            "source": "prospectus-2026-academic-rules-and-regulations.pdf",
+            "section": "1. Attendance Requirement",
+            "page": 1,
+            "score": 0.81712449
+        },
+        {
+            "chunk_id": "academic-rules-handbook-jun-2026-p010-c051",
+            "source": "academic-rules-handbook-jun-2026.pdf",
+            "section": "1.21 Students are required to maintain 100% attendance in",
+            "page": 10,
+            "score": 0.78272694
+        },
+        {
+            "chunk_id": "academic-rules-handbook-jun-2026-p010-c052",
+            "source": "academic-rules-handbook-jun-2026.pdf",
+            "section": "1.22 Failure to meet attendance requirements in a course will",
+            "page": 10,
+            "score": 0.75009775
+        },
+        {
+            "chunk_id": "academic-rules-handbook-jun-2026-p027-c151",
+            "source": "academic-rules-handbook-jun-2026.pdf",
+            "section": "5.24 A student who has not viewed his final exam paper in the",
+            "page": 27,
+            "score": 0.74947917
+        },
+        {
+            "chunk_id": "academic-rules-handbook-jun-2026-p025-c139",
+            "source": "academic-rules-handbook-jun-2026.pdf",
+            "section": "5.12 A student is expected to take mid and final examination as per",
+            "page": 25,
+            "score": 0.7186445
+        }
+    ],
+    "provider": "ollama-host"
+}
+exit=0
+
+$ make ask Q=How many credit hours does a student need to graduate from the BS program at FAST?
+{
+    "request_id": "d36430f6fadc79778bbc7763f4f0470d",
+    "answer": "The student needs to complete 6 credit hours to graduate from the BS program at FAST.",
+    "citations": [
+        {
+            "source": "academic-rules-handbook-jun-2026.pdf",
+            "section": "3.5 Any student with credits earned at other institution(s), under",
+            "page": 14
+        }
+    ],
+    "answered_from_context": true,
+    "confidence": "high",
+    "retrieved": [
+        {
+            "chunk_id": "academic-rules-handbook-jun-2026-p014-c071",
+            "source": "academic-rules-handbook-jun-2026.pdf",
+            "section": "3.5 Any student with credits earned at other institution(s), under",
+            "page": 14,
+            "score": 0.7533997299999999
+        },
+        {
+            "chunk_id": "prospectus-2026-academic-rules-and-regulations-p004-c039",
+            "source": "prospectus-2026-academic-rules-and-regulations.pdf",
+            "section": "30. Admission with Credit Transfer",
+            "page": 4,
+            "score": 0.73337752
+        },
+        {
+            "chunk_id": "academic-rules-handbook-jun-2026-p030-c171",
+            "source": "academic-rules-handbook-jun-2026.pdf",
+            "section": "7.3 Students earning an SGPA of 4.00 with at least 30 credit hours",
+            "page": 30,
+            "score": 0.7239247600000001
+        },
+        {
+            "chunk_id": "student-handbook-jun-2026-p010-c037",
+            "source": "student-handbook-jun-2026.pdf",
+            "section": "18. It is generally recommended that students only take the",
+            "page": 10,
+            "score": 0.71559912
+        },
+        {
+            "chunk_id": "prospectus-2026-academic-rules-and-regulations-p005-c044",
+            "source": "prospectus-2026-academic-rules-and-regulations.pdf",
+            "section": "34. Maximum Time Allowed to",
+            "page": 5,
+            "score": 0.71455103
+        }
+    ],
+    "provider": "ollama-host"
+}
+exit=0
+
+$ kubectl create job --from=cronjob/reindex k4-index-check -n rahbar
+job.batch/k4-index-check created
+exit=0
+
+# Redis path: sum of rahbar_cache_lookups_total{result="hit"} over the 3 api pods
+$ bash hits.sh   # before
+2449.0
+$ 6x make ask (same question)
+$ bash hits.sh   # after
+2455.0
+
+$ kubectl get job k4-index-check -n rahbar
+error: timed out waiting for the condition on jobs/k4-index-check
+NAME             STATUS    COMPLETIONS   DURATION   AGE
+k4-index-check   Running   0/1           10m        10m
+# (kubectl wait hit its 590 s limit; the Job needed 617 s. Result read afterwards, then the Job deleted.)
+$ kubectl get job k4-index-check -n rahbar   # a minute later
+NAME             STATUS     COMPLETIONS   DURATION   AGE
+k4-index-check   Complete   1/1           10m        10m
+
+$ kubectl logs -n rahbar job/k4-index-check | tail -2
+{"ts": "2026-11-06T13:51:08Z", "logger": "rahbar.indexer", "msg": "stored", "chunks": 980, "index_id": "20261106T135106Z-138ed5", "collection": "rahbar", "replaced": true, "seconds": 1.9}
+{"ts": "2026-11-06T13:51:08Z", "logger": "rahbar.indexer", "msg": "indexer finished", "chunks": 980, "seconds": 617.5}
+# The Job ran under default-deny with only indexer-egress: Chroma and Ollama reached, 980 chunks stored.

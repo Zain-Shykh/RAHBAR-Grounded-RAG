@@ -81,7 +81,7 @@ Helm charts, a service mesh, an operator, an Ingress TLS setup, Prometheus or Gr
 | K1 | `ui` image and base workloads on minikube | A-01, A-02, A-03 | 5 h | DONE (with deviations DEV-008, DEV-009) | #20 |
 | K2 | Indexer Job, CronJob, corpus delivery, real index in the cluster | A-04 (milestone I-2) | 3 h | DONE (with deviation DEV-010) | #21 |
 | K3 | Ingress, HPA, rollout hardening | A-05 | 2 h | DONE | #22 |
-| K4 | NetworkPolicies and proof | A-06 | 3 h | NOT STARTED | |
+| K4 | NetworkPolicies and proof | A-06 | 3 h | DONE | #PR |
 | K5 | Overlays `ci` and `prod`, manifest validation | A-07 | 2 h | NOT STARTED | |
 | K6 | CI part 1: lint, test, manifests, build, scan | A-08 | 3 h | NOT STARTED | |
 | K7 | CI part 2: e2e-eval on kind | A-09 | 4 h | NOT STARTED | |
@@ -97,11 +97,11 @@ Hours spent so far (fill in at each phase end): planned 33.5 h, actual `____`.
 ## 2. Current focus
 
 ```
-Phase:        K4  NetworkPolicies and proof
+Phase:        K5  Overlays ci and prod, manifest validation
 Stage:        not started   (SPEC DRAFT, IMPLEMENTING, TESTING, READY FOR PR, MERGED)
 Branch:       (none yet)
 Spec:         (none yet)
-Next action:  fresh session: stage 0 then stage 1 for K4. K3 is merged: Ingress rahbar (192.168.49.2, host rahbar.local), HPA api 3-8 at 70%, PDB api minAvailable 2. On this laptop `minikube ip` needs `sg docker -c` (or INGRESS_IP=192.168.49.2); cached/cache-lookup questions need Ollama running (query embedding). K2 state: namespace rahbar runs api x3 (1/1), ui, chroma-0, redis, the real index (980 chunks, index_id changes on `make index`) and CronJob reindex; Ollama on the host is stopped (start it only when a cache-miss question must be answered: OLLAMA_HOST=0.0.0.0 ollama serve). Host gateway IP for K4: 192.168.49.1. `make apply` deletes and re-runs the indexer Job (13 min with Ollama running): use `kubectl apply -k k8s/overlays/dev` for manifest-only changes.
+Next action:  fresh session: stage 0 then stage 1 for K5. K4 is merged: 8 NetworkPolicies in k8s/base/networkpolicy.yaml, Ollama ipBlock placeholder 203.0.113.1/32 in base, patched to 192.168.49.1/32 in the dev overlay by two JSON patches (api-egress index 2, indexer-egress index 1): the ci overlay must remove or patch the Ollama rule (no Ollama in ci) and prod must patch its own ipBlock. Cluster: api x3, ui, chroma-0, redis, real index (980 chunks) under default-deny; Ollama on the host is stopped (OLLAMA_HOST=0.0.0.0 ollama serve when a cache-miss question must be answered). `minikube` needs `sg docker -c` or INGRESS_IP=192.168.49.2. `make apply` re-runs the 13-minute indexer: use `kubectl apply -k k8s/overlays/dev` for manifest-only changes.
 Waiting on:   Zain: Docker Hub account and token (needed from K8, create it early). Ahmad: nothing blocks.
 Last updated: 2026-11-06
 ```
@@ -131,6 +131,7 @@ Append-only, newest at the bottom. One line per event: date, phase, what happene
 2026-11-05  K1  DONE (#20). k8s base running on minikube: api x3 0/1 (readyz 503 failed=[collection], healthz 200), ui, chroma-0, redis Ready, PVCs Bound; images api 388 MB, indexer 592 MB, ui 73.7 MB; kubeconform 16 resources valid, 0 Secret in build. Data survives pod deletion (Chroma collection, Redis key). A-5 verified (api pod deletion 11.4 s vs 0.9 s without preStop). Found: Service `chroma` injects CHROMA_PORT=tcp://... and crash-loops Chroma -> enableServiceLinks false (DEV-008). fsGroup is a no-op on minikube hostPath, /data is 0777 (DEV-009). Evidence docs/evidence/k01-*.txt. Note: api rollout stalls while no index exists (maxUnavailable 0, new pods never Ready): expected until K2.
 2026-11-06  K2  DONE (#21). corpus-data PVC, Job `indexer`, CronJob `reindex` (spec copied from the Job by a kustomize replacement, D-093), make corpus/apply/down. A-1: host.minikube.internal = 192.168.49.1 from a pod, Ollama answered. A-4: kubectl cp into busybox helper OK (11 files). Job Complete 1/1 in 13 min, peak 483 Mi, 980 chunks (DEV-010). api 0/1 -> 1/1 by itself, no restart. Cited answer "80%" (prospectus, Attendance Requirement), repeat X-Cache HIT. `make index` 9 min 24 s, index_id changed, 90 requests during the swap all 200. Run 1 of the Job was marked DeadlineExceeded after the laptop slept ~15 h with the pod already finished; re-run clean (inhibit sleep for long waits). Evidence docs/evidence/k02-*.txt.
 2026-11-06  K3  DONE (#22). k8s/base ingress.yaml, hpa.yaml, pdb.yaml (D-095). Ingress rahbar address 192.168.49.2; `/` returns the UI HTML; `make ask` through the Ingress returns a cited answer; /metrics and /api/healthz not routed to the api. HPA idle `cpu: 4%/70%`, 3-8. Forced test (target 5%, cached-question loop): 3 -> 6 -> 8 replicas in 30 s, back to 3 about 5 min after revert. `<unknown>` shows for about 1 min after pods restart (metrics lag), then a number. `rollout restart deploy/api` under a 0.5 s loop through the Ingress: 0 non-200 of 42. endpoints api = 3 IPs. kubeconform 22 resources valid. Evidence docs/evidence/k03-*.txt.
+2026-11-06  K4  DONE (#PR). k8s/base/networkpolicy.yaml (8 policies, name selectors only), dev patch for the Ollama ipBlock (192.168.49.1/32, confirmed with minikube ssh). Proof docs/evidence/k04-networkpolicy-proof.txt: before, ui reaches chroma and redis; after, ui to chroma and redis time out, indexer-labelled pod to redis times out but reaches chroma and Ollama, api reaches chroma and redis (cache hits +6), UI 200 through the Ingress, cited cache-miss answer via Ollama, indexer Job from the CronJob completed (980 chunks, 617 s). ui to api is closed on the ui egress side by design (4.6).
 ```
 
 ---
@@ -315,7 +316,7 @@ None.
 
 ## Phase K4: NetworkPolicies and proof (A-06)
 
-**Status:** NOT STARTED · **Branch:** `feat/k8s-k04-networkpolicy` · **Est:** 3 h · **Priority:** P0
+**Status:** DONE · **Branch:** `feat/k8s-k04-networkpolicy` · **Est:** 3 h · **Priority:** P0
 
 ### Objective
 The cluster denies all traffic except the paths the architecture needs, the system still works under that policy, and a captured experiment proves that `ui` cannot reach `chroma` while `api` can.
@@ -339,11 +340,11 @@ Architecture 4.6 (the whole section: policies table and diagram), 4.7; requireme
 TLS, mTLS, egress to the internet in `hosted` mode (an overlay concern, not shipped).
 
 ### Acceptance criteria
-- [ ] All eight policy objects exist; `kubectl get netpol -n rahbar` lists them.
-- [ ] After applying them: pods Ready, UI loads, `make ask` answers (including a cache-miss question, which needs Ollama), `make index` completes.
-- [ ] The proof file shows: before = `ui` reaches `chroma`; after = `ui` to `chroma` refused or timed out, `ui` to `redis` blocked, `indexer` to `redis` blocked, `api` to `chroma` and `redis` allowed.
-- [ ] `kubeconform -strict` passes; the policy file has no policy that selects by anything other than `app.kubernetes.io/name` labels and namespaces.
-- [ ] `make test && make lint` green.
+- [x] All eight policy objects exist; `kubectl get netpol -n rahbar` lists them.
+- [x] After applying them: pods Ready, UI loads, `make ask` answers (including a cache-miss question, which needs Ollama), `make index` completes.
+- [x] The proof file shows: before = `ui` reaches `chroma`; after = `ui` to `chroma` refused or timed out, `ui` to `redis` blocked, `indexer` to `redis` blocked, `api` to `chroma` and `redis` allowed.
+- [x] `kubeconform -strict` passes; the policy file has no policy that selects by anything other than `app.kubernetes.io/name` labels and namespaces.
+- [x] `make test && make lint` green.
 
 ### Verify
 ```bash
