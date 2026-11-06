@@ -1,0 +1,77 @@
+# Phase K7 spec and plan: CI part 2 (e2e-eval on kind)
+
+| | |
+| --- | --- |
+| Phase | K7, from `docs/IMPLEMENTATION_PLAN_PLATFORM.md` |
+| Work plan task | A-09 |
+| Branch | `ci/k07-e2e-eval` |
+| Stage | IMPLEMENTING |
+| Started | 2026-11-06 |
+| Approved (spec and plan) | pre-approved by Zain, platform plan 0.1 |
+| Depends on | K5 (`ci` overlay, DEV-011 / D-096), K6 (`build` artifact) |
+
+## 1. Objective
+A sixth job `e2e-eval` in `.github/workflows/ci.yml` creates a kind cluster, deploys the `ci` overlay, indexes the fixture corpus with the Job, runs `eval/run_eval.py` through the Ingress and fails the pull request when the gate fails.
+
+## 2. Context
+Architecture 4.15 (e2e-eval row), 5.13, AD-19, AD-27; R-CI-6; risk R-07 (kind default CNI does not enforce NetworkPolicy); H-8 (`RELEVANCE_FLOOR=0.20` in `ci`). K5 rehearsal: `docs/evidence/k05-ci-overlay-rehearsal.txt` (Job 8 s, 16 chunks, gate passed).
+
+## 3. Scope
+In: the `e2e-eval` job, `workflow_dispatch` trigger, evidence (`k07-*.txt`), results register, check_submission section I, five `STARTER-TODO` prose rewordings (the checker greps that literal). Out: CD (K8), repo settings (K9), pushing images.
+
+## 4. Interfaces and contracts
+- Job name exactly `e2e-eval`, `needs: build`, `timeout-minutes: 20`. Other job names unchanged.
+- Reuses the `images` artifact from `build` (SHA-tagged); retag to `rahbar-*:ci`, `kind load docker-image`. No rebuild.
+- kind binary v0.33.0 downloaded from the release (pinned; no third-party action), default node image of that release. ingress-nginx `controller-v1.15.1` `provider/kind` manifest (pinned tag). Both verified with `gh api .../releases`.
+- kind config: one control-plane node labelled `ingress-ready=true`, `extraPortMappings` 80 -> 80, so the runner reaches the Ingress on `http://localhost` with `Host: rahbar.local` (`--host`).
+- `kustomize` 5.8.3 as in `manifests`; `kustomize build --load-restrictor LoadRestrictionsNone k8s/overlays/ci | kubectl apply -f -` (DEV-011).
+- On failure: `kubectl get pods,jobs,ingress -A`, `describe`, logs of api, chroma, redis, indexer Job. `results.fixture.json` uploaded always (`if: always()`, `if-no-files-found: warn`).
+
+## 5. Behaviour and design details
+Order: checkout, download artifact, `docker load`, retag, install kind and kustomize, create cluster, load images, install ingress-nginx and wait for the controller, apply overlay, `kubectl wait` Job complete (300 s), api rollout status (180 s), chroma/redis/ui rollouts, run the eval, upload. No `|| true`; any non-zero step fails the job. NetworkPolicies stay in the overlay: kind does not enforce them, so CI proves behaviour not isolation; isolation is proven on minikube (K4, `docs/evidence/k04-*`), risk R-07 (D-100).
+
+## 6. Acceptance criteria
+- [ ] **AC-1**: job green on the PR and on `dev`; `results.fixture.json` uploaded; metrics and wall time in the results register.
+- [ ] **AC-2**: a branch that breaks retrieval turns `e2e-eval` red with the gate message; `docs/evidence/k07-gate-fail.txt`; PR closed unmerged.
+- [ ] **AC-3**: fails closed (no `|| true`, timeouts set, failure dump present).
+- [ ] **AC-4**: `check_submission.py` section I shows kind and `needs:` satisfied; starter-kit section has no STARTER-TODO failure from docs.
+- [ ] **AC-5**: `make test && make lint` green; other five jobs still green.
+
+## 7. Test strategy and traceability
+| AC | Level | Command | Needs |
+| --- | --- | --- | --- |
+| AC-1 | manual | `gh run view <id>`, evidence `k07-e2e-green.txt` | Actions |
+| AC-2 | manual | throwaway PR, `docs/evidence/k07-gate-fail.txt` | Actions |
+| AC-3 | review | `grep -n '|| true' .github/workflows/ci.yml` empty | nothing |
+| AC-4 | manual | `python3 scripts/check_submission.py` | nothing |
+| AC-5 | unit | `make test && make lint` | nothing |
+
+## 8. Open questions
+None open. D-099 (reuse artifact, kind binary, no helm/kind-action), D-100 (keep policies in `ci`, enforcement on minikube).
+
+## 9. Risks and assumptions
+Image loading, ingress readiness and Host routing are the likely CI-only failures; cluster time ~5 min. kind needs port 80 free on the runner (it is). Disk on the laptop is irrelevant: everything runs on the runner.
+
+## 10. Plan
+| Step | What | Verify | Commit |
+| --- | --- | --- | --- |
+| 1 | spec | pushed | `docs(spec): K7 spec and plan` |
+| 2 | STARTER-TODO rewording | checker section | `docs: reword the starter-kit marker name` |
+| 3 | `e2e-eval` job | PR run green | `ci: e2e-eval on kind` |
+| 4 | gate-fail demo (throwaway branch) | red run, PR closed | evidence commit |
+| 5 | tester, docs, plan, PR, merge | tester PASS | `docs(k7): ...` |
+Estimate 4 h.
+
+## 11. Implementation notes
+(filled during implement)
+
+## 12. Test report
+| Round | Date | Command | Result | Notes |
+| --- | --- | --- | --- | --- |
+
+## 13. Sign-offs
+| Gate | Date | Approved by | Notes |
+| --- | --- | --- | --- |
+| Spec and plan | 2026-11-06 | pre-approved by Zain | platform plan 0.1 |
+| Tester verdict PASS | | | rounds: |
+| Merged | | | PR # |
