@@ -1,0 +1,229 @@
+# limits sanity check: six different cache-miss golden questions through the Ingress under the K10 limits (api 128Mi/256Mi, ui 10m/16Mi-100m/32Mi, chroma 50m/192Mi-500m/512Mi, redis 50m/64Mi-250m/256Mi, indexer 250m/384Mi-1/1Gi)
+# second attempt: the first attempt (six other golden questions, all MISS, 0 restarts) had a sampler that never started, so no kubectl top samples were taken; it is discarded and these six different questions (all still cache misses) were run with the sampler working
+# captured 2026-11-06T20:02Z on minikube (Calico, docker driver), namespace rahbar, dev overlay; index freshly rebuilt by the clean-clone run (980 chunks), Ollama on the host
+
+$ kubectl get pods -n rahbar   (before)
+NAME                    READY   STATUS      RESTARTS   AGE
+api-6486b9b855-jwzpr    1/1     Running     0          18m
+api-6486b9b855-lvtd9    1/1     Running     0          18m
+api-6486b9b855-xxpcx    1/1     Running     0          18m
+chroma-0                1/1     Running     0          18m
+indexer-wvqw4           0/1     Completed   0          18m
+redis-6f989b5dd-zflgv   1/1     Running     0          18m
+ui-666d88fd49-cvcqt     1/1     Running     0          18m
+
+$ kubectl top pods -n rahbar --containers   (before)
+POD                     NAME     CPU(cores)   MEMORY(bytes)   
+api-6486b9b855-jwzpr    api      3m           68Mi            
+api-6486b9b855-lvtd9    api      3m           71Mi            
+api-6486b9b855-xxpcx    api      3m           69Mi            
+chroma-0                chroma   2m           54Mi            
+redis-6f989b5dd-zflgv   redis    11m          9Mi             
+ui-666d88fd49-cvcqt     ui       1m           2Mi             
+
+$ question 1: What is the largest share of a degree program's credit hours that can be exempted for courses studied at another university?
+  elapsed 19s; x-outcome: answered x-cache: MISS  HTTP/1.1 200 OK
+  answered_from_context=True provider=ollama-host citations=1 answer=50%
+
+$ question 2: How many students must register for a summer course, or the course is dropped?
+  elapsed 29s; x-outcome: answered x-cache: MISS  HTTP/1.1 200 OK
+  answered_from_context=True provider=ollama-host citations=1 answer=10
+
+$ question 3: How many days does a student have to tell the Academic Office about classes missed for an unavoidable reason?
+  elapsed 47s; x-outcome: answered x-cache: MISS  HTTP/1.1 200 OK
+  answered_from_context=True provider=ollama-host citations=1 answer=2 days
+
+$ question 4: For MBA and MS programs, how is a grade of C interpreted?
+  elapsed 51s; x-outcome: answered x-cache: MISS  HTTP/1.1 200 OK
+  answered_from_context=True provider=ollama-host citations=1 answer=Average
+
+$ question 5: What is the deadline to withdraw from a course?
+  elapsed 35s; x-outcome: answered x-cache: MISS  HTTP/1.1 200 OK
+  answered_from_context=True provider=ollama-host citations=1 answer=last day of the makeup week of every semester
+
+$ question 6: What is the tuition fee per credit hour for BS programs for 2026-27?
+  elapsed 21s; x-outcome: answered x-cache: MISS  HTTP/1.1 200 OK
+  answered_from_context=True provider=ollama-host citations=1 answer=Rs. 12,000
+
+$ kubectl top pods -n rahbar --containers   (sampled every 10 s while the six questions ran; per-container peak below)
+  api-6486b9b855-jwzpr api           peak cpu     4m  peak mem   68Mi
+  api-6486b9b855-lvtd9 api           peak cpu     4m  peak mem   71Mi
+  api-6486b9b855-xxpcx api           peak cpu     4m  peak mem   69Mi
+  chroma-0 chroma                    peak cpu     2m  peak mem   55Mi
+  redis-6f989b5dd-zflgv redis        peak cpu    12m  peak mem   10Mi
+  ui-666d88fd49-cvcqt ui             peak cpu     1m  peak mem    2Mi
+
+raw samples:
+--- 01:02:31
+api-6486b9b855-jwzpr    api      3m    68Mi   
+api-6486b9b855-lvtd9    api      3m    71Mi   
+api-6486b9b855-xxpcx    api      3m    69Mi   
+chroma-0                chroma   2m    54Mi   
+redis-6f989b5dd-zflgv   redis    11m   9Mi    
+ui-666d88fd49-cvcqt     ui       1m    2Mi    
+--- 01:02:41
+api-6486b9b855-jwzpr    api      4m    68Mi   
+api-6486b9b855-lvtd9    api      4m    71Mi   
+api-6486b9b855-xxpcx    api      4m    69Mi   
+chroma-0                chroma   2m    54Mi   
+redis-6f989b5dd-zflgv   redis    12m   9Mi    
+ui-666d88fd49-cvcqt     ui       1m    2Mi    
+--- 01:02:51
+api-6486b9b855-jwzpr    api      4m    68Mi   
+api-6486b9b855-lvtd9    api      4m    71Mi   
+api-6486b9b855-xxpcx    api      4m    69Mi   
+chroma-0                chroma   2m    54Mi   
+redis-6f989b5dd-zflgv   redis    12m   9Mi    
+ui-666d88fd49-cvcqt     ui       1m    2Mi    
+--- 01:03:01
+api-6486b9b855-jwzpr    api      4m    68Mi   
+api-6486b9b855-lvtd9    api      4m    71Mi   
+api-6486b9b855-xxpcx    api      4m    69Mi   
+chroma-0                chroma   2m    54Mi   
+redis-6f989b5dd-zflgv   redis    12m   9Mi    
+ui-666d88fd49-cvcqt     ui       1m    2Mi    
+--- 01:03:11
+api-6486b9b855-jwzpr    api      4m    68Mi   
+api-6486b9b855-lvtd9    api      4m    71Mi   
+api-6486b9b855-xxpcx    api      4m    69Mi   
+chroma-0                chroma   2m    54Mi   
+redis-6f989b5dd-zflgv   redis    12m   9Mi    
+ui-666d88fd49-cvcqt     ui       1m    2Mi    
+--- 01:03:21
+api-6486b9b855-jwzpr    api      4m    68Mi   
+api-6486b9b855-lvtd9    api      4m    71Mi   
+api-6486b9b855-xxpcx    api      4m    69Mi   
+chroma-0                chroma   2m    54Mi   
+redis-6f989b5dd-zflgv   redis    12m   9Mi    
+ui-666d88fd49-cvcqt     ui       1m    2Mi    
+--- 01:03:31
+api-6486b9b855-jwzpr    api      4m    68Mi   
+api-6486b9b855-lvtd9    api      4m    71Mi   
+api-6486b9b855-xxpcx    api      4m    69Mi   
+chroma-0                chroma   2m    54Mi   
+redis-6f989b5dd-zflgv   redis    12m   9Mi    
+ui-666d88fd49-cvcqt     ui       1m    2Mi    
+--- 01:03:41
+api-6486b9b855-jwzpr    api      3m    68Mi   
+api-6486b9b855-lvtd9    api      3m    71Mi   
+api-6486b9b855-xxpcx    api      3m    69Mi   
+chroma-0                chroma   2m    54Mi   
+redis-6f989b5dd-zflgv   redis    11m   9Mi    
+ui-666d88fd49-cvcqt     ui       1m    2Mi    
+--- 01:03:51
+api-6486b9b855-jwzpr    api      3m    68Mi   
+api-6486b9b855-lvtd9    api      3m    71Mi   
+api-6486b9b855-xxpcx    api      3m    69Mi   
+chroma-0                chroma   2m    54Mi   
+redis-6f989b5dd-zflgv   redis    11m   9Mi    
+ui-666d88fd49-cvcqt     ui       1m    2Mi    
+--- 01:04:02
+api-6486b9b855-jwzpr    api      3m    68Mi   
+api-6486b9b855-lvtd9    api      3m    71Mi   
+api-6486b9b855-xxpcx    api      3m    69Mi   
+chroma-0                chroma   2m    54Mi   
+redis-6f989b5dd-zflgv   redis    11m   9Mi    
+ui-666d88fd49-cvcqt     ui       1m    2Mi    
+--- 01:04:12
+api-6486b9b855-jwzpr    api      3m    68Mi   
+api-6486b9b855-lvtd9    api      3m    71Mi   
+api-6486b9b855-xxpcx    api      3m    69Mi   
+chroma-0                chroma   2m    54Mi   
+redis-6f989b5dd-zflgv   redis    11m   9Mi    
+ui-666d88fd49-cvcqt     ui       1m    2Mi    
+--- 01:04:22
+api-6486b9b855-jwzpr    api      3m    68Mi   
+api-6486b9b855-lvtd9    api      3m    71Mi   
+api-6486b9b855-xxpcx    api      3m    69Mi   
+chroma-0                chroma   2m    54Mi   
+redis-6f989b5dd-zflgv   redis    11m   9Mi    
+ui-666d88fd49-cvcqt     ui       1m    2Mi    
+--- 01:04:32
+api-6486b9b855-jwzpr    api      3m    68Mi   
+api-6486b9b855-lvtd9    api      3m    71Mi   
+api-6486b9b855-xxpcx    api      3m    69Mi   
+chroma-0                chroma   2m    54Mi   
+redis-6f989b5dd-zflgv   redis    11m   9Mi    
+ui-666d88fd49-cvcqt     ui       1m    2Mi    
+--- 01:04:42
+api-6486b9b855-jwzpr    api      3m    68Mi   
+api-6486b9b855-lvtd9    api      3m    71Mi   
+api-6486b9b855-xxpcx    api      3m    69Mi   
+chroma-0                chroma   2m    55Mi   
+redis-6f989b5dd-zflgv   redis    12m   9Mi    
+ui-666d88fd49-cvcqt     ui       1m    2Mi    
+--- 01:04:52
+api-6486b9b855-jwzpr    api      3m    68Mi   
+api-6486b9b855-lvtd9    api      3m    71Mi   
+api-6486b9b855-xxpcx    api      3m    69Mi   
+chroma-0                chroma   2m    55Mi   
+redis-6f989b5dd-zflgv   redis    12m   9Mi    
+ui-666d88fd49-cvcqt     ui       1m    2Mi    
+--- 01:05:02
+api-6486b9b855-jwzpr    api      3m    68Mi   
+api-6486b9b855-lvtd9    api      3m    71Mi   
+api-6486b9b855-xxpcx    api      3m    69Mi   
+chroma-0                chroma   2m    55Mi   
+redis-6f989b5dd-zflgv   redis    12m   9Mi    
+ui-666d88fd49-cvcqt     ui       1m    2Mi    
+--- 01:05:12
+api-6486b9b855-jwzpr    api      3m    68Mi   
+api-6486b9b855-lvtd9    api      3m    71Mi   
+api-6486b9b855-xxpcx    api      3m    69Mi   
+chroma-0                chroma   2m    55Mi   
+redis-6f989b5dd-zflgv   redis    12m   9Mi    
+ui-666d88fd49-cvcqt     ui       1m    2Mi    
+--- 01:05:22
+api-6486b9b855-jwzpr    api      3m    68Mi   
+api-6486b9b855-lvtd9    api      3m    71Mi   
+api-6486b9b855-xxpcx    api      3m    69Mi   
+chroma-0                chroma   2m    55Mi   
+redis-6f989b5dd-zflgv   redis    12m   9Mi    
+ui-666d88fd49-cvcqt     ui       1m    2Mi    
+--- 01:05:32
+api-6486b9b855-jwzpr    api      3m    68Mi   
+api-6486b9b855-lvtd9    api      3m    71Mi   
+api-6486b9b855-xxpcx    api      3m    69Mi   
+chroma-0                chroma   2m    55Mi   
+redis-6f989b5dd-zflgv   redis    12m   9Mi    
+ui-666d88fd49-cvcqt     ui       1m    2Mi    
+--- 01:05:42
+api-6486b9b855-jwzpr    api      3m    68Mi   
+api-6486b9b855-lvtd9    api      3m    71Mi   
+api-6486b9b855-xxpcx    api      3m    69Mi   
+chroma-0                chroma   2m    54Mi   
+redis-6f989b5dd-zflgv   redis    11m   10Mi   
+ui-666d88fd49-cvcqt     ui       1m    2Mi    
+--- 01:05:52
+api-6486b9b855-jwzpr    api      3m    68Mi   
+api-6486b9b855-lvtd9    api      3m    71Mi   
+api-6486b9b855-xxpcx    api      3m    69Mi   
+chroma-0                chroma   2m    54Mi   
+redis-6f989b5dd-zflgv   redis    11m   10Mi   
+ui-666d88fd49-cvcqt     ui       1m    2Mi    
+
+$ kubectl get pods -n rahbar   (after)
+NAME                    READY   STATUS      RESTARTS   AGE
+api-6486b9b855-jwzpr    1/1     Running     0          22m
+api-6486b9b855-lvtd9    1/1     Running     0          22m
+api-6486b9b855-xxpcx    1/1     Running     0          22m
+chroma-0                1/1     Running     0          22m
+indexer-wvqw4           0/1     Completed   0          22m
+redis-6f989b5dd-zflgv   1/1     Running     0          22m
+ui-666d88fd49-cvcqt     1/1     Running     0          22m
+
+$ restart counts and last termination reason per container
+api-6486b9b855-jwzpr  restartCount=0  lastState.terminated=
+api-6486b9b855-lvtd9  restartCount=0  lastState.terminated=
+api-6486b9b855-xxpcx  restartCount=0  lastState.terminated=
+chroma-0  restartCount=0  lastState.terminated=
+indexer-wvqw4  restartCount=0  lastState.terminated=
+redis-6f989b5dd-zflgv  restartCount=0  lastState.terminated=
+ui-666d88fd49-cvcqt  restartCount=0  lastState.terminated=
+
+$ kubectl get events -n rahbar | grep -ci oomkill
+0
+
+$ kubectl get hpa -n rahbar
+NAME   REFERENCE        TARGETS       MINPODS   MAXPODS   REPLICAS   AGE
+api    Deployment/api   cpu: 3%/70%   3         8         3          22m

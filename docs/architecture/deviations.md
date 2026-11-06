@@ -83,9 +83,11 @@ Copy this block to the end of section 7, increment the number, and fill every li
 | DEV-006 | Cache maintenance runs on the next request or readiness probe, not inside the index refresh | S3 | ABSORBED | 5.9.4 item 3 | 2026-11-05 |
 | DEV-007 | The model timeout and the Ingress timeout must exceed 90 s and 120 s on the host CPU | S3 | ABSORBED | 4.4, 5.7.4 | 2026-11-05 |
 | DEV-008 | Pods set `enableServiceLinks: false` (Service env vars break Chroma) | S3 | ABSORBED | 4.2, 4.4 | 2026-11-05 |
-| DEV-009 | `fsGroup` is a no-op on minikube hostPath volumes; `/data` is writable because the provisioner makes it 0777 | S3 | OPEN, accepted | 4.7, R-01, R-02 | 2026-11-05 |
-| DEV-010 | The in-cluster index has 980 chunks, not 981: Tesseract in the indexer image OCRs the 8-page faculty policy into 39 chunks (host run: 40) | S3 | OPEN, accepted | 5.4, AD-08 | 2026-11-06 |
-| DEV-013 | Requests and limits in 4.2 replaced by the values measured in K10 (`docs/evidence/resources.md`) | S3 | CLOSED, absorbed | 4.2, R-RES-2 | 2026-11-07 |
+| DEV-009 | `fsGroup` is a no-op on minikube hostPath volumes; `/data` is writable because the provisioner makes it 0777 | S3 | ABSORBED | 4.7, R-01, R-02 | 2026-11-05 |
+| DEV-010 | The in-cluster index has 980 chunks, not 981: Tesseract in the indexer image OCRs the 8-page faculty policy into 39 chunks (host run: 40) | S3 | ABSORBED | 5.4, AD-08 | 2026-11-06 |
+| DEV-011 | The `ci` overlay needs `--load-restrictor LoadRestrictionsNone`; rehearsal ran on minikube | S3 | ABSORBED | 4.11, 4.5, AD-18 | 2026-11-06 |
+| DEV-012 | `cd.yml` also runs on `workflow_dispatch` and may push SHA tags from `dev` | S3 | ABSORBED | 4.15 | 2026-11-06 |
+| DEV-013 | Requests and limits in 4.2 replaced by the values measured in K10 (`docs/evidence/resources.md`) | S3 | ABSORBED | 4.2, R-RES-2 | 2026-11-07 |
 
 ## 7. Log
 
@@ -298,7 +300,7 @@ Places where the architecture has flagged a real chance of deviation (architectu
 
 | | |
 | --- | --- |
-| Status | OPEN, accepted (no action needed on minikube; real clusters honour `fsGroup`) |
+| Status | ABSORBED (2026-11-07, K11: architecture 9.2 R-02 states it; accepted, decided by Claude, pre-approved by Zain) |
 | Severity | S3 |
 | Date | 2026-11-05 |
 | Raised by | Claude (phase K1) |
@@ -317,7 +319,7 @@ Places where the architecture has flagged a real chance of deviation (architectu
 
 | | |
 | --- | --- |
-| Status | OPEN, accepted |
+| Status | ABSORBED (2026-11-07, K11: architecture 4.5 corpus-delivery note; accepted, decided by Claude, pre-approved by Zain) |
 | Severity | S3 |
 | Date | 2026-11-06 |
 | Raised by | Claude (phase K2) |
@@ -336,7 +338,7 @@ Places where the architecture has flagged a real chance of deviation (architectu
 
 | | |
 | --- | --- |
-| Status | OPEN, accepted |
+| Status | ABSORBED (2026-11-07, K11: architecture 4.11; the real kind run is `e2e-eval`, green, `docs/evidence/k07-e2e-green.txt`) |
 | Severity | S3 |
 | Date | 2026-11-06 |
 | Raised by | Claude (phase K5) |
@@ -349,12 +351,13 @@ Places where the architecture has flagged a real chance of deviation (architectu
 
 **Why it matters:** a workflow that forgets the flag fails at build time, loudly. The real kind run is the K7 job itself.
 
-**Impact:** none on the demo. Absorbed in architecture 4.11 at K11.
+**Impact:** none on the demo. Absorbed in architecture 4.11 at K11 (2026-11-07).
 
 ### DEV-012 `cd.yml` also runs on `workflow_dispatch` and may push SHA tags from `dev`
+
 | | |
 | --- | --- |
-| Status | OPEN, accepted |
+| Status | ABSORBED (2026-11-07, K11: architecture 4.15 Triggers row) |
 | Severity | S3 |
 | Date | 2026-11-06 |
 | Raised by | Claude (phase K8) |
@@ -367,13 +370,13 @@ Places where the architecture has flagged a real chance of deviation (architectu
 
 **Why it matters:** it lets CD be exercised from `dev` before the final merge; no `:latest`, no push from feature branches.
 
-**Impact:** none on the submission; the run that counts for R-SUB-2 is the first push to `main` (Phase 15). Absorbed in architecture 4.15 at K11.
+**Impact:** none on the submission; the run that counts for R-SUB-2 is the first push to `main` (Phase 15). Absorbed in architecture 4.15 at K11 (2026-11-07).
 
 ### DEV-013 Requests and limits in architecture 4.2 replaced by measured values
 
 | | |
 | --- | --- |
-| Status | CLOSED, absorbed (architecture 4.2 table edited in the same PR) |
+| Status | ABSORBED (architecture 4.2 table edited in the same PR, 2026-11-07) |
 | Severity | S3 |
 | Date | 2026-11-07 |
 | Raised by | Claude (phase K10) |

@@ -29,6 +29,6 @@ All three miss the same two questions (q10, q14) and score every question within
 
 ## Consequences
 - Storage amplification is 1.04 (75 644 stored words over 73 051 source words, `scripts/chunk_report.py`): overlap costs 4%, not the 25% a blind 50-word overlap on 200-word windows would.
-- The chunk count is 981; the indexer embeds at 422 s for all of them; a change of size needs a full re-index (stage-and-swap, ADR 0001).
+- The chunk count is 981 on the host build (980 inside the cluster, DEV-010); the indexer embeds at 422 s for all of them; a change of size needs a full re-index (stage-and-swap, ADR 0001).
 - The recall plateau at 0.875 is not a chunking limit. q14 ("clause 1.21") is a retrieval miss because the embedding gives the number almost no weight (1.21 and 1.22 sit at cosine 0.927), and q10 is a scanned policy whose OCR named the section by title; both need hybrid (lexical plus vector) retrieval, not built here (architecture 1.2, D-006). More chunk tuning will not move them.
 - The heading rules are heuristics with known losses (list items inside a roman section become their own sections; OCR clause numbers like `92.` for `9.2`; duplicated Student Handbook pages 30 and 31). They are listed in `docs/PIPELINE.md`. Watch: a new document type with no heading markers falls back to paragraphs and loses the `section` guarantee.

@@ -285,16 +285,21 @@ If the first command prints nothing, Ollama is not listening on `0.0.0.0` or a f
 
 ## 9. Build, deploy, index, ask
 
-> **Status.** The Kubernetes manifests, the Dockerfiles, `make corpus` and the real pipeline are being built (see [`WORKPLAN.md`](WORKPLAN.md)). The order below is the target and is the contract for the README. Each step is marked when it lands.
+> The order below is the one in the README and it was run line by line on a fresh clone on 2026-11-07 (`docs/evidence/k11-clean-clone.txt`). Needs: `make install` done, `make cluster` done (or minikube already running), Ollama listening on `0.0.0.0` (section 5), the documents fetched with `make fetch`.
+>
+> **Docker permission.** If `make images` stops with `permission denied ... /var/run/docker.sock`, your login session predates the `docker` group (section 3.2): run `sg docker -c "make images"` (same for `make cluster` and `make dev-services`) until you log out and in.
+>
+> **Ollama host IP.** Before `make apply` run the two `minikube ssh` checks in section 8: the NetworkPolicy `ipBlock` for Ollama defaults to `192.168.49.1/32`. If `host.minikube.internal` is another address, edit the two `cidr` values in `k8s/overlays/dev/kustomization.yaml`, or every answer comes back as a `provider_error` fallback.
 
 ```bash
 make images         # build api, indexer, ui and load them into minikube
 make corpus         # create the namespace and corpus PVC, copy corpus/raw into it
 make apply          # kubectl apply -k k8s/overlays/dev (the indexer Job runs once Chroma is up)
 kubectl get pods -n rahbar -w
+kubectl wait --for=condition=complete job/indexer -n rahbar --timeout=1800s    # 10 to 13 minutes
 ```
 
-When `api` pods show `1/1 READY` the index exists. Ask a question:
+The `api` pods stay `0/1` until the indexer has stored the index; that is the readiness probe working (`/readyz` 503 `collection`). When they show `1/1 READY` the index exists. Ask a question:
 
 ```bash
 make ask Q="What CGPA puts a student on academic warning?"

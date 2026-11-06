@@ -1,0 +1,71 @@
+# clean-clone run of the README: a fresh clone outside the repository, no .venv, no corpus/raw, the existing minikube
+# captured 2026-11-06/07 (UTC 19:41 to 19:56) on Linux, minikube (Calico, docker driver), Ollama on the host (OLLAMA_HOST=0.0.0.0)
+# clone: git clone https://github.com/Zain-Shykh/RAHBAR-Grounded-RAG.git; git checkout dev   (commit 0aecd91), directory
+# /home/zain-shykh/Desktop/SCD_ASSIGNMENTS/k11-clean/RAHBAR-Grounded-RAG ; checked before: `ls .venv corpus/raw` -> No such file or directory
+# The cluster already existed, so `make cluster` was not repeated; the namespace was deleted with `make down` first.
+# Local times below are PKT (UTC+5). Docker layer cache on this machine was warm, so `make images` is faster than on a new laptop.
+
+step                                   result
+-------------------------------------  ---------------------------------------------------------------------------------
+make install                (00:41:06) exit 0, 36 s
+make test                   (00:41:42) exit 0: api 283 passed 19 skipped, indexer 257 passed, eval 91 passed
+make lint                   (00:41:47) exit 0: ruff clean, mypy api 30 files, indexer 14 files
+make fetch                  (00:42:13) exit 0: 9 documents downloaded, corpus/MANIFEST.md rewritten, `git status` clean afterwards
+.venv/bin/python corpus/fetch.py --verify   9 of 9 match the manifest
+make down                   (00:42:55) exit 0: namespace "rahbar" deleted (PVCs and the old index with it)
+make images                 (00:43:28) FAILED: permission denied ... /var/run/docker.sock  (this login session predates the docker group)
+sg docker -c "make images"  (00:43:33) exit 0, 26 s: api, indexer, ui built and `minikube image load`ed
+make corpus                 (00:43:59) exit 0: namespace and PVC created, 9 PDFs/HTML + MANIFEST.md copied, listing printed
+make apply                  (00:44:04) exit 0: everything created; api pods 0/1 (no index yet) as documented; Job indexer running
+kubectl wait --for=condition=complete job/indexer -n rahbar --timeout=1800s   (00:54:09) condition met
+make ask                    (00:54:35) FAILED: "Expecting value: line 1 column 1" (INGRESS_IP empty, `minikube ip` needs docker access)
+sg docker -c 'make ask ...' (00:54:42) exit 0: answer "2.00", citation academic-rules-handbook-jun-2026.pdf section 5.4, page 24
+sg docker -c 'make ask Q="What are the hostel rules?"'  answered_from_context false, "The documents in the corpus do not cover this question."
+make eval                   not repeated: it ran in K10 (docs/evidence/k10-eval-gate.txt)
+
+# Findings and what was changed
+1. `make images` / `make ask` fail with a docker permission error on a session without the docker group. Not a repository bug, but the README
+   gave no hint. README quick start and SETUP section 9 now say "prefix with sg docker -c ...".
+2. `make ask` / `make eval` with an empty INGRESS_IP produced a JSON parse error with no explanation. Makefile now stops with a message that names
+   the cause (guard added to both targets).
+3. README told the reader that `make corpus` was "not written yet: Ahmad" and that steps 3 and 4 "depend on work in progress"; both stale, removed.
+   README had no wait step for the indexer and did not say the api pods stay 0/1 until the index exists; both added.
+4. README corpus section said `python corpus/fetch.py --verify`; no `python` exists outside the venv. Changed to `.venv/bin/python`.
+5. Project status listed 981 chunks only; it now says 981 on the host and 980 in the cluster (DEV-010).
+
+# Index built by the Job (kubectl logs job/indexer --tail=2)
+{"ts": "2026-11-06T19:54:06Z", "logger": "rahbar.indexer", "msg": "stored", "chunks": 980, "index_id": "20261106T195405Z-a58ed3", "collection": "rahbar", "replaced": false, "seconds": 1.4}
+{"ts": "2026-11-06T19:54:06Z", "logger": "rahbar.indexer", "msg": "indexer finished", "chunks": 980, "seconds": 599.7}
+
+$ kubectl get job indexer -n rahbar
+NAME      STATUS     COMPLETIONS   DURATION   AGE
+indexer   Complete   1/1           10m        18m
+
+$ kubectl get pods -n rahbar   (after the answer questions; limits sanity ran afterwards, see k11-limits-sanity.txt)
+
+# Final state is recorded at the end of this file.
+
+$ kubectl get pods -n rahbar   (end of the session, after the limits check)
+NAME                    READY   STATUS      RESTARTS   AGE
+api-6486b9b855-jwzpr    1/1     Running     0          22m
+api-6486b9b855-lvtd9    1/1     Running     0          22m
+api-6486b9b855-xxpcx    1/1     Running     0          22m
+chroma-0                1/1     Running     0          22m
+indexer-wvqw4           0/1     Completed   0          22m
+redis-6f989b5dd-zflgv   1/1     Running     0          22m
+ui-666d88fd49-cvcqt     1/1     Running     0          22m
+
+$ kubectl get hpa,ingress,pvc -n rahbar
+NAME                                      REFERENCE        TARGETS       MINPODS   MAXPODS   REPLICAS   AGE
+horizontalpodautoscaler.autoscaling/api   Deployment/api   cpu: 3%/70%   3         8         3          22m
+
+NAME                               CLASS   HOSTS          ADDRESS        PORTS   AGE
+ingress.networking.k8s.io/rahbar   nginx   rahbar.local   192.168.49.2   80      22m
+
+NAME                                         STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE
+persistentvolumeclaim/cache-data             Bound    pvc-8b20cfcb-3a04-4d36-bfba-f91352fc9ab8   1Gi        RWO            standard       <unset>                 22m
+persistentvolumeclaim/chroma-data-chroma-0   Bound    pvc-6e9a2c11-6ef9-4e71-915e-6c5a14fb9fbf   2Gi        RWO            standard       <unset>                 22m
+persistentvolumeclaim/corpus-data            Bound    pvc-c5e6cdf5-ba65-4cf9-8b51-003c585d45f7   1Gi        RWO            standard       <unset>                 22m
+
+$ kubectl exec -n rahbar deploy/api -- python -c "...urlopen(http://localhost:8000/readyz)"
+{"status":"ready","checks":{"chroma":"ok","collection":"ok","embed_pin":"ok","redis":"ok","embed_dimension":"ok"}}

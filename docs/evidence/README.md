@@ -2,6 +2,14 @@
 
 Plain text, the command first (`$ ...`), then the real output, unedited. Cluster files were captured on minikube (Calico, docker driver), namespace `rahbar`; the index there has 980 chunks (DEV-010: the container's Tesseract makes 39 chunks for the faculty policy, the host makes 40). CI and branch-protection files come from GitHub. Each file starts with its date.
 
+## K11: clean clone, limits check, reference check (2026-11-07)
+
+| File | Shows |
+| --- | --- |
+| `k11-clean-clone.txt` | the README followed line by line from a fresh clone outside the repository (no `.venv`, no `corpus/raw`): install, test, lint, fetch, `make down`, images, corpus, apply, indexer 980 chunks in 10 min, answer and abstention; what failed and was fixed |
+| `k11-limits-sanity.txt` | six different cache-miss golden questions through the Ingress under the K10 limits, `kubectl top` every 10 s, restart counts 0, no OOMKilled |
+| `k11-reference-check.txt` | `scripts/check_refs.py`: every `path:line` reference in `docs/ENGINEERING-NOTES.md` and ADR 0001 resolves; no AHMAD marker left |
+
 ## K10: final cluster evidence (2026-11-06/07, images rebuilt after the K6 dependency bumps)
 
 | File | Shows |
