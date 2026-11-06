@@ -82,7 +82,7 @@ These hold in every environment and every commit. A change that breaks one is a 
 | AD-23 | The embedded text of a chunk is `"<section>\n<text>"` with the nomic task prefix `search_document: `. A question is embedded with `search_query: `. | ◇ | 5.3 |
 | AD-24 | The metric names in section 4.14 are fixed. | ◇ | 4.14 |
 | AD-25 | If the model provider is down or times out, the API answers HTTP 200 with the canned fallback and counts it in `rahbar_fallbacks_total`. | ◇ | 5.7.4 |
-| AD-26 | Non-goals: no PodDisruptionBudget, no Prometheus or Grafana deployment, no service mesh, no auth, no conversation store, no model fine-tuning. | ◇ | 1.2 |
+| AD-26 | (A PodDisruptionBudget for the api, `minAvailable: 2`, was added later: DEV-014.) Non-goals: no Prometheus or Grafana deployment, no service mesh, no auth, no conversation store, no model fine-tuning. | ◇ | 1.2 |
 | AD-27 | Two eval baselines: `eval/baseline.json` (real corpus, shipped numbers, run locally) and `eval/fixtures/baseline.fixture.json` (CI, fixtures). | ◇ | 5.13.4 |
 | AD-28 | Chunk ids are stable: `<source stem>-p<page 3 digits>-c<seq 3 digits>`. | ◇ | 5.4.2 |
 
@@ -98,7 +98,7 @@ It runs on Kubernetes (minikube for development and the demo), re-indexes withou
 
 ### 1.2 Non-goals (AD-26)
 
-Not built, on purpose: authentication or user accounts, conversation history, streaming answers, a PodDisruptionBudget, Prometheus or Grafana in the cluster (metrics are exposed, not scraped), a service mesh, TLS on the Ingress, multi-node scheduling rules, model fine-tuning, a reranker. Hybrid retrieval is optional (see `OPEN_DECISIONS.md` D-006) and not part of the baseline.
+Not built, on purpose: authentication or user accounts, conversation history, streaming answers, Prometheus or Grafana in the cluster (metrics are exposed, not scraped), a service mesh, TLS on the Ingress, multi-node scheduling rules, model fine-tuning, a reranker. Hybrid retrieval is optional (see `OPEN_DECISIONS.md` D-006) and not part of the baseline.
 
 ### 1.3 The stranger test
 
