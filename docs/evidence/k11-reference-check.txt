@@ -26,7 +26,7 @@ ok   indexer/pipeline/run.py:107
 ok   indexer/pipeline/run.py:83
 ok   indexer/pipeline/run.py:94
 ok   indexer/pipeline/store.py:94
-ok   k8s/base/api.yaml:5
+ok   k8s/base/api.yaml:2
 ok   k8s/base/api.yaml:60
 ok   k8s/base/api.yaml:70
 ok   k8s/base/chroma-statefulset.yaml:12
@@ -46,3 +46,5 @@ ok   k8s/base/kustomization.yaml:31
 ok   k8s/base/networkpolicy.yaml:100
 ok   k8s/base/reindex-cronjob.yaml:12
 40 references, 0 unresolved
+
+# the script only proves the line exists; the independent tester also read every cited k8s and api line and found one wrong (api.yaml:5, now :2)
