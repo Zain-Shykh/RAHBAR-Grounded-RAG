@@ -5,7 +5,7 @@
 | Phase | K6, from `docs/IMPLEMENTATION_PLAN_PLATFORM.md` |
 | Work plan task | A-08 |
 | Branch | `ci/k06-ci-core` |
-| Stage | TESTING |
+| Stage | MERGED |
 | Started | 2026-11-06 |
 | Approved (spec and plan) | pre-approved by Zain, platform plan 0.1 |
 | Depends on | K5 (`make manifests`, DEV-011 / D-096) |
@@ -56,3 +56,21 @@ Trivy may flag base images: bump tag or record accepted risk (ADR 0004). Redis s
 
 ## 12. Test report
 (tester rounds below)
+
+### Round 1 (independent tester)
+
+| AC | Result | Evidence |
+| --- | --- | --- |
+| AC-1 | PASS | Run 42236140181 on head 2b11c19: lint, test, manifests, build, scan all pass (`gh pr checks 25`, run conclusion success). |
+| AC-2 | PASS | `docs/evidence/k06-failing-check.txt` shows run 42235467712, manifests fail, build/scan skipping; PR #26 CLOSED, mergedAt null; `ci/k06-rehearsal-broken` absent on origin. |
+| AC-3 | PASS | actionlint clean; top-level `permissions`; all 8 `uses:` pinned to 40-char SHA with tag comment; build `needs: [lint, test, manifests]`, scan `needs: build`; no login/push/secrets. `:latest` grep only hits Ollama model-name handling in indexer code/tests (not images). |
+| AC-4 | PASS | Results register has the Trivy row (3 / 22 / 63 findings, fixes, final 0). Scan job green. |
+| AC-5 | PASS | Section I FAILs left: kind job, rollout status, registry login, eval runner in CI (K7 / K8 only). |
+| AC-6 | PASS | README line 5 badge -> actions/workflows/ci.yml. |
+| AC-7 | PASS | `make test` 257 + 91 passed; `make lint` ruff and mypy clean; api `pytest --cov=app` 283 passed, 19 skipped (no local Redis), 98% coverage. |
+
+Break attempts: ui/Dockerfile still ends `USER 101` (USER root only for `apk upgrade`); diff does not touch ui/index.html, ui/nginx.conf, settings or secrets; installed venv already has fastapi 0.135.4, starlette 1.10.0, pdfplumber 0.11.10, pypdf 7.0.0, so tests ran on the bumped deps; no secret/token/password strings in the diff. Cluster: api x3, ui, redis, chroma Ready; indexer Completed.
+
+Defects: none. Note: the final-commit run was still in progress when tester started; waited until success.
+
+Verdict: PASS
