@@ -6,7 +6,7 @@ name: cd
 # from main or dev, and only ever as :<sha> (never :latest).
 on:
   push:
-    branches: [main, ci/k08-cd]  # ponytail: k08-cd is the rehearsal branch, removed before merge
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -67,7 +67,7 @@ jobs:
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
           context: api
-          push: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/ci/k08-cd' }}
+          push: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev' }}
           tags: ${{ env.IMAGE_NS }}/rahbar-api:${{ github.sha }}
           provenance: false
       - name: build and push rahbar-indexer
@@ -75,7 +75,7 @@ jobs:
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
           context: indexer
-          push: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/ci/k08-cd' }}
+          push: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev' }}
           tags: ${{ env.IMAGE_NS }}/rahbar-indexer:${{ github.sha }}
           provenance: false
       - name: build and push rahbar-ui
@@ -83,7 +83,7 @@ jobs:
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
           context: ui
-          push: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/ci/k08-cd' }}
+          push: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev' }}
           tags: ${{ env.IMAGE_NS }}/rahbar-ui:${{ github.sha }}
           provenance: false
 

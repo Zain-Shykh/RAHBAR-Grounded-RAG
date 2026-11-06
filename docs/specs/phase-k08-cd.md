@@ -5,7 +5,7 @@
 | Phase | K8, from `docs/IMPLEMENTATION_PLAN_PLATFORM.md` |
 | Work plan task | A-10 |
 | Branch | `ci/k08-cd` |
-| Stage | IMPLEMENTING |
+| Stage | READY FOR PR |
 | Started | 2026-11-06 |
 | Approved (spec and plan) | pre-approved by Zain, platform plan 0.1 |
 | Depends on | K5 (`ci`, `prod` overlays), K6/K7 (`ci.yml` pieces), HP-1 (done: namespace `zain13sv`, secrets set) |
@@ -33,11 +33,11 @@ Out: cloud deploy; branch protection (K9, not touched here); settings and secret
 Honesty: the first run that counts for R-SUB-2 happens after the `dev` to `main` merge (Phase 15). Before that, the rehearsal runs from `dev` by `workflow_dispatch` and pushes SHA tags of a `dev` commit.
 
 ## 6. Acceptance criteria
-- [ ] **AC-1**: `cd.yml` has `test` -> `build-push` (`needs: test`) -> `deploy` (`needs: build-push`), `permissions:`, pinned actions, SHA tags only.
-- [ ] **AC-2**: rehearsal run green from `dev`: three images on Docker Hub tagged with the SHA, smoke test passed.
-- [ ] **AC-3**: no secret in any log or file; run logs show `***` for secrets only; `git log -p | grep -iE "dckr_pat|password"` empty.
-- [ ] **AC-4**: `check_submission.py` section I has no CD, `needs:`, `permissions:` or `:latest` failure.
-- [ ] **AC-5**: `make test && make lint` green; public images contain no documents.
+- [x] **AC-1**: `cd.yml` has `test` -> `build-push` (`needs: test`) -> `deploy` (`needs: build-push`), `permissions:`, pinned actions, SHA tags only.
+- [x] **AC-2**: rehearsal run green from `dev`: three images on Docker Hub tagged with the SHA, smoke test passed.
+- [x] **AC-3**: no secret in any log or file; run logs show `***` for secrets only; `git log -p | grep -iE "dckr_pat|password"` empty.
+- [x] **AC-4**: `check_submission.py` section I has no CD, `needs:`, `permissions:` or `:latest` failure.
+- [x] **AC-5**: `make test && make lint` green; public images contain no documents.
 
 ## 7. Test strategy and traceability
 | AC | Level | Command | Needs |
@@ -64,7 +64,12 @@ Docker Hub anonymous pull rate limit (3 images, one pull each in `deploy` plus k
 Estimate 3 h.
 
 ## 11. Implementation notes
-(filled during implementation)
+- `workflow_dispatch` is not offered until the file is on the default branch (`gh workflow run` returned HTTP 404), so the rehearsal used a temporary `push` trigger on `ci/k08-cd` (and the push guard allowed that ref), both removed before the PR. DEV-012.
+- Run 42246763004 green on the first try (three jobs about 5 min 40 s). Run 42247612689 (evidence) after moving the summary: Actions masked the namespace in `build-push` because it equals the username secret (`https://hub.docker.com/r/***/...`); the summary is now written in `deploy`, which has no secret, from `build-push` job outputs (digests).
+- `deploy` pulls the images with no login: proves they are public. Docker Hub API (anonymous) returned HTTP 200 for the three repos and the SHA tag.
+- Sizes: compressed api 90.4 MB, indexer 151.9 MB, ui 27.9 MB; uncompressed 263 / 407 / 64.8 MB.
+- `provenance: false` keeps the pushed object a plain image manifest (no attestation index).
+- AC-4: `python3 scripts/check_submission.py` section I all ok, 0 failures.
 
 ## 12. Test report
 | Round | Date | Command | Result | Notes |

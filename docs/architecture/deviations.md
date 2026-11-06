@@ -349,3 +349,21 @@ Places where the architecture has flagged a real chance of deviation (architectu
 **Why it matters:** a workflow that forgets the flag fails at build time, loudly. The real kind run is the K7 job itself.
 
 **Impact:** none on the demo. Absorbed in architecture 4.11 at K11.
+
+### DEV-012 `cd.yml` also runs on `workflow_dispatch` and may push SHA tags from `dev`
+| | |
+| --- | --- |
+| Status | OPEN, accepted |
+| Severity | S3 |
+| Date | 2026-11-06 |
+| Raised by | Claude (phase K8) |
+| Architecture reference | 4.15 (Triggers, CD) |
+| Files changed | `.github/workflows/cd.yml` |
+
+**The architecture says:** `cd.yml` runs on push to `main` only.
+
+**What was built:** push to `main`, plus `workflow_dispatch`. The three `build-push-action` steps push only when the ref is `main` or `dev` (a dispatch from another branch builds and never publishes); the tag is always `${{ github.sha }}`. GitHub only offers `workflow_dispatch` for a workflow file that exists on the default branch, so until the `dev` to `main` merge the pipeline was rehearsed with a temporary `push` trigger on the working branch (removed before merge): run $R.
+
+**Why it matters:** it lets CD be exercised from `dev` before the final merge; no `:latest`, no push from feature branches.
+
+**Impact:** none on the submission; the run that counts for R-SUB-2 is the first push to `main` (Phase 15). Absorbed in architecture 4.15 at K11.
