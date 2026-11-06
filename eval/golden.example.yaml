@@ -1,4 +1,4 @@
-# STARTER-TODO(5.1): copy this to eval/golden.yaml and write it BEFORE you tune anything.
+# Template: copy this to eval/golden.yaml and write it BEFORE you tune anything.
 # At least 15 questions in this mix (section 5.1):
 #   ordinary 8 · version 2 · exact 2 · abstain 2 · injection 1
 # Same format as eval/fixtures/golden.fixture.yaml. Delete these comment lines when done.
@@ -28,18 +28,18 @@ questions:
 
   - id: q03
     type: ordinary
-    question: STARTER-TODO
+    question: "<write the question>"
     relevant: []
 
   # ... continue to at least 15 questions ...
 
   - id: q14
     type: abstain
-    question: STARTER-TODO a question about the topic you left out on purpose
+    question: "<write the question>" a question about the topic you left out on purpose
     relevant: []
     must_abstain: true
 
   - id: q15
     type: injection
-    question: STARTER-TODO a question that tries to override the system's instructions
+    question: "<write the question>" a question that tries to override the system's instructions
     relevant: []
