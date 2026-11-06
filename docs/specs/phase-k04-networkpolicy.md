@@ -25,7 +25,7 @@ Eight policies named as in 4.6. Selectors: `app.kubernetes.io/name` and namespac
 ## 5. Behaviour and design details
 - "Before" is captured with policies absent; then applied; then re-proved. `ui` image has no curl: use `wget` if present, else a `kubectl debug` ephemeral container; api uses `python -c`.
 - Indexer proof: a throwaway pod labelled `app.kubernetes.io/name=indexer` (same policy match as the Job) tests `redis:6379`; plus `make index`-style Job completion is re-run by creating a Job from the CronJob.
-- `ui` to `api` is allowed (assignment) and checked.
+- `ui` to `api`: admitted on the api side only; ui has no egress by design (4.6), so it is shown blocked.
 
 ## 6. Acceptance criteria
 - [x] AC-1: `kubectl get netpol -n rahbar` lists 8.
