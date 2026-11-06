@@ -1,0 +1,21 @@
+$ curl -s localhost:8000/readyz   (port-forward to deploy/api)
+{"status":"ready","checks":{"chroma":"ok","collection":"ok","embed_pin":"ok","redis":"ok","embed_dimension":"ok"}}
+
+$ curl -s -D - -XPOST localhost:8000/api/ask -d <attendance question>   (first ask)
+HTTP/1.1 200 OK
+content-type: application/json
+x-outcome: cached
+x-cache: HIT
+x-request-id: b385eb772add495ab03b125ec769aee4
+
+{"request_id":"b385eb772add495ab03b125ec769aee4","answer":"80%","citations":[{"source":"prospectus-2026-academic-rules-and-regulations.pdf","section":"1. Attendance Requirement","page":1}],"answered_from_context":true,"confidence":"high","retrieved":[{"chunk_id":"prospectus-2026-academic-rules-and-regulations-p001-c001","source":"prospectus-2026-academic-rules-and-regulations.pdf","section":"1. Attendance Requirement","page":1,"score":0.81712449},{"chunk_id":"academic-rules-handbook-jun-2026-p010-c051","source":"academic-rules-handbook-jun-2026.pdf","section":"1.21 Students are required to maintain 100% attendance in","page":10,"score":0.78272694},{"chunk_id":"academic-rules-handbook-jun-2026-p010-c052","source":"academic-rules-handbook-jun-2026.pdf","section":"1.22 Failure to meet attendance requirements in a course will","page":10,"score":0.75009775},{"chunk_id":"academic-rules-handbook-jun-2026-p027-c151","source":"academic-rules-handbook-jun-2026.pdf","section":"5.24 A student who has not viewed his final exam paper in the","page":27,"score":0.74947917},{"chunk_id":"academic-rules-handbook-jun-2026-p025-c139","source":"academic-rules-handbook-jun-2026.pdf","section":"5.12 A student is expected to take mid and final examination as per","page":25,"score":0.7186445}],"provider":"ollama-host"}
+
+
+$ same request again (headers only)
+HTTP/1.1 200 OK
+x-cache: HIT
+
+$ curl -s localhost:8000/metrics | grep ^rahbar_index_info
+rahbar_index_info{chunks="980",embed_model="nomic-embed-text",index_id="20261106T103106Z-41fe5d"} 1.0
+
+Note: the very first request of this question (before this file was written) returned x-cache: MISS, then the repeat returned x-cache: HIT (observed 2026-11-06 15:35 PKT). The ask above is the third request, hence HIT.

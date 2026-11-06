@@ -84,6 +84,7 @@ Copy this block to the end of section 7, increment the number, and fill every li
 | DEV-007 | The model timeout and the Ingress timeout must exceed 90 s and 120 s on the host CPU | S3 | ABSORBED | 4.4, 5.7.4 | 2026-11-05 |
 | DEV-008 | Pods set `enableServiceLinks: false` (Service env vars break Chroma) | S3 | ABSORBED | 4.2, 4.4 | 2026-11-05 |
 | DEV-009 | `fsGroup` is a no-op on minikube hostPath volumes; `/data` is writable because the provisioner makes it 0777 | S3 | OPEN, accepted | 4.7, R-01, R-02 | 2026-11-05 |
+| DEV-010 | The in-cluster index has 980 chunks, not 981: Tesseract in the indexer image OCRs the 8-page faculty policy into 39 chunks (host run: 40) | S3 | OPEN, accepted | 5.4, AD-08 | 2026-11-06 |
 
 ## 7. Log
 
@@ -310,3 +311,22 @@ Places where the architecture has flagged a real chance of deviation (architectu
 **Why it matters:** the proof that `fsGroup` itself chowns the volume is not available here. On a cluster whose volume driver supports `fsGroup` the manifests rely on it, which is documented Kubernetes behaviour; it was not exercised here. The security settings are kept as designed.
 
 **Impact:** none on the demo. Stated honestly in architecture 9.
+
+### DEV-010 The in-cluster index has 980 chunks, not 981
+
+| | |
+| --- | --- |
+| Status | OPEN, accepted |
+| Severity | S3 |
+| Date | 2026-11-06 |
+| Raised by | Claude (phase K2) |
+| Architecture reference | 5.4 (chunk counts), AD-08; platform plan K2 ("must equal 981") |
+| Files changed | none |
+
+**The plan says:** the collection holds 981 chunks (measured on the host in RAG phases 7 and 12).
+
+**What was observed:** the indexer Job built 980 chunks twice (Job and `make index`), same `_index.json`, same SHA-256 verified files. Eight of nine documents match the host counts exactly (238, 65, 182, 7, 8, 44, 245, 152). The difference is `faculty-entrepreneurship-and-technical-start-ups-policy.pdf`: 8 pages, all 8 OCR'd, 39 chunks in the container, 40 on the host. OCR output depends on the Tesseract build and thread count, so one boundary moves.
+
+**Why it matters:** none for correctness; eval baselines (`eval/baseline.json`) were measured on the 981 index, so a local `make eval` against the cluster may differ by a fraction of one chunk's effect. The count is recorded as 980 in the results register.
+
+**Impact:** none. If an exact match is wanted later, pin the Tesseract version in `indexer/Dockerfile` and re-measure on the host with the same build (RAG lane).

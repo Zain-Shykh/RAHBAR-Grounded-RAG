@@ -1,0 +1,134 @@
+# K2 evidence: indexer Job in minikube (2026-11-06). Ollama on host, OLLAMA_HOST=0.0.0.0.
+
+## A-1: host.minikube.internal from a pod
+$ minikube ssh "grep host.minikube.internal /etc/hosts"
+192.168.49.1	host.minikube.internal
+$ kubectl run a1 --image=busybox:1.37.0 -- sh -c "nslookup host.minikube.internal; wget -qO- http://host.minikube.internal:11434/api/tags"
+Name: host.minikube.internal  Address: 192.168.49.1
+{"models":[{"name":"nomic-embed-text:latest", ...  (Ollama answered)
+
+## A-4 / AC-1: make corpus (listing from the helper pod, then helper deleted)
+pod "corpus-loader" deleted from rahbar namespace
+kubectl apply -f k8s/tools/corpus-loader.yaml
+pod/corpus-loader created
+kubectl wait --for=condition=Ready pod/corpus-loader -n rahbar --timeout=120s
+pod/corpus-loader condition met
+kubectl cp /home/zain-shykh/Desktop/SCD_ASSIGNMENTS/assign_2/corpus/raw/. rahbar/corpus-loader:/corpus
+kubectl cp /home/zain-shykh/Desktop/SCD_ASSIGNMENTS/assign_2/corpus/raw/../MANIFEST.md rahbar/corpus-loader:/corpus/MANIFEST.md
+kubectl exec -n rahbar corpus-loader -- ls -l /corpus
+total 34208
+-rw-r--r--    1 10001    10001         2473 Nov  5 19:14 MANIFEST.md
+-rw-r--r--    1 10001    10001         3715 Nov  5 19:14 _index.json
+-rw-r--r--    1 10001    10001       987731 Nov  5 19:14 academic-rules-handbook-jun-2026.pdf
+-rw-r--r--    1 10001    10001       891216 Nov  5 19:14 annual-report-2019-20.pdf
+-rw-r--r--    1 10001    10001      5100456 Nov  5 19:14 annual-report-2023-24.pdf
+-rw-r--r--    1 10001    10001      3872809 Nov  5 19:14 faculty-entrepreneurship-and-technical-start-ups-policy.pdf
+-rw-r--r--    1 10001    10001        91429 Nov  5 19:14 fee-structure-page.html
+-rw-r--r--    1 10001    10001        95673 Nov  5 19:14 grading-page.html
+-rw-r--r--    1 10001    10001      7066767 Nov  5 19:14 prospectus-2026-academic-rules-and-regulations.pdf
+-rw-r--r--    1 10001    10001      1980275 Nov  5 19:14 student-handbook-jun-2026.pdf
+-rw-r--r--    1 10001    10001     14888226 Nov  5 19:14 undergraduate-academic-rules-aug-2023.pdf
+kubectl delete pod corpus-loader -n rahbar --wait=false
+pod "corpus-loader" deleted from rahbar namespace
+
+## Job
+$ kubectl get job,pods,cronjob -n rahbar
+NAME                           STATUS     COMPLETIONS   DURATION   AGE
+job.batch/indexer              Complete   1/1           13m        160m
+job.batch/reindex-1793969226   Complete   1/1           9m24s      10m
+
+NAME                           READY   STATUS      RESTARTS   AGE
+pod/api-794bb447b9-8q5gk       1/1     Running     0          19h
+pod/api-794bb447b9-dl65s       1/1     Running     0          19h
+pod/api-794bb447b9-v58n4       1/1     Running     0          19h
+pod/chroma-0                   1/1     Running     0          19h
+pod/indexer-mr98n              0/1     Completed   0          160m
+pod/redis-85454df54f-gzfxb     1/1     Running     0          19h
+pod/reindex-1793969226-sm8xn   0/1     Completed   0          10m
+pod/ui-6d5b48c974-cjw8d        1/1     Running     0          19h
+
+NAME                    SCHEDULE    TIMEZONE   SUSPEND   ACTIVE   LAST SCHEDULE   AGE
+cronjob.batch/reindex   0 3 * * 0   <none>     False     0        <none>          17h
+
+$ kubectl describe job indexer -n rahbar | head -40
+Name:                     indexer
+Namespace:                rahbar
+Selector:                 batch.kubernetes.io/controller-uid=f350f63f-d06f-48d4-a8ab-ea6f266e88ff
+Labels:                   app.kubernetes.io/name=indexer
+                          app.kubernetes.io/part-of=rahbar
+Annotations:              <none>
+Parallelism:              1
+Completions:              1
+Completion Mode:          NonIndexed
+Suspend:                  false
+Backoff Limit:            2
+Start Time:               Fri, 06 Nov 2026 15:17:50 +0500
+Completed At:             Fri, 06 Nov 2026 15:31:12 +0500
+Duration:                 13m
+Active Deadline Seconds:  1800s
+Pods Statuses:            0 Active (0 Ready) / 1 Succeeded / 0 Failed
+Pod Template:
+  Labels:           app.kubernetes.io/name=indexer
+                    app.kubernetes.io/part-of=rahbar
+                    batch.kubernetes.io/controller-uid=f350f63f-d06f-48d4-a8ab-ea6f266e88ff
+                    batch.kubernetes.io/job-name=indexer
+                    controller-uid=f350f63f-d06f-48d4-a8ab-ea6f266e88ff
+                    job-name=indexer
+  Service Account:  indexer
+  Containers:
+   indexer:
+    Image:      rahbar-indexer:dev
+    Port:       <none>
+    Host Port:  <none>
+    Limits:
+      cpu:     1
+      memory:  2Gi
+    Requests:
+      cpu:     250m
+      memory:  512Mi
+    Environment Variables from:
+      rahbar-config  ConfigMap  Optional: false
+    Environment:     <none>
+    Mounts:
+      /corpus from corpus (ro)
+
+## Logs (stage lines)
+$ kubectl logs job/indexer -n rahbar | grep -E "starting|verified|chunked total|embedded|stored|finished"
+{"ts": "2026-11-06T10:17:51Z", "logger": "rahbar.indexer", "msg": "indexer starting", "dummy": false, "embed_model": "nomic-embed-text", "collection": "rahbar", "chroma": "chroma:8000", "pod": "indexer-mr98n"}
+{"ts": "2026-11-06T10:17:53Z", "logger": "rahbar.indexer", "msg": "verified corpus", "files": 9}
+{"ts": "2026-11-06T10:24:13Z", "logger": "rahbar.indexer", "msg": "chunked total", "documents": 9, "chunks": 980, "words": 75623, "source_words": 73030, "amplification": 1.04}
+{"ts": "2026-11-06T10:31:06Z", "logger": "rahbar.indexer", "msg": "embedded", "vectors": 980, "model": "nomic-embed-text", "batches": 31, "seconds": 413.8}
+{"ts": "2026-11-06T10:31:09Z", "logger": "rahbar.indexer", "msg": "stored", "chunks": 980, "index_id": "20261106T103106Z-41fe5d", "collection": "rahbar", "replaced": true, "seconds": 2.6}
+{"ts": "2026-11-06T10:31:09Z", "logger": "rahbar.indexer", "msg": "indexer finished", "chunks": 980, "seconds": 798.0}
+
+## Per-document chunks (run 2)
+{"ts": "2026-11-06T10:21:57Z", "logger": "rahbar.indexer", "msg": "chunked", "source": "undergraduate-academic-rules-aug-2023.pdf", "chunks": 152, "words": 4860, "source_words": 4860, "amplification": 1.0}
+{"ts": "2026-11-06T10:22:19Z", "logger": "rahbar.indexer", "msg": "chunked", "source": "academic-rules-handbook-jun-2026.pdf", "chunks": 238, "words": 9956, "source_words": 9806, "amplification": 1.02}
+{"ts": "2026-11-06T10:22:20Z", "logger": "rahbar.indexer", "msg": "chunked", "source": "prospectus-2026-academic-rules-and-regulations.pdf", "chunks": 44, "words": 3389, "source_words": 3389, "amplification": 1.0}
+{"ts": "2026-11-06T10:22:40Z", "logger": "rahbar.indexer", "msg": "chunked", "source": "student-handbook-jun-2026.pdf", "chunks": 245, "words": 16724, "source_words": 16324, "amplification": 1.02}
+{"ts": "2026-11-06T10:22:44Z", "logger": "rahbar.indexer", "msg": "chunked", "source": "annual-report-2019-20.pdf", "chunks": 65, "words": 7191, "source_words": 6991, "amplification": 1.03}
+{"ts": "2026-11-06T10:22:56Z", "logger": "rahbar.indexer", "msg": "chunked", "source": "annual-report-2023-24.pdf", "chunks": 182, "words": 30353, "source_words": 28510, "amplification": 1.06}
+{"ts": "2026-11-06T10:22:56Z", "logger": "rahbar.indexer", "msg": "chunked", "source": "fee-structure-page.html", "chunks": 7, "words": 572, "source_words": 572, "amplification": 1.0}
+{"ts": "2026-11-06T10:22:56Z", "logger": "rahbar.indexer", "msg": "chunked", "source": "grading-page.html", "chunks": 8, "words": 835, "source_words": 835, "amplification": 1.0}
+{"ts": "2026-11-06T10:24:13Z", "logger": "rahbar.indexer", "msg": "chunked", "source": "faculty-entrepreneurship-and-technical-start-ups-policy.pdf", "chunks": 39, "words": 1743, "source_words": 1743, "amplification": 1.0}
+
+## Peak memory (kubectl top every 10 s, run 2, limit 2Gi)
+15:24:31 indexer-mr98n   1001m   483Mi   
+(run 1 peak: 484Mi, run 1 DeadlineExceeded because the laptop suspended; see plan log)
+
+## Chunk count / index_id
+$ curl -s localhost:8000/metrics | grep ^rahbar_index_info
+rahbar_index_info{chunks="980",embed_model="nomic-embed-text",index_id="20261106T125625Z-ba262b"} 1.0
+
+## Re-index: make index (Job from CronJob reindex) with a request loop (3 questions, every 2 s)
+$ make index
+kubectl create job --from=cronjob/reindex reindex-1793969226 -n rahbar
+{"ts": "2026-11-06T12:56:27Z", "logger": "rahbar.indexer", "msg": "stored", "chunks": 980, "index_id": "20261106T125625Z-ba262b", "collection": "rahbar", "replaced": true, "seconds": 1.9}
+{"ts": "2026-11-06T12:56:27Z", "logger": "rahbar.indexer", "msg": "indexer finished", "chunks": 980, "seconds": 560.0}
+
+loop: 90 requests with HTTP 200, 0 other
+first and last lines, and the line where index_id changes:
+17:47:02 200 index_id="20261106T103106Z-41fe5d"
+17:56:29 200 index_id="20261106T103106Z-41fe5d"
+17:57:40 200 index_id="20261106T125625Z-ba262b"
+17:57:40 200 index_id="20261106T125625Z-ba262b"

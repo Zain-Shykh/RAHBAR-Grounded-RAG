@@ -5,7 +5,7 @@
 | Phase | K2, from `docs/IMPLEMENTATION_PLAN_PLATFORM.md` |
 | Work plan task | A-04 (milestone I-2) |
 | Branch | `feat/k8s-k02-indexer` |
-| Stage | IMPLEMENTING |
+| Stage | TESTING |
 | Started | 2026-11-06 |
 | Approved (spec and plan) | pre-approved by Zain, platform plan 0.1 |
 | Depends on | K1 (#20); H-4 (indexer peak 438 MB, 9 min 40 s on host) |
@@ -79,7 +79,12 @@ Rollback: `make down` and revert the step. Estimate 3 h.
 
 ## 11. Implementation notes
 
-(filled during implementation)
+- Replacement works: `kustomize build` renders the CronJob `jobTemplate.spec` identical to the Job spec (image, limits, volumes, backoff, deadline). `kubeconform -strict`: 19 resources valid, loader pod valid.
+- `kubectl cp` needs the source path to exist locally; `corpus/raw` is gitignored and absent in a worktree, so the Makefile has `CORPUS_SRC` (default `corpus/raw`).
+- Job 1 was marked `DeadlineExceeded` (laptop slept about 15 h with the pod finished). Re-run clean under `systemd-inhibit`. `activeDeadlineSeconds` stays 1800 (13 min measured).
+- api pods turned 1/1 by themselves after the index appeared (no restart).
+- 980 chunks, not 981: DEV-010.
+- Results and evidence: `docs/evidence/k02-indexer-job.txt`, `k02-first-answer.txt`.
 
 ## 12. Test report
 
