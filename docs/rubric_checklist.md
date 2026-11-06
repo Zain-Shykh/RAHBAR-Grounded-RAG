@@ -43,7 +43,7 @@ Extra "don't" items from the text (not listed as deductions but explicitly forbi
 - [ ] Do not remove the pause between fetch requests [R-COR-11].
 - [ ] Do not list the placeholder Secret in `kustomization.yaml` [§4.7].
 - [ ] Do not present AI output as our own; disclose in `AI-USAGE.md` [R-AI-1].
-- [ ] Do not leave any `STARTER-TODO` or `raise NotImplementedError` in the repo [R-SUB-5].
+- [ ] Do not leave any starter-kit placeholder marker or `raise NotImplementedError` in the repo [R-SUB-5].
 - [ ] Do not start minikube without `--cni=calico` [§9].
 
 ---
@@ -207,7 +207,7 @@ At least four of six, each with symptom, diagnosis, stage, remedy, and "how I'd 
 ### B12. Final submission gate
 
 - [ ] `python scripts/check_submission.py` (`make check`) clean.
-- [ ] `grep -rn STARTER-TODO --exclude-dir=.venv .` returns nothing.
+- [ ] the placeholder-marker grep printed by `make check` returns nothing.
 - [ ] `make test && make lint` green.
 - [ ] Fresh clone + README steps works end to end (cited answer, abstention, pod delete survives).
 - [ ] Git history scanned for secrets.

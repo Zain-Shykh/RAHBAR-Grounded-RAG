@@ -219,7 +219,7 @@ make check       # submission checker
 make             # list every target
 ```
 
-Work happens on feature branches off `dev`; `main` is protected (pull request, passing CI, one approval). Details in [`CONTRIBUTING.md`](CONTRIBUTING.md). Continuous integration runs lint, tests with coverage, manifest validation, image builds, a Trivy scan and an end-to-end evaluation on a kind cluster against a small fixture corpus; continuous delivery builds images tagged by commit SHA, pushes them to Docker Hub and deploys to an ephemeral cluster.
+Work happens on feature branches off `dev`; `main` is protected (pull request, passing CI, one approval). Details in [`CONTRIBUTING.md`](CONTRIBUTING.md). Continuous integration runs lint, tests with coverage, manifest validation, image builds, a Trivy scan and an end-to-end evaluation on a kind cluster against a small fixture corpus (kind's default network plugin does not enforce NetworkPolicy, so that job proves behaviour; isolation is proven on minikube with Calico, `docs/evidence/k04-networkpolicy-proof.txt`); continuous delivery builds images tagged by commit SHA, pushes them to Docker Hub and deploys to an ephemeral cluster.
 
 ## Project status
 

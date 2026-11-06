@@ -84,7 +84,7 @@ Helm charts, a service mesh, an operator, an Ingress TLS setup, Prometheus or Gr
 | K4 | NetworkPolicies and proof | A-06 | 3 h | DONE | #23 |
 | K5 | Overlays `ci` and `prod`, manifest validation | A-07 | 2 h | DONE (with deviation DEV-011) | #24 |
 | K6 | CI part 1: lint, test, manifests, build, scan | A-08 | 3 h | DONE | #25 |
-| K7 | CI part 2: e2e-eval on kind | A-09 | 4 h | NOT STARTED | |
+| K7 | CI part 2: e2e-eval on kind | A-09 | 4 h | DONE | #27 |
 | K8 | CD: Docker Hub, build-push, deploy | A-10 | 3 h | NOT STARTED | |
 | K9 | Branch protection and the gate demonstration | A-11 | 1.5 h | NOT STARTED | |
 | K10 | Cluster evidence | A-13 | 3 h | NOT STARTED | |
@@ -97,12 +97,12 @@ Hours spent so far (fill in at each phase end): planned 33.5 h, actual `____`.
 ## 2. Current focus
 
 ```
-Phase:        K7  CI part 2: e2e-eval on kind
+Phase:        K8  CD: Docker Hub, build-push, deploy
 Stage:        not started   (SPEC DRAFT, IMPLEMENTING, TESTING, READY FOR PR, MERGED)
 Branch:       (none yet)
 Spec:         (none yet)
-Next action:  fresh session: stage 0 then stage 1 for K7. K6 is merged: `.github/workflows/ci.yml` has the five jobs `lint`, `test`, `manifests`, `build`, `scan` (actions pinned by SHA; build saves the three images as the `images` artifact tagged with the commit SHA; `scan` downloads it). Add `e2e-eval` to this file with `needs: build` (or its own artifact use): kind cluster, load the images, apply the `ci` overlay with `kustomize build --load-restrictor LoadRestrictionsNone k8s/overlays/ci | kubectl apply -f -` (images there are `rahbar-*:ci`, so retag the SHA images to `:ci` before `kind load`), run `eval/run_eval.py` fixture golden against the port-forwarded api. Check each new action's latest release with `gh api repos/<o>/<r>/releases/latest` and pin by SHA. Image bumps from K6: api fastapi 0.135.4 + starlette 1.10.0, indexer pdfplumber 0.11.10 + pypdf 7.0.0, ui nginx-unprivileged 1.30.6-alpine plus `apk upgrade` (Trivy). Laptop disk ~96% full.
-Waiting on:   Zain: Docker Hub account and token (needed from K8, create it early). Ahmad: nothing blocks.
+Next action:  fresh session: stage 0 then stage 1 for K8. K7 is merged: `ci.yml` has six jobs (`lint`, `test`, `manifests`, `build`, `scan`, `e2e-eval`) and `workflow_dispatch`. Reusable pieces for `cd.yml`: kind v0.33.0 binary + kind config with `ingress-ready` label and port 80 mapping, ingress-nginx `controller-v1.15.1` `provider/kind` manifest, kustomize 5.8.3, `kustomize build --load-restrictor LoadRestrictionsNone k8s/overlays/ci | kubectl apply -f -`, eval via `--api http://localhost --host rahbar.local`; whole e2e-eval takes 2 m 39 s. check_submission still fails only on cd.yml missing and the registry login step (K8). Needs HP-1 (Docker Hub account and secrets from Zain) before the push steps can run.
+Waiting on:   Zain: Docker Hub account and token (HP-1, needed now for K8). Ahmad: nothing blocks.
 Last updated: 2026-11-06
 ```
 
@@ -134,6 +134,7 @@ Append-only, newest at the bottom. One line per event: date, phase, what happene
 2026-11-06  K4  DONE (#23). k8s/base/networkpolicy.yaml (8 policies, name selectors only), dev patch for the Ollama ipBlock (192.168.49.1/32, confirmed with minikube ssh). Proof docs/evidence/k04-networkpolicy-proof.txt: before, ui reaches chroma and redis; after, ui to chroma and redis time out, indexer-labelled pod to redis times out but reaches chroma and Ollama, api reaches chroma and redis (cache hits +6), UI 200 through the Ingress, cited cache-miss answer via Ollama, indexer Job from the CronJob completed (980 chunks, 617 s). ui to api is closed on the ui egress side by design (4.6).
 2026-11-06  K5  DONE (#24). k8s/overlays/ci (fixtures ConfigMap generator, ConfigMap patch, Job and CronJob volume swap, Ollama egress removed) and k8s/overlays/prod (registry image names, SHA placeholder); `make manifests` validates all three with kubeconform -strict (30, 31, 30 resources valid), docs/evidence/k05-manifests.txt; no `:latest` in k8s. Rehearsal docs/evidence/k05-ci-overlay-rehearsal.txt: ci overlay in throwaway namespace rahbar-ci on minikube under default-deny, indexer Job indexed 3 fixtures into 16 chunks in 3.5 s, api x3 Ready, `/readyz` ok, `run_eval.py` with the fixture golden and baseline: gate passed, exit 0. Not on kind: pulling the kind node image filled the disk (the kubeconfig was truncated; `minikube update-context` restored it), so kind and its images were removed. D-096, DEV-011.
 2026-11-06  K6  DONE (#25). .github/workflows/ci.yml: lint, test (Redis service container, coverage >= 60%), manifests (`make manifests`), build (needs lint+test+manifests, no push), scan (needs build, Trivy HIGH,CRITICAL --ignore-unfixed). Actions pinned by SHA (checkout v7.0.1, setup-python v7.1.0, setup-buildx v4.4.1, upload-artifact v7.0.2, download-artifact v8.0.2, trivy-action v0.36.0). First Trivy run failed on all three images (api 3, indexer 22, ui 63 HIGH/CRITICAL with fix); fixed by dependency and base-image bumps (results register), four fix pushes, final run https://github.com/Zain-Shykh/RAHBAR-Grounded-RAG/actions/runs/42234718843 all five green, 302 api tests (0 skipped). Rehearsal: PR #26 with apiVersion apps/v99 failed `manifests`, build and scan skipped, closed unmerged: docs/evidence/k06-failing-check.txt. D-097, D-098. README badge added. `check_submission.py` section I: remaining failures are K7 (kind, eval gate) and K8 (rollout status, registry login).
+2026-11-06  K7  DONE (#27). `e2e-eval` job (needs: build, timeout 20 min, fail closed, dump + artifact `results-fixture`) and `workflow_dispatch` in ci.yml: kind v0.33.0 (binary, config with ingress-ready + port 80), ingress-nginx controller-v1.15.1, images from the build artifact retagged `:ci`, `kustomize build --load-restrictor LoadRestrictionsNone k8s/overlays/ci | kubectl apply -f -`, Job wait, eval through `http://localhost` with Host rahbar.local. Green on the first push: run 42238088989 (a later run, 42241904298, failed closed on a race: the ingress admission webhook refused the apply right after the controller was Ready; fixed with a bounded apply retry; run 42243531531 then got nginx's 503 on the first question before the Ingress synced the api endpoints, fixed with a bounded wait for `GET /api/ask` = 405, run 42242724142 green), 2 m 39 s, recall@5 0.80, citations 5/5, abstention 1/1: docs/evidence/k07-e2e-green.txt. Gate demo: RELEVANCE_FLOOR=0.0 did NOT turn it red (f05 still abstains with the hashing embedder); RETRIEVER=stub did: `GATE FAILED recall@5 fell from 0.800 to 0.000`, PR #28 closed unmerged, branch deleted: docs/evidence/k07-gate-fail.txt. Policies stay in `ci`; enforcement proven on minikube (D-100, R-07). D-099, D-100. The five prose mentions of the old starter-kit marker name reworded (checker section 0 passes).
 ```
 
 ---
@@ -151,8 +152,8 @@ Numbers this lane must measure. Nothing here is a guess: leave `-` until measure
 | Api request and limit, actual `kubectl top` per pod, idle and under load | - | K10 | `kubectl top pods -n rahbar` |
 | HPA reading (current/target) idle and under load | idle `cpu: 4%/70%` (3 replicas); cached-question loop with target forced to 5%: `32%/5%`, 3 to 6 to 8 replicas in 30 s; back to 3 about 5 min after the revert (K3; K10 repeats) | K3, K10 | `kubectl get hpa -n rahbar` |
 | Failed requests during `rollout restart` of the api | 0 of 42 (cached question through the Ingress every 0.5 s) | K3 | request loop |
-| `ci` e2e-eval wall time on kind | - | K7 | Actions run |
-| Fixture eval result in CI (recall@5, citation validity, abstention) | - | K7 | `eval/fixtures/results.fixture.json` |
+| `ci` e2e-eval wall time on kind | 2 m 39 s job (kind create, images load, ingress-nginx, Job 30 s, gate 1 s); whole pipeline about 5 min 35 s | K7 | Actions run 42238088989 |
+| Fixture eval result in CI (recall@5, citation validity, abstention) | recall@3 0.80, recall@5 0.80 (= baseline), citation validity 1.00 (5/5), abstention correctness 1.00 (1/1), fallback 0; p50 0.01 s. kind does not enforce NetworkPolicy: CI proves behaviour, isolation is proven on minikube (K4, R-07, D-100) | K7 | artifact `results-fixture` of run 42238088989; `docs/evidence/k07-e2e-green.txt` |
 | Image sizes on Docker Hub (api, indexer, ui) and the SHA tag | - | K8 | Docker Hub page |
 | Trivy findings (HIGH and CRITICAL with a fix) per image, and what was done | First run: api 3 HIGH (starlette 0.46.2: CVE-2025-62727, then CVE-2026-48818 and CVE-2026-54283 fixed only in starlette 1.x) -> fastapi 0.135.4 + starlette 1.10.0; indexer 22 HIGH (pdfminer.six 20250327: 2, pypdf 5.4.0: 20) -> pdfplumber 0.11.10 (pins pdfminer.six 20260107) + pypdf 7.0.0 (not imported by the pipeline); ui 63 (60 HIGH, 3 CRITICAL, nginx-unprivileged 1.27-alpine, alpine 3.2x) -> 1.30.6-alpine, then 8 left (brotli, curl, expat, zlib) -> `apk upgrade` in the Dockerfile. Final run: 0 on all three; no accepted risk, so ADR 0004 unchanged | K6 | Actions runs 42230686973 to 42234718843 |
 | CI `test` job: api tests run, coverage | 302 passed, 0 skipped (Redis service container, D-097); api coverage gate 60% passes | K6 | Actions run 42234718843 |
@@ -459,7 +460,7 @@ None.
 
 ## Phase K7: CI part 2: e2e-eval on kind (A-09)
 
-**Status:** NOT STARTED · **Branch:** `ci/k07-e2e-eval` · **Est:** 4 h · **Priority:** P0 · **Hardest CI job**
+**Status:** DONE (#27) · **Branch:** `ci/k07-e2e-eval` · **Est:** 4 h · **Priority:** P0 · **Hardest CI job**
 
 ### Objective
 A `e2e-eval` job creates a kind cluster, deploys the `ci` overlay with the three images, indexes the fixture corpus with the Job, waits for the api, runs the evaluation harness against the Ingress, and fails the pull request when the gate fails.
@@ -484,12 +485,12 @@ Architecture 4.15 (e2e-eval row, "what e2e-eval proves"), 5.13 (evaluation archi
 Pushing images (K8).
 
 ### Acceptance criteria
-- [ ] The job passes on `dev` (run URL in the log) and `results.fixture.json` is uploaded; recall@5, citation validity and abstention correctness are in the results register.
-- [ ] A change that breaks retrieval turns the job red with the gate message; evidence file saved, the broken branch not merged.
-- [ ] The job fails closed: if the Job does not complete or the api does not become Ready, the job fails (no `|| true`).
-- [ ] Total job time recorded in the results register.
-- [ ] `python3 scripts/check_submission.py` section I (CI/CD) shows kind and `needs:` satisfied.
-- [ ] `make test && make lint` green.
+- [x] The job passes on `dev` (run URL in the log) and `results.fixture.json` is uploaded; recall@5, citation validity and abstention correctness are in the results register.
+- [x] A change that breaks retrieval turns the job red with the gate message; evidence file saved, the broken branch not merged.
+- [x] The job fails closed: if the Job does not complete or the api does not become Ready, the job fails (no `|| true`).
+- [x] Total job time recorded in the results register.
+- [x] `python3 scripts/check_submission.py` section I (CI/CD) shows kind and `needs:` satisfied.
+- [x] `make test && make lint` green.
 
 ### Verify
 ```bash
@@ -690,7 +691,7 @@ HP-5: tell Zain what Ahmad still owns (A-00 and A-12) and what he should review 
 [`IMPLEMENTATION_PLAN.md`](IMPLEMENTATION_PLAN.md) lists **Phase 15, integration support and final verification**, as the last phase. It was written when two people were building two lanes in parallel, so it said "integration support": make the lanes meet. With this plan the integration happens inside K2 (the real index in the cluster, milestone I-2), K7 (the fixture gate in CI, milestone I-3 for CI), K10 (the real corpus evaluated through the Ingress, I-3 on the cluster) and K11 (the clean clone). What remains of Phase 15 after K11 is only the final verification, in this order:
 
 1. `make test && make lint && make check`, every remaining warning explained.
-2. No leftover placeholder marker (`grep -rn STARTER-TODO --exclude-dir=.venv .`) and no `NotImplementedError`.
+2. No leftover placeholder marker (the placeholder-marker grep printed by `make check`) and no `NotImplementedError`.
 3. Secret scan of the Git history; no `corpus/raw` content committed.
 4. Deviation log and `OPEN_DECISIONS.md` reviewed: nothing open that affects the delivered system.
 5. Baselines consistent with the shipped config; every number in `PIPELINE.md` matches the committed results.

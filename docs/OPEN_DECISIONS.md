@@ -1164,3 +1164,25 @@ Entry template:
 - Claude recommends: A. Tags are mutable; a matrix renames the check (`scan (api)`), which would break the required check name `scan`.
 - Decision: A. Decided by: Claude, pre-approved by Zain.
 - Decided on: 2026-11-06
+
+### D-099 e2e-eval reuses the build artifact; kind from the pinned release binary
+- Status: DECIDED
+- Raised: 2026-11-06 by Claude (phase K7)
+- Area: ci
+- Related: AD-19, R-CI-6, D-098
+- Question: Rebuild images in the job or reuse `build`'s artifact; kind via `helm/kind-action` or the binary?
+- Options: A. `needs: build`, `docker load` the artifact, retag `:ci`; kind v0.33.0 binary via curl. B. Rebuild in the job; kind-action.
+- Claude recommends: A. No second 5 min build, one fewer third-party action to pin; the config (ingress port mapping) is ours anyway.
+- Decision: A. Decided by: Claude, pre-approved by Zain.
+- Decided on: 2026-11-06
+
+### D-100 NetworkPolicies stay in the `ci` overlay; enforcement is proven on minikube
+- Status: DECIDED
+- Raised: 2026-11-06 by Claude (phase K7)
+- Area: ci
+- Related: risk R-07, K4 evidence, plan K7 design notes (option a)
+- Question: Exclude the policies from `ci` or install Calico in kind?
+- Options: A. Keep policies (harmless, kind CNI ignores them), state that isolation is proven on minikube. B. Calico in kind (minutes more per run).
+- Claude recommends: A.
+- Decision: A. CI proves behaviour (Job, Chroma, Ingress, metadata filter, citations, abstention), not isolation. Decided by: Claude, pre-approved by Zain.
+- Decided on: 2026-11-06
