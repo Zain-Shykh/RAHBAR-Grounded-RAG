@@ -78,11 +78,11 @@ These hold in every environment and every commit. A change that breaks one is a 
 | AD-19 | CI and CD use `kind` plus ingress-nginx, the same controller as the minikube addon. | ◇ | 4.15 |
 | AD-20 | The API re-resolves the Chroma collection by name every `INDEX_REFRESH_SECONDS` and on any not-found error, because the swap in AD-02 changes the collection id. | ◇ | 5.6.4 |
 | AD-21 | Each API pod limits concurrent model calls with a semaphore (`LLM_MAX_CONCURRENCY`, default 2). | ◇ | 5.12.4 |
-| AD-22 | `section` is the heading text exactly as it appears in the document. Evaluation matches `source` exactly and `section` by normalised equality or "starts with golden section followed by a space, dot or colon". | ◇ | 5.4.2, 5.13.2 |
+| AD-22 | `section` is the heading text as it appears in the document, whitespace-normalised and cut at 80 characters on a word boundary. Evaluation matches `source` exactly and `section` by normalised equality (trim, lower-case, collapse whitespace, Unicode NFKC, dash variants folded to `-`) or "starts with golden section followed by a space, dot or colon". | ◇ | 5.4.2, 5.13.2 |
 | AD-23 | The embedded text of a chunk is `"<section>\n<text>"` with the nomic task prefix `search_document: `. A question is embedded with `search_query: `. | ◇ | 5.3 |
 | AD-24 | The metric names in section 4.14 are fixed. | ◇ | 4.14 |
 | AD-25 | If the model provider is down or times out, the API answers HTTP 200 with the canned fallback and counts it in `rahbar_fallbacks_total`. | ◇ | 5.7.4 |
-| AD-26 | Non-goals: no PodDisruptionBudget, no Prometheus or Grafana deployment, no service mesh, no auth, no conversation store, no model fine-tuning. | ◇ | 1.2 |
+| AD-26 | (A PodDisruptionBudget for the api, `minAvailable: 2`, was added later: DEV-014.) Non-goals: no Prometheus or Grafana deployment, no service mesh, no auth, no conversation store, no model fine-tuning. | ◇ | 1.2 |
 | AD-27 | Two eval baselines: `eval/baseline.json` (real corpus, shipped numbers, run locally) and `eval/fixtures/baseline.fixture.json` (CI, fixtures). | ◇ | 5.13.4 |
 | AD-28 | Chunk ids are stable: `<source stem>-p<page 3 digits>-c<seq 3 digits>`. | ◇ | 5.4.2 |
 
@@ -98,7 +98,7 @@ It runs on Kubernetes (minikube for development and the demo), re-indexes withou
 
 ### 1.2 Non-goals (AD-26)
 
-Not built, on purpose: authentication or user accounts, conversation history, streaming answers, a PodDisruptionBudget, Prometheus or Grafana in the cluster (metrics are exposed, not scraped), a service mesh, TLS on the Ingress, multi-node scheduling rules, model fine-tuning, a reranker. Hybrid retrieval is optional (see `OPEN_DECISIONS.md` D-006) and not part of the baseline.
+Not built, on purpose: authentication or user accounts, conversation history, streaming answers, Prometheus or Grafana in the cluster (metrics are exposed, not scraped), a service mesh, TLS on the Ingress, multi-node scheduling rules, model fine-tuning, a reranker. Hybrid retrieval is optional (see `OPEN_DECISIONS.md` D-006) and not part of the baseline.
 
 ### 1.3 The stranger test
 
@@ -144,7 +144,7 @@ flowchart LR
 | UI | Static `ui/index.html` served by nginx | Image base `nginxinc/nginx-unprivileged`, pinned patch tag; listens on 8080; writes only under `/tmp` |
 | API | FastAPI, uvicorn, Pydantic v2, httpx (sync endpoints) | `fastapi 0.115.12`, `uvicorn 0.34.2`, `pydantic 2.11.4`, `httpx 0.28.1`, `prometheus-client`, `chromadb-client 1.0.12`, `redis 5.2.1` |
 | Vector store | ChromaDB server | `chromadb/chroma:1.0.12`, must equal the client version |
-| Cache | Redis Stack server (vector search module) | `redis/redis-stack-server`, one exact tag chosen and verified at implementation (see 9.2, R-02) |
+| Cache | Redis Stack server (vector search module) | `redis/redis-stack-server:7.4.0-v8`, pinned and verified in phase 2 (see 9.2, R-02) |
 | Indexer | Python 3.12, `pdfplumber`, `pypdf`, `pytesseract`, `pdf2image`, `pyyaml`, stdlib `html.parser` | System packages in the image: `tesseract-ocr`, `poppler-utils` |
 | LLM (default) | Ollama on the laptop, `llama3.2:3b` | Reached at `host.minikube.internal:11434` |
 | Embeddings | Ollama, `nomic-embed-text` (768 dimensions) | Same host. CI uses `hashing-bow-768` (AD-07) |
@@ -218,11 +218,11 @@ Resource numbers are initial. They are replaced by figures justified with `kubec
 
 | Object | Kind | Replicas | Image | Port | ServiceAccount | Storage | Requests (cpu / mem) | Limits (cpu / mem) |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `api` | Deployment | 3 (HPA 3 to 8) | `rahbar-api:<tag>` | 8000 | `api` | `emptyDir` `/tmp` | 100m / 256Mi | 500m / 512Mi |
-| `ui` | Deployment | 1 | `rahbar-ui:<tag>` | 8080 | `ui` | `emptyDir` `/tmp` | 25m / 32Mi | 100m / 64Mi |
-| `chroma` | StatefulSet | 1 | `chromadb/chroma:1.0.12` | 8000 | `chroma` | PVC `chroma-data` (2Gi) at `/data` | 100m / 256Mi | 500m / 1Gi |
-| `redis` | Deployment | 1 | `redis/redis-stack-server:<pinned>` | 6379 | `redis` | PVC `cache-data` (1Gi) at `/data` | 100m / 256Mi | 500m / 512Mi |
-| `indexer` | Job | 1 (completions 1) | `rahbar-indexer:<tag>` | none | `indexer` | PVC `corpus-data` read-only at `/corpus`, `emptyDir` `/tmp` | 250m / 512Mi | 1 / 2Gi |
+| `api` | Deployment | 3 (HPA 3 to 8) | `rahbar-api:<tag>` | 8000 | `api` | `emptyDir` `/tmp` | 100m / 128Mi | 500m / 256Mi |
+| `ui` | Deployment | 1 | `rahbar-ui:<tag>` | 8080 | `ui` | `emptyDir` `/tmp` | 10m / 16Mi | 100m / 32Mi |
+| `chroma` | StatefulSet | 1 | `chromadb/chroma:1.0.12` | 8000 | `chroma` | PVC `chroma-data` (2Gi) at `/data` | 50m / 192Mi | 500m / 512Mi |
+| `redis` | Deployment | 1 | `redis/redis-stack-server:<pinned>` | 6379 | `redis` | PVC `cache-data` (1Gi) at `/data` | 50m / 64Mi | 250m / 256Mi |
+| `indexer` | Job | 1 (completions 1) | `rahbar-indexer:<tag>` | none | `indexer` | PVC `corpus-data` read-only at `/corpus`, `emptyDir` `/tmp` | 250m / 384Mi | 1 / 1Gi |
 | `reindex` | CronJob (weekly, `0 3 * * 0`) | creates the Job above | same image and arguments as `indexer` | none | `indexer` | same | same | same |
 
 Labels on every object: `app.kubernetes.io/name: <api|ui|chroma|redis|indexer>`, `app.kubernetes.io/part-of: rahbar`. NetworkPolicies and Services select on `app.kubernetes.io/name`.
@@ -247,7 +247,7 @@ One Ingress, class `nginx`, one host `rahbar.local` (the line `<minikube ip> rah
 | `/api` | Prefix | `api:8000`, no rewrite (the app's routes already begin with `/api`) |
 | `/` | Prefix | `ui:80` |
 
-Annotations: `nginx.ingress.kubernetes.io/proxy-read-timeout: "120"` (model calls on a laptop CPU exceed the 60 s default) and `proxy-body-size: "16k"`.
+Annotations: `nginx.ingress.kubernetes.io/proxy-read-timeout: "310"` (at least 310 s, above `LLM_TIMEOUT_SECONDS`; model calls on a laptop CPU took up to 139 s, DEV-007) and `proxy-body-size: "16k"`.
 
 `/healthz`, `/readyz` and `/metrics` are not routed through the Ingress. They are reached in-cluster by probes, or by `kubectl port-forward` for evidence.
 
@@ -265,13 +265,13 @@ Annotations: `nginx.ingress.kubernetes.io/proxy-read-timeout: "120"` (model call
 | `CHROMA_HOST`, `CHROMA_PORT`, `CHROMA_COLLECTION` | `chroma`, `8000`, `rahbar` | api, indexer | The live collection name. The indexer stages into `rahbar_next` (AD-02). |
 | `REDIS_HOST`, `REDIS_PORT` | `redis`, `6379` | api | |
 | `TOP_K` | `5` | api | Recall@5 is the headline metric. |
-| `RELEVANCE_FLOOR` | `0.50` (to be calibrated, section 5.6.3) | api | Cosine similarity of the best passage. |
-| `CACHE_THRESHOLD` | `0.92` (to be calibrated, section 5.9.3) | api | Lowest value with zero false hits on the test set. |
+| `RELEVANCE_FLOOR` | `0.70` (calibrated in phase 12: midpoint of 0.658 and 0.746, section 5.6.3) | api | Cosine similarity of the best passage. |
+| `CACHE_THRESHOLD` | `0.96` (calibrated in phase 11, section 5.9.3) | api | Lowest value with zero false hits on the test set. |
 | `CACHE_TTL_SECONDS` | `86400` | api | A safety net. Real invalidation is by `index_id`. |
 | `TEMPERATURE` | `0.2` | api | JSON and facts want 0 to 0.3. Not 0, so that the one retry can produce a different output than the first try. |
 | `LLM_NUM_CTX` | `8192` | api | Five chunks of 400 words plus instructions exceed Ollama's small default context. |
 | `LLM_MAX_TOKENS` | `512` | api | Caps generation time. |
-| `LLM_TIMEOUT_SECONDS` | `90` | api | Below the Ingress timeout (120 s). |
+| `LLM_TIMEOUT_SECONDS` | `300` | api | Below the Ingress timeout (at least 310 s). Measured: slowest uncached answer 139 s on the host CPU (DEV-007). |
 | `LLM_MAX_CONCURRENCY` | `2` | api | AD-21. |
 | `INDEX_REFRESH_SECONDS` | `10` | api | Polling interval for collection metadata (AD-20, AD-04). |
 | `CHUNK_SIZE`, `CHUNK_OVERLAP` | `400`, `50` (to be chosen by measurement, section 5.4.2) | indexer | Unit: words (AD-10). |
@@ -294,6 +294,8 @@ The ConfigMap file carries a one-line YAML comment justifying each of `TEMPERATU
 StorageClass: the minikube default `standard` (hostPath provisioner, `ReadWriteOnce`). It is a single node, so the helper pod and the Job can both mount `corpus-data`, one after the other.
 
 **Corpus delivery (AD-08).** `make corpus` applies the namespace and `corpus-data`, starts a short-lived non-root helper pod that mounts it, runs `kubectl cp corpus/raw/. rahbar/corpus-loader:/corpus`, and deletes the pod. `kubectl cp` goes through the API server, so default-deny NetworkPolicy does not interfere. In the `ci` overlay the Job reads the fixture documents from a ConfigMap `corpus-fixtures` mounted at `/corpus` instead of the PVC.
+
+**Chunk count (DEV-010).** The index built on the host has 981 chunks and every RAG measurement (baselines, tuning, `eval/results.json`) uses it. The same corpus indexed by the container has 980: the container's Tesseract OCRs the 8-page faculty policy into 39 chunks instead of 40. The count is an observation of the build, not a contract; cluster evidence quotes 980. Pinning the Tesseract version in `indexer/Dockerfile` and re-measuring would remove the difference (not done).
 
 The documents are never committed and never baked into an image, so the public Docker Hub images hold no university PDFs (R-COR-12). Before it indexes, the Job re-hashes every file against the `sha256` in `_index.json` and exits non-zero on a mismatch.
 
@@ -439,6 +441,8 @@ k8s/
     └── prod/       # registry images tagged by commit SHA, real config
 ```
 
+The `ci` overlay reads its fixtures from `eval/fixtures`, outside the overlay directory, which kustomize refuses by default. It is therefore built with `kustomize build --load-restrictor LoadRestrictionsNone k8s/overlays/ci` and applied with `kustomize build ... | kubectl apply -f -`, not `kubectl apply -k` (`make manifests`, `ci.yml` and `cd.yml` all pass the flag; DEV-011). `dev` and `prod` build with plain `kustomize build`. A repo-level `k8s/tools/corpus-loader.yaml` (not part of any overlay) is the helper pod that `make corpus` uses to fill the corpus PVC.
+
 | Aspect | `dev` | `ci` | `prod` |
 | --- | --- | --- | --- |
 | Where it runs | minikube on a laptop | kind in GitHub Actions (CI e2e-eval and CD smoke test) | The definition of the production shape; validated by `kubeconform -strict` on every PR |
@@ -548,7 +552,7 @@ flowchart LR
 
 | Item | Decision |
 | --- | --- |
-| Triggers | `ci.yml`: `pull_request` to `main` and `push` to `dev`. `cd.yml`: `push` to `main`. |
+| Triggers | `ci.yml`: `pull_request` to `main` and `dev`, `push` to `dev`, and `workflow_dispatch`. `cd.yml`: `push` to `main`, and `workflow_dispatch` so the pipeline can be rehearsed from `dev` (GitHub offers a dispatch only for a workflow file on the default branch, so this works once the file is on `main`). The three `build-push-action` steps set `push:` only when the ref is `main` or `dev`, so a dispatch from any other branch builds and never publishes; the tag is always the commit SHA (DEV-012). The first run that counts for R-SUB-2 is the push to `main` at the final merge. |
 | e2e-eval | kind cluster, ingress-nginx installed (the same controller as the minikube addon), `ci` overlay, images loaded with `kind load`, corpus from `eval/fixtures`, wait for the Job, wait for the api rollout, then `python eval/run_eval.py --api http://localhost --host rahbar.local --golden eval/fixtures/golden.fixture.yaml --baseline eval/fixtures/baseline.fixture.json --out eval/fixtures/results.fixture.json` (AD-27). Exit 1 fails the job. |
 | What e2e-eval proves | The plumbing (Job, Chroma, StatefulSet, PVC, probes, Ingress), the metadata filter on versions, citation validity, abstention and the injection defence, with a deterministic embedder and the extractive provider. It does not measure semantic quality; that is measured locally with Ollama against the real corpus (`make eval`). |
 | Gate | recall@5 drop of more than 5 points below the baseline, any must-abstain answered from context, or citation validity under 95%. |
@@ -701,9 +705,9 @@ sequenceDiagram
 | Stage | Input | Output | Rules |
 | --- | --- | --- | --- |
 | **verify** | `/corpus/_index.json` | the verified list | Files missing or hash different: log each, exit 1. |
-| **extract** | one file | `Document` with `Page`s | PDF: `pdfplumber` text per page, layout preserved so table rows stay on one line. A page with fewer than 30 non-space characters is OCR'd: `pdf2image` at 200 dpi, `pytesseract` language `eng`, `Page.ocr = True`. HTML: stdlib `html.parser`; tables become one line per row with ` \| ` between cells and the table caption or nearest heading kept as context. Markdown (fixtures): front matter stripped, headings kept. Repeating headers and footers (a line that appears in the top or bottom three lines of at least half the pages) are removed. Headings and section numbers are never removed. |
+| **extract** | one file | `Document` with `Page`s | PDF: `pdfplumber` default text mode per page (`extract_text()`; a table row stays on one line, DEV-001). Files whose pages hold several columns or two-page spreads are cropped into columns first and read in order (`COLUMN_SPLITS`, D-044, D-052). A page with fewer than 30 non-space characters is OCR'd: `pdf2image` at 200 dpi, `pytesseract` language `eng`, `Page.ocr = True`. HTML: stdlib `html.parser`; tables become one line per row with ` \| ` between cells and the table caption or nearest heading kept as context. Markdown (fixtures): front matter stripped, headings kept. Repeating headers and footers (a line that appears in the top or bottom three lines of at least half the pages) are removed. Headings and section numbers are never removed. |
 | **clean** | `Document` | `Document` | Normalise Unicode and whitespace, join words hyphenated across line ends, drop page-number-only lines and form feeds, collapse more than two blank lines. Never strip clause numbers, table separators or heading lines. One thing deliberately kept: the clause numbers inside OCR text even when mangled (for example `92.`), because dropping them would hide the loss; this is reported in `PIPELINE.md`. |
-| **chunk** | `Document`, `CHUNK_SIZE`, `CHUNK_OVERLAP` | `Chunk`s | Unit: words (AD-10). Detect headings with: numbered clause (`^\d+(\.\d+)*[.)]?\s+\S`), roman or lettered section lines, and short all-caps lines. Split on headings first, then blank-line paragraphs, then sentences, packing to `CHUNK_SIZE`. Overlap: the last `CHUNK_OVERLAP` words of a chunk start the next chunk within the same section. A table row is never split. A chunk never crosses a document. `section` is the nearest heading text exactly as written, whitespace-normalised (AD-22); before the first heading it is the document title. `page` is the page where the chunk starts. |
+| **chunk** | `Document`, `CHUNK_SIZE`, `CHUNK_OVERLAP` | `Chunk`s | Unit: words (AD-10). Detect headings with four rules, first match wins: (1) numbered clause `N.` or `N.N...` (1 or 2 digits and a dot, a capital or `(` next, line at most 150 characters; page headers such as `16 Student Handbook 2026` and `1)` items do not count), (2) roman or lettered section lines, (3) short all-caps lines, (4) an isolated short line (1 to 10 words, blank above, text below, no final punctuation). A title with no body hands its line to the next section. A line is split before a dotted clause number followed by a capital word (two columns run into one line; grades such as `4.00` excluded) (DEV-003). Split on headings first, then blank-line paragraphs, then sentences, packing to `CHUNK_SIZE`. Overlap: the last `CHUNK_OVERLAP` words of a chunk start the next chunk within the same section. A table row is never split. A chunk never crosses a document. `section` is the nearest heading text as written, whitespace-normalised and cut at 80 characters on a word boundary (AD-22, DEV-003); before the first heading it is the document title. `page` is the page where the chunk starts. |
 | **embed** | chunk texts | vectors | As in 5.3. All-or-nothing: one failed batch after retries fails the Job. Vector length must equal the first vector's length. |
 | **store** | chunks, vectors | live collection | Stage-and-swap (5.4.3). |
 
@@ -924,7 +928,7 @@ Rules: evidence is numbered from 1 in rank order; the strings `<<<` and `>>>` ar
 
 #### 5.7.2 Provider interface (AD-14)
 
-Kit contract: `generate(question, passages) -> Answer`. Extended, backwards compatible with the stub:
+Kit contract: `generate(question, passages) -> Answer`. Extended, backwards compatible with the stub (DEV-004: `Passage` also gains optional `doc_version: str | None` and `superseded: bool | None`, default `None`, filled by the retriever from chunk metadata for the evidence header of 5.7.1; the prompt omits a header field whose value is `None`; no external JSON shape changes):
 
 ```python
 @dataclass
@@ -956,7 +960,7 @@ Ollama call: `POST {OLLAMA_URL}/api/chat` with `model=LLM_MODEL`, `messages`, `s
 `validate.py` checks, in order:
 
 1. The text parses as JSON and satisfies `Answer`.
-2. Every citation resolves to a retrieved passage, matching `source` exactly and `section` exactly (page is filled from the passage if the model omitted it or disagrees).
+2. Every citation resolves to a retrieved passage, matching `source` exactly and `section` exactly, or, failing an exact match, `section` is a prefix of exactly one distinct retrieved `section` of the same `source`, ending at a space, dot or colon, and not an all-digit parent number (`4.3` for `4.3 The normal course load is 5 courses.`; DEV-005). The citation is rewritten to the passage's exact `source`, `section` and `page`, so a response only carries retrieved strings. An ambiguous or mid-word prefix is rejected.
 3. If `answered_from_context` is true, there is at least one citation. If it is false, citations are emptied.
 4. `answer` is non-empty.
 
@@ -1014,7 +1018,7 @@ The assignment requires the cache to expire when the indexing Job runs, and requ
 
 1. The indexer stamps a new `index_id` into the collection metadata at every run (5.4.3).
 2. Every cache entry and every cache search index is named by the `index_id` it was built under.
-3. When an API pod's refresh sees a new `index_id`, it creates `idx:cache:{new}`, then drops every other `idx:cache:*` index with `FT.DROPINDEX ... DD` (which deletes its entries). The operation is idempotent, so three pods doing it at once is safe.
+3. When an API pod sees a new `index_id` in its snapshot (on the next question or the next `/readyz` probe, whichever comes first; `SemanticCache.maintain`, DEV-006), it creates `idx:cache:{new}`, then drops every other `idx:cache:*` index with `FT.DROPINDEX ... DD` (which deletes its entries). The operation is idempotent, so three pods doing it at once is safe.
 4. A pod's retriever and its cache both read the same `index_state` snapshot, so within one pod the cache and the index always agree. For up to `INDEX_REFRESH_SECONDS` after a swap, a pod that has not refreshed yet may still serve cached answers built from the old index (and its collection handle may error and trigger a refresh, see 5.6.4). Once it refreshes it only sees the new `index_id`, so the old entries are unreachable. The window is bounded by the refresh interval, and the demonstration waits longer than that.
 5. Entries written by a late pod under an old `index_id` land under a prefix with no search index. They are never found and expire by TTL.
 
@@ -1057,7 +1061,7 @@ Ollama runs on the laptop, outside the cluster, listening on `0.0.0.0:11434` (`O
 | api | `POST /api/embed` | `{"model": EMBED_MODEL, "input": ["search_query: ..."]}` | every uncached question |
 | api | `POST /api/chat` | `model`, `messages`, `stream=false`, `format=<schema>`, `options` | generation |
 
-Embedding and generation use two different models loaded by the same Ollama. Ollama keeps both resident while memory allows (`OLLAMA_KEEP_ALIVE` is a host setting). The first request after a cold start is slow; the 90 s timeout covers it, and the CI-less demo runs one warm-up question first.
+Embedding and generation use two different models loaded by the same Ollama. Ollama keeps both resident while memory allows (`OLLAMA_KEEP_ALIVE` is a host setting). The first request after a cold start is slow; the 300 s timeout covers it, and the CI-less demo runs one warm-up question first.
 
 #### 5.12.3 Data governance (ADR 0004)
 
@@ -1088,7 +1092,7 @@ flowchart LR
 
 | Metric | Definition |
 | --- | --- |
-| Section match | A retrieved passage matches a golden `{source, section}` when `source` is equal and the retrieved `section` equals the golden `section` after trimming, lower-casing and collapsing whitespace, **or** starts with the golden section followed by a space, `.` or `:`. So golden `1.21` matches retrieved `1.21 Attendance`, and golden `5` matches `5.4 Academic Warning`. |
+| Section match | A retrieved passage matches a golden `{source, section}` when `source` is equal and the retrieved `section` equals the golden `section` after trimming, lower-casing, collapsing whitespace, Unicode NFKC and folding dash variants to `-`, **or** starts with the golden section followed by a space, `.` or `:`. So golden `1.21` matches retrieved `1.21 Attendance`, and golden `5` matches `5.4 Academic Warning`. |
 | recall@k | For each question with relevant passages: `|{golden items matched by any of the first k retrieved}| / |golden items|`. Questions with an empty `relevant` list (abstain) are excluded from recall. Reported for k = 3 and 5, overall and by question type. |
 | Citation validity | `valid citations / all citations` over all responses, using the 5.8 rule. Responses with no citations contribute nothing. |
 | Abstention correctness | Fraction of `must_abstain` questions whose response has `answered_from_context == false`. Must be 100%. A separate line reports how many of those came from `X-Outcome: fallback`, so a masked failure is visible. |
@@ -1217,19 +1221,19 @@ Each is expected to work. If it does not, the fix is a deviation entry, not a qu
 
 | # | Assumption | How to verify early |
 | --- | --- | --- |
-| A-1 | `host.minikube.internal` resolves inside pods, and the Calico `ipBlock` for the gateway lets the traffic through | `kubectl exec` a pod, `curl http://host.minikube.internal:11434/api/tags` |
-| A-2 | Chroma 1.0.12 supports `collection.modify(name=...)` and `delete_collection` over the HTTP client as used in 5.4.4 | a small script against the running StatefulSet before the indexer is written |
-| A-3 | `chromadb-client` batch limit is at least 500 records per `add` | same script |
-| A-4 | `kubectl cp` works into the helper pod with a non-root user and an `fsGroup` PVC | `make corpus` dry run |
-| A-5 | The native `preStop` sleep action is available on the cluster's Kubernetes version | `kubectl explain pod.spec.containers.lifecycle.preStop.sleep` |
-| A-6 | `ollama` accepts `format=<json schema>` for `llama3.2:3b` and honours `num_ctx` 8192 within laptop memory | one manual call |
+| A-1 | `host.minikube.internal` resolves inside pods, and the Calico `ipBlock` for the gateway lets the traffic through | `kubectl exec` a pod, `curl http://host.minikube.internal:11434/api/tags`. **Verified 2026-11-06 (K2, minikube):** resolves to 192.168.49.1 from a pod, Ollama answered `/api/tags`; re-verified with the `ipBlock` policy in K4 (2026-11-06): an `indexer`-labelled pod reached `192.168.49.1:11434`, the api answered a cache-miss question and the indexer Job stored 980 chunks (`docs/evidence/k04-networkpolicy-proof.txt`). |
+| A-2 | Chroma 1.0.12 supports `collection.modify(name=...)` and `delete_collection` over the HTTP client as used in 5.4.4 | a small script against the running StatefulSet before the indexer is written. **Verified 2026-11-04 (phase 2, `scripts/verify_services.py` 1.4, 1.5):** rename keeps count and metadata; the delete-then-rename swap works; `where` on a bool and on `$in` works (1.6). |
+| A-3 | `chromadb-client` batch limit is at least 500 records per `add` | same script. **Verified 2026-11-04:** 500 in one `add` works; server `get_max_batch_size()` is 5461. |
+| A-4 | `kubectl cp` works into the helper pod with a non-root user and an `fsGroup` PVC | `make corpus` dry run. **Verified 2026-11-06 (K2):** `kubectl cp` into a pinned busybox helper (UID 10001, `fsGroup` 10001) copied 11 files (34 MB); the Job read them read-only. |
+| A-5 | The native `preStop` sleep action is available on the cluster's Kubernetes version | `kubectl explain pod.spec.containers.lifecycle.preStop.sleep`. **Verified 2026-11-05 (K1, minikube v1.37.0):** the field exists and the manifest is accepted; deleting an api pod took 11.4 s (10 s sleep plus shutdown), a ui pod without `preStop` 0.9 s. No `exec` fallback needed. `docs/evidence/k01-prestop-sleep.txt`. |
+| A-6 | `ollama` accepts `format=<json schema>` for `llama3.2:3b` and honours `num_ctx` 8192 within laptop memory | one manual call. **Verified 2026-11-04 (`scripts/verify_ollama.py`):** `format=Answer.model_json_schema()` is honoured on 3 of 3 prompts (answerable, unanswerable, injection), every reply validates; `num_ctx` 8192 is honoured (a 6510-token prompt was fully read and a code word from its first paragraph recovered); `llama3.2:3b` is 2986 MiB resident, 100% CPU. **Latency:** on this CPU-only host a warm 6510-token prompt took about 20 s (two runs: 19.0 s and 19.8 s, roughly 330 tokens/s), so a typical 3000-token prompt is about 10 s plus generation. A first run on a busy host took 171 s, so contention and cold loads can be many times slower; phase 10 keeps the timeout and the warm-up question, and phase 12 measures the real p50 and p95. |
 
 ### 9.2 Risks
 
 | # | Risk | Mitigation |
 | --- | --- | --- |
-| R-01 | `chromadb/chroma:1.0.12` may not start as a non-root user with `readOnlyRootFilesystem` | set `runAsUser` to the image's user, `fsGroup` for `/data`, `emptyDir` for any other write path. If impossible, log a deviation naming the weakened setting. |
-| R-02 | `redis/redis-stack-server` may expect to write outside `/data` and may default to root | same approach; pin a tag whose behaviour is verified; if the vector module cannot run non-root, log a deviation. Fallback option D-001 B (plain Redis with app-side cosine) remains available. |
+| R-01 | `chromadb/chroma:1.0.12` may not start as a non-root user with `readOnlyRootFilesystem` | set `runAsUser` to the image's user, `fsGroup` for `/data`, `emptyDir` for any other write path. If impossible, log a deviation naming the weakened setting. **Verified 2026-11-04: no deviation.** The image default user is root, but it runs as UID 10001 with `--read-only --cap-drop ALL --security-opt no-new-privileges`, `/data` writable (needs `fsGroup` or equivalent ownership), `PERSIST_DIRECTORY=/data`, and writes nothing else outside `/data` (`docker diff`). Collection create, 500-record add, rename, swap and filters all pass in that mode. |
+| R-02 | `redis/redis-stack-server` may expect to write outside `/data` and may default to root | same approach; pin a tag whose behaviour is verified; if the vector module cannot run non-root, log a deviation. Fallback option D-001 B (plain Redis with app-side cosine) remains available. **Verified 2026-11-04: no deviation.** `redis/redis-stack-server:7.4.0-v8` defaults to root but runs as UID 10001 with `--read-only --cap-drop ALL --security-opt no-new-privileges` and `REDIS_ARGS="--appendonly yes"`; it writes only under `/data` (`docker diff` shows nothing else; `--dir /data` is set by its entrypoint). The `/data` volume must be owned by the UID (`fsGroup: 10001` in Kubernetes). **Re-checked 2026-11-07 (K11):** on the clean-clone redeploy chroma-0 and redis again started as UID 10001 on fresh PVCs and wrote `/data`; on minikube's hostPath provisioner this still works because the directory is 0777, not because of `fsGroup` (DEV-009, accepted: real clusters honour `fsGroup`, which we have not been able to exercise). `FT.CREATE` HNSW cosine 768 plus TAG, KNN 1 `DIALECT 2` with a tag filter, TTL and `FT.DROPINDEX ... DD` all pass in that mode. **Kubernetes check, 2026-11-05 (K1):** both pods run as UID 10001 with read-only root, drop ALL, and write `/data` on minikube. `fsGroup` itself is not what makes it writable there: the hostPath provisioner creates `/data` as 0777 root, so `fsGroup` is a no-op (DEV-009). Chroma additionally needs `enableServiceLinks: false` (DEV-008). |
 | R-03 | The Ollama host IP differs between machines | `ipBlock` value in the `dev` overlay, documented one-line check in the README |
 | R-04 | 6 GB minikube plus Ollama models may be tight on the laptop | stop unused Ollama models; the resource table in 4.2 is deliberately small |
 | R-05 | OCR clause-number errors reduce exact-term recall on the scanned documents | documented in `PIPELINE.md`; not hidden |

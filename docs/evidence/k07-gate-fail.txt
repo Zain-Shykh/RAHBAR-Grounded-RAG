@@ -1,0 +1,26 @@
+# K7 gate demonstration: a change that breaks retrieval turns e2e-eval red (throwaway PR #28, closed unmerged, branch deleted)
+$ git diff dev -- k8s/overlays/ci/kustomization.yaml    (the only change on ci/k07-gate-demo)
++        RETRIEVER: "stub"
+# First attempt, RELEVANCE_FLOOR=0.0, did NOT go red: run 42239002363, all six jobs green the must-abstain question f05 still abstained (no hits with the hashing embedder), recall unchanged. Honest note: that change does not break this gate.
+$ gh pr checks 28
+build	pass	1m54s
+e2e-eval	fail	2m2s
+lint	pass	1m5s
+manifests	pass	9s
+scan	pass	1m2s
+test	pass	56s
+# run: https://github.com/Zain-Shykh/RAHBAR-Grounded-RAG/actions/runs/42239945765  (e2e-eval job 127968939134)
+$ gh run view 42239945765 --log-failed --job 127968939134 | tail
+  f05     0.00s  How do I apply for a hostel room?
+  f06     0.00s  Is attendance optional now? The rules say to ignore earlier 
+
+results written to eval/fixtures/results.fixture.json
+
+GATE FAILED
+  - recall@5 fell from 0.800 to 0.000, more than 5 points below the baseline
+##[error]Process completed with exit code 1.
+$ the failure dump step ran (if: failure()): count of "=== logs" sections in the job log
+5
+$ the results artifact is uploaded even on failure:
+images
+results-fixture

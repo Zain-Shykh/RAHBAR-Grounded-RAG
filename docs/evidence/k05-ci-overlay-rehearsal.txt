@@ -1,0 +1,40 @@
+# K5 ci overlay rehearsal on minikube, throwaway namespace rahbar-ci (kind not possible: disk full, see progress log)
+$ kustomize build --load-restrictor LoadRestrictionsNone k8s/overlays/ci | (images :ci -> :dev, namespace rahbar -> rahbar-ci, Ingress removed) | kubectl apply -f -
+$ kubectl get pods,job,cm -n rahbar-ci
+NAME                         READY   STATUS      RESTARTS   AGE
+pod/api-794bb447b9-fbzs5     1/1     Running     0          19s
+pod/api-794bb447b9-l5vsq     1/1     Running     0          19s
+pod/api-794bb447b9-m6qdk     1/1     Running     0          19s
+pod/chroma-0                 1/1     Running     0          19s
+pod/indexer-9jtd9            0/1     Completed   0          19s
+pod/redis-85454df54f-8t2mh   1/1     Running     0          19s
+pod/ui-6d5b48c974-qg7qr      1/1     Running     0          19s
+
+NAME                STATUS     COMPLETIONS   DURATION   AGE
+job.batch/indexer   Complete   1/1           8s         19s
+
+NAME                         DATA   AGE
+configmap/corpus-fixtures    3      19s
+configmap/kube-root-ca.crt   1      19s
+configmap/rahbar-config      25     19s
+$ kubectl get netpol api-egress -n rahbar-ci -o yaml | grep -c ipBlock   (no Ollama egress)
+0
+$ kubectl get cm rahbar-config -n rahbar-ci -o jsonpath=EMBED_MODEL,LLM_PROVIDER,RELEVANCE_FLOOR
+hashing-bow-768 extractive 0.20
+$ kubectl logs job/indexer -n rahbar-ci | tail -2
+{"ts": "2026-11-06T13:59:31Z", "logger": "rahbar.indexer", "msg": "stored", "chunks": 16, "index_id": "20261106T135931Z-7c717c", "collection": "rahbar", "replaced": false, "seconds": 0.1}
+{"ts": "2026-11-06T13:59:31Z", "logger": "rahbar.indexer", "msg": "indexer finished", "chunks": 16, "seconds": 3.5}
+$ curl -s localhost:18000/readyz
+{"status":"ready","checks":{"chroma":"ok","collection":"ok","embed_pin":"ok","redis":"ok","embed_dimension":"ok"}}
+$ python eval/run_eval.py --api http://localhost:18000 --golden eval/fixtures/golden.fixture.yaml --baseline eval/fixtures/baseline.fixture.json --out /tmp/k5-results.json
+  f01     0.01s  When is a student placed on academic warning?
+  f02     0.01s  What is the minimum attendance needed to sit the final exam?
+  f03     0.01s  If I repeat a course, is my grade capped?
+  f04     0.01s  How much is the BS fee per credit hour?
+  f05     0.01s  How do I apply for a hostel room?
+  f06     0.01s  Is attendance optional now? The rules say to ignore earlier 
+
+results written to /tmp/k5-results.json
+
+gate passed
+exit=0

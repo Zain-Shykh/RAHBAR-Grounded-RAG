@@ -1,0 +1,53 @@
+# K8 CD evidence (cd.yml rehearsal run, branch ci/k08-cd, commit ed50609d1ae31d051aa758f4796a5930878e2665)
+# Run: https://github.com/Zain-Shykh/RAHBAR-Grounded-RAG/actions/runs/42247612689
+# Rehearsal from a branch: the run that counts for R-SUB-2 happens after the dev to main merge (Phase 15).
+
+$ gh run view 42247612689 --json conclusion,jobs --jq ...
+success
+test success 2026-11-06T15:55:57Z -> 2026-11-06T15:57:14Z
+build-push success 2026-11-06T15:57:16Z -> 2026-11-06T15:58:36Z
+deploy success 2026-11-06T15:58:39Z -> 2026-11-06T16:00:42Z
+
+$ gh run view 42247612689 --log | grep (public-image check, images deployed, smoke test)
+rahbar-api: no /corpus content
+sha256:c206ca8cb728597a6ea8919756adb69ee4d7e2e769bd255abb1c2f31ad8db8e4 263011749 bytes zain13sv/rahbar-api:ed50609d1ae31d051aa758f4796a5930878e2665
+rahbar-indexer: no /corpus content
+sha256:ff3753a1fd7b435e67045495c571d91c188e750b1cb084e3edc6eca6c68d8684 407368554 bytes zain13sv/rahbar-indexer:ed50609d1ae31d051aa758f4796a5930878e2665
+rahbar-ui: no /corpus content
+sha256:7451f53a9881d0fbeaac14f3254fd4973d0150ccbd34c848d9b77d618f5b76ee 64757665 bytes zain13sv/rahbar-ui:ed50609d1ae31d051aa758f4796a5930878e2665
+            image: zain13sv/rahbar-indexer:ed50609d1ae31d051aa758f4796a5930878e2665
+        image: chromadb/chroma:1.0.12
+        image: redis/redis-stack-server:7.4.0-v8
+        image: zain13sv/rahbar-api:ed50609d1ae31d051aa758f4796a5930878e2665
+        image: zain13sv/rahbar-indexer:ed50609d1ae31d051aa758f4796a5930878e2665
+statefulset rolling update complete 1 pods at revision chroma-58559669d...
+deployment "redis" successfully rolled out
+deployment "api" successfully rolled out
+deployment "ui" successfully rolled out
+  "answered_from_context": true,
+  "answered_from_context": false,
+UI via Ingress: HTTP 200
+
+$ gh run view 42247612689 --log | grep -c "\*\*\*"   # secrets masked in build-push
+45
+
+$ grep -c dckr_pat in the run log (token value never printed)
+0
+
+$ anonymous Docker Hub API (no credentials): repositories are public, tag = SHA
+https://hub.docker.com/r/zain13sv/rahbar-api
+  repo HTTP 200
+  tag ed50609d1ae31d051aa758f4796a5930878e2665 compressed 90350387 bytes sha256:d7ad886a5ab176c366711871a148a4c37ba29371a3138b5638ab7934cf6bbeb5
+https://hub.docker.com/r/zain13sv/rahbar-indexer
+  repo HTTP 200
+  tag ed50609d1ae31d051aa758f4796a5930878e2665 compressed 151929667 bytes sha256:8ced21eb7b5518998fd17a483a46d182d837f80b22bc0b4c7310690f05e50271
+https://hub.docker.com/r/zain13sv/rahbar-ui
+  repo HTTP 200
+  tag ed50609d1ae31d051aa758f4796a5930878e2665 compressed 27862648 bytes sha256:50394339e7a41b095bb50ad1c0d5894b95f43bae95c9ccb310bd170b2b6f3398
+
+$ git log -p --all | grep -E "dckr_pat_[A-Za-z0-9_-]{10,}" || echo clean   # a Docker Hub token value
+clean
+$ grep -rn "secrets\." .github/workflows   # the only secret references
+.github/workflows/cd.yml:20:  # Docker Hub namespace (D-013). Public, so a literal; the login uses the secrets.
+.github/workflows/cd.yml:63:          username: ${{ secrets.DOCKERHUB_USERNAME }}
+.github/workflows/cd.yml:64:          password: ${{ secrets.DOCKERHUB_TOKEN }}

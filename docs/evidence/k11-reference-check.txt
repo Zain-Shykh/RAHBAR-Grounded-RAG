@@ -1,0 +1,50 @@
+# every path:line reference in the engineering notes and ADR 0001 resolves to a real line
+# captured 2026-11-06T19:47Z on branch docs/k11-platform-docs
+
+$ grep -n AHMAD docs/ENGINEERING-NOTES.md || echo "no markers left"
+no markers left
+
+$ python3 scripts/check_refs.py docs/ENGINEERING-NOTES.md docs/adr/0001-indexer-as-job.md
+ok   api/app/config.py:54
+ok   api/app/config.py:55
+ok   api/app/main.py:32
+ok   api/app/main.py:45
+ok   api/app/providers/llm/ollama.py:28
+ok   api/app/retrieval/chroma.py:40
+ok   api/app/retrieval/chroma.py:43
+ok   api/app/routes/ask.py:14
+ok   api/app/routes/health.py:24
+ok   api/app/routes/health.py:60
+ok   api/app/routes/metrics.py:24
+ok   api/app/services/answer.py:100
+ok   api/app/services/index_state.py:113
+ok   api/app/services/validate.py:23
+ok   eval/golden.yaml:105
+ok   eval/golden.yaml:76
+ok   indexer/pipeline/embed.py:20
+ok   indexer/pipeline/run.py:107
+ok   indexer/pipeline/run.py:83
+ok   indexer/pipeline/run.py:94
+ok   indexer/pipeline/store.py:94
+ok   k8s/base/api.yaml:2
+ok   k8s/base/api.yaml:60
+ok   k8s/base/api.yaml:70
+ok   k8s/base/chroma-statefulset.yaml:12
+ok   k8s/base/chroma-statefulset.yaml:46
+ok   k8s/base/configmap.yaml:10
+ok   k8s/base/configmap.yaml:31
+ok   k8s/base/indexer-job.yaml:41
+ok   k8s/base/indexer-job.yaml:5
+ok   k8s/base/kustomization.yaml:31
+ok   k8s/base/networkpolicy.yaml:100
+ok   k8s/base/pdb.yaml:10
+ok   k8s/base/reindex-cronjob.yaml:13
+ok   k8s/base/api.yaml:52
+ok   k8s/base/chroma-statefulset.yaml:46
+ok   k8s/base/indexer-job.yaml:5
+ok   k8s/base/kustomization.yaml:31
+ok   k8s/base/networkpolicy.yaml:100
+ok   k8s/base/reindex-cronjob.yaml:12
+40 references, 0 unresolved
+
+# the script only proves the line exists; the independent tester also read every cited k8s and api line and found one wrong (api.yaml:5, now :2)

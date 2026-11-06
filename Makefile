@@ -11,9 +11,13 @@ BIN := $(abspath $(VENV))/bin
 # docker driver, run `minikube tunnel` in another terminal and use INGRESS_IP=127.0.0.1.
 INGRESS_IP ?= $(shell minikube ip 2>/dev/null)
 HOST ?= rahbar.local
+CORPUS_SRC ?= corpus/raw
+# Local data services (phase 2). Tags verified in docs/specs/phase-02-local-services.md.
+CHROMA_IMAGE ?= chromadb/chroma:1.0.12
+REDIS_IMAGE ?= redis/redis-stack-server:7.4.0-v8
 
 .DEFAULT_GOAL := help
-.PHONY: help install test lint dev cluster images apply secret index ask fetch eval eval-fixtures check
+.PHONY: help install test lint dev dev-services dev-services-stop dev-services-reset cluster images corpus apply down secret index ask fetch eval eval-fixtures check manifests
 
 help: ## list the targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  make %-14s %s\n", $$1, $$2}'
@@ -23,17 +27,38 @@ install: ## create .venv and install the api, indexer and tool dependencies
 	$(BIN)/pip install -q --upgrade pip
 	$(BIN)/pip install -q -r api/requirements-dev.txt -r indexer/requirements-dev.txt
 
-test: ## run the api and indexer tests (stubs only: no cluster, no model, no network)
+test: ## run the api, indexer and eval tests (stubs only: no cluster, no model, no network)
 	cd api && $(BIN)/pytest -q
 	cd indexer && $(BIN)/pytest -q
+	cd eval && $(BIN)/pytest -q
 
 lint: ## ruff and mypy over everything in Python
-	$(BIN)/ruff check api indexer eval corpus
+	$(BIN)/ruff check api indexer eval corpus scripts/verify_services.py scripts/verify_ollama.py scripts/check_golden_extract.py scripts/chunk_report.py scripts/check_index.py scripts/live_check_phase10.py scripts/live_check_phase11.py scripts/calibrate_cache.py
 	cd api && $(BIN)/mypy app
 	cd indexer && $(BIN)/mypy pipeline
 
 dev: ## run the API with stubs on http://localhost:8000, serving the chat UI too
 	cd api && SERVE_UI_DIR=../ui RETRIEVER=stub LLM_PROVIDER=stub $(BIN)/uvicorn app.main:app --reload --port 8000
+
+dev-services: ## start Chroma :8100 and Redis Stack :6379 (until re-login: sg docker -c "make dev-services")
+	-@docker rm -f rahbar-dev-chroma rahbar-dev-redis >/dev/null 2>&1
+	docker run -d --name rahbar-dev-chroma -p 127.0.0.1:8100:8000 -v rahbar-dev-chroma:/data \
+	  -e IS_PERSISTENT=TRUE -e PERSIST_DIRECTORY=/data -e ANONYMIZED_TELEMETRY=FALSE $(CHROMA_IMAGE)
+	docker run -d --name rahbar-dev-redis -p 127.0.0.1:6379:6379 -v rahbar-dev-redis:/data \
+	  -e REDIS_ARGS="--appendonly yes" $(REDIS_IMAGE)
+	@for i in $$(seq 30); do \
+	  curl -sf http://localhost:8100/api/v2/heartbeat >/dev/null && docker exec rahbar-dev-redis redis-cli ping 2>/dev/null | grep -q PONG && break; \
+	  [ $$i = 30 ] && { echo "services did not become ready in 30 s"; exit 1; }; sleep 1; done
+	@echo "ready. export CHROMA_HOST=localhost CHROMA_PORT=8100 REDIS_HOST=localhost REDIS_PORT=6379"
+
+dev-services-stop: ## stop and remove the two dev containers (data volumes are kept)
+	-docker rm -f rahbar-dev-chroma rahbar-dev-redis
+
+dev-services-reset: dev-services-stop ## also delete the dev data volumes
+	-docker volume rm rahbar-dev-chroma rahbar-dev-redis
+
+manifests: ## build and kubeconform-validate the dev, ci and prod overlays
+	@set -e; for o in dev ci prod; do echo "== $$o"; kustomize build --load-restrictor LoadRestrictionsNone k8s/overlays/$$o > /tmp/rahbar-$$o.yaml; kubeconform -strict -summary < /tmp/rahbar-$$o.yaml; done
 
 cluster: ## start minikube with Calico, then enable metrics-server and ingress
 	minikube start --driver=docker --cni=calico --memory=6144 --cpus=4
@@ -48,8 +73,23 @@ images: ## build the three images and load them into minikube (needs yours: Dock
 	minikube image load rahbar-indexer:$(TAG)
 	minikube image load rahbar-ui:$(TAG)
 
-apply: ## apply the dev overlay (needs yours: manifests)
+corpus: ## copy $(CORPUS_SRC) (default corpus/raw) into the corpus-data PVC (namespace, PVC, helper pod, kubectl cp)
+	kubectl apply -f k8s/base/namespace.yaml -f k8s/base/corpus-pvc.yaml
+	kubectl apply -f k8s/base/serviceaccounts.yaml
+	kubectl delete pod corpus-loader -n $(NS) --ignore-not-found
+	kubectl apply -f k8s/tools/corpus-loader.yaml
+	kubectl wait --for=condition=Ready pod/corpus-loader -n $(NS) --timeout=120s
+	kubectl cp $(CORPUS_SRC)/. $(NS)/corpus-loader:/corpus
+	kubectl cp $(CORPUS_SRC)/../MANIFEST.md $(NS)/corpus-loader:/corpus/MANIFEST.md
+	kubectl exec -n $(NS) corpus-loader -- ls -l /corpus
+	kubectl delete pod corpus-loader -n $(NS) --wait=false
+
+apply: ## apply the dev overlay; a finished indexer Job is deleted first (immutable template), so it runs again
+	kubectl delete job indexer -n $(NS) --ignore-not-found
 	kubectl apply -k k8s/overlays/dev
+
+down: ## delete the namespace and everything in it (PVCs too)
+	kubectl delete namespace $(NS) --ignore-not-found
 
 secret: ## create the LLM key Secret from the LLM_API_KEY variable; never from a file
 	@test -n "$$LLM_API_KEY" || { echo "export LLM_API_KEY=... first"; exit 1; }
@@ -61,6 +101,7 @@ index: ## run the indexer once, from the CronJob's template (needs yours: CronJo
 	@echo "watch it with: kubectl get jobs -n $(NS) -w"
 
 ask: ## ask through the Ingress: make ask Q="What CGPA puts a student on academic warning?"
+	@test -n "$(INGRESS_IP)" || { echo "INGRESS_IP is empty: 'minikube ip' failed. Docker permission? Run: sg docker -c 'make $@ ...'. macOS/Windows: minikube tunnel and INGRESS_IP=127.0.0.1"; exit 1; }
 	@curl -s -X POST "http://$(INGRESS_IP)/api/ask" -H "Host: $(HOST)" \
 	  -H 'Content-Type: application/json' -d "$$(Q="$(Q)" $(PY) -c 'import json,os; print(json.dumps({"question": os.environ["Q"]}))')" \
 	  | $(PY) -m json.tool
@@ -69,6 +110,7 @@ fetch: ## download the documents listed in corpus/sources.yaml
 	$(BIN)/python corpus/fetch.py
 
 eval: ## score eval/golden.yaml through the Ingress and apply the CI gate
+	@test -n "$(INGRESS_IP)" || { echo "INGRESS_IP is empty: 'minikube ip' failed. Docker permission? Run: sg docker -c 'make $@ ...'. macOS/Windows: minikube tunnel and INGRESS_IP=127.0.0.1"; exit 1; }
 	$(BIN)/python eval/run_eval.py --api "http://$(INGRESS_IP)" --host $(HOST)
 
 eval-fixtures: ## score the CI fixture golden set against a local `make dev`

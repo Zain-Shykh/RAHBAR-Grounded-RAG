@@ -1,0 +1,66 @@
+$ kubectl get ingress,hpa,pdb -n rahbar
+NAME                               CLASS   HOSTS          ADDRESS        PORTS   AGE
+ingress.networking.k8s.io/rahbar   nginx   rahbar.local   192.168.49.2   80      67s
+
+NAME                                      REFERENCE        TARGETS       MINPODS   MAXPODS   REPLICAS   AGE
+horizontalpodautoscaler.autoscaling/api   Deployment/api   cpu: 4%/70%   3         8         3          67s
+
+NAME                             MIN AVAILABLE   MAX UNAVAILABLE   ALLOWED DISRUPTIONS   AGE
+poddisruptionbudget.policy/api   2               N/A               1                     67s
+
+$ kubectl get endpoints api -n rahbar
+NAME   ENDPOINTS                                                  AGE
+api    10.244.120.82:8000,10.244.120.89:8000,10.244.120.93:8000   19h
+
+$ curl -s -H "Host: rahbar.local" http://$(minikube ip)/ | head -5
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+$ curl -s -w " [%{http_code}]" -H "Host: rahbar.local" http://$(minikube ip)/healthz | head -c 120   (not routed to the api: served by the UI)
+ok
+ [200]
+
+$ curl -s -w " [%{http_code}]" -H "Host: rahbar.local" http://$(minikube ip)/api/healthz | head -c 120   (api has no /api/healthz)
+{"detail":"Not Found"} [404]
+
+$ curl -s -w " [%{http_code}]" -H "Host: rahbar.local" http://$(minikube ip)/metrics | head -c 120   (not routed to the api)
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initia
+
+$ make ask Q="What is the minimum attendance requirement?"
+{
+    "request_id": "d0add08415bd1daf3c13b5dacbbb33cc",
+    "answer": "80%",
+    "citations": [
+        {
+            "source": "prospectus-2026-academic-rules-and-regulations.pdf",
+            "section": "1. Attendance Requirement",
+            "page": 1
+        },
+        {
+            "source": "academic-rules-handbook-jun-2026.pdf",
+            "section": "1.21 Students are required to maintain 100% attendance in",
+            "page": 10
+        }
+    ],
+    "answered_from_context": true,
+    "confidence": "high",
+    "retrieved": [
+        {
+            "chunk_id": "prospectus-2026-academic-rules-and-regulations-p001-c001",
+            "source": "prospectus-2026-academic-rules-and-regulations.pdf",
+            "section": "1. Attendance Requirement",
+            "page": 1,
+            "score": 0.81883812
+        },
+        {
+            "chunk_id": "academic-rules-handbook-jun-2026-p010-c051",
+            "source": "academic-rules-handbook-jun-2026.pdf",
+            "section": "1.21 Students are required to maintain 100% attendance in",
+            "page": 10,

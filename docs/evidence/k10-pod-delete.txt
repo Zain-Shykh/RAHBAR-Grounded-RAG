@@ -1,0 +1,30 @@
+# delete one api pod while a request loop runs (cached question every 0.5 s through the Ingress)
+# captured 2026-11-06T19:02Z on minikube (Calico, docker driver), namespace rahbar, dev overlay
+
+$ kubectl get pods -n rahbar -l app.kubernetes.io/name=api
+NAME                   READY   STATUS    RESTARTS   AGE
+api-6896667d9f-kl7sw   1/1     Running   0          35s
+api-6896667d9f-nxqcp   1/1     Running   0          26s
+api-6896667d9f-pkdzk   1/1     Running   0          31s
+
+$ kubectl delete pod/api-6896667d9f-kl7sw -n rahbar
+pod "api-6896667d9f-kl7sw" deleted from rahbar namespace
+
+$ kubectl rollout status deploy/api -n rahbar --timeout=120s
+deployment "api" successfully rolled out
+
+$ kubectl get pods -n rahbar -l app.kubernetes.io/name=api
+NAME                   READY   STATUS    RESTARTS   AGE
+api-6896667d9f-nxqcp   1/1     Running   0          48s
+api-6896667d9f-pkdzk   1/1     Running   0          53s
+api-6896667d9f-zffrt   1/1     Running   0          21s
+
+$ kubectl get endpoints api -n rahbar
+Warning: v1 Endpoints is deprecated in v1.33+; use discovery.k8s.io/v1 EndpointSlice
+NAME   ENDPOINTS                                                  AGE
+api    10.244.120.83:8000,10.244.120.84:8000,10.244.120.87:8000   25h
+
+$ request loop result
+request loop: 38 requests, status counts:
+     38 200
+non-200: 0

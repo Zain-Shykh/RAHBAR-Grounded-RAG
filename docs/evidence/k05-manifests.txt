@@ -1,0 +1,22 @@
+$ kubectl apply -k k8s/overlays/dev
+statefulset.apps/chroma configured
+poddisruptionbudget.policy/api configured
+(all other objects unchanged)
+$ kubectl get pods -n rahbar
+NAME                     READY   STATUS      RESTARTS   AGE
+api-6f867f8545-fzhwt     1/1     Running     0          41m
+api-6f867f8545-l679s     1/1     Running     0          41m
+api-6f867f8545-t8877     1/1     Running     0          41m
+chroma-0                 1/1     Running     0          20h
+indexer-mr98n            0/1     Completed   0          3h42m
+redis-85454df54f-gzfxb   1/1     Running     0          20h
+ui-6d5b48c974-cjw8d      1/1     Running     0          20h
+$ make manifests
+== dev
+Summary: 30 resources found parsing stdin - Valid: 30, Invalid: 0, Errors: 0, Skipped: 0
+== ci
+Summary: 31 resources found parsing stdin - Valid: 31, Invalid: 0, Errors: 0, Skipped: 0
+== prod
+Summary: 30 resources found parsing stdin - Valid: 30, Invalid: 0, Errors: 0, Skipped: 0
+$ grep -rn ":latest" k8s || echo "no latest"
+no latest

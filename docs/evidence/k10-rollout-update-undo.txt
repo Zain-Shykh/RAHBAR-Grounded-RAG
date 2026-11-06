@@ -1,0 +1,114 @@
+# rolling update to a second image tag (v2 = the same rebuilt image, APP_VERSION=2.0.0 so /healthz shows it), request loop, rollout undo
+# captured 2026-11-06T19:01Z on minikube (Calico, docker driver), namespace rahbar, dev overlay
+
+$ kubectl rollout history deploy/api -n rahbar
+deployment.apps/api 
+REVISION  CHANGE-CAUSE
+1         <none>
+2         <none>
+3         <none>
+4         <none>
+
+
+$ kubectl exec -n rahbar deploy/api -- python -c "import urllib.request;print(urllib.request.urlopen('http://localhost:8000/healthz').read().decode())"
+{"status":"alive","version":"0.1.0"}
+
+$ kubectl rollout pause deploy/api -n rahbar
+deployment.apps/api paused
+
+$ kubectl set image deploy/api api=rahbar-api:v2 -n rahbar
+deployment.apps/api image updated
+
+$ kubectl set env deploy/api APP_VERSION=2.0.0 -n rahbar
+deployment.apps/api env updated
+
+$ kubectl annotate deploy/api -n rahbar kubernetes.io/change-cause='v2: image rahbar-api:v2, APP_VERSION=2.0.0' --overwrite
+deployment.apps/api annotated
+
+$ kubectl rollout resume deploy/api -n rahbar
+deployment.apps/api resumed
+
+$ kubectl rollout status deploy/api -n rahbar --timeout=300s
+Waiting for deployment "api" rollout to finish: 1 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 1 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 1 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 2 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 2 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 2 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "api" rollout to finish: 1 old replicas are pending termination...
+deployment "api" successfully rolled out
+
+$ kubectl get pods -n rahbar -l app.kubernetes.io/name=api -o custom-columns=NAME:.metadata.name,READY:.status.containerStatuses[0].ready,IMAGE:.spec.containers[0].image
+NAME                   READY   IMAGE
+api-55d456855-8wfjf    true    rahbar-api:v2
+api-55d456855-lthmw    true    rahbar-api:v2
+api-55d456855-z8c7q    true    rahbar-api:v2
+api-6896667d9f-mlf52   true    rahbar-api:dev
+api-6896667d9f-sd4cq   true    rahbar-api:dev
+api-6896667d9f-vfbmf   true    rahbar-api:dev
+
+$ kubectl exec -n rahbar deploy/api -- python -c "import urllib.request;print(urllib.request.urlopen('http://localhost:8000/healthz').read().decode())"
+{"status":"alive","version":"2.0.0"}
+
+$ kubectl rollout history deploy/api -n rahbar
+deployment.apps/api 
+REVISION  CHANGE-CAUSE
+1         <none>
+2         <none>
+3         <none>
+4         <none>
+5         v2: image rahbar-api:v2, APP_VERSION=2.0.0
+
+
+$ kubectl rollout undo deploy/api -n rahbar
+Warning: resource deployments/api was previously managed with 'kubectl apply'. Rolling back will not update the kubectl.kubernetes.io/last-applied-configuration annotation, which may cause unexpected behavior on future 'kubectl apply' operations. Consider using 'kubectl apply' with your previous configuration file instead.
+deployment.apps/api rolled back
+
+$ kubectl rollout status deploy/api -n rahbar --timeout=300s
+Waiting for deployment "api" rollout to finish: 1 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 1 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 1 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 1 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 2 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 2 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 2 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 2 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "api" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "api" rollout to finish: 1 old replicas are pending termination...
+deployment "api" successfully rolled out
+
+$ kubectl get pods -n rahbar -l app.kubernetes.io/name=api -o custom-columns=NAME:.metadata.name,READY:.status.containerStatuses[0].ready,IMAGE:.spec.containers[0].image
+NAME                   READY   IMAGE
+api-55d456855-8wfjf    true    rahbar-api:v2
+api-55d456855-lthmw    true    rahbar-api:v2
+api-55d456855-z8c7q    true    rahbar-api:v2
+api-6896667d9f-kl7sw   true    rahbar-api:dev
+api-6896667d9f-nxqcp   true    rahbar-api:dev
+api-6896667d9f-pkdzk   true    rahbar-api:dev
+
+$ kubectl exec -n rahbar deploy/api -- python -c "import urllib.request;print(urllib.request.urlopen('http://localhost:8000/healthz').read().decode())"
+{"status":"alive","version":"0.1.0"}
+
+$ kubectl rollout history deploy/api -n rahbar
+deployment.apps/api 
+REVISION  CHANGE-CAUSE
+1         <none>
+2         <none>
+3         <none>
+5         v2: image rahbar-api:v2, APP_VERSION=2.0.0
+6         <none>
+
+
+$ request loop result (cached question every 0.5 s through the Ingress, whole demonstration)
+request loop: 49 requests, status counts:
+     49 200
+non-200: 0
+# the listings above still show old pods in their preStop/terminating window; settled state:
+$ kubectl get pods -n rahbar -l app.kubernetes.io/name=api -o custom-columns=NAME:.metadata.name,READY:.status.containerStatuses[0].ready,IMAGE:.spec.containers[0].image
+NAME                   READY   IMAGE
+api-6896667d9f-kl7sw   true    rahbar-api:dev
+api-6896667d9f-nxqcp   true    rahbar-api:dev
+api-6896667d9f-pkdzk   true    rahbar-api:dev
+

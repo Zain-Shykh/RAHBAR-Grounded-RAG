@@ -43,6 +43,19 @@ class Settings:
 
     log_level: str = "INFO"
 
+    # Architecture 4.4 defaults; the later phases read these.
+    redis_host: str = "redis"
+    redis_port: int = 6379
+    relevance_floor: float = 0.70   # phase 12: midpoint of hostel max 0.658 and answerable min 0.746
+    cache_threshold: float = 0.96   # phase 11: lowest of 0.88/0.92/0.96 with zero false hits
+    cache_ttl_seconds: int = 86400
+    llm_num_ctx: int = 8192
+    llm_max_tokens: int = 512
+    llm_timeout_seconds: int = 300
+    llm_max_concurrency: int = 2
+    index_refresh_seconds: int = 10
+    app_version: str = "0.1.0"
+
 
 def get_settings() -> Settings:
     return Settings(
@@ -59,4 +72,15 @@ def get_settings() -> Settings:
         hosted_base_url=os.environ.get("HOSTED_BASE_URL", ""),
         llm_api_key=os.environ.get("LLM_API_KEY", ""),
         log_level=os.environ.get("LOG_LEVEL", "INFO"),
+        redis_host=os.environ.get("REDIS_HOST", "redis"),
+        redis_port=_int("REDIS_PORT", 6379),
+        relevance_floor=_float("RELEVANCE_FLOOR", 0.70),
+        cache_threshold=_float("CACHE_THRESHOLD", 0.96),
+        cache_ttl_seconds=_int("CACHE_TTL_SECONDS", 86400),
+        llm_num_ctx=_int("LLM_NUM_CTX", 8192),
+        llm_max_tokens=_int("LLM_MAX_TOKENS", 512),
+        llm_timeout_seconds=_int("LLM_TIMEOUT_SECONDS", 300),
+        llm_max_concurrency=_int("LLM_MAX_CONCURRENCY", 2),
+        index_refresh_seconds=_int("INDEX_REFRESH_SECONDS", 10),
+        app_version=os.environ.get("APP_VERSION", "0.1.0"),
     )

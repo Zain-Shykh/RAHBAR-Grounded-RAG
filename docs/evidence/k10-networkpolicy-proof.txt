@@ -1,0 +1,41 @@
+# NetworkPolicy enforcement re-checked on the final deployment (Calico); the full K4 sequence is docs/evidence/k04-networkpolicy-proof.txt
+# captured 2026-11-06T19:18Z on minikube (Calico, docker driver), namespace rahbar, dev overlay
+
+$ kubectl get netpol -n rahbar
+NAME               POD-SELECTOR                     AGE
+allow-dns-egress   <none>                           5h39m
+api-egress         app.kubernetes.io/name=api       5h39m
+api-ingress        app.kubernetes.io/name=api       5h39m
+chroma-ingress     app.kubernetes.io/name=chroma    5h39m
+default-deny-all   <none>                           5h39m
+indexer-egress     app.kubernetes.io/name=indexer   5h39m
+redis-ingress      app.kubernetes.io/name=redis     5h39m
+ui-ingress         app.kubernetes.io/name=ui        5h39m
+
+$ kubectl exec -n rahbar deploy/ui -- wget -T3 -qO- http://chroma:8000/api/v2/heartbeat; echo exit=$?
+wget: download timed out
+command terminated with exit code 1
+exit=1
+
+$ kubectl exec -n rahbar deploy/ui -- nc -zv -w3 redis 6379; echo exit=$?
+nc: redis (10.108.124.57:6379): Operation timed out
+command terminated with exit code 1
+exit=1
+
+$ kubectl exec -n rahbar deploy/ui -- wget -T3 -qO- http://api:8000/healthz; echo exit=$?
+wget: download timed out
+command terminated with exit code 1
+exit=1
+
+$ kubectl exec -n rahbar deploy/api -- python -c "import urllib.request;print(urllib.request.urlopen('http://chroma:8000/api/v2/heartbeat',timeout=3).read())"; echo exit=$?
+b'{"nanosecond heartbeat":1793992719818427051}'
+exit=0
+
+$ kubectl exec -n rahbar deploy/api -- python -c "import socket;s=socket.create_connection(('redis',6379),timeout=3);print('redis open')"; echo exit=$?
+redis open
+exit=0
+
+$ kubectl exec -n rahbar deploy/api -- python -c "import urllib.request;print(urllib.request.urlopen('http://example.com',timeout=3).status)" 2>&1 | tail -1; echo exit=$?
+command terminated with exit code 1
+exit=0
+

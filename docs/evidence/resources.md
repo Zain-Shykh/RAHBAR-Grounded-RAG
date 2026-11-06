@@ -1,0 +1,28 @@
+# Resource requests and limits: measured, then set
+
+Measured on minikube (Calico, docker driver, 4 CPUs, 6 GiB), namespace `rahbar`, dev overlay, 2026-11-06 and 2026-11-07, with `kubectl top pods --containers` (metrics-server, 15 to 60 s resolution). Raw output is in the files named in the last column. The index has 980 chunks (DEV-010). The numbers in `k8s/base` were changed to the "Set" columns in the same PR (DEV-013; `make manifests` passes for `dev`, `ci`, `prod`).
+
+Rule used: **request** = the steady figure plus a margin (the scheduler guarantee; for CPU also the denominator of the HPA percentage); **limit** = a multiple of the highest figure seen, small enough that a leak is caught, large enough that a normal peak never reaches it. A request below the measurement would make the pod burstable beyond what it was promised; a limit far above it wastes node headroom.
+
+| Workload | Measured (cpu / memory) | Was (request, limit) | Set (request, limit) | Why | Evidence |
+| --- | --- | --- | --- | --- | --- |
+| `api` (each of 3 pods) | idle 2 m / 68 to 70 Mi; cache-miss question in flight 4 m / 68 Mi (the pod waits on Ollama, I/O bound); 18 golden questions through the Ingress at most 4 m / 70 Mi; cached-answer burst (6 parallel loops) 14 to 23 % of the request, i.e. 14 to 23 m; first minute after a restart 135 m (imports, index check) | 100 m / 256 Mi, 500 m / 512 Mi | **100 m / 128 Mi, 500 m / 256 Mi** | Memory: 128 Mi request is 1.8x the 70 Mi peak; 256 Mi limit is 3.7x, ample for the answer path, and a leak would be killed rather than starve the node. CPU request stays 100 m on purpose: the HPA target (70 %) is a fraction of it, K3's scale-up evidence assumes it, and the 135 m start-up burst is under the 500 m limit. | `k10-top-pods.txt`, `k10-top-during-eval.txt`, `k10-hpa.txt` |
+| `ui` | 1 m / 2 Mi (nginx serving a static page, proxying `/api`) | 25 m / 32 Mi, 100 m / 64 Mi | **10 m / 16 Mi, 100 m / 32 Mi** | 8x headroom on memory, the limit is still 16x the use. CPU request 10 m is 10x the use; the 100 m limit covers a burst of static files. | `k10-top-pods.txt`, `k10-top-during-eval.txt` |
+| `chroma` | idle 1 to 2 m / 117 to 131 Mi (980 vectors of 768 floats, SQLite, HNSW in memory) | 100 m / 256 Mi, 500 m / 1 Gi | **50 m / 192 Mi, 500 m / 512 Mi** | Request 192 Mi is 1.5x the peak; limit 512 Mi is 3.9x the peak. Chroma memory was not sampled inside the re-index window, only before and after (118 to 131 Mi); the margin is meant to cover a stage-and-swap that briefly holds two collections, an inference, not a measurement. CPU limit unchanged: query bursts and the swap are short. | `k10-top-during-eval.txt`, `k10-indexer-peak.txt` |
+| `redis` | 8 to 13 m / 8 to 11 Mi (Redis Stack, a few hundred cached answers at most) | 100 m / 256 Mi, 500 m / 512 Mi | **50 m / 64 Mi, 250 m / 256 Mi** | 64 Mi request is 6x the use; the 256 Mi limit leaves room for the vector index of the cache, far above the measured 11 Mi. | `k10-top-pods.txt`, `k10-top-during-eval.txt` |
+| `indexer` Job and `reindex` CronJob (same template) | CPU at the limit (about 1000 m) for the OCR and chunking minutes, 2 m while it waits on Ollama for embeddings; memory 198 Mi, rising to a **peak of 428 Mi** (manual re-index) and **484 Mi** (the Job re-run under the new limits; K2 measured 483 Mi), 344 to 412 Mi after; 9 min 43 s and 9 min 59 s for the two re-indexes (K2: 13 min for the first Job) | 250 m / 512 Mi, 1 / 2 Gi | **250 m / 384 Mi, 1 / 1 Gi** | Request 384 Mi is 0.8x the 484 Mi peak (the scheduler only needs the working set, the rest is burst); limit 1 Gi is 2.1x the peak. CPU limit 1 is reached and is the throttle for OCR; a higher limit would only speed up a one-off job, the request stays 250 m. Memory grows with chunk count (all chunks are held before the store step), so re-measure if the corpus grows. | `k10-indexer-peak.txt`, `k10-resources-applied.txt` |
+
+## No OOM
+
+- `kubectl get events -n rahbar | grep -ci oomkill` returned `0` after the re-index and after the evaluation run; every container's `lastState.terminated` is empty and the reindex pod ended `Completed exit=0` (`k10-indexer-peak.txt`).
+- The re-index was run again with the new limits applied: Job `Complete` in 9 min 59 s, `Completed exit=0`, peak sampled 484 Mi of the 1 Gi limit, 0 OOM events (`k10-resources-applied.txt`).
+
+## K11 re-check under the final limits
+
+After the clean-clone redeploy (all pods on the K10 limits, a fresh 980-chunk index) six different golden questions were asked through the Ingress, all cache misses, while `kubectl top` was sampled every 10 s (`k11-limits-sanity.txt`): api at most 4 m / 71 Mi per pod, chroma 2 m / 55 Mi, redis 12 m / 10 Mi, ui 1 m / 2 Mi. Every container has `restartCount=0` and an empty `lastState.terminated`, `kubectl get events | grep -ci oomkill` is `0`, the HPA stayed at 3 replicas (`3%/70%`). No limit was raised. The indexer was re-run from scratch under its limits in the same session (Job `Complete` in 10 min, `docs/evidence/k11-clean-clone.txt`); its memory was not sampled that time, the 484 Mi peak from K10 stands.
+
+## Honest limits of the measurement
+
+- `kubectl top` samples every 15 s or more: a shorter CPU spike (the OCR stage) can be higher than any sample. The indexer CPU is therefore stated as "at the limit".
+- The api is I/O bound while the model generates (ENGINEERING-NOTES, Q3): CPU is a poor scaling signal here, which is why `k10-hpa.txt` forces the target down to 5 % to show scale-up.
+- Node: 4 CPUs, the eight api replicas the HPA reached in `k10-hpa.txt` request 800 m in total, well inside the node.

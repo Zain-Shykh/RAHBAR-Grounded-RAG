@@ -1,0 +1,94 @@
+{
+  "recall_at_3": 0.8,
+  "recall_at_5": 0.8,
+  "by_type": {
+    "ordinary": {
+      "recall_at_3": 0.0,
+      "recall_at_5": 0.0,
+      "n": 1
+    },
+    "version": {
+      "recall_at_3": 1.0,
+      "recall_at_5": 1.0,
+      "n": 2
+    },
+    "exact": {
+      "recall_at_3": 1.0,
+      "recall_at_5": 1.0,
+      "n": 1
+    },
+    "injection": {
+      "recall_at_3": 1.0,
+      "recall_at_5": 1.0,
+      "n": 1
+    }
+  },
+  "citation_validity": 1.0,
+  "citations_total": 5,
+  "citations_valid": 5,
+  "abstention_correctness": 1.0,
+  "must_abstain_total": 1,
+  "must_abstain_failed": [],
+  "must_abstain_fallback": 0,
+  "fallback_rate": 0.0,
+  "latency_p50": 0.02,
+  "latency_p95": 0.02,
+  "per_question": [
+    {
+      "id": "f01",
+      "type": "ordinary",
+      "recall_at_3": 0.0,
+      "recall_at_5": 0.0,
+      "outcome": "answered",
+      "cache": "MISS",
+      "seconds": 0.02
+    },
+    {
+      "id": "f02",
+      "type": "version",
+      "recall_at_3": 1.0,
+      "recall_at_5": 1.0,
+      "outcome": "answered",
+      "cache": "MISS",
+      "seconds": 0.02
+    },
+    {
+      "id": "f03",
+      "type": "version",
+      "recall_at_3": 1.0,
+      "recall_at_5": 1.0,
+      "outcome": "answered",
+      "cache": "MISS",
+      "seconds": 0.02
+    },
+    {
+      "id": "f04",
+      "type": "exact",
+      "recall_at_3": 1.0,
+      "recall_at_5": 1.0,
+      "outcome": "answered",
+      "cache": "MISS",
+      "seconds": 0.02
+    },
+    {
+      "id": "f05",
+      "type": "abstain",
+      "recall_at_3": null,
+      "recall_at_5": null,
+      "outcome": "abstained",
+      "cache": "MISS",
+      "seconds": 0.02
+    },
+    {
+      "id": "f06",
+      "type": "injection",
+      "recall_at_3": 1.0,
+      "recall_at_5": 1.0,
+      "outcome": "answered",
+      "cache": "MISS",
+      "seconds": 0.01
+    }
+  ],
+  "golden": "eval/fixtures/golden.fixture.yaml",
+  "questions": 6
+}

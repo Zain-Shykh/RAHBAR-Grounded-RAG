@@ -1,0 +1,217 @@
+name: ci
+
+on:
+  pull_request:
+    branches: [main, dev]
+  push:
+    branches: [dev]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: |
+            api/requirements-dev.txt
+            indexer/requirements-dev.txt
+      - run: make install
+      - name: ruff and mypy (make lint)
+        run: make lint
+
+  test:
+    runs-on: ubuntu-24.04
+    services:
+      redis:
+        image: redis/redis-stack-server:7.4.0-v8
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s --health-timeout 3s --health-retries 10
+    env:
+      REDIS_URL: redis://localhost:6379
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: |
+            api/requirements-dev.txt
+            indexer/requirements-dev.txt
+      - run: make install
+      - run: make test
+      - name: api coverage gate (60%)
+        run: cd api && ../.venv/bin/pytest -q --cov=app --cov-report=term --cov-fail-under=60
+
+  manifests:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: install kustomize 5.8.3 and kubeconform 0.8.0
+        run: |
+          mkdir -p "$HOME/.local/bin"
+          curl -fsSL https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv5.8.3/kustomize_v5.8.3_linux_amd64.tar.gz | tar -xz -C "$HOME/.local/bin" kustomize
+          curl -fsSL https://github.com/yannh/kubeconform/releases/download/v0.8.0/kubeconform-linux-amd64.tar.gz | tar -xz -C "$HOME/.local/bin" kubeconform
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - run: make manifests
+
+  build:
+    needs: [lint, test, manifests]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      - name: build api, indexer, ui (load only, never push)
+        run: |
+          for i in api indexer ui; do
+            docker buildx build --load -t rahbar-$i:${{ github.sha }} $i
+          done
+          docker save -o images.tar rahbar-api:${{ github.sha }} rahbar-indexer:${{ github.sha }} rahbar-ui:${{ github.sha }}
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: images
+          path: images.tar
+          retention-days: 1
+
+  scan:
+    needs: build
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: images
+      - run: docker load -i images.tar
+      - name: trivy api
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: rahbar-api:${{ github.sha }}
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: "1"
+          format: table
+      - name: trivy indexer
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: rahbar-indexer:${{ github.sha }}
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: "1"
+          format: table
+      - name: trivy ui
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: rahbar-ui:${{ github.sha }}
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: "1"
+          format: table
+
+  e2e-eval:
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+      - run: pip install httpx==0.28.1 pyyaml==6.0.2
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: images
+      - name: load images and retag to :ci (the ci overlay tag)
+        run: |
+          docker load -i images.tar
+          for i in api indexer ui; do docker tag rahbar-$i:${{ github.sha }} rahbar-$i:ci; done
+      - name: install kind 0.33.0 and kustomize 5.8.3
+        run: |
+          mkdir -p "$HOME/.local/bin"
+          curl -fsSL -o "$HOME/.local/bin/kind" https://github.com/kubernetes-sigs/kind/releases/download/v0.33.0/kind-linux-amd64
+          chmod +x "$HOME/.local/bin/kind"
+          curl -fsSL https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv5.8.3/kustomize_v5.8.3_linux_amd64.tar.gz | tar -xz -C "$HOME/.local/bin" kustomize
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: kind cluster (port 80 mapped for ingress-nginx)
+        run: |
+          cat > kind-config.yaml <<'KIND'
+          kind: Cluster
+          apiVersion: kind.x-k8s.io/v1alpha4
+          nodes:
+            - role: control-plane
+              kubeadmConfigPatches:
+                - |
+                  kind: InitConfiguration
+                  nodeRegistration:
+                    kubeletExtraArgs:
+                      node-labels: "ingress-ready=true"
+              extraPortMappings:
+                - {containerPort: 80, hostPort: 80, protocol: TCP}
+          KIND
+          kind create cluster --config kind-config.yaml --wait 120s
+          kind load docker-image rahbar-api:ci rahbar-indexer:ci rahbar-ui:ci
+      - name: ingress-nginx controller-v1.15.1
+        run: |
+          kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.15.1/deploy/static/provider/kind/deploy.yaml
+          kubectl wait -n ingress-nginx --for=condition=ready pod -l app.kubernetes.io/component=controller --timeout=180s
+      - name: apply the ci overlay (DEV-011, load restrictor off)
+        run: |
+          kustomize build --load-restrictor LoadRestrictionsNone k8s/overlays/ci > ci.yaml
+          # The ingress admission webhook can refuse connections for a few seconds after
+          # the controller pod is Ready: retry the apply, bounded, and fail if it never works.
+          for n in 1 2 3 4 5 6; do
+            kubectl apply -f ci.yaml && exit 0
+            echo "apply attempt $n failed, retrying in 10 s"; sleep 10
+          done
+          exit 1
+      - name: wait for the indexer Job and the workloads
+        run: |
+          kubectl wait -n rahbar --for=condition=complete job/indexer --timeout=300s
+          kubectl rollout status -n rahbar statefulset/chroma --timeout=180s
+          kubectl rollout status -n rahbar deployment/redis --timeout=180s
+          kubectl rollout status -n rahbar deployment/api --timeout=180s
+          kubectl rollout status -n rahbar deployment/ui --timeout=180s
+      - name: wait until the Ingress routes /api to the api
+        run: |
+          # Ready pods are not enough: ingress-nginx syncs endpoints a few seconds later and
+          # answers its own 503 until then. GET /api/ask is 405 from the api once routed.
+          for n in $(seq 1 30); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' -H 'Host: rahbar.local' http://localhost/api/ask || echo 000)
+            echo "attempt $n: GET /api/ask -> $code"
+            [ "$code" = 405 ] && exit 0
+            sleep 2
+          done
+          exit 1
+      - name: eval gate through the Ingress
+        run: |
+          python eval/run_eval.py --api http://localhost --host rahbar.local \
+            --golden eval/fixtures/golden.fixture.yaml \
+            --baseline eval/fixtures/baseline.fixture.json \
+            --out eval/fixtures/results.fixture.json
+      - name: dump cluster state on failure
+        if: failure()
+        run: |
+          set +e  # diagnostics only: keep dumping even if one command fails
+          kubectl get pods,jobs,svc,ingress -A -o wide
+          kubectl describe pods,job -n rahbar
+          for t in deployment/api statefulset/chroma deployment/redis job/indexer; do
+            echo "=== logs $t"; kubectl logs -n rahbar "$t" --all-containers --tail=200
+          done
+          kubectl logs -n ingress-nginx -l app.kubernetes.io/component=controller --tail=100
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: results-fixture
+          path: eval/fixtures/results.fixture.json
+          if-no-files-found: warn
+          retention-days: 7

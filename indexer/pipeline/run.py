@@ -18,6 +18,7 @@ from pathlib import Path
 
 from .config import IndexerSettings, get_settings
 from .models import Chunk
+from .verify import VerifyError
 
 
 def log(msg: str, **fields: object) -> None:
@@ -66,20 +67,40 @@ def discover(corpus_dir: str) -> list[tuple[Path, str, bool]]:
 def run_pipeline(settings: IndexerSettings) -> int:
     from .chunk import chunk
     from .clean import clean
-    from .embed import embed
+    from .embed import dimension, document_text, embed, wait_for_ollama
     from .extract import extract
-    from .store import store
+    from .store import store, wait_for_chroma
+    from .verify import verify
 
+    dimension(settings.embed_model)  # an unknown model fails before any wait
+    wait_for_chroma(settings, settings.chroma_wait_seconds)
+    wait_for_ollama(settings, settings.ollama_wait_seconds)
+    if (Path(settings.corpus_dir) / "_index.json").exists():  # fixture dirs have none
+        log("verified corpus", files=verify(settings.corpus_dir))
     documents = discover(settings.corpus_dir)
     if not documents:
         raise SystemExit(f"no documents found in {settings.corpus_dir}")
     all_chunks: list[Chunk] = []
+    stored_words = source_words = 0
     for path, doc_version, superseded in documents:
         doc = clean(extract(str(path), doc_version, superseded))
         pieces = chunk(doc, settings.chunk_size, settings.chunk_overlap)
-        log("chunked", source=path.name, chunks=len(pieces))
+        words = sum(len(c.text.split()) for c in pieces)
+        src = sum(len(p.text.split()) for p in doc.pages)
+        stored_words, source_words = stored_words + words, source_words + src
+        log("chunked", source=path.name, chunks=len(pieces), words=words, source_words=src,
+            amplification=round(words / src, 2) if src else 0.0)
+        if not pieces:
+            log("document produced no chunks", source=path.name)
         all_chunks.extend(pieces)
-    vectors = embed([c.text for c in all_chunks], settings)
+    log("chunked total", documents=len(documents), chunks=len(all_chunks), words=stored_words,
+        source_words=source_words,
+        amplification=round(stored_words / source_words, 2) if source_words else 0.0)
+    started = time.perf_counter()
+    vectors = embed([document_text(c) for c in all_chunks], settings)
+    log("embedded", vectors=len(vectors), model=settings.embed_model,
+        batches=-(-len(vectors) // settings.embed_batch_size),
+        seconds=round(time.perf_counter() - started, 1))
     return store(all_chunks, vectors, settings)
 
 
@@ -100,9 +121,16 @@ def main() -> int:
             count = write_dummy_index(settings, get_client(settings))
         else:
             count = run_pipeline(settings)
+    except VerifyError as exc:
+        for problem in str(exc).split("\n"):
+            log("corpus verification failed", problem=problem)
+        return 1
     except NotImplementedError as exc:
         log("indexer stage not implemented yet", error=str(exc))
         return 2
+    except (Exception, SystemExit) as exc:  # a failed Job must say why, as JSON
+        log("indexer failed", error=repr(exc), kind=type(exc).__name__)
+        return 1
     log("indexer finished", chunks=count, seconds=round(time.perf_counter() - started, 1))
     return 0
 

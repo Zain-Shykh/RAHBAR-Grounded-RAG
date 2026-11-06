@@ -14,6 +14,7 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from .config import get_settings
@@ -21,6 +22,8 @@ from .logjson import configure_logging, request_id_var
 from .providers.llm import get_provider
 from .retrieval import get_retriever
 from .routes import ask, health, metrics
+from .services.cache import get_cache
+from .services.index_state import IndexUnavailable
 
 log = logging.getLogger("rahbar.api")
 
@@ -32,9 +35,16 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     app.state.settings = settings
     app.state.retriever = get_retriever(settings)
     app.state.provider = get_provider(settings)
-    # STARTER-TODO(4.4): compare the collection's embedding-model metadata with
-    # settings.embed_model here, and make /readyz fail on a mismatch.
     # This process only reads the index. The indexer Job writes it.
+    state = getattr(app.state.retriever, "state", None)   # None for the stub retriever
+    app.state.index_state = state
+    # Only the API talks to Redis, lazily: nothing here connects, so start-up never needs it.
+    app.state.cache = get_cache(settings) if state is not None else None
+    if state is not None:
+        try:
+            state.get()   # logs "embedding pin conflict" now, not at the first question
+        except IndexUnavailable as exc:
+            log.warning("index not usable at start", extra={"reason": exc.reason, "error": str(exc)})
     log.info(
         "api started",
         extra={"retriever": settings.retriever, "llm_provider": settings.llm_provider,
@@ -44,6 +54,13 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
 
 app = FastAPI(title="RAHBAR API", lifespan=lifespan)
+
+
+@app.exception_handler(IndexUnavailable)
+async def index_unavailable(request: Request, exc: IndexUnavailable) -> JSONResponse:
+    """Infrastructure failure, not model output: 503 with a fixed body, never a traceback (5.5.2)."""
+    log.error("index unavailable", extra={"reason": exc.reason, "error": str(exc)})
+    return JSONResponse(status_code=503, content={"detail": "index unavailable"})
 
 
 @app.middleware("http")
@@ -63,6 +80,7 @@ async def request_context(request: Request, call_next):  # type: ignore[no-untyp
         elapsed = time.perf_counter() - start
         metrics.REQUESTS.labels(path=path, status=str(status)).inc()
         metrics.LATENCY.labels(path=path).observe(elapsed)
+        metrics.DURATION.labels(path=path).observe(elapsed)
         if path not in ("/healthz", "/readyz", "/metrics"):
             log.info("request", extra={"path": path, "status": status,
                                        "ms": round(elapsed * 1000, 1)})

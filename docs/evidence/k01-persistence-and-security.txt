@@ -1,0 +1,41 @@
+# fsGroup mechanism: id and ownership inside the pods
+$ kubectl exec -n rahbar chroma-0 -c chroma -- sh -c 'id; ls -ldn /data; touch /data/.w && echo write-ok && rm /data/.w; touch /x 2>&1 | head -1'
+uid=10001 gid=10001 groups=10001
+drwxrwxrwx 2 0 0 4096 Nov  5 17:53 /data
+write-ok
+touch: cannot touch '/x': Read-only file system
+$ kubectl exec -n rahbar deploy/redis -c redis -- sh -c 'id; ls -ldn /data; touch /data/.w && echo write-ok && rm /data/.w; touch /x 2>&1 | head -1'
+uid=10001 gid=10001 groups=10001
+drwxrwxrwx 3 0 0 4096 Nov  5 17:53 /data
+write-ok
+touch: cannot touch '/x': Read-only file system
+
+# resources on every container
+Pod api-794bb447b9-2ppvl api req {'cpu': '100m', 'memory': '256Mi'} lim {'cpu': '500m', 'memory': '512Mi'}
+Pod api-794bb447b9-5n7nr api req {'cpu': '100m', 'memory': '256Mi'} lim {'cpu': '500m', 'memory': '512Mi'}
+Pod api-794bb447b9-v58n4 api req {'cpu': '100m', 'memory': '256Mi'} lim {'cpu': '500m', 'memory': '512Mi'}
+Pod chroma-0 chroma req {'cpu': '100m', 'memory': '256Mi'} lim {'cpu': '500m', 'memory': '1Gi'}
+Pod redis-85454df54f-zbrs9 redis req {'cpu': '100m', 'memory': '256Mi'} lim {'cpu': '500m', 'memory': '512Mi'}
+Pod ui-6d5b48c974-bpd5r ui req {'cpu': '25m', 'memory': '32Mi'} lim {'cpu': '100m', 'memory': '64Mi'}
+StatefulSet chroma chroma req {'cpu': '100m', 'memory': '256Mi'} lim {'cpu': '500m', 'memory': '1Gi'}
+
+# Chroma data survives pod deletion
+before delete: ['k01_marker'] 1
+$ kubectl delete pod chroma-0 -n rahbar
+pod "chroma-0" deleted from rahbar namespace
+pod/chroma-0 condition met
+after delete : ['k01_marker'] 1
+cleaned up   : []
+
+# Redis data survives pod deletion
+$ redis-cli set k01 marker
+OK
+marker
+$ kubectl delete pod -l app.kubernetes.io/name=redis
+pod "redis-85454df54f-zbrs9" deleted from rahbar namespace
+pod/redis-85454df54f-4kdlv condition met
+$ redis-cli get k01
+marker
+1
+$ redis-cli module list (search module present)
+name ReJSON ver 20809 path /opt/redis-stack/lib/rejson.so args  name redisgears_2 ver 20020 path /opt/redis-stack/lib/redisgears.so args v8-plugin-path /opt/redis-stack/lib/libredisgears_v8_plugin.so name search ver 21020 path /opt/redis-stack/lib/redisearch.so args MAXSEARCHRESULTS 10000 MAXAGGREGATERESULTS 10000 name timeseries ver 11206 path /opt/redis-stack/lib/redistimeseries.so args  name RedisCompat ver 1 path /opt/redis-stack/lib/rediscompat.so args  name bf ver 20816 path /opt/redis-stack/lib/redisbloom.so args  

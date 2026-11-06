@@ -23,7 +23,7 @@ def client(monkeypatch: pytest.MonkeyPatch) -> TestClient:
 def test_liveness_answers_without_dependencies(client: TestClient) -> None:
     r = client.get("/healthz")
     assert r.status_code == 200
-    assert r.json() == {"status": "alive"}
+    assert r.json() == {"status": "alive", "version": "0.1.0"}   # 4.8 adds the version
 
 
 def test_ask_returns_the_response_contract(client: TestClient) -> None:
