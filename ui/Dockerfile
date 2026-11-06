@@ -1,5 +1,5 @@
 # rahbar-ui: static chat page behind nginx, non-root on 8080 (architecture 4.12).
-FROM nginxinc/nginx-unprivileged:1.27-alpine
+FROM nginxinc/nginx-unprivileged:1.30.6-alpine
 COPY nginx.conf /etc/nginx/nginx.conf
 COPY index.html /usr/share/nginx/html/index.html
 USER 101
