@@ -82,7 +82,7 @@ Helm charts, a service mesh, an operator, an Ingress TLS setup, Prometheus or Gr
 | K2 | Indexer Job, CronJob, corpus delivery, real index in the cluster | A-04 (milestone I-2) | 3 h | DONE (with deviation DEV-010) | #21 |
 | K3 | Ingress, HPA, rollout hardening | A-05 | 2 h | DONE | #22 |
 | K4 | NetworkPolicies and proof | A-06 | 3 h | DONE | #23 |
-| K5 | Overlays `ci` and `prod`, manifest validation | A-07 | 2 h | NOT STARTED | |
+| K5 | Overlays `ci` and `prod`, manifest validation | A-07 | 2 h | DONE (with deviation DEV-011) | #24 |
 | K6 | CI part 1: lint, test, manifests, build, scan | A-08 | 3 h | NOT STARTED | |
 | K7 | CI part 2: e2e-eval on kind | A-09 | 4 h | NOT STARTED | |
 | K8 | CD: Docker Hub, build-push, deploy | A-10 | 3 h | NOT STARTED | |
@@ -97,11 +97,11 @@ Hours spent so far (fill in at each phase end): planned 33.5 h, actual `____`.
 ## 2. Current focus
 
 ```
-Phase:        K5  Overlays ci and prod, manifest validation
+Phase:        K6  CI part 1: lint, test, manifests, build, scan
 Stage:        not started   (SPEC DRAFT, IMPLEMENTING, TESTING, READY FOR PR, MERGED)
 Branch:       (none yet)
 Spec:         (none yet)
-Next action:  fresh session: stage 0 then stage 1 for K5. K4 is merged: 8 NetworkPolicies in k8s/base/networkpolicy.yaml, Ollama ipBlock placeholder 203.0.113.1/32 in base, patched to 192.168.49.1/32 in the dev overlay by two JSON patches (api-egress index 2, indexer-egress index 1): the ci overlay must remove or patch the Ollama rule (no Ollama in ci) and prod must patch its own ipBlock. Cluster: api x3, ui, chroma-0, redis, real index (980 chunks) under default-deny; Ollama on the host is stopped (OLLAMA_HOST=0.0.0.0 ollama serve when a cache-miss question must be answered). `minikube` needs `sg docker -c` or INGRESS_IP=192.168.49.2. `make apply` re-runs the 13-minute indexer: use `kubectl apply -k k8s/overlays/dev` for manifest-only changes.
+Next action:  fresh session: stage 0 then stage 1 for K6. K5 is merged: overlays dev, ci, prod build and validate (`make manifests`, which builds with `--load-restrictor LoadRestrictionsNone`: the ci overlay's fixtures generator reads eval/fixtures, D-096). ci overlay: images rahbar-*:ci, ConfigMap patch (hashing-bow-768, extractive, floor 0.20), corpus-fixtures ConfigMap mounted at /corpus in Job and CronJob, Ollama egress removed; apply it with `kustomize build --load-restrictor LoadRestrictionsNone k8s/overlays/ci | kubectl apply -f -` (not `apply -k`). Rehearsal passed (16 chunks, eval gate exit 0) but on minikube, not kind (disk was full; kind v0.24.0 binary is NOT installed any more, CI has its own). prod overlay: docker.io/DOCKERHUB_NAMESPACE/rahbar-*:<40 zeros>, CD sets the real values. The `ci` Ingress is part of the overlay (not exercised in the rehearsal). Laptop disk is ~96% full: free space before building images. Cluster: api x3, ui, chroma-0, redis, real index (980 chunks); Ollama on the host is stopped.
 Waiting on:   Zain: Docker Hub account and token (needed from K8, create it early). Ahmad: nothing blocks.
 Last updated: 2026-11-06
 ```
@@ -132,6 +132,7 @@ Append-only, newest at the bottom. One line per event: date, phase, what happene
 2026-11-06  K2  DONE (#21). corpus-data PVC, Job `indexer`, CronJob `reindex` (spec copied from the Job by a kustomize replacement, D-093), make corpus/apply/down. A-1: host.minikube.internal = 192.168.49.1 from a pod, Ollama answered. A-4: kubectl cp into busybox helper OK (11 files). Job Complete 1/1 in 13 min, peak 483 Mi, 980 chunks (DEV-010). api 0/1 -> 1/1 by itself, no restart. Cited answer "80%" (prospectus, Attendance Requirement), repeat X-Cache HIT. `make index` 9 min 24 s, index_id changed, 90 requests during the swap all 200. Run 1 of the Job was marked DeadlineExceeded after the laptop slept ~15 h with the pod already finished; re-run clean (inhibit sleep for long waits). Evidence docs/evidence/k02-*.txt.
 2026-11-06  K3  DONE (#22). k8s/base ingress.yaml, hpa.yaml, pdb.yaml (D-095). Ingress rahbar address 192.168.49.2; `/` returns the UI HTML; `make ask` through the Ingress returns a cited answer; /metrics and /api/healthz not routed to the api. HPA idle `cpu: 4%/70%`, 3-8. Forced test (target 5%, cached-question loop): 3 -> 6 -> 8 replicas in 30 s, back to 3 about 5 min after revert. `<unknown>` shows for about 1 min after pods restart (metrics lag), then a number. `rollout restart deploy/api` under a 0.5 s loop through the Ingress: 0 non-200 of 42. endpoints api = 3 IPs. kubeconform 22 resources valid. Evidence docs/evidence/k03-*.txt.
 2026-11-06  K4  DONE (#23). k8s/base/networkpolicy.yaml (8 policies, name selectors only), dev patch for the Ollama ipBlock (192.168.49.1/32, confirmed with minikube ssh). Proof docs/evidence/k04-networkpolicy-proof.txt: before, ui reaches chroma and redis; after, ui to chroma and redis time out, indexer-labelled pod to redis times out but reaches chroma and Ollama, api reaches chroma and redis (cache hits +6), UI 200 through the Ingress, cited cache-miss answer via Ollama, indexer Job from the CronJob completed (980 chunks, 617 s). ui to api is closed on the ui egress side by design (4.6).
+2026-11-06  K5  DONE (#24). k8s/overlays/ci (fixtures ConfigMap generator, ConfigMap patch, Job and CronJob volume swap, Ollama egress removed) and k8s/overlays/prod (registry image names, SHA placeholder); `make manifests` validates all three with kubeconform -strict (30, 31, 30 resources valid), docs/evidence/k05-manifests.txt; no `:latest` in k8s. Rehearsal docs/evidence/k05-ci-overlay-rehearsal.txt: ci overlay in throwaway namespace rahbar-ci on minikube under default-deny, indexer Job indexed 3 fixtures into 16 chunks in 3.5 s, api x3 Ready, `/readyz` ok, `run_eval.py` with the fixture golden and baseline: gate passed, exit 0. Not on kind: pulling the kind node image filled the disk (the kubeconfig was truncated; `minikube update-context` restored it), so kind and its images were removed. D-096, DEV-011.
 ```
 
 ---
@@ -362,7 +363,7 @@ None. Update `docs/SETUP.md` with the Ollama host IP check if it was not there.
 
 ## Phase K5: Overlays `ci` and `prod`, manifest validation (A-07)
 
-**Status:** NOT STARTED · **Branch:** `feat/k8s-k05-overlays` · **Est:** 2 h · **Priority:** P0
+**Status:** DONE (with deviation DEV-011) · **Branch:** `feat/k8s-k05-overlays` · **Est:** 2 h · **Priority:** P0
 
 ### Objective
 Three overlays exist and all build and validate: `dev` (minikube), `ci` (kind in GitHub Actions: fixture corpus, hashing embedder, extractive provider, no Ollama egress), `prod` (registry images by commit SHA).
@@ -385,12 +386,12 @@ Architecture 4.11 (layout and the overlay comparison table), 4.15 (e2e-eval and 
 The workflows themselves (K6, K7, K8).
 
 ### Acceptance criteria
-- [ ] `make manifests` passes for `dev`, `ci` and `prod`.
-- [ ] `dev` still applies on minikube unchanged in behaviour (re-run `kubectl apply -k k8s/overlays/dev`; pods stay Ready).
-- [ ] The `ci` overlay was exercised end to end (kind or throwaway namespace): the Job indexed the fixtures, the api turned Ready, `eval/run_eval.py` with `golden.fixture.yaml` and `baseline.fixture.json` exits 0; output saved to `docs/evidence/k05-ci-overlay-rehearsal.txt`.
-- [ ] `prod` builds with a placeholder SHA and contains no `:latest`.
-- [ ] `grep -rn ":latest" k8s` returns nothing.
-- [ ] `make test && make lint` green.
+- [x] `make manifests` passes for `dev`, `ci` and `prod`.
+- [x] `dev` still applies on minikube unchanged in behaviour (re-run `kubectl apply -k k8s/overlays/dev`; pods stay Ready).
+- [x] The `ci` overlay was exercised end to end (kind or throwaway namespace): the Job indexed the fixtures, the api turned Ready, `eval/run_eval.py` with `golden.fixture.yaml` and `baseline.fixture.json` exits 0; output saved to `docs/evidence/k05-ci-overlay-rehearsal.txt`.
+- [x] `prod` builds with a placeholder SHA and contains no `:latest`.
+- [x] `grep -rn ":latest" k8s` returns nothing.
+- [x] `make test && make lint` green.
 
 ### Verify
 ```bash

@@ -330,3 +330,22 @@ Places where the architecture has flagged a real chance of deviation (architectu
 **Why it matters:** none for correctness; eval baselines (`eval/baseline.json`) were measured on the 981 index, so a local `make eval` against the cluster may differ by a fraction of one chunk's effect. The count is recorded as 980 in the results register.
 
 **Impact:** none. If an exact match is wanted later, pin the Tesseract version in `indexer/Dockerfile` and re-measure on the host with the same build (RAG lane).
+
+### DEV-011 The `ci` overlay needs `--load-restrictor LoadRestrictionsNone`; rehearsal ran on minikube
+
+| | |
+| --- | --- |
+| Status | OPEN, accepted |
+| Severity | S3 |
+| Date | 2026-11-06 |
+| Raised by | Claude (phase K5) |
+| Architecture reference | 4.11, 4.5, AD-18 |
+| Files changed | `k8s/overlays/ci/kustomization.yaml`, `Makefile` (`manifests`) |
+
+**The architecture says:** `kustomize build k8s/overlays/<x> | kubeconform -strict`, and the `ci` overlay carries a `corpus-fixtures` ConfigMap from `eval/fixtures`.
+
+**What was built:** the ConfigMap generator reads `../../../eval/fixtures` (one copy of the fixtures), which kustomize refuses by default, so the `ci` overlay is built with `--load-restrictor LoadRestrictionsNone` and applied with `kustomize build ... | kubectl apply -f -` (not `kubectl apply -k`). `dev` and `prod` build with plain `kustomize build`. K6 to K8 must pass the flag (D-096). The end-to-end rehearsal ran on minikube in a throwaway namespace, not on kind, because the laptop disk filled while pulling the kind node image.
+
+**Why it matters:** a workflow that forgets the flag fails at build time, loudly. The real kind run is the K7 job itself.
+
+**Impact:** none on the demo. Absorbed in architecture 4.11 at K11.

@@ -1131,3 +1131,14 @@ Entry template:
 - Claude recommends: A. Matches the plan; does not block rollouts (they are not evictions).
 - Decision: A. Decided by: Claude, pre-approved by Zain.
 - Decided on: 2026-11-06
+
+### D-096 `ci` overlay builds the fixtures ConfigMap with `--load-restrictor LoadRestrictionsNone`
+- Status: DECIDED
+- Raised: 2026-11-06 by Claude (phase K5)
+- Area: k8s
+- Related: architecture 4.5, 4.11, AD-18; `indexer/pipeline/run.py` `discover()`
+- Question: How does the `ci` overlay get `eval/fixtures/*.md` into a ConfigMap, and does the Job need `_index.json`?
+- Options: A. `configMapGenerator` pointing at `../../../eval/fixtures`, built with the load restrictor off. B. Copy the fixtures into `k8s/overlays/ci/` (two copies to drift). C. Symlinks (kustomize resolves and rejects them).
+- Claude recommends: A. One copy of the fixtures. The cost is that this overlay needs `kustomize build --load-restrictor LoadRestrictionsNone ... | kubectl apply -f -` (not `kubectl apply -k`); `make manifests` and the workflows do that. `_index.json` is not needed: `discover()` falls back to the front matter and `verify` is skipped when it is absent, so no file is generated.
+- Decision: A. Decided by: Claude, pre-approved by Zain.
+- Decided on: 2026-11-06

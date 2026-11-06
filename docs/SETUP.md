@@ -344,6 +344,7 @@ make eval
 | `make cluster` | Start minikube with the right options. |
 | `make images` | Build and load the three images. Re-run after any code change you want in the cluster. |
 | `make apply` | Apply the dev overlay. |
+| `make manifests` | Build the dev, ci and prod overlays and validate each with `kubeconform -strict` (the ci overlay needs `--load-restrictor LoadRestrictionsNone`; the target sets it). |
 | `make index` | Re-run the indexer from the CronJob template. |
 | `make ask Q="..."` | Ask through the Ingress. |
 | `make eval` | Score `eval/golden.yaml` and apply the gate. |

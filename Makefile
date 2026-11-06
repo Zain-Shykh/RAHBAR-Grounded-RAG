@@ -17,7 +17,7 @@ CHROMA_IMAGE ?= chromadb/chroma:1.0.12
 REDIS_IMAGE ?= redis/redis-stack-server:7.4.0-v8
 
 .DEFAULT_GOAL := help
-.PHONY: help install test lint dev dev-services dev-services-stop dev-services-reset cluster images corpus apply down secret index ask fetch eval eval-fixtures check
+.PHONY: help install test lint dev dev-services dev-services-stop dev-services-reset cluster images corpus apply down secret index ask fetch eval eval-fixtures check manifests
 
 help: ## list the targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  make %-14s %s\n", $$1, $$2}'
@@ -56,6 +56,9 @@ dev-services-stop: ## stop and remove the two dev containers (data volumes are k
 
 dev-services-reset: dev-services-stop ## also delete the dev data volumes
 	-docker volume rm rahbar-dev-chroma rahbar-dev-redis
+
+manifests: ## build and kubeconform-validate the dev, ci and prod overlays
+	@set -e; for o in dev ci prod; do echo "== $$o"; kustomize build --load-restrictor LoadRestrictionsNone k8s/overlays/$$o > /tmp/rahbar-$$o.yaml; kubeconform -strict -summary < /tmp/rahbar-$$o.yaml; done
 
 cluster: ## start minikube with Calico, then enable metrics-server and ingress
 	minikube start --driver=docker --cni=calico --memory=6144 --cpus=4

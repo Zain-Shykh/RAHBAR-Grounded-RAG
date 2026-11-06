@@ -1,0 +1,61 @@
+# kind in GitHub Actions (CI e2e-eval, CD smoke test): fixture corpus, hashing embedder,
+# extractive provider, no Ollama anywhere (architecture 4.11, AD-18).
+# The generator reads ../../../eval/fixtures, outside this directory, so build with
+#   kustomize build --load-restrictor LoadRestrictionsNone k8s/overlays/ci   (make manifests does) (D-096)
+# `kubectl apply -k` cannot be used for this overlay: use `kustomize build ... | kubectl apply -f -`.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: rahbar
+resources:
+  - ../../base
+# CI builds the images in the job and loads them with `kind load docker-image`.
+images:
+  - name: rahbar-api
+    newName: rahbar-api
+    newTag: ci
+  - name: rahbar-indexer
+    newName: rahbar-indexer
+    newTag: ci
+  - name: rahbar-ui
+    newName: rahbar-ui
+    newTag: ci
+generatorOptions:
+  disableNameSuffixHash: true
+configMapGenerator:
+  # No _index.json: the indexer reads the front matter of each file (run.py discover()).
+  - name: corpus-fixtures
+    files:
+      - ../../../eval/fixtures/academic-rules-2023.md
+      - ../../../eval/fixtures/academic-rules-2026.md
+      - ../../../eval/fixtures/fees-2026.md
+patches:
+  - target: {kind: ConfigMap, name: rahbar-config}
+    patch: |-
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: rahbar-config
+      data:
+        EMBED_MODEL: "hashing-bow-768"
+        LLM_PROVIDER: "extractive"
+        # H-8: hashing embedder scores run 0.00 to 0.43; 0.70 would abstain on everything.
+        RELEVANCE_FLOOR: "0.20"
+        CORPUS_DIR: "/corpus"
+  # The Job and the CronJob (a copy made in base) read the fixtures, not the PVC.
+  - target: {kind: Job, name: indexer}
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/volumes/0
+        value: {name: corpus, configMap: {name: corpus-fixtures}}
+  - target: {kind: CronJob, name: reindex}
+    patch: |-
+      - op: replace
+        path: /spec/jobTemplate/spec/template/spec/volumes/0
+        value: {name: corpus, configMap: {name: corpus-fixtures}}
+  # No Ollama in CI: drop the host ipBlock egress rules (api index 2, indexer index 1).
+  - target: {kind: NetworkPolicy, name: api-egress}
+    patch: |-
+      - {op: remove, path: /spec/egress/2}
+  - target: {kind: NetworkPolicy, name: indexer-egress}
+    patch: |-
+      - {op: remove, path: /spec/egress/1}
