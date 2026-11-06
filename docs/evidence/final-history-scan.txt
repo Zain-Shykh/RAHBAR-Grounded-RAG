@@ -1,0 +1,21 @@
+$ git log -p --all | grep -E "dckr_pat_[A-Za-z0-9_-]{10,}|gsk_[A-Za-z0-9]{20,}|AIza[A-Za-z0-9_-]{25,}|sk-[A-Za-z0-9]{30,}|ghp_[A-Za-z0-9]{20,}|BEGIN .*PRIVATE KEY"
+0
+$ git log --all --stat -- corpus/raw | wc -l
+0
+$ git log --all --diff-filter=A --name-only --format= | grep -iE "(^|/)\.env|secret|\.pem$|\.key$|\.pdf$" | sort -u
+Assignment 02, RAHBAR Grounded RAG on Kubernetes.pdf
+k8s/base/secret.placeholder.yaml
+$ git log -p --all | grep -iE "^\+.*(api[_-]?key|password|secret|dckr_pat)" | grep -E "[:=] *[\"']?[A-Za-z0-9+/_-]{20,}" | head   # value-shaped assignments
+$ grep -rn "STARTER-TOD[O]" --exclude-dir=.venv --exclude-dir=.git . | grep -v "^STARTER.md\|^scripts/check_submission.py\|^docs/evidence/final-history-scan.txt"
+(none; STARTER.md and scripts/check_submission.py are the starter kit documents that name the marker)
+$ grep -rn "raise NotImplementedError" --include=*.py api indexer eval scripts | grep -v check_submission
+(none)
+$ cat .gitignore | grep -nE "env|secret"
+1:# secrets
+2:.env
+3:.env.*
+4:*secret*.yaml
+5:*secret*.yml
+6:!k8s/base/secret.placeholder.yaml
+16:.venv/
+17:venv/

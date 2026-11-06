@@ -88,6 +88,7 @@ Copy this block to the end of section 7, increment the number, and fill every li
 | DEV-011 | The `ci` overlay needs `--load-restrictor LoadRestrictionsNone`; rehearsal ran on minikube | S3 | ABSORBED | 4.11, 4.5, AD-18 | 2026-11-06 |
 | DEV-012 | `cd.yml` also runs on `workflow_dispatch` and may push SHA tags from `dev` | S3 | ABSORBED | 4.15 | 2026-11-06 |
 | DEV-013 | Requests and limits in 4.2 replaced by the values measured in K10 (`docs/evidence/resources.md`) | S3 | ABSORBED | 4.2, R-RES-2 | 2026-11-07 |
+| DEV-014 | A PodDisruptionBudget for the api (`minAvailable: 2`) was built although AD-26 listed it as a non-goal | S3 | ABSORBED | AD-26, 1.2 | 2026-11-07 |
 
 ## 7. Log
 
@@ -391,3 +392,21 @@ Places where the architecture has flagged a real chance of deviation (architectu
 
 **Impact:** none on behaviour; the HPA percentage is unchanged because the api CPU request stays 100m.
 
+### DEV-014 A PodDisruptionBudget for the api was built
+
+| | |
+| --- | --- |
+| Status | ABSORBED (architecture 1.2 and AD-26 edited in the same PR, 2026-11-07) |
+| Severity | S3 |
+| Date | 2026-11-07 |
+| Raised by | Claude (phase 15 review; the file came in with K3) |
+| Architecture reference | 1.2 (non-goals), AD-26 |
+| Files changed | `k8s/base/pdb.yaml`, `k8s/base/kustomization.yaml` |
+
+**The architecture says:** no PodDisruptionBudget.
+
+**What was built:** `k8s/base/pdb.yaml`, `minAvailable: 2` on the three api replicas, so a voluntary disruption (node drain) cannot take the api below two ready pods.
+
+**Why it matters:** it is a small, standard resilience object that supports the "service stays up" requirement; it costs nothing at runtime and is valid on the 3 to 8 replica HPA range. Leaving the architecture saying "none" while the cluster has one would be silent drift.
+
+**Impact:** none on behaviour. Architecture 1.2 and AD-26 no longer list the PodDisruptionBudget as a non-goal.

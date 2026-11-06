@@ -35,8 +35,9 @@ class CacheError(RuntimeError):
 def cacheable(response: AskResponse, outcome: str, follow_up: bool) -> bool:
     """The write rule (5.9.2): only a validated, answered, from-context, non-follow-up response.
 
-    Abstentions, fallbacks and anything that failed validation never get here with outcome
-    "answered". The citation check is repeated so a bad entry can never be served many times.
+    This is the never-cache rule: abstentions, fallbacks, validation failures and follow-ups
+    are never stored. Only outcome "answered" passes.
+    The citation check is repeated so a bad entry can never be served many times.
     """
     if follow_up or outcome != "answered" or not response.answered_from_context:
         return False

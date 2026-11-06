@@ -58,6 +58,8 @@ def _within(seconds: float, fn: Callable[[], Any]) -> tuple[bool, Any]:
 
 @router.get("/readyz")
 def readyz(request: Request) -> JSONResponse:
+    # Non-empty collection: state.get() raises IndexUnavailable("collection") when
+    # col.count() == 0 (services/index_state.py), so an empty index is never Ready.
     state = request.app.state.index_state
     if state is None:   # RETRIEVER=stub: nothing to check
         return JSONResponse({"status": "ready", "checks": {"retriever": "stub"}})

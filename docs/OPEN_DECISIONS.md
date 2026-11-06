@@ -36,23 +36,23 @@ Entry template:
 | ID | Title | Area | Status | Blocks |
 | --- | --- | --- | --- | --- |
 | D-001 | Semantic cache backend | api | DECIDED | ADR, Redis manifests, cache code |
-| D-002 | Chunk size unit | indexer | PROVISIONAL | chunker, ConfigMap, PIPELINE.md |
-| D-003 | How documents reach the indexer Job | indexer, k8s | PROVISIONAL | Job manifest, indexer Dockerfile |
+| D-002 | Chunk size unit | indexer | DECIDED | chunker, ConfigMap, PIPELINE.md |
+| D-003 | How documents reach the indexer Job | indexer, k8s | DECIDED | Job manifest, indexer Dockerfile |
 | D-004 | Work split between Zain and Ahmad | process | DECIDED | everything |
 | D-005 | Embedding via Ollama host | indexer, api | DECIDED | embed stage, NetworkPolicy |
-| D-006 | Retrieval: vector only or hybrid | api, eval | PROVISIONAL | retriever, exact-term recall |
+| D-006 | Retrieval: vector only or hybrid | api, eval | DECIDED | retriever, exact-term recall |
 | D-007 | ADR 0002 and 0003 topics | docs | DECIDED | ADR files, checker |
-| D-008 | Where ARCHITECTURE.md lives | docs | PROVISIONAL | doc layout |
-| D-009 | Ingress hostname | k8s | PROVISIONAL | Ingress, eval host header |
+| D-008 | Where ARCHITECTURE.md lives | docs | DECIDED | doc layout |
+| D-009 | Ingress hostname | k8s | DECIDED | Ingress, eval host header |
 | D-010 | CI e2e cluster: kind or k3d | ci-cd | DECIDED | ci.yml |
-| D-011 | Handling of the "older version" question | api | PROVISIONAL | retriever filter logic |
-| D-012 | Follow-up question detection | api | PROVISIONAL | cache, answer service |
+| D-011 | Handling of the "older version" question | api | DECIDED | retriever filter logic |
+| D-012 | Follow-up question detection | api | DECIDED | cache, answer service |
 | D-013 | Docker Hub account and repo names | ci-cd | DECIDED | cd.yml |
 | D-014 | Branch protection: required checks and admin enforcement | process | DECIDED | merging |
 | D-015 | Which four failure stages to break | docs | DECIDED | FAILURE-ANALYSIS.md |
 | D-016 | Duplicate content: Prospectus 2026 vs Handbook 2026 | corpus, indexer | DECIDED | golden set, retrieval |
-| D-017 | OCR settings and quality threshold | indexer | PROVISIONAL | extract stage |
-| D-018 | LLM provider scope | api | PROVISIONAL | provider code |
+| D-017 | OCR settings and quality threshold | indexer | DECIDED | extract stage |
+| D-018 | LLM provider scope | api | DECIDED | provider code |
 | D-019 | Corpus choice | corpus | DECIDED | |
 | D-020 | Absent topic is hostel rules | corpus | DECIDED | |
 | D-021 | Default LLM mode and models | api | DECIDED | |
@@ -61,14 +61,14 @@ Entry template:
 | D-024 | Dependency documentation | process | DECIDED | |
 | D-025 | Docker access workaround | process | DECIDED | |
 | D-026 | Re-index swap strategy | indexer | DECIDED |  |
-| D-027 | Cache invalidation without indexer in Redis | api, indexer | PROVISIONAL | cache code |
-| D-028 | Third overlay `ci` | k8s, ci-cd | PROVISIONAL | kustomize layout |
-| D-029 | Kit interface extensions | api | PROVISIONAL | provider, retriever code |
-| D-030 | Embedding code duplicated in api and indexer | api, indexer | PROVISIONAL | embedder code |
-| D-031 | Two eval baselines | eval, ci-cd | PROVISIONAL | CI gate |
-| D-032 | Pull request flow inside the team | process | PROVISIONAL | merging |
+| D-027 | Cache invalidation without indexer in Redis | api, indexer | DECIDED | cache code |
+| D-028 | Third overlay `ci` | k8s, ci-cd | DECIDED | kustomize layout |
+| D-029 | Kit interface extensions | api | DECIDED | provider, retriever code |
+| D-030 | Embedding code duplicated in api and indexer | api, indexer | DECIDED | embedder code |
+| D-031 | Two eval baselines | eval, ci-cd | DECIDED | CI gate |
+| D-032 | Pull request flow inside the team | process | DECIDED | merging |
 | D-033 | License | docs | DECIDED | |
-| D-034 | Load balance between lanes | process | OPEN | work plan |
+| D-034 | Load balance between lanes | process | DECIDED | work plan |
 | D-035 | api image: how the build stage hands over dependencies | api | DECIDED | api/Dockerfile |
 | D-036 | HEALTHCHECK in the Dockerfiles | api, indexer | DECIDED | Dockerfiles |
 | D-037 | Makefile `images` target during phase 1 | process | DECIDED | make images |
@@ -109,7 +109,7 @@ Entry template:
 - Decided on: 2026-11-04
 
 ### D-002 Chunk size unit
-- Status: PROVISIONAL
+- Status: DECIDED
 - Raised: 2026-11-04 by Claude
 - Area: indexer
 - Related: R-IDX-3, R-IDX-7, R-IDX-8, `CHUNK_SIZE=400`, `CHUNK_OVERLAP=50`
@@ -118,10 +118,10 @@ Entry template:
 - Claude recommends: A with whitespace-word counts as a proxy (no extra dependency), stated plainly in PIPELINE.md. Amplification is then just words stored / words original. Three configs to measure, for example (200, 25), (400, 50), (600, 100).
 - Blocks: chunker, ConfigMap, PIPELINE.md.
 - Decision: Words (whitespace-separated), AD-10 in architecture. Confirm.
-- Decided on: (pending confirmation)
+- Decided on: 2026-11-07 (final verification, phase 15: applied as recommended and shipped; pre-approved by Zain; decided by Claude)
 
 ### D-003 How documents reach the indexer Job
-- Status: PROVISIONAL
+- Status: DECIDED
 - Raised: 2026-11-04 by Claude
 - Area: indexer, k8s
 - Related: R-IDX-9, R-COR-12
@@ -133,7 +133,7 @@ Entry template:
 - Claude recommends: A for the real corpus (init container, verify hashes, egress allowed to the internet only for that pod). CI keeps using `eval/fixtures` baked or mounted, so CI stays offline and fast.
 - Blocks: Job manifest, indexer Dockerfile, NetworkPolicy egress.
 - Decision: PVC corpus-data filled by `make corpus` from local corpus/raw (AD-08); the Job re-hashes files against _index.json before indexing. Zain asked for the drawbacks of this option; Claude proceeded provisionally. Confirm or switch to the init-container fetch.
-- Decided on: (pending confirmation)
+- Decided on: 2026-11-07 (final verification, phase 15: applied as recommended and shipped; pre-approved by Zain; decided by Claude)
 
 ### D-004 Work split between Zain and Ahmad
 - Status: DECIDED
@@ -159,7 +159,7 @@ Entry template:
 - Decided on: 2026-11-04
 
 ### D-006 Retrieval: vector only or hybrid
-- Status: PROVISIONAL
+- Status: DECIDED
 - Raised: 2026-11-04 by Claude
 - Area: api, eval
 - Related: R-COR-7, R-ENG-5, R-BON-2
@@ -168,7 +168,7 @@ Entry template:
 - Claude recommends: A first. Add B only if time remains after the CI gate works; it is bonus-sized and risks the CI timeline.
 - Blocks: retriever design only.
 - Decision: Vector only in the baseline (architecture 1.2). Hybrid stays optional bonus.
-- Decided on: (pending confirmation)
+- Decided on: 2026-11-07 (final verification, phase 15: applied as recommended and shipped; pre-approved by Zain; decided by Claude)
 
 ### D-007 ADR 0002 and 0003 topics
 - Status: DECIDED
@@ -182,7 +182,7 @@ Entry template:
 - Decided on: 2026-11-04
 
 ### D-008 Where ARCHITECTURE.md lives
-- Status: PROVISIONAL
+- Status: DECIDED
 - Raised: 2026-11-04 by Claude
 - Area: docs
 - Related: R-K8S-CHROMA
@@ -190,10 +190,10 @@ Entry template:
 - Claude recommends: `docs/ARCHITECTURE.md`, unless the checker looks for it at the root.
 - Blocks: doc layout.
 - Decision: The reason for the StatefulSet is written in docs/architecture/architecture.md section 4.10. Add a short docs/ARCHITECTURE.md pointer when the README is written, so the file name the assignment mentions exists. The checker does not look for it.
-- Decided on: (pending confirmation)
+- Decided on: 2026-11-07 (final verification, phase 15: applied as recommended and shipped; pre-approved by Zain; decided by Claude)
 
 ### D-009 Ingress hostname
-- Status: PROVISIONAL
+- Status: DECIDED
 - Raised: 2026-11-04 by Claude
 - Area: k8s
 - Related: R-K8S-ING, `make ask`, `run_eval.py --host`
@@ -201,7 +201,7 @@ Entry template:
 - Claude recommends: `rahbar.local`, with the `/etc/hosts` line (`$(minikube ip) rahbar.local`) in the README.
 - Blocks: Ingress manifest, README.
 - Decision: rahbar.local, as in the Makefile and run_eval examples (architecture 4.3).
-- Decided on: (pending confirmation)
+- Decided on: 2026-11-07 (final verification, phase 15: applied as recommended and shipped; pre-approved by Zain; decided by Claude)
 
 ### D-010 CI e2e cluster: kind or k3d
 - Status: DECIDED
@@ -216,7 +216,7 @@ Entry template:
 - Decided on: 2026-11-04
 
 ### D-011 Handling of the "older version" question
-- Status: PROVISIONAL
+- Status: DECIDED
 - Raised: 2026-11-04 by Claude
 - Area: api
 - Related: R-QRY-4, R-GOL-2
@@ -225,10 +225,10 @@ Entry template:
 - Claude recommends: C using the year/version text (regex), no LLM call, easy to test. Answers must name which version they quote.
 - Blocks: retriever filter logic, version-sensitive golden questions.
 - Decision: Rule-based: year tokens matching known doc_versions, else older-version phrases, else current only (architecture 5.6.2).
-- Decided on: (pending confirmation)
+- Decided on: 2026-11-07 (final verification, phase 15: applied as recommended and shipped; pre-approved by Zain; decided by Claude)
 
 ### D-012 Follow-up question detection
-- Status: PROVISIONAL
+- Status: DECIDED
 - Raised: 2026-11-04 by Claude
 - Area: api
 - Related: R-QRY-2, R-CAC-4
@@ -237,7 +237,7 @@ Entry template:
 - Claude recommends: check what `ui/index.html` already sends. If it sends history, use it; otherwise C and say so.
 - Blocks: cache, answer service.
 - Decision: Single-turn API, no follow-ups. The UI sends only the question. A follow_up flag exists internally for the cache rule (architecture 5.5.4).
-- Decided on: (pending confirmation)
+- Decided on: 2026-11-07 (final verification, phase 15: applied as recommended and shipped; pre-approved by Zain; decided by Claude)
 
 ### D-013 Docker Hub account and repo names
 - Status: DECIDED
@@ -262,7 +262,7 @@ Entry template:
 - Decided on: 2026-11-06
 
 ### D-015 Which four failure stages to break
-- Status: OPEN
+- Status: DECIDED
 - Raised: 2026-11-04 by Claude
 - Area: docs
 - Related: R-FAI-A..F
@@ -284,7 +284,7 @@ Entry template:
 - Decided on: 2026-11-04
 
 ### D-017 OCR settings and quality threshold
-- Status: PROVISIONAL
+- Status: DECIDED
 - Raised: 2026-11-04 by Claude
 - Area: indexer
 - Related: R-IDX-1, R-COR-3
@@ -292,10 +292,10 @@ Entry template:
 - Claude recommends: a page counts as scanned when it has fewer than ~30 extractable characters; OCR at 200 dpi, `eng`, via `pytesseract` + `pdf2image` (what we tested). Add a light fix-up for clause numbers only if measured as worth it; otherwise document the loss.
 - Blocks: extract stage.
 - Decision: Page is scanned when it has fewer than 30 non-space characters; OCR at 200 dpi, language eng, pdf2image + pytesseract (architecture 5.4.2).
-- Decided on: (pending confirmation)
+- Decided on: 2026-11-07 (final verification, phase 15: applied as recommended and shipped; pre-approved by Zain; decided by Claude)
 
 ### D-018 LLM provider scope
-- Status: PROVISIONAL
+- Status: DECIDED
 - Raised: 2026-11-04 by Claude
 - Area: api
 - Related: R-LLM-1..4
@@ -303,7 +303,7 @@ Entry template:
 - Claude recommends: `ollama-host` full; `hosted` as a thin second file if time remains. Stub stays for tests.
 - Blocks: provider code, ADR 0004.
 - Decision: ollama-host full; `extractive` for CI and tests; `hosted` as a thin second file only if time allows (architecture 5.7.2).
-- Decided on: (pending confirmation)
+- Decided on: 2026-11-07 (final verification, phase 15: applied as recommended and shipped; pre-approved by Zain; decided by Claude)
 
 ### D-026 Re-index swap strategy
 - Status: DECIDED
@@ -314,54 +314,60 @@ Entry template:
 - Decided on: 2026-11-04
 
 ### D-027 Cache invalidation without the indexer touching Redis
-- Status: PROVISIONAL
+- Status: DECIDED
 - Raised: 2026-11-04 by Claude
 - Area: api, indexer
 - Related: AD-04, AD-05, R-CAC-5, R-SEC-4
 - Question: The assignment says "redis from api only" and also "expire the cache when the indexing Job runs". Both hold only if the indexer never reaches Redis.
 - Claude recommends (and used): the indexer stamps a new `index_id` in the collection metadata; each API pod names its cache search index by it and drops older ones. A `scope` tag keeps version-intent questions apart.
-- Decision: pending confirmation.
+- Decision: as recommended; shipped and verified (see the PR that introduced it). Decided by: Claude, pre-approved by Zain.
+- Decided on: 2026-11-07 (final verification, phase 15)
 
 ### D-028 Overlays: add `ci` next to `dev` and `prod`
-- Status: PROVISIONAL
+- Status: DECIDED
 - Raised: 2026-11-04 by Claude
 - Area: k8s, ci-cd
 - Related: AD-18, requirements R-CI-6, R-CD-1
 - Question: The assignment names two overlays. CI and the CD smoke test run on kind with no Ollama, so they need fixture corpus, hashing embedder and extractive provider. Three overlays keep that out of `dev` and `prod`.
-- Decision: pending confirmation.
+- Decision: as recommended; shipped and verified (see the PR that introduced it). Decided by: Claude, pre-approved by Zain.
+- Decided on: 2026-11-07 (final verification, phase 15)
 
 ### D-029 Kit interface extensions
-- Status: PROVISIONAL
+- Status: DECIDED
 - Raised: 2026-11-04 by Claude
 - Area: api
 - Related: AD-14, AD-15, STARTER.md ("If you change a contract, say why in an ADR")
 - Question: Provider `generate` returns a `GenerationResult` (adds token counts) and accepts a retry `hint`; the retriever accepts an optional pre-computed `vector` and `where`; outcome travels in `X-Outcome` and `X-Cache` headers. The external JSON is unchanged. Needs a line in ADR 0004.
-- Decision: pending confirmation.
+- Decision: as recommended; shipped and verified (see the PR that introduced it). Decided by: Claude, pre-approved by Zain.
+- Decided on: 2026-11-07 (final verification, phase 15)
 
 ### D-030 Embedding code duplicated in api and indexer
-- Status: PROVISIONAL
+- Status: DECIDED
 - Raised: 2026-11-04 by Claude
 - Area: api, indexer
 - Related: AD-09
 - Question: The two images have separate build contexts, so the Ollama client and the hashing embedder exist twice. A parity test with a fixed golden vector keeps them equal. Alternative: a shared package built into both images (more build plumbing).
-- Decision: pending confirmation.
+- Decision: as recommended; shipped and verified (see the PR that introduced it). Decided by: Claude, pre-approved by Zain.
+- Decided on: 2026-11-07 (final verification, phase 15)
 
 ### D-031 Two eval baselines
-- Status: PROVISIONAL
+- Status: DECIDED
 - Raised: 2026-11-04 by Claude
 - Area: eval, ci-cd
 - Related: AD-27
 - Question: The CI gate runs on fixtures with a deterministic embedder, so its numbers differ from the real-corpus baseline. CI uses `eval/fixtures/baseline.fixture.json`; `eval/baseline.json` holds the shipped real numbers from a local run.
-- Decision: pending confirmation.
+- Decision: as recommended; shipped and verified (see the PR that introduced it). Decided by: Claude, pre-approved by Zain.
+- Decided on: 2026-11-07 (final verification, phase 15)
 
 ### D-032 Pull request flow inside the team
-- Status: PROVISIONAL
+- Status: DECIDED
 - Raised: 2026-11-04 by Claude
 - Area: process
 - Related: CONTRIBUTING.md section 2
 - Question: Feature branches off `dev`, one PR per task. A change touching only your own lane's files may be merged into `dev` by its author after `make test && make lint`; changes in shared files or contracts need the other person's review. `dev` to `main` needs approval (protection).
 - Claude recommends: as written, to keep a four-day schedule moving. Stricter option: every PR into `dev` needs the other person's approval.
-- Decision: pending confirmation.
+- Decision: as recommended; shipped and verified (see the PR that introduced it). Decided by: Claude, pre-approved by Zain.
+- Decided on: 2026-11-07 (final verification, phase 15)
 
 ### D-033 License
 - Status: DECIDED
@@ -371,12 +377,13 @@ Entry template:
 - Decided on: 2026-11-04
 
 ### D-034 Load balance between lanes
-- Status: OPEN
+- Status: DECIDED
 - Raised: 2026-11-04 by Claude
 - Area: process
 - Related: docs/WORKPLAN.md
 - Question: Estimates are about 37.5 h (Zain) and 39 h (Ahmad) against roughly 40 h each. Zain's lane has the serial dependency chain. If Zain slips, candidates to move to Ahmad: the `hashing-bow-768` embedder and `extractive` provider (he needs them for CI e2e), unit tests for the pure modules, and running the four failure-analysis experiments.
-- Decision: pending.
+- Decision: moot. Ahmad was unavailable, so Zain's session built both lanes (platform plan K1 to K11); the hashing embedder, extractive provider and failure experiments were already in Zain's lane. Decided by: Claude, pre-approved by Zain.
+- Decided on: 2026-11-07
 
 ---
 
@@ -666,6 +673,16 @@ Entry template:
 - Question: Chroma crash-loops because Service `chroma` injects `CHROMA_PORT=tcp://...`. How to avoid?
 - Decision: `enableServiceLinks: false` on every pod (api, ui, chroma, redis). Also stops Service variables from shadowing ConfigMap keys such as `REDIS_PORT`. Logged as DEV-008. Decided by: Claude, pre-approved by Zain
 - Decided on: 2026-11-05
+
+### D-104 Phase 15: how the last checker warnings and the open decisions were closed
+- Status: DECIDED
+- Raised: 2026-11-07 by Claude (phase 15)
+- Area: process, docs
+- Question: (1) `make check` still warns "readiness does not look like it checks for a NON-EMPTY collection" and "no never-cache rule found". Rename code to satisfy the regex, add dead code, or explain? (2) Sixteen entries sat at PROVISIONAL or OPEN although the system shipped with their recommendations.
+- Options: A. Explain the warnings in the rubric known-gaps section and add clarifying comments only. B. Rename `follow_up` to `is_followup` and add a redundant count check. C. Leave the entries as they are.
+- Claude recommends: A for (1): the behaviour exists (`IndexState.get` raises `IndexUnavailable("collection")` when `col.count() == 0`, `api/app/services/index_state.py`; `cacheable()` in `api/app/services/cache.py` is the never-cache rule, covered by tests), the checker strips comments and only inspects the `readyz` body. Gaming a lint with dead code is worse than a documented warning. For (2): mark DECIDED, they were applied as recommended and verified.
+- Decision: A, and mark D-002 to D-034 DECIDED with the 2026-11-07 date. Decided by: Claude, pre-approved by Zain.
+- Decided on: 2026-11-07
 
 ## Change log
 
@@ -1219,3 +1236,4 @@ Entry template:
 - Claude recommends: A. A marker left in the notes scores zero and the deadline is Sunday night; honesty is kept by the flag and by saying what was not run (swapped probes, provoked OOM, two concurrent Jobs).
 - Decision: A. Decided by: Claude, pre-approved by Zain.
 - Decided on: 2026-11-07
+- 2026-11-07: phase 15: D-104 added; all PROVISIONAL and OPEN entries closed as DECIDED.

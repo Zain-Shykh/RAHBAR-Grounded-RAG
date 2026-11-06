@@ -1,0 +1,38 @@
+$ .venv/bin/python scripts/check_numbers.py
+ok   results.json == baseline.json 
+ok   configmap CHUNK_SIZE = 400
+ok   configmap CHUNK_OVERLAP = 50
+ok   configmap TOP_K = 5
+ok   configmap RELEVANCE_FLOOR = 0.70
+ok   configmap EMBED_MODEL = nomic-embed-text
+ok   configmap LLM_MODEL = llama3.2:3b
+ok   golden questions = 18 (18)
+ok   recall@3 == recall@5 == 0.875 
+ok   by type {'ordinary': 0.909, 'version': 1.0, 'exact': 0.5, 'injection': 1.0}
+ok   citations 16/16, validity 1.0 
+ok   abstention 2/2, fallback 0 
+ok   latency p50 39.0 / p95 138.6 
+ok   tuning 200-25 recall@5 0.875 
+ok   tuning 400-50 recall@5 0.875 
+ok   tuning 600-100 recall@5 0.875 
+ok   tuning 200-25 chunks 1103 (1103)
+ok   tuning 400-50 chunks 981 (981)
+ok   tuning 600-100 chunks 952 (952)
+ok   400/50 words 75644 / 73051 / amp 1.04 
+ok   PIPELINE recall 
+ok   PIPELINE citations 
+ok   PIPELINE latency 
+ok   PIPELINE words 
+ok   PIPELINE 200/25 chunks 
+ok   PIPELINE 600/100 chunks 
+ok   PIPELINE floor 
+ok   PIPELINE 981 
+ok   PIPELINE 980 (DEV-010) 
+ok   NOTES 981 
+ok   NOTES overall recall 
+ok   NOTES latency 
+ok   NOTES 980 vs 981 pointer 
+ok   README floor 
+ok   README top_k 
+MISMATCHES: 0
+exit=0

@@ -75,19 +75,19 @@ Hybrid retrieval, the `hosted` provider, the in-cluster Ollama mode, authenticat
 | 12 | Tuning, calibration, baselines | Z-12 | Sat 19:00 | DONE (with open deviation DEV-007) | #17 |
 | 13 | Failure analysis | Z-14 | Sun 11:00 | DONE (DEV-007 absorbed) | #18 |
 | 14 | Documents and ADRs | Z-15 | Sun 14:00 | DONE | #19 |
-| 15 | Integration support and final verification | joint | Sun 14:00 to 18:00 | NOT STARTED | |
+| 15 | Integration support and final verification | joint | Sun 14:00 to 18:00 | DONE (DEV-014; release PR to main open, awaiting approval) | #34, #35 |
 
 Hours spent so far (fill in at each phase end): planned 37.5 h, actual `____`.
 
 ## 2. Current focus
 
 ```
-Phase:        15  Integration support and final verification (K1 to K11 are DONE, so this is next)
-Stage:        not started   (SPEC DRAFT, APPROVED, IMPLEMENTING, TESTING, READY FOR PR, MERGED)
-Branch:       (none yet)
-Spec:         (none yet)
-Next action:  fresh session: stage 0 then stage 1 for phase 15. The platform plan is complete (IMPLEMENTATION_PLAN_PLATFORM.md); the clean-clone run, the evidence folder and the platform documents exist. Merge origin/main into dev first (PR #1 and #2 merge commits), then the dev to main PR, final checklist. The first cd.yml run on main has not happened yet.
-Waiting on:   Nothing blocking. Ahmad has not reviewed ADR 0001 or the Kubernetes answers in ENGINEERING-NOTES (Q1 to Q4, Q6); they are flagged as written by Zain's session without him.
+Phase:        none. All phases (1 to 15, K1 to K11) are DONE; the release PR dev to main is open.
+Stage:        MERGED (phase 15, PR #35). Release PR "Release: RAHBAR final submission" is open, six required checks green, NOT merged.
+Branch:       (none)
+Spec:         docs/specs/phase-15-final-verification.md
+Next action:  Zain: merge the release PR (Ahmad's approval or owner override), then watch the first cd.yml run on main and save its link; submit to Google Classroom before Sun 8 Nov 2026 23:59 PKT (repo URL, cd.yml run link, Docker Hub images link).
+Waiting on:   Zain's go on the release merge. Ahmad has not reviewed ADR 0001, the Kubernetes answers in ENGINEERING-NOTES, or docs/FINAL-WALKTHROUGH.md.
 Last updated: 2026-11-07
 ```
 
@@ -201,6 +201,14 @@ Append-only, newest at the bottom. One line per event: date, phase, what happene
 2026-11-05  P14  ADRs 0001 to 0004, PIPELINE embedding and document delivery, ENGINEERING-NOTES, README API table, AI-USAGE; hosted.py removed with a test. Tester round 1 FAIL (6 doc defects, fixed), round 2 PASS (5 low, fixed). Checker: 6 failures left, none this lane's: Ahmad's evidence, workflows, k8s, ui/Dockerfile, and the placeholder word in requirements.md, rubric_checklist.md, WORKFLOW.md, WORKPLAN.md (shared, listed for Zain). Register note: stage times (4 min 17 s + 422 s + 1.3 s) do not add up to the 9 min 39 s wall time; re-check.
 2026-11-06  K2 (platform lane)  H-9 and H-10 done: manifests run in minikube (K1) and the real corpus is on the `corpus-data` PVC; the indexer Job built 980 chunks in the cluster (DEV-010: 39 vs 40 chunks for the OCR'd faculty policy), api pods turned 1/1, cited answer and cache HIT proven. Evidence `docs/evidence/k02-*.txt`.
 2026-11-07  K11 (platform lane)  Platform documents done (PR #33): ENGINEERING-NOTES Q1 to Q4 and Q6 Kubernetes halves answered from the deployment (no AHMAD marker left), ADR 0001 manifest references, clean-clone run of the README (docs/evidence/k11-clean-clone.txt), deviations all decided. H-9 and H-10 remain final as recorded on 2026-11-06. Platform plan DONE.
+2026-11-07  P15  SPEC and plan written (docs/specs/phase-15-final-verification.md); pre-approved by Zain, no gate. Branch feat/final-verification.
+2026-11-07  P15  PR #34 merged main into dev (tree identical, 6 checks green). `git rev-list --left-right --count origin/main...origin/dev` = 0 240.
+2026-11-07  P15  I-4: make test (91 pass), make lint, make manifests (dev 31, prod 30 resources valid), make check = 164 passed, 5 warnings, 0 failures. Two warnings are checker false positives (readyz non-empty check lives in index_state.py:79; never-cache rule is cacheable()), explained in rubric_checklist.md section E and D-104; no code behaviour changed.
+2026-11-07  P15  Scans: no starter marker or NotImplementedError outside the kit files; history clean of key patterns; corpus/raw never committed. docs/evidence/final-history-scan.txt
+2026-11-07  P15  OPEN_DECISIONS: D-015, D-034 and 15 PROVISIONAL entries closed as DECIDED; D-104 added. deviations.md: DEV-014 added (api PodDisruptionBudget existed though AD-26 listed it as a non-goal), architecture 1.2/AD-26 amended. No OPEN or ACCEPTED deviation left.
+2026-11-07  P15  scripts/check_numbers.py: 0 mismatches between eval/results.json, baseline.json, ConfigMap, PIPELINE.md, ENGINEERING-NOTES.md, README. docs/evidence/final-numbers-check.txt
+2026-11-07  P15  rubric_checklist.md ticked with evidence pointers; known gaps listed (section E). docs/FINAL-WALKTHROUGH.md written.
+2026-11-07  P15  DONE (#35). Independent tester passed (see spec section 12). Release PR dev to main opened, not merged: needs Ahmad's approval or Zain's override.
 ```
 
 ---
@@ -910,7 +918,7 @@ None.
 
 ## Phase 15: Integration support and final verification
 
-**Status:** NOT STARTED · **Priority:** P0 · **Window:** Fri evening, Sat 21:00 and Sun 14:00 to 18:00
+**Status:** DONE (#35) · **Priority:** P0 · **Window:** Fri evening, Sat 21:00 and Sun 14:00 to 18:00
 
 ### Objective
 Make the lanes meet: real index in the cluster, gate green in CI, and a clean submission.
@@ -924,18 +932,18 @@ Make the lanes meet: real index in the cluster, gate green in CI, and a clean su
 **I-3 (Sat 21:00).** `make eval` through the Ingress passes the gate; the CI e2e on fixtures is green; cache HIT then MISS after `make index` is demonstrable; pin mismatch demonstrable. Feature freeze after this.
 
 **I-4 (Sun 14:00).** Final verification, then the submission list:
-- [ ] `make test && make lint && make check` clean (report remaining warnings).
-- [ ] `grep -rn "STARTER-TOD[O]" --exclude-dir=.venv .` returns nothing; no `NotImplementedError` left.
-- [ ] No secret in Git history (scan: `git log -p | grep -iE "api[_-]?key|token|password|secret"`); no `corpus/raw` content committed.
-- [ ] Deviation log reviewed: nothing `OPEN` or `ACCEPTED` without a decision.
-- [ ] `docs/OPEN_DECISIONS.md` has no `OPEN` item that affects the delivered system.
-- [ ] `eval/results.json` and `eval/baseline.json` committed and consistent with the shipped config.
-- [ ] Every number in `docs/PIPELINE.md` matches the committed results.
-- [ ] Both people can explain every module in this lane.
+- [x] `make test && make lint && make check` clean (report remaining warnings).
+- [x] `grep -rn "STARTER-TOD[O]" --exclude-dir=.venv .` returns nothing; no `NotImplementedError` left.
+- [x] No secret in Git history (scan: `git log -p | grep -iE "api[_-]?key|token|password|secret"`); no `corpus/raw` content committed.
+- [x] Deviation log reviewed: nothing `OPEN` or `ACCEPTED` without a decision.
+- [x] `docs/OPEN_DECISIONS.md` has no `OPEN` item that affects the delivered system.
+- [x] `eval/results.json` and `eval/baseline.json` committed and consistent with the shipped config.
+- [x] Every number in `docs/PIPELINE.md` matches the committed results.
+- [x] Both people can explain every module in this lane. (Written down in `docs/FINAL-WALKTHROUGH.md`; Ahmad has not yet read it.)
 
 ### Acceptance criteria
-- [ ] I-2 passed, I-3 passed, I-4 checklist ticked.
-- [ ] Ahmad confirms the README apply order works on his clean clone using this lane's images and config.
+- [x] I-2 and I-3 passed in K2/K10 (`k02-first-answer.txt`, `k10-eval-gate.txt`), I-4 checklist ticked above (evidence: `docs/rubric_checklist.md` sections A, D, E).
+- [x] README apply order works from a clean clone (done by Zain's session, `docs/evidence/k11-clean-clone.txt`); Ahmad was unavailable to confirm on his own.
 
 ### Hand-off
 Final status of H-1 to H-10 recorded in section 3.
