@@ -165,7 +165,15 @@ jobs:
           kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.15.1/deploy/static/provider/kind/deploy.yaml
           kubectl wait -n ingress-nginx --for=condition=ready pod -l app.kubernetes.io/component=controller --timeout=180s
       - name: apply the ci overlay (DEV-011, load restrictor off)
-        run: kustomize build --load-restrictor LoadRestrictionsNone k8s/overlays/ci | kubectl apply -f -
+        run: |
+          kustomize build --load-restrictor LoadRestrictionsNone k8s/overlays/ci > ci.yaml
+          # The ingress admission webhook can refuse connections for a few seconds after
+          # the controller pod is Ready: retry the apply, bounded, and fail if it never works.
+          for n in 1 2 3 4 5 6; do
+            kubectl apply -f ci.yaml && exit 0
+            echo "apply attempt $n failed, retrying in 10 s"; sleep 10
+          done
+          exit 1
       - name: wait for the indexer Job and the workloads
         run: |
           kubectl wait -n rahbar --for=condition=complete job/indexer --timeout=300s
