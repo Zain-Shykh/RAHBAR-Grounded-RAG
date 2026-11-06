@@ -39,7 +39,7 @@ patches:
         EMBED_MODEL: "hashing-bow-768"
         LLM_PROVIDER: "extractive"
         # H-8: hashing embedder scores run 0.00 to 0.43; 0.70 would abstain on everything.
-        RELEVANCE_FLOOR: "0.20"
+        RELEVANCE_FLOOR: "0.0"
         CORPUS_DIR: "/corpus"
   # The Job and the CronJob (a copy made in base) read the fixtures, not the PVC.
   - target: {kind: Job, name: indexer}
