@@ -1,0 +1,71 @@
+# kubectl top, idle and during a cache-miss question (api image rebuilt after the K6 dependency bumps)
+# captured 2026-11-06T18:45Z on minikube (Calico, docker driver), namespace rahbar, dev overlay
+
+$ kubectl top pods -n rahbar --containers
+POD                      NAME     CPU(cores)   MEMORY(bytes)   
+api-6896667d9f-mlf52     api      2m           68Mi            
+api-6896667d9f-sd4cq     api      2m           68Mi            
+api-6896667d9f-vfbmf     api      2m           70Mi            
+chroma-0                 chroma   1m           117Mi           
+redis-85454df54f-gzfxb   redis    8m           10Mi            
+ui-5d994769c6-q7kw9      ui       1m           2Mi             
+
+$ kubectl top nodes
+NAME       CPU(cores)   CPU(%)   MEMORY(bytes)   MEMORY(%)   
+minikube   175m         2%       1676Mi          10%         
+
+$ (now one cache-miss question runs through the Ingress; kubectl top sampled every 6 s while it is in flight)
+--- t+0s
+api-6896667d9f-mlf52     api      2m    68Mi    
+api-6896667d9f-sd4cq     api      2m    68Mi    
+api-6896667d9f-vfbmf     api      2m    70Mi    
+--- t+6s
+api-6896667d9f-mlf52     api      2m    68Mi    
+api-6896667d9f-sd4cq     api      2m    68Mi    
+api-6896667d9f-vfbmf     api      2m    70Mi    
+--- t+12s
+api-6896667d9f-mlf52     api      2m    68Mi    
+api-6896667d9f-sd4cq     api      2m    68Mi    
+api-6896667d9f-vfbmf     api      2m    70Mi    
+--- t+18s
+api-6896667d9f-mlf52     api      2m    68Mi    
+api-6896667d9f-sd4cq     api      2m    68Mi    
+api-6896667d9f-vfbmf     api      2m    70Mi    
+--- t+24s
+api-6896667d9f-mlf52     api      4m    68Mi    
+api-6896667d9f-sd4cq     api      4m    68Mi    
+api-6896667d9f-vfbmf     api      4m    68Mi    
+--- t+30s
+api-6896667d9f-mlf52     api      4m    68Mi    
+api-6896667d9f-sd4cq     api      4m    68Mi    
+api-6896667d9f-vfbmf     api      4m    68Mi    
+--- t+36s
+api-6896667d9f-mlf52     api      4m    68Mi    
+api-6896667d9f-sd4cq     api      4m    68Mi    
+api-6896667d9f-vfbmf     api      4m    68Mi    
+--- t+42s
+api-6896667d9f-mlf52     api      4m    68Mi    
+api-6896667d9f-sd4cq     api      4m    68Mi    
+api-6896667d9f-vfbmf     api      4m    68Mi    
+--- t+48s
+api-6896667d9f-mlf52     api      4m    68Mi    
+api-6896667d9f-sd4cq     api      4m    68Mi    
+api-6896667d9f-vfbmf     api      4m    68Mi    
+--- t+54s
+api-6896667d9f-mlf52     api      4m    68Mi    
+api-6896667d9f-sd4cq     api      4m    68Mi    
+api-6896667d9f-vfbmf     api      4m    68Mi    
+
+$ response of that question
+HTTP/1.1 200 OK
+x-cache: MISS
+{"request_id":"aa8c5fe84384f4b1ed9c307a875f4678","answer":"75%","citations":[{"source":"prospectus-2026-academic-rules-and-regulations.pdf","section":"1. Attendance Requirement","page":1},{"source":"academic-rules-handbook-jun-2026.pdf","section":"1.21 Students are required to maintain 100% attendance in","page":10},{"source":"academic-rules-handbook-jun-2026.pdf","section":"1.22 Failure to meet attendance requirements in a course will","page":10}],"answered_from_context":true,"confidence":"high
+
+$ kubectl top pods -n rahbar --containers   (after)
+POD                      NAME     CPU(cores)   MEMORY(bytes)   
+api-6896667d9f-mlf52     api      4m           68Mi            
+api-6896667d9f-sd4cq     api      4m           68Mi            
+api-6896667d9f-vfbmf     api      4m           68Mi            
+chroma-0                 chroma   2m           118Mi           
+redis-85454df54f-gzfxb   redis    10m          11Mi            
+ui-5d994769c6-q7kw9      ui       1m           2Mi             

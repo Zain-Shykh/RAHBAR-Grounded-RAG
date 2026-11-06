@@ -1,0 +1,12 @@
+# kubectl top of every pod while make eval (golden set through the Ingress) runs, sampled every 60 s
+# captured 2026-11-06T19:04Z on minikube (Calico, docker driver), namespace rahbar, dev overlay
+
+$ kubectl top pods -n rahbar --containers   (every 60 s while make eval runs)
+19:04:10
+api-7cd86cfdd5-f9s5l     api      135m   68Mi    
+api-7cd86cfdd5-hvs8m     api      133m   67Mi    
+chroma-0                 chroma   3m     130Mi   
+redis-85454df54f-gzfxb   redis    13m    8Mi     
+ui-5d994769c6-q7kw9      ui       1m     2Mi     
+api   Deployment/api   cpu: <unknown>/70%   3     8     3     5h48m
+

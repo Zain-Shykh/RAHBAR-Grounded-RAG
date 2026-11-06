@@ -1,0 +1,39 @@
+# HPA reading idle, under load with the target forced down (CPU does not rise with generation, see K3), and after the revert
+# captured 2026-11-06T18:47Z on minikube (Calico, docker driver), namespace rahbar, dev overlay
+
+$ kubectl get hpa -n rahbar
+NAME   REFERENCE        TARGETS       MINPODS   MAXPODS   REPLICAS   AGE
+api    Deployment/api   cpu: 3%/70%   3         8         3          5h31m
+
+$ kubectl get hpa api -n rahbar -o jsonpath='{.spec.minReplicas}{" "}{.spec.maxReplicas}{" "}{.spec.metrics[0].resource.target.averageUtilization}{"\n"}'
+3 8 70
+
+$ kubectl patch hpa api -n rahbar --type=json -p='[{"op":"replace","path":"/spec/metrics/0/resource/target/averageUtilization","value":5}]'
+horizontalpodautoscaler.autoscaling/api patched
+
+$ (6 parallel loops of the cached question through the Ingress; kubectl get hpa every 15 s)
+18:47:10
+api   Deployment/api   cpu: 3%/5%   3     8     3     5h31m
+18:47:25
+api   Deployment/api   cpu: 3%/5%   3     8     3     5h31m
+18:47:40
+api   Deployment/api   cpu: 3%/5%   3     8     3     5h31m
+18:47:55
+api   Deployment/api   cpu: 14%/5%   3     8     3     5h31m
+18:48:10
+api   Deployment/api   cpu: 14%/5%   3     8     6     5h32m
+18:48:25
+api   Deployment/api   cpu: 14%/5%   3     8     8     5h32m
+18:48:40
+api   Deployment/api   cpu: 14%/5%   3     8     8     5h32m
+18:48:55
+api   Deployment/api   cpu: 23%/5%   3     8     8     5h32m
+18:49:10
+api   Deployment/api   cpu: 23%/5%   3     8     8     5h33m
+$ kubectl patch hpa api -n rahbar --type=json -p='[{"op":"replace","path":"/spec/metrics/0/resource/target/averageUtilization","value":70}]'
+horizontalpodautoscaler.autoscaling/api patched
+
+$ kubectl get hpa -n rahbar
+NAME   REFERENCE        TARGETS        MINPODS   MAXPODS   REPLICAS   AGE
+api    Deployment/api   cpu: 23%/70%   3         8         8          5h33m
+

@@ -1,0 +1,27 @@
+# semantic cache and manual re-index: MISS, HIT, make index, new index_id, MISS, HIT
+# captured 2026-11-06T18:49Z on minikube (Calico, docker driver), namespace rahbar, dev overlay
+# the first MISS of this sequence is the cache-miss question recorded in k10-top-pods.txt (x-cache: MISS); the question was then asked again: HIT (below)
+
+$ kubectl exec -n rahbar deploy/api -- python -c "import urllib.request;t=urllib.request.urlopen('http://localhost:8000/metrics').read().decode();print([l for l in t.splitlines() if l.startswith('rahbar_index_info')][0])"
+rahbar_index_info{chunks="980",embed_model="nomic-embed-text",index_id="20261106T135106Z-138ed5"} 1.0
+
+$ curl -si -X POST -H 'Host: rahbar.local' http://$(minikube ip)/api/ask -d '{"question":"What is the minimum attendance required to sit in the final examination?"}'   (asked once already in k10-top-pods.txt, so this is the HIT)
+HTTP/1.1 200 OK
+x-cache: HIT
+
+$ make index
+kubectl create job --from=cronjob/reindex reindex-$(date +%s) -n rahbar
+job.batch/reindex-1793990975 created
+watch it with: kubectl get jobs -n rahbar -w
+
+$ kubectl exec -n rahbar deploy/api -- python -c "import urllib.request;t=urllib.request.urlopen('http://localhost:8000/metrics').read().decode();print([l for l in t.splitlines() if l.startswith('rahbar_index_info')][0])"
+rahbar_index_info{chunks="980",embed_model="nomic-embed-text",index_id="20261106T185913Z-762907"} 1.0
+
+$ curl -si -X POST -H 'Host: rahbar.local' http://$(minikube ip)/api/ask -d '{"question":"What is the minimum attendance required to sit in the final examination?"}'
+HTTP/1.1 200 OK
+x-cache: MISS
+
+$ curl -si -X POST -H 'Host: rahbar.local' http://$(minikube ip)/api/ask -d '{"question":"What is the minimum attendance required to sit in the final examination?"}'
+HTTP/1.1 200 OK
+x-cache: HIT
+
