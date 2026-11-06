@@ -47,7 +47,7 @@ Entry template:
 | D-010 | CI e2e cluster: kind or k3d | ci-cd | DECIDED | ci.yml |
 | D-011 | Handling of the "older version" question | api | PROVISIONAL | retriever filter logic |
 | D-012 | Follow-up question detection | api | PROVISIONAL | cache, answer service |
-| D-013 | Docker Hub account and repo names | ci-cd | OPEN | cd.yml |
+| D-013 | Docker Hub account and repo names | ci-cd | DECIDED | cd.yml |
 | D-014 | Branch protection: required checks and admin enforcement | process | OPEN | merging |
 | D-015 | Which four failure stages to break | docs | DECIDED | FAILURE-ANALYSIS.md |
 | D-016 | Duplicate content: Prospectus 2026 vs Handbook 2026 | corpus, indexer | DECIDED | golden set, retrieval |
@@ -240,15 +240,15 @@ Entry template:
 - Decided on: (pending confirmation)
 
 ### D-013 Docker Hub account and repo names
-- Status: OPEN
+- Status: DECIDED
 - Raised: 2026-11-04 by Claude
 - Area: ci-cd
 - Related: R-CD-1, R-CD-4, R-SUB-3
 - Question: Which Docker Hub account, and what repository names? Who creates the access token and stores it as a GitHub Secret? Images are public.
 - Claude recommends: one namespace, three repos `rahbar-api`, `rahbar-indexer`, `rahbar-ui`. Token created by the account owner and added under repo Secrets: `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN`. Claude never sees the token.
 - Blocks: cd.yml.
-- Decision:
-- Decided on:
+- Decision: namespace `zain13sv`; public repositories `zain13sv/rahbar-api`, `zain13sv/rahbar-indexer`, `zain13sv/rahbar-ui`. Secrets `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` set by Zain (access token, read and write, 30 day expiry, about 6 Dec 2026, after the deadline). Decided by: Zain (HP-1), recorded by Claude.
+- Decided on: 2026-11-06
 
 ### D-014 Branch protection: required checks and admin enforcement
 - Status: OPEN
@@ -1185,4 +1185,15 @@ Entry template:
 - Options: A. Keep policies (harmless, kind CNI ignores them), state that isolation is proven on minikube. B. Calico in kind (minutes more per run).
 - Claude recommends: A.
 - Decision: A. CI proves behaviour (Job, Chroma, Ingress, metadata filter, citations, abstention), not isolation. Decided by: Claude, pre-approved by Zain.
+- Decided on: 2026-11-06
+
+### D-101 CD design: literal namespace, push guard by ref, ci overlay with SHA images
+- Status: DECIDED
+- Raised: 2026-11-06 by Claude (phase K8)
+- Area: ci-cd
+- Related: D-013, R-CD-1..5, AD-07, AD-19, architecture 4.15
+- Question: How to name the images, guard the pushes during the rehearsal, and deploy the pushed images?
+- Options: A. `IMAGE_NS: zain13sv` literal in the workflow (the login uses the secrets); `push:` only when the ref is `main` or `dev` (so a dispatch from another branch builds but never publishes); the tag is `${{ github.sha }}` only; deploy = `kustomize edit set image` on `k8s/overlays/ci` (fixtures, hashing embedder, extractive provider: no Ollama in Actions), kind pulls the public images from Docker Hub. B. Namespace from the username secret (the log would mask it as `***`, the run summary could not show the Docker Hub links); deploy the `prod` overlay (needs Ollama and the real corpus, impossible in Actions).
+- Claude recommends: A.
+- Decision: A. Decided by: Claude, pre-approved by Zain. The `prod` overlay stays validated by kubeconform only.
 - Decided on: 2026-11-06

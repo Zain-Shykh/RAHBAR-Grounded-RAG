@@ -85,7 +85,7 @@ Helm charts, a service mesh, an operator, an Ingress TLS setup, Prometheus or Gr
 | K5 | Overlays `ci` and `prod`, manifest validation | A-07 | 2 h | DONE (with deviation DEV-011) | #24 |
 | K6 | CI part 1: lint, test, manifests, build, scan | A-08 | 3 h | DONE | #25 |
 | K7 | CI part 2: e2e-eval on kind | A-09 | 4 h | DONE | #27 |
-| K8 | CD: Docker Hub, build-push, deploy | A-10 | 3 h | NOT STARTED | |
+| K8 | CD: Docker Hub, build-push, deploy | A-10 | 3 h | IN PROGRESS | |
 | K9 | Branch protection and the gate demonstration | A-11 | 1.5 h | NOT STARTED | |
 | K10 | Cluster evidence | A-13 | 3 h | NOT STARTED | |
 | K11 | Platform documents | A-14 | 3 h | NOT STARTED | |
@@ -114,7 +114,7 @@ Update this block at the end of every work session, even if the phase is unfinis
 
 | ID | Direction | Item | Phase | Done |
 | --- | --- | --- | --- | :---: |
-| HP-1 | Zain (human) | Create the Docker Hub account and an access token (read, write, delete scope on the repos). Run `gh secret set DOCKERHUB_USERNAME` and `gh secret set DOCKERHUB_TOKEN` with the `!` prefix. Decide the Docker Hub namespace (decision D-013) | before K8 | [ ] |
+| HP-1 | Zain (human) | Create the Docker Hub account and an access token (read, write, delete scope on the repos). Run `gh secret set DOCKERHUB_USERNAME` and `gh secret set DOCKERHUB_TOKEN` with the `!` prefix. Decide the Docker Hub namespace (decision D-013). DONE 2026-11-06: namespace `zain13sv`, secrets set (token has a 30 day expiry, about 6 Dec 2026) | before K8 | [x] |
 | HP-2 | Zain (human) | Approve changing branch protection on `main` (required checks, admin enforcement) when K9 asks | K9 | [ ] |
 | HP-3 | RAG lane to platform | H-7 to H-14 values: ConfigMap values, `ci` overlay floor 0.20, `LLM_TIMEOUT_SECONDS=300`, Ingress timeout at least 310 s, Redis settings, health and metrics paths. Texts are in the progress log of `IMPLEMENTATION_PLAN.md`. Already delivered, listed here so nothing is missed | K1 to K5 | [x] |
 | HP-4 | Platform to RAG lane | Final status of H-9 (manifests running in minikube) and H-10 (real corpus on the PVC, Job runnable) recorded in `IMPLEMENTATION_PLAN.md` section 3 | K2 | [x] |

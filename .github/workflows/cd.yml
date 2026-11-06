@@ -1,0 +1,203 @@
+name: cd
+
+# Push to main: test, publish three images to Docker Hub tagged with the commit SHA only,
+# then deploy exactly those images to an ephemeral kind cluster and smoke-test them through
+# the Ingress. workflow_dispatch lets the pipeline be rehearsed from dev; pushes happen only
+# from main or dev, and only ever as :<sha> (never :latest).
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cd-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  # Docker Hub namespace (D-013). Public, so a literal; the login uses the secrets.
+  IMAGE_NS: zain13sv
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    services:
+      redis:
+        image: redis/redis-stack-server:7.4.0-v8
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s --health-timeout 3s --health-retries 10
+    env:
+      REDIS_URL: redis://localhost:6379
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: |
+            api/requirements-dev.txt
+            indexer/requirements-dev.txt
+      - run: make install
+      - name: make lint
+        run: make lint
+      - name: make test
+        run: make test
+
+  build-push:
+    needs: test
+    runs-on: ubuntu-24.04
+    outputs:
+      sha: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      - name: Docker Hub login (access token from GitHub Secrets)
+        uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: build and push rahbar-api
+        id: api
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: api
+          push: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev' }}
+          tags: ${{ env.IMAGE_NS }}/rahbar-api:${{ github.sha }}
+          provenance: false
+      - name: build and push rahbar-indexer
+        id: indexer
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: indexer
+          push: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev' }}
+          tags: ${{ env.IMAGE_NS }}/rahbar-indexer:${{ github.sha }}
+          provenance: false
+      - name: build and push rahbar-ui
+        id: ui
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: ui
+          push: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev' }}
+          tags: ${{ env.IMAGE_NS }}/rahbar-ui:${{ github.sha }}
+          provenance: false
+      - name: pushed images and digests (run summary)
+        run: |
+          {
+            echo "### Images pushed to Docker Hub (tag = commit SHA)"
+            echo
+            echo "| Image | Tag | Digest |"
+            echo "| --- | --- | --- |"
+            echo "| https://hub.docker.com/r/$IMAGE_NS/rahbar-api | \`${{ github.sha }}\` | \`${{ steps.api.outputs.digest }}\` |"
+            echo "| https://hub.docker.com/r/$IMAGE_NS/rahbar-indexer | \`${{ github.sha }}\` | \`${{ steps.indexer.outputs.digest }}\` |"
+            echo "| https://hub.docker.com/r/$IMAGE_NS/rahbar-ui | \`${{ github.sha }}\` | \`${{ steps.ui.outputs.digest }}\` |"
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+
+  deploy:
+    needs: build-push
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      TAG: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: public images contain no documents (pulled anonymously, no login in this job)
+        run: |
+          for i in api indexer ui; do
+            docker pull -q "$IMAGE_NS/rahbar-$i:$TAG"
+            docker run --rm --entrypoint sh "$IMAGE_NS/rahbar-$i:$TAG" -c 'if [ -d /corpus ] && [ -n "$(ls -A /corpus)" ]; then echo "rahbar-'"$i"': /corpus is not empty"; exit 1; else echo "rahbar-'"$i"': no /corpus content"; fi'
+            docker image inspect "$IMAGE_NS/rahbar-$i:$TAG" --format '{{.Id}} {{.Size}} bytes {{index .RepoTags 0}}'
+          done
+      - name: install kind 0.33.0 and kustomize 5.8.3
+        run: |
+          mkdir -p "$HOME/.local/bin"
+          curl -fsSL -o "$HOME/.local/bin/kind" https://github.com/kubernetes-sigs/kind/releases/download/v0.33.0/kind-linux-amd64
+          chmod +x "$HOME/.local/bin/kind"
+          curl -fsSL https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv5.8.3/kustomize_v5.8.3_linux_amd64.tar.gz | tar -xz -C "$HOME/.local/bin" kustomize
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: kind cluster (port 80 mapped for ingress-nginx)
+        run: |
+          cat > kind-config.yaml <<'KIND'
+          kind: Cluster
+          apiVersion: kind.x-k8s.io/v1alpha4
+          nodes:
+            - role: control-plane
+              kubeadmConfigPatches:
+                - |
+                  kind: InitConfiguration
+                  nodeRegistration:
+                    kubeletExtraArgs:
+                      node-labels: "ingress-ready=true"
+              extraPortMappings:
+                - {containerPort: 80, hostPort: 80, protocol: TCP}
+          KIND
+          kind create cluster --config kind-config.yaml --wait 120s
+      - name: ingress-nginx controller-v1.15.1
+        run: |
+          kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.15.1/deploy/static/provider/kind/deploy.yaml
+          kubectl wait -n ingress-nginx --for=condition=ready pod -l app.kubernetes.io/component=controller --timeout=180s
+      - name: apply the ci overlay with the pushed SHA images (kind pulls from Docker Hub)
+        run: |
+          cd k8s/overlays/ci
+          for i in api indexer ui; do
+            kustomize edit set image "rahbar-$i=$IMAGE_NS/rahbar-$i:$TAG"
+          done
+          cd ../../..
+          kustomize build --load-restrictor LoadRestrictionsNone k8s/overlays/ci > deploy.yaml
+          grep -E '^\s+image: ' deploy.yaml | sort -u
+          if grep -E 'image: .*:(latest|ci)$' deploy.yaml; then echo "mutable tag in the deployed manifests"; exit 1; fi
+          # The ingress admission webhook can refuse connections for a few seconds after
+          # the controller is Ready: retry the apply, bounded, fail if it never works.
+          for n in 1 2 3 4 5 6; do
+            kubectl apply -f deploy.yaml && exit 0
+            echo "apply attempt $n failed, retrying in 10 s"; sleep 10
+          done
+          exit 1
+      - name: wait for the indexer Job and the workloads
+        run: |
+          kubectl wait -n rahbar --for=condition=complete job/indexer --timeout=300s
+          kubectl rollout status -n rahbar statefulset/chroma --timeout=180s
+          kubectl rollout status -n rahbar deployment/redis --timeout=180s
+          kubectl rollout status -n rahbar deployment/api --timeout=180s
+          kubectl rollout status -n rahbar deployment/ui --timeout=180s
+          kubectl get pods -n rahbar -o custom-columns=NAME:.metadata.name,IMAGE:.spec.containers[*].image
+      - name: wait until the Ingress routes /api to the api
+        run: |
+          for n in $(seq 1 30); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' -H 'Host: rahbar.local' http://localhost/api/ask || echo 000)
+            echo "attempt $n: GET /api/ask -> $code"
+            [ "$code" = 405 ] && exit 0
+            sleep 2
+          done
+          exit 1
+      - name: smoke test through the Ingress (one answer with a citation, one abstention)
+        run: |
+          ask() { curl -fsS -H 'Host: rahbar.local' -H 'Content-Type: application/json' \
+                    -d "{\"question\": \"$1\"}" http://localhost/api/ask; }
+          a=$(ask "How much is the BS fee per credit hour?")
+          echo "$a" | jq '{answered_from_context, answer, citations}'
+          echo "$a" | jq -e '.answered_from_context == true and (.citations | length) >= 1' >/dev/null \
+            || { echo "SMOKE FAIL: expected an answer with a citation"; exit 1; }
+          b=$(ask "How do I apply for a hostel room?")
+          echo "$b" | jq '{answered_from_context, answer, citations}'
+          echo "$b" | jq -e '.answered_from_context == false' >/dev/null \
+            || { echo "SMOKE FAIL: the must-abstain question was answered"; exit 1; }
+          curl -fsS -o /dev/null -w 'UI via Ingress: HTTP %{http_code}\n' -H 'Host: rahbar.local' http://localhost/
+          {
+            echo "### Deploy smoke test passed"
+            echo
+            echo "Images deployed on kind, tag \`$TAG\`: answered with a citation, abstained on the out-of-corpus question."
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: dump cluster state on failure
+        if: failure()
+        run: |
+          set +e  # diagnostics only: keep dumping even if one command fails
+          kubectl get pods,jobs,svc,ingress -A -o wide
+          kubectl describe pods,job -n rahbar
+          for t in deployment/api statefulset/chroma deployment/redis job/indexer; do
+            echo "=== logs $t"; kubectl logs -n rahbar "$t" --all-containers --tail=200
+          done
+          kubectl logs -n ingress-nginx -l app.kubernetes.io/component=controller --tail=100
