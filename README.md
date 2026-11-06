@@ -3,11 +3,12 @@
 **Grounded question answering over university documents, running on Kubernetes.**
 
 [![ci](https://github.com/Zain-Shykh/RAHBAR-Grounded-RAG/actions/workflows/ci.yml/badge.svg)](https://github.com/Zain-Shykh/RAHBAR-Grounded-RAG/actions/workflows/ci.yml)
+[![cd](https://github.com/Zain-Shykh/RAHBAR-Grounded-RAG/actions/workflows/cd.yml/badge.svg)](https://github.com/Zain-Shykh/RAHBAR-Grounded-RAG/actions/workflows/cd.yml)
 ![Python](https://img.shields.io/badge/python-3.12-blue)
 ![Kubernetes](https://img.shields.io/badge/kubernetes-minikube-326ce5)
 ![FastAPI](https://img.shields.io/badge/api-FastAPI-009688)
 ![ChromaDB](https://img.shields.io/badge/vector%20store-ChromaDB-ff6f00)
-![Status](https://img.shields.io/badge/status-in%20development-orange)
+![Status](https://img.shields.io/badge/status-built%2C%20final%20checks-yellow)
 
 A 5th-semester student wants to know whether they can register for a course after failing its prerequisite. The answer is in a clause of a PDF on the university website, superseded last year by a revised policy that is also still on the website. A general-purpose language model will answer anyway, sound completely certain, and describe some other university's rules.
 
@@ -41,7 +42,7 @@ RAHBAR answers **only from a real document corpus** (public FAST-NUCES policies,
 - **Indexing as a Job.** One writer, never at API start-up; re-index with one command and no downtime.
 - **Embedding-model pin enforced in code.** If the API and the index disagree on the model, the pod refuses to become ready and logs why.
 - **Measured quality.** A golden set, recall@k by question type, citation validity and abstention correctness, enforced as a CI gate.
-- **Secure by default (design; manifests in progress).** Non-root containers, read-only root filesystems, dropped capabilities, per-workload service accounts, default-deny network policies.
+- **Secure by default.** Non-root containers, read-only root filesystems, dropped capabilities, per-workload service accounts, default-deny network policies.
 - **Observable.** JSON logs with a request id, Prometheus metrics, and one log line per request listing the retrieved chunk ids and scores.
 
 ## Architecture
@@ -98,28 +99,30 @@ The cluster path, in the order that works from a clean clone:
 OLLAMA_HOST=0.0.0.0 ollama serve
 ollama pull llama3.2:3b && ollama pull nomic-embed-text
 
-# 2. cluster and corpus
-make cluster                 # minikube + Calico + metrics-server + ingress
-make fetch                   # download the public documents to corpus/raw (not committed)
+# 2. cluster and corpus (make install must have run, see above)
+make cluster                 # minikube + Calico + metrics-server + ingress (skip if minikube is already running)
+make fetch                   # download the public documents to corpus/raw (not committed); about a minute, it pauses politely between files
 
-# 3. build and deploy
+# 3. build and deploy (if docker says "permission denied", prefix with: sg docker -c "make images")
 make images                  # build api, indexer, ui and load them into minikube
-make corpus                  # create the namespace and corpus PVC, copy the documents in (target not written yet: Ahmad)
+make corpus                  # create the namespace and corpus PVC, copy the documents in
 make apply                   # kubectl apply -k k8s/overlays/dev; the indexer Job runs once Chroma is up
-kubectl get pods -n rahbar -w
+kubectl get pods -n rahbar -w                                       # Ctrl-C when api pods are 1/1
+kubectl wait --for=condition=complete job/indexer -n rahbar --timeout=1800s   # about 10 to 13 minutes with Ollama running
 
-# 4. ask
+# 4. ask and evaluate
 make ask Q="What CGPA puts a student on academic warning?"
 make ask Q="What are the hostel rules?"          # the corpus deliberately lacks this: it declines
+make eval                                        # the 18 golden questions through the Ingress, with the CI gate (18 questions at 15 to 130 s each; allow 10 to 15 minutes)
 ```
+
+The api pods stay `0/1` until the indexer has built the index (`/readyz` returns 503 `collection` until then); that is expected, not a fault. `make apply` deletes a finished indexer Job first so that it runs again.
 
 Re-index without redeploying:
 
 ```bash
 kubectl create job --from=cronjob/reindex manual-reindex-1 -n rahbar     # or: make index
 ```
-
-> Steps 3 and 4 depend on work in progress; see [Project status](#project-status).
 
 ## API
 
@@ -223,23 +226,27 @@ Work happens on feature branches off `dev`; `main` is protected (pull request, p
 
 ## Project status
 
-The RAG lane (API, indexer, evaluation) is built and measured; the cluster and delivery work is in progress. Measured on the real corpus with `llama3.2:3b`: recall@5 0.875, citation validity 100% (16 of 16), abstention correctness 100% (2 of 2), fallback rate 0 (`eval/results.json`).
+The RAG lane (API, indexer, evaluation), the Kubernetes manifests, the images, CI and CD are built, and the cluster behaviour is demonstrated with saved output in [`docs/evidence/`](docs/evidence/README.md). Measured on the real corpus with `llama3.2:3b`: recall@5 0.875, citation validity 100% (16 of 16), abstention correctness 100% (2 of 2), fallback rate 0 (`eval/results.json`).
 
 | Area | State |
 | --- | --- |
 | Corpus: 9 public documents, manifest, seven required properties | Done |
-| Indexing pipeline (extract, OCR, clean, chunk, embed, store, stage-and-swap) | Done: 981 chunks in 9 min 39 s |
+| Indexing pipeline (extract, OCR, clean, chunk, embed, store, stage-and-swap) | Done: 981 chunks in 9 min 39 s on the host (all measurements); 980 chunks in about 10 min in the cluster, because the container's Tesseract OCRs one document into one chunk fewer (DEV-010) |
 | Retriever, version scope, providers, validation, semantic cache | Done |
 | Evaluation: golden set, runner, baselines, fixture baseline for CI | Done |
 | Failure analysis, ADRs, pipeline report, engineering notes (RAG lane) | Done |
 | Dockerfiles for api and indexer | Done |
-| Kubernetes manifests, ui image, CI (`ci.yml`), CD (`cd.yml`, images on Docker Hub `zain13sv/rahbar-*`) | Done; evidence and platform docs in progress |
+| Kubernetes manifests (dev, ci, prod overlays), ui image, NetworkPolicies, HPA, probes | Done, applied and demonstrated on minikube (`docs/evidence/k01-*` to `k10-*`) |
+| CI (`ci.yml`: lint, tests, manifests, build, Trivy, end-to-end evaluation on kind) | Done; green on pull requests into `dev`; branch protection on `main` shown in `docs/evidence/k09-*` |
+| CD (`cd.yml`: build, push `zain13sv/rahbar-*` by commit SHA, deploy to an ephemeral cluster) | Written and rehearsed from `dev` (`docs/evidence/k08-cd-run.txt`); its first run on `main` happens at the final `dev` to `main` merge |
+| Clean-clone run of this README, platform documents | Done (`docs/evidence/k11-clean-clone.txt`) |
+| Deferred | Chat UI polish (states, narrow screens, version label); UI screenshots; hybrid retrieval and a re-ranker (non-goals); an HPA on a model-throughput metric (design only, ENGINEERING-NOTES Q3) |
 
 Plan and ownership: [`docs/WORKPLAN.md`](docs/WORKPLAN.md).
 
 ## Corpus and data
 
-The corpus is public documents from the FAST-NUCES website (`nu.edu.pk`): policies, handbooks, annual reports, fee and grading pages. To respect the university's content and keep the repository small, **the documents are not committed**. `corpus/sources.yaml` lists each URL, and `corpus/MANIFEST.md` records the size and SHA-256 of every file; `make fetch` downloads them, politely, one at a time, and `python corpus/fetch.py --verify` re-checks the hashes. Nothing behind a login is used. The corpus deliberately omits one topic (hostel rules) so that abstention can be tested honestly. See [`docs/CORPUS.md`](docs/CORPUS.md).
+The corpus is public documents from the FAST-NUCES website (`nu.edu.pk`): policies, handbooks, annual reports, fee and grading pages. To respect the university's content and keep the repository small, **the documents are not committed**. `corpus/sources.yaml` lists each URL, and `corpus/MANIFEST.md` records the size and SHA-256 of every file; `make fetch` downloads them, politely, one at a time, and `.venv/bin/python corpus/fetch.py --verify` re-checks the hashes. Nothing behind a login is used. The corpus deliberately omits one topic (hostel rules) so that abstention can be tested honestly. See [`docs/CORPUS.md`](docs/CORPUS.md).
 
 Answers describe the documents as they were downloaded and are not official university advice.
 
@@ -252,6 +259,6 @@ AI tools were used in this project. What they wrote or shaped, and what we chang
 | | Focus |
 | --- | --- |
 | [Zain-Shykh](https://github.com/Zain-Shykh) | RAG pipeline, API, indexer, evaluation |
-| Ahmad | Kubernetes, UI, CI/CD |
+| Ahmad | Kubernetes, UI, CI/CD (owner of this lane; unavailable during the build, so the manifests, workflows and platform documents were written by Zain's AI-assisted sessions and have not been reviewed by him, see [`docs/AI-USAGE.md`](docs/AI-USAGE.md)) |
 
 No license has been chosen yet; all rights reserved until one is added.
