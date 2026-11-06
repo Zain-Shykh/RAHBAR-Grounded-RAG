@@ -85,7 +85,7 @@ Helm charts, a service mesh, an operator, an Ingress TLS setup, Prometheus or Gr
 | K5 | Overlays `ci` and `prod`, manifest validation | A-07 | 2 h | DONE (with deviation DEV-011) | #24 |
 | K6 | CI part 1: lint, test, manifests, build, scan | A-08 | 3 h | DONE | #25 |
 | K7 | CI part 2: e2e-eval on kind | A-09 | 4 h | DONE | #27 |
-| K8 | CD: Docker Hub, build-push, deploy | A-10 | 3 h | NOT STARTED | |
+| K8 | CD: Docker Hub, build-push, deploy | A-10 | 3 h | DONE (with deviation DEV-012) | #29 |
 | K9 | Branch protection and the gate demonstration | A-11 | 1.5 h | NOT STARTED | |
 | K10 | Cluster evidence | A-13 | 3 h | NOT STARTED | |
 | K11 | Platform documents | A-14 | 3 h | NOT STARTED | |
@@ -97,12 +97,12 @@ Hours spent so far (fill in at each phase end): planned 33.5 h, actual `____`.
 ## 2. Current focus
 
 ```
-Phase:        K8  CD: Docker Hub, build-push, deploy
+Phase:        K9  Branch protection and the gate demonstration
 Stage:        not started   (SPEC DRAFT, IMPLEMENTING, TESTING, READY FOR PR, MERGED)
 Branch:       (none yet)
 Spec:         (none yet)
-Next action:  fresh session: stage 0 then stage 1 for K8. K7 is merged: `ci.yml` has six jobs (`lint`, `test`, `manifests`, `build`, `scan`, `e2e-eval`) and `workflow_dispatch`. Reusable pieces for `cd.yml`: kind v0.33.0 binary + kind config with `ingress-ready` label and port 80 mapping, ingress-nginx `controller-v1.15.1` `provider/kind` manifest, kustomize 5.8.3, `kustomize build --load-restrictor LoadRestrictionsNone k8s/overlays/ci | kubectl apply -f -`, eval via `--api http://localhost --host rahbar.local`; whole e2e-eval takes 2 m 39 s. check_submission still fails only on cd.yml missing and the registry login step (K8). Needs HP-1 (Docker Hub account and secrets from Zain) before the push steps can run.
-Waiting on:   Zain: Docker Hub account and token (HP-1, needed now for K8). Ahmad: nothing blocks.
+Next action:  fresh session: stage 0 then stage 1 for K9. K8 is merged: `.github/workflows/cd.yml` (test, build-push, deploy), rehearsed green on branch ci/k08-cd. Required check names on main: `lint`, `test`, `manifests`, `build`, `scan`, `e2e-eval` (ci.yml). cd.yml has `workflow_dispatch` but GitHub offers it only once the file is on main; the first run that counts for R-SUB-2 is the first push to main (Phase 15). Docker Hub: zain13sv/rahbar-{api,indexer,ui}, public. Settings changes are denied to Claude sessions: K9 needs HP-2 and Zain's own commands.
+Waiting on:   Zain: HP-2 (approve the branch-protection change; run the settings commands himself). Ahmad: nothing blocks.
 Last updated: 2026-11-06
 ```
 
@@ -114,7 +114,7 @@ Update this block at the end of every work session, even if the phase is unfinis
 
 | ID | Direction | Item | Phase | Done |
 | --- | --- | --- | --- | :---: |
-| HP-1 | Zain (human) | Create the Docker Hub account and an access token (read, write, delete scope on the repos). Run `gh secret set DOCKERHUB_USERNAME` and `gh secret set DOCKERHUB_TOKEN` with the `!` prefix. Decide the Docker Hub namespace (decision D-013) | before K8 | [ ] |
+| HP-1 | Zain (human) | Create the Docker Hub account and an access token (read, write, delete scope on the repos). Run `gh secret set DOCKERHUB_USERNAME` and `gh secret set DOCKERHUB_TOKEN` with the `!` prefix. Decide the Docker Hub namespace (decision D-013). DONE 2026-11-06: namespace `zain13sv`, secrets set (token has a 30 day expiry, about 6 Dec 2026) | before K8 | [x] |
 | HP-2 | Zain (human) | Approve changing branch protection on `main` (required checks, admin enforcement) when K9 asks | K9 | [ ] |
 | HP-3 | RAG lane to platform | H-7 to H-14 values: ConfigMap values, `ci` overlay floor 0.20, `LLM_TIMEOUT_SECONDS=300`, Ingress timeout at least 310 s, Redis settings, health and metrics paths. Texts are in the progress log of `IMPLEMENTATION_PLAN.md`. Already delivered, listed here so nothing is missed | K1 to K5 | [x] |
 | HP-4 | Platform to RAG lane | Final status of H-9 (manifests running in minikube) and H-10 (real corpus on the PVC, Job runnable) recorded in `IMPLEMENTATION_PLAN.md` section 3 | K2 | [x] |
@@ -154,10 +154,11 @@ Numbers this lane must measure. Nothing here is a guess: leave `-` until measure
 | Failed requests during `rollout restart` of the api | 0 of 42 (cached question through the Ingress every 0.5 s) | K3 | request loop |
 | `ci` e2e-eval wall time on kind | 2 m 39 s job (kind create, images load, ingress-nginx, Job 30 s, gate 1 s); whole pipeline about 5 min 35 s | K7 | Actions run 42238088989 |
 | Fixture eval result in CI (recall@5, citation validity, abstention) | recall@3 0.80, recall@5 0.80 (= baseline), citation validity 1.00 (5/5), abstention correctness 1.00 (1/1), fallback 0; p50 0.01 s. kind does not enforce NetworkPolicy: CI proves behaviour, isolation is proven on minikube (K4, R-07, D-100) | K7 | artifact `results-fixture` of run 42238088989; `docs/evidence/k07-e2e-green.txt` |
-| Image sizes on Docker Hub (api, indexer, ui) and the SHA tag | - | K8 | Docker Hub page |
+| Image sizes on Docker Hub (api, indexer, ui) and the SHA tag | compressed on Docker Hub: api 90.4 MB, indexer 151.9 MB, ui 27.9 MB; uncompressed 263 MB, 407 MB, 64.8 MB; tag = commit SHA `ed50609d1ae31d051aa758f4796a5930878e2665` (rehearsal run, branch ci/k08-cd); pages https://hub.docker.com/r/zain13sv/rahbar-api, .../rahbar-indexer, .../rahbar-ui | K8 | Docker Hub pages; `docs/evidence/k08-cd-run.txt` |
 | Trivy findings (HIGH and CRITICAL with a fix) per image, and what was done | First run: api 3 HIGH (starlette 0.46.2: CVE-2025-62727, then CVE-2026-48818 and CVE-2026-54283 fixed only in starlette 1.x) -> fastapi 0.135.4 + starlette 1.10.0; indexer 22 HIGH (pdfminer.six 20250327: 2, pypdf 5.4.0: 20) -> pdfplumber 0.11.10 (pins pdfminer.six 20260107) + pypdf 7.0.0 (not imported by the pipeline); ui 63 (60 HIGH, 3 CRITICAL, nginx-unprivileged 1.27-alpine, alpine 3.2x) -> 1.30.6-alpine, then 8 left (brotli, curl, expat, zlib) -> `apk upgrade` in the Dockerfile. Final run: 0 on all three; no accepted risk, so ADR 0004 unchanged | K6 | Actions runs 42230686973 to 42234718843 |
 | CI `test` job: api tests run, coverage | 302 passed, 0 skipped (Redis service container, D-097); api coverage gate 60% passes | K6 | Actions run 42234718843 |
 | CI wall time (lint, test, manifests parallel; build; scan) | about 1 min, 1 min, 7 s; build 1.5 min; scan 55 s; about 4.5 min end to end | K6 | `gh pr checks 25` |
+| CD wall time (rehearsal) | test 1 m 17 s, build-push 1 m 20 s, deploy 2 m 03 s; about 5 m 40 s end to end | K8 | Actions run 42247612689 |
 | Cold answer latency through the Ingress in the cluster (p50, p95) | - | K10 | `make eval` |
 
 ---
@@ -211,6 +212,7 @@ kubectl apply -k k8s/overlays/dev && kubectl get pods,pvc -n rahbar
 kubectl port-forward -n rahbar deploy/api 8000:8000 & sleep 2; curl -s localhost:8000/healthz; curl -si localhost:8000/readyz | head -12; kill %1
 python3 scripts/check_submission.py | sed -n '/G · kubernetes/,/H · evaluation/p'
 ```
+2026-11-06  K8  DONE (#29, DEV-012). .github/workflows/cd.yml: `test` (make lint, make test, Redis service) -> `build-push` (needs: test; docker/login-action v4.8.0 with the two secrets, build-push-action v7.4.0, tag `${{ github.sha }}` only, push only from main or dev) -> `deploy` (needs: build-push; anonymous pull proves the images are public and hold no /corpus content, kind v0.33.0, ci overlay with `kustomize edit set image`, mutable-tag guard, Job and rollout waits, Ingress route poll, smoke test: BS fee question answered with a citation, hostel question abstains, UI 200). workflow_dispatch needs the file on the default branch, so the rehearsal was a push to ci/k08-cd (temporary trigger, removed): https://github.com/Zain-Shykh/RAHBAR-Grounded-RAG/actions/runs/42247612689 green (first run 42246763004 also green); images https://hub.docker.com/r/zain13sv/rahbar-api, /rahbar-indexer, /rahbar-ui tagged ed50609d1ae31d051aa758f4796a5930878e2665 (anonymous Docker Hub API: HTTP 200, tag present). The namespace equals a secret value, so Actions masks it as *** in the build-push job: the digest summary is written in deploy. Run logs: 0 hits for a token value; the only secret references are the two in the login step. check_submission section I: CD, needs, permissions, :latest all ok. The run that counts for R-SUB-2 is the first push to main after the dev to main merge (Phase 15). Evidence docs/evidence/k08-cd-run.txt. D-013 decided (HP-1 done), D-101.
 
 ### Hand-off
 None. Record "k8s base running" in the progress log.
@@ -505,7 +507,7 @@ None.
 
 ## Phase K8: CD: Docker Hub, build-push, deploy (A-10)
 
-**Status:** NOT STARTED · **Branch:** `ci/k08-cd` · **Est:** 3 h · **Priority:** P0 · **Blocked until:** HP-1 (Docker Hub account and secrets)
+**Status:** DONE (with deviation DEV-012) · **Branch:** `ci/k08-cd` · **Est:** 3 h · **Priority:** P0 · **Blocked until:** HP-1 (Docker Hub account and secrets)
 
 ### Objective
 A push to `main` tests the code, builds and pushes three images to Docker Hub tagged with the commit SHA, deploys them to an ephemeral kind cluster, and smoke-tests an answer through the Ingress.
@@ -529,11 +531,11 @@ Architecture 4.15 (CD diagram and table), requirements R-CD-1..5, R-SUB-2, R-SUB
 Deploying to a real cloud cluster.
 
 ### Acceptance criteria
-- [ ] `cd.yml` exists with `test` -> `build-push` (`needs: test`) -> `deploy` (`needs: build-push`), a `permissions:` block, pinned actions, SHA tags only.
-- [ ] A rehearsal run (from `dev` via `workflow_dispatch`, or the first run after the `dev` to `main` merge) is green: three images visible on Docker Hub tagged with the SHA, and the deploy job's smoke test passed (run URL in the log).
-- [ ] No secret value appears in any log or file (`git log -p | grep -iE "dckr_pat|password"` returns nothing; the run logs show `***`).
-- [ ] `python3 scripts/check_submission.py` section I has no failure about CD, `needs:`, `permissions:` or `:latest`.
-- [ ] `make test && make lint` green.
+- [x] `cd.yml` exists with `test` -> `build-push` (`needs: test`) -> `deploy` (`needs: build-push`), a `permissions:` block, pinned actions, SHA tags only.
+- [x] (rehearsal from branch ci/k08-cd, run 42247612689; the first run after the dev to main merge is Phase 15) A rehearsal run is green: three images visible on Docker Hub tagged with the SHA, and the deploy job's smoke test passed (run URL in the log).
+- [x] No secret value appears in any log or file (`git log -p --all | grep -E "dckr_pat_[A-Za-z0-9_-]{10,}"` returns nothing; the run logs show `***`).
+- [x] `python3 scripts/check_submission.py` section I has no failure about CD, `needs:`, `permissions:` or `:latest`.
+- [x] `make test && make lint` green.
 
 ### Verify
 ```bash

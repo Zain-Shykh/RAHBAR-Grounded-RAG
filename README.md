@@ -233,7 +233,7 @@ The RAG lane (API, indexer, evaluation) is built and measured; the cluster and d
 | Evaluation: golden set, runner, baselines, fixture baseline for CI | Done |
 | Failure analysis, ADRs, pipeline report, engineering notes (RAG lane) | Done |
 | Dockerfiles for api and indexer | Done |
-| Kubernetes manifests, ui image, CI/CD workflows, evidence | In progress (Ahmad) |
+| Kubernetes manifests, ui image, CI (`ci.yml`), CD (`cd.yml`, images on Docker Hub `zain13sv/rahbar-*`) | Done; evidence and platform docs in progress |
 
 Plan and ownership: [`docs/WORKPLAN.md`](docs/WORKPLAN.md).
 
