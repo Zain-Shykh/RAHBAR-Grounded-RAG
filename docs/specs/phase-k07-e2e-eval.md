@@ -5,7 +5,7 @@
 | Phase | K7, from `docs/IMPLEMENTATION_PLAN_PLATFORM.md` |
 | Work plan task | A-09 |
 | Branch | `ci/k07-e2e-eval` |
-| Stage | IMPLEMENTING |
+| Stage | TESTING |
 | Started | 2026-11-06 |
 | Approved (spec and plan) | pre-approved by Zain, platform plan 0.1 |
 | Depends on | K5 (`ci` overlay, DEV-011 / D-096), K6 (`build` artifact) |
@@ -63,7 +63,11 @@ Image loading, ingress readiness and Host routing are the likely CI-only failure
 Estimate 4 h.
 
 ## 11. Implementation notes
-(filled during implement)
+- First push went green (run 42238088989, 2 m 39 s). The only YAML slip was a colon inside a step `name:` (fixed before the first push), so the list of CI-only failures the plan predicted (image loading, ingress readiness, Host routing) did not occur: kind config with the `ingress-ready` label and 80:80 mapping plus the `provider/kind` ingress-nginx manifest worked as is.
+- eval needs only `httpx` and `pyyaml`: installed with pinned versions in the job, no new requirements file.
+- RELEVANCE_FLOOR=0.0 does not break the gate (f05 abstains on no hits). RETRIEVER=stub does (recall@5 0.80 -> 0.00). Evidence: `docs/evidence/k07-gate-fail.txt`.
+- Failure dump step uses `set +e` instead of `|| true` so every diagnostic prints; the gate steps have no `|| true`.
+- No deviation from the architecture (4.15 row matches); D-099, D-100.
 
 ## 12. Test report
 | Round | Date | Command | Result | Notes |

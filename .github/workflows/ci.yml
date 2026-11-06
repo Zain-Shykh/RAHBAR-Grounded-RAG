@@ -182,12 +182,13 @@ jobs:
       - name: dump cluster state on failure
         if: failure()
         run: |
-          kubectl get pods,jobs,svc,ingress -A -o wide || true
-          kubectl describe pods,job -n rahbar || true
+          set +e  # diagnostics only: keep dumping even if one command fails
+          kubectl get pods,jobs,svc,ingress -A -o wide
+          kubectl describe pods,job -n rahbar
           for t in deployment/api statefulset/chroma deployment/redis job/indexer; do
-            echo "=== logs $t"; kubectl logs -n rahbar "$t" --all-containers --tail=200 || true
+            echo "=== logs $t"; kubectl logs -n rahbar "$t" --all-containers --tail=200
           done
-          kubectl logs -n ingress-nginx -l app.kubernetes.io/component=controller --tail=100 || true
+          kubectl logs -n ingress-nginx -l app.kubernetes.io/component=controller --tail=100
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:

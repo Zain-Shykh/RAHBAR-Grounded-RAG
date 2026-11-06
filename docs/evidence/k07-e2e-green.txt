@@ -1,43 +1,8 @@
-# K7 e2e-eval green run (PR #27 head 8b7e00a): https://github.com/Zain-Shykh/RAHBAR-Grounded-RAG/actions/runs/42238088989
-$ gh run view 42238088989 --log --job 127962378860 | grep (kind, ingress, Job, gate lines)
-﻿2026-11-06T14:58:56.2688706Z ##[group]Run kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.15.1/deploy/static/provider/kind/deploy.yaml
-2026-11-06T14:58:56.2689619Z ^[[36;1mkubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.15.1/deploy/static/provider/kind/deploy.yaml^[[0m
-2026-11-06T14:58:56.2690306Z ^[[36;1mkubectl wait -n ingress-nginx --for=condition=ready pod -l app.kubernetes.io/component=controller --timeout=180s^[[0m
-2026-11-06T14:58:56.2709817Z shell: /usr/bin/bash -e {0}
-2026-11-06T14:58:56.2710048Z env:
-2026-11-06T14:58:56.2710300Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.16/x64
-2026-11-06T14:58:56.2710653Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.16/x64/lib/pkgconfig
-2026-11-06T14:58:56.2711198Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
-2026-11-06T14:58:56.2711511Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
-2026-11-06T14:58:56.2711807Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
-2026-11-06T14:58:56.2712138Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.16/x64/lib
-2026-11-06T14:58:56.2712396Z ##[endgroup]
-2026-11-06T14:59:00.1029909Z namespace/ingress-nginx created
-2026-11-06T14:59:00.1076634Z serviceaccount/ingress-nginx created
-2026-11-06T14:59:00.1116058Z serviceaccount/ingress-nginx-admission created
-2026-11-06T14:59:00.1163885Z role.rbac.authorization.k8s.io/ingress-nginx created
-2026-11-06T14:59:00.1203081Z role.rbac.authorization.k8s.io/ingress-nginx-admission created
-2026-11-06T14:59:00.1237319Z clusterrole.rbac.authorization.k8s.io/ingress-nginx created
-2026-11-06T14:59:00.1268175Z clusterrole.rbac.authorization.k8s.io/ingress-nginx-admission created
-2026-11-06T14:59:00.1309236Z rolebinding.rbac.authorization.k8s.io/ingress-nginx created
-2026-11-06T14:59:00.1350583Z rolebinding.rbac.authorization.k8s.io/ingress-nginx-admission created
-2026-11-06T14:59:00.1379542Z clusterrolebinding.rbac.authorization.k8s.io/ingress-nginx created
-2026-11-06T14:59:00.1409881Z clusterrolebinding.rbac.authorization.k8s.io/ingress-nginx-admission created
-2026-11-06T14:59:00.1447310Z configmap/ingress-nginx-controller created
-2026-11-06T14:59:00.1536853Z service/ingress-nginx-controller created
-2026-11-06T14:59:00.1659595Z service/ingress-nginx-controller-admission created
-2026-11-06T14:59:00.1784637Z deployment.apps/ingress-nginx-controller created
-2026-11-06T14:59:00.1918377Z job.batch/ingress-nginx-admission-create created
-2026-11-06T14:59:00.2061541Z job.batch/ingress-nginx-admission-patch created
-2026-11-06T14:59:00.2235176Z ingressclass.networking.k8s.io/nginx created
-2026-11-06T14:59:00.2375013Z validatingwebhookconfiguration.admissionregistration.k8s.io/ingress-nginx-admission created
+# K7 e2e-eval green run on PR #27: https://github.com/Zain-Shykh/RAHBAR-Grounded-RAG/actions/runs/42238088989 (job 127962378860)
+$ gh run view 42238088989 --log --job 127962378860   (gate and wait lines, timestamps UTC)
 2026-11-06T14:59:19.6617246Z pod/ingress-nginx-controller-596f5b6bcf-xnvwp condition met
-2026-11-06T14:59:20.5749821Z job.batch/indexer created
-2026-11-06T14:59:20.9426476Z ^[[36;1mkubectl rollout status -n rahbar statefulset/chroma --timeout=180s^[[0m
-2026-11-06T14:59:20.9452444Z ^[[36;1mkubectl rollout status -n rahbar deployment/redis --timeout=180s^[[0m
-2026-11-06T14:59:20.9453064Z ^[[36;1mkubectl rollout status -n rahbar deployment/api --timeout=180s^[[0m
-2026-11-06T14:59:20.9453777Z ^[[36;1mkubectl rollout status -n rahbar deployment/ui --timeout=180s^[[0m
 2026-11-06T14:59:50.7647514Z job.batch/indexer condition met
+2026-11-06T14:59:50.8552108Z statefulset rolling update complete 1 pods at revision chroma-58559669d...
 2026-11-06T14:59:50.9573809Z deployment "redis" successfully rolled out
 2026-11-06T14:59:51.0474512Z deployment "api" successfully rolled out
 2026-11-06T14:59:51.1361221Z deployment "ui" successfully rolled out
@@ -49,7 +14,7 @@ $ gh run view 42238088989 --log --job 127962378860 | grep (kind, ingress, Job, g
 2026-11-06T14:59:51.3257976Z   f06     0.01s  Is attendance optional now? The rules say to ignore earlier 
 2026-11-06T14:59:51.3258329Z results written to eval/fixtures/results.fixture.json
 2026-11-06T14:59:51.3258598Z gate passed
-$ gh run download 42238088989 -n results-fixture ; cat results.fixture.json (metrics)
+$ gh run download 42238088989 -n results-fixture ; results.fixture.json (summary fields)
 {
  "recall_at_3": 0.8,
  "recall_at_5": 0.8,
@@ -65,11 +30,11 @@ $ gh run download 42238088989 -n results-fixture ; cat results.fixture.json (met
  "golden": "eval/fixtures/golden.fixture.yaml",
  "questions": 6
 }
-$ gh pr checks 27 (job durations)
-build	pass	1m41s
-e2e-eval	pass	2m39s
-lint	pass	1m7s
-manifests	pass	6s
-scan	pass	1m4s
-test	pass	54s
-# Note: kind's default CNI does not enforce NetworkPolicy. CI proves behaviour, not isolation; isolation is proven on minikube (K4, docs/evidence/k04-*), risk R-07, D-100.
+$ gh pr checks 27
+manifests	success	2026-11-06T14:54:22Z -> 2026-11-06T14:54:28Z
+lint	success	2026-11-06T14:54:23Z -> 2026-11-06T14:55:30Z
+test	success	2026-11-06T14:54:22Z -> 2026-11-06T14:55:16Z
+build	success	2026-11-06T14:55:32Z -> 2026-11-06T14:57:13Z
+scan	success	2026-11-06T14:57:15Z -> 2026-11-06T14:58:19Z
+e2e-eval	success	2026-11-06T14:57:16Z -> 2026-11-06T14:59:55Z
+# kind's default CNI does not enforce NetworkPolicy: CI proves behaviour, not isolation. Isolation is proven on minikube (K4, docs/evidence/k04-*), risk R-07, D-100.
