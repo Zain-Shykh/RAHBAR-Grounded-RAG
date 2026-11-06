@@ -5,7 +5,7 @@
 | Phase | K3, from `docs/IMPLEMENTATION_PLAN_PLATFORM.md` |
 | Work plan task | A-05 |
 | Branch | `feat/k8s-k03-ingress-hpa` |
-| Stage | IMPLEMENTING |
+| Stage | MERGED |
 | Started | 2026-11-06 |
 | Approved (spec and plan) | pre-approved by Zain, platform plan 0.1 |
 | Depends on | K1 (#20), K2 (#21: real index, api 3/3 Ready) |
@@ -80,11 +80,12 @@ See the progress log in the platform plan.
 
 | Round | Date | Command | Result | Notes |
 | --- | --- | --- | --- | --- |
+| 1 | 2026-11-06 | AC-1..AC-6 re-run read-only, `make test && make lint` | PASS | no defects; 91+257+283 tests green, kubeconform 22 valid |
 
 ## 13. Sign-offs
 
 | Gate | Date | Approved by | Notes |
 | --- | --- | --- | --- |
 | Spec and plan | 2026-11-06 | Zain (pre-approved) | |
-| Tester verdict PASS | | | |
-| Merged | | | |
+| Tester verdict PASS | 2026-11-06 | independent subagent | rounds: 1 |
+| Merged | 2026-11-06 | Claude (pre-approved) | PR on dev |
