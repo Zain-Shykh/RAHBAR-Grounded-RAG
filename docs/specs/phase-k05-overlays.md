@@ -5,7 +5,7 @@
 | Phase | K5, from `docs/IMPLEMENTATION_PLAN_PLATFORM.md` |
 | Work plan task | A-07 |
 | Branch | `feat/k8s-k05-overlays` |
-| Stage | TESTING |
+| Stage | READY FOR PR |
 | Started | 2026-11-06 |
 | Approved (spec and plan) | pre-approved by Zain, platform plan 0.1 |
 | Depends on | K1 to K4 |
@@ -54,4 +54,4 @@ CI-only failures: the rehearsal is the mitigation. Hashing floor 0.20 might fail
 See progress log.
 
 ## 12. Test report
-Pending.
+Round 1, 2026-11-06, branch feat/k8s-k05-overlays: **PASS**. AC-1..AC-5 PASS (make manifests 30/31/30 resources valid; dev diff vs origin/dev empty, server dry-run ok; ci build has no ipBlock, fixtures ConfigMap mounted in Job and CronJob, floor 0.20; prod pinned, no `:latest`; 257 + 91 tests, lint clean; make target fails loudly on a broken overlay). AC-3 checked from the evidence file only (disk). No defects.
