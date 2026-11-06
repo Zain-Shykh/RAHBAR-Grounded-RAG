@@ -5,7 +5,7 @@
 | Phase | K5, from `docs/IMPLEMENTATION_PLAN_PLATFORM.md` |
 | Work plan task | A-07 |
 | Branch | `feat/k8s-k05-overlays` |
-| Stage | IMPLEMENT |
+| Stage | TESTING |
 | Started | 2026-11-06 |
 | Approved (spec and plan) | pre-approved by Zain, platform plan 0.1 |
 | Depends on | K1 to K4 |
@@ -28,11 +28,11 @@ In: `k8s/overlays/ci`, `k8s/overlays/prod`, `make manifests`, rehearsal evidence
 The base CronJob receives the Job spec by a `replacements` in base, so overlay patches target both objects. Rehearsal on kind if installable, else a throwaway namespace on minikube.
 
 ## 6. Acceptance criteria
-- [ ] AC-1 `make manifests` passes for dev, ci, prod.
-- [ ] AC-2 dev re-applies, pods Ready.
-- [ ] AC-3 ci rehearsal: Job indexed fixtures, api Ready, `run_eval.py` fixture golden/baseline exits 0 (`docs/evidence/k05-ci-overlay-rehearsal.txt`).
-- [ ] AC-4 prod builds, no `:latest`; `grep -rn ":latest" k8s` empty.
-- [ ] AC-5 `make test && make lint` green.
+- [x] AC-1 `make manifests` passes for dev, ci, prod.
+- [x] AC-2 dev re-applies, pods Ready.
+- [x] AC-3 ci rehearsal: Job indexed fixtures, api Ready, `run_eval.py` fixture golden/baseline exits 0 (`docs/evidence/k05-ci-overlay-rehearsal.txt`).
+- [x] AC-4 prod builds, no `:latest`; `grep -rn ":latest" k8s` empty.
+- [x] AC-5 `make test && make lint` green.
 
 ## 7. Test strategy
 Cluster rehearsal plus the Verify commands; tester subagent re-runs them.
