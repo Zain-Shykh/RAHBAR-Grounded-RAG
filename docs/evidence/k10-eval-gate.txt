@@ -1,5 +1,6 @@
 # make eval through the Ingress against the real corpus in the cluster (980 chunks: DEV-010, the container's Tesseract makes 39 chunks for the faculty policy against 40 on the host), images rebuilt after the K6 dependency bumps (fastapi 0.135.4, starlette 1.10.0)
 # captured 2026-11-06T19:16Z on minikube (Calico, docker driver), namespace rahbar, dev overlay
+# order of events: this evaluation ran at 19:03-19:16, before the measured requests/limits were applied (19:17) and the cluster re-indexed (index_id 20261106T192749Z-9ae03c); behaviour does not depend on those numbers, but no evaluation was repeated after them
 
 $ kubectl get deploy api ui -n rahbar -o wide | cut -c1-120
 NAME   READY   UP-TO-DATE   AVAILABLE   AGE   CONTAINERS   IMAGES           SELECTOR
