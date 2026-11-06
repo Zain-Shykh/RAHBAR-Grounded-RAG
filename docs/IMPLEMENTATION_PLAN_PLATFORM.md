@@ -87,7 +87,7 @@ Helm charts, a service mesh, an operator, an Ingress TLS setup, Prometheus or Gr
 | K7 | CI part 2: e2e-eval on kind | A-09 | 4 h | DONE | #27 |
 | K8 | CD: Docker Hub, build-push, deploy | A-10 | 3 h | DONE (with deviation DEV-012) | #29 |
 | K9 | Branch protection and the gate demonstration | A-11 | 1.5 h | DONE | #31 |
-| K10 | Cluster evidence | A-13 | 3 h | NOT STARTED | |
+| K10 | Cluster evidence | A-13 | 3 h | DONE (with deviation DEV-013) | #PRNUM |
 | K11 | Platform documents | A-14 | 3 h | NOT STARTED | |
 
 After K11 comes **Phase 15** of the RAG plan (integration support and final verification, the joint phase). It is deliberately last, see section 6.
@@ -97,13 +97,13 @@ Hours spent so far (fill in at each phase end): planned 33.5 h, actual `____`.
 ## 2. Current focus
 
 ```
-Phase:        K10  Cluster evidence
+Phase:        K11  Platform documents
 Stage:        not started   (SPEC DRAFT, IMPLEMENTING, TESTING, READY FOR PR, MERGED)
 Branch:       (none yet)
 Spec:         (none yet)
-Next action:  fresh session: stage 0 then stage 1 for K10. K9 is merged: main is protected (six checks, strict, one approval, enforce_admins OFF), gate demonstrated with PR #30 (closed unmerged). Phase 15 note: origin/main holds two old merge commits (PR #1, #2) that dev lacks; with strict checks the dev to main PR is BEHIND until main is merged into dev.
+Next action:  fresh session: stage 0 then stage 1 for K11. K10 is merged: evidence in docs/evidence (README.md indexes it), requests and limits in k8s/base replaced by measured values (DEV-013, architecture 4.2 edited). K11 must update docs/ENGINEERING-NOTES.md where it quotes the old indexer limits, and absorb DEV-012 into architecture 4.15. Cluster is running the rebuilt images (rahbar-api:dev, fastapi 0.135.4) with the 980-chunk index. UI screenshots (chat with a citation, an abstention) are still missing: they need a browser at http://rahbar.local. Phase 15 note: origin/main holds two old merge commits (PR #1, #2) that dev lacks; with strict checks the dev to main PR is BEHIND until main is merged into dev.
 Waiting on:   Nothing. Phase 15: Ahmad approves the dev to main PR, or Zain merges as owner (enforcement off).
-Last updated: 2026-11-06
+Last updated: 2026-11-07
 ```
 
 Update this block at the end of every work session, even if the phase is unfinished.
@@ -135,6 +135,9 @@ Append-only, newest at the bottom. One line per event: date, phase, what happene
 2026-11-06  K5  DONE (#24). k8s/overlays/ci (fixtures ConfigMap generator, ConfigMap patch, Job and CronJob volume swap, Ollama egress removed) and k8s/overlays/prod (registry image names, SHA placeholder); `make manifests` validates all three with kubeconform -strict (30, 31, 30 resources valid), docs/evidence/k05-manifests.txt; no `:latest` in k8s. Rehearsal docs/evidence/k05-ci-overlay-rehearsal.txt: ci overlay in throwaway namespace rahbar-ci on minikube under default-deny, indexer Job indexed 3 fixtures into 16 chunks in 3.5 s, api x3 Ready, `/readyz` ok, `run_eval.py` with the fixture golden and baseline: gate passed, exit 0. Not on kind: pulling the kind node image filled the disk (the kubeconfig was truncated; `minikube update-context` restored it), so kind and its images were removed. D-096, DEV-011.
 2026-11-06  K6  DONE (#25). .github/workflows/ci.yml: lint, test (Redis service container, coverage >= 60%), manifests (`make manifests`), build (needs lint+test+manifests, no push), scan (needs build, Trivy HIGH,CRITICAL --ignore-unfixed). Actions pinned by SHA (checkout v7.0.1, setup-python v7.1.0, setup-buildx v4.4.1, upload-artifact v7.0.2, download-artifact v8.0.2, trivy-action v0.36.0). First Trivy run failed on all three images (api 3, indexer 22, ui 63 HIGH/CRITICAL with fix); fixed by dependency and base-image bumps (results register), four fix pushes, final run https://github.com/Zain-Shykh/RAHBAR-Grounded-RAG/actions/runs/42234718843 all five green, 302 api tests (0 skipped). Rehearsal: PR #26 with apiVersion apps/v99 failed `manifests`, build and scan skipped, closed unmerged: docs/evidence/k06-failing-check.txt. D-097, D-098. README badge added. `check_submission.py` section I: remaining failures are K7 (kind, eval gate) and K8 (rollout status, registry login).
 2026-11-06  K7  DONE (#27). `e2e-eval` job (needs: build, timeout 20 min, fail closed, dump + artifact `results-fixture`) and `workflow_dispatch` in ci.yml: kind v0.33.0 (binary, config with ingress-ready + port 80), ingress-nginx controller-v1.15.1, images from the build artifact retagged `:ci`, `kustomize build --load-restrictor LoadRestrictionsNone k8s/overlays/ci | kubectl apply -f -`, Job wait, eval through `http://localhost` with Host rahbar.local. Green on the first push: run 42238088989 (a later run, 42241904298, failed closed on a race: the ingress admission webhook refused the apply right after the controller was Ready; fixed with a bounded apply retry; run 42243531531 then got nginx's 503 on the first question before the Ingress synced the api endpoints, fixed with a bounded wait for `GET /api/ask` = 405, run 42242724142 green), 2 m 39 s, recall@5 0.80, citations 5/5, abstention 1/1: docs/evidence/k07-e2e-green.txt. Gate demo: RELEVANCE_FLOOR=0.0 did NOT turn it red (f05 still abstains with the hashing embedder); RETRIEVER=stub did: `GATE FAILED recall@5 fell from 0.800 to 0.000`, PR #28 closed unmerged, branch deleted: docs/evidence/k07-gate-fail.txt. Policies stay in `ci`; enforcement proven on minikube (D-100, R-07). D-099, D-100. The five prose mentions of the old starter-kit marker name reworded (checker section 0 passes).
+2026-11-06  K8  DONE (#29, DEV-012). .github/workflows/cd.yml: `test` (make lint, make test, Redis service) -> `build-push` (needs: test; docker/login-action v4.8.0 with the two secrets, build-push-action v7.4.0, tag `${{ github.sha }}` only, push only from main or dev) -> `deploy` (needs: build-push; anonymous pull proves the images are public and hold no /corpus content, kind v0.33.0, ci overlay with `kustomize edit set image`, mutable-tag guard, Job and rollout waits, Ingress route poll, smoke test: BS fee question answered with a citation, hostel question abstains, UI 200). workflow_dispatch needs the file on the default branch, so the rehearsal was a push to ci/k08-cd (temporary trigger, removed): https://github.com/Zain-Shykh/RAHBAR-Grounded-RAG/actions/runs/42247612689 green (first run 42246763004 also green); images https://hub.docker.com/r/zain13sv/rahbar-api, /rahbar-indexer, /rahbar-ui tagged ed50609d1ae31d051aa758f4796a5930878e2665 (anonymous Docker Hub API: HTTP 200, tag present). The namespace equals a secret value, so Actions masks it as *** in the build-push job: the digest summary is written in deploy. Run logs: 0 hits for a token value; the only secret references are the two in the login step. check_submission section I: CD, needs, permissions, :latest all ok. The run that counts for R-SUB-2 is the first push to main after the dev to main merge (Phase 15). Evidence docs/evidence/k08-cd-run.txt. D-013 decided (HP-1 done), D-101.
+2026-11-06  K9  DONE (#31). main protection read back (applied by the orchestrator, no settings changed by this session): required checks lint, test, manifests, build, scan, e2e-eval, strict, 1 approval with stale-review dismissal, conversation resolution, no force push or deletion, enforce_admins OFF (Ahmad is the only second approver and is unavailable; owner can override for the final merge). docs/evidence/k09-branch-protection.txt. Gate demo PR #30 (https://github.com/Zain-Shykh/RAHBAR-Grounded-RAG/pull/30, base main, apps/v99 in k8s/base/ui.yaml): manifests failed, build/scan/e2e-eval skipped, merge without --admin refused ("base branch policy prohibits the merge"; first attempt "head branch is not up to date" because main has two old merge commits dev lacks: merged origin/main into the demo branch) -> docs/evidence/k09-blocked-merge.txt. Fix pushed: all six green, still BLOCKED/REVIEW_REQUIRED (one-approval rule) -> docs/evidence/k09-green-pr.txt. PR closed unmerged, branch deleted. D-014 decided. Page screenshots of PR #30 are an optional extra for Zain (needs a logged-in browser).
+2026-11-07  K10  DONE (#PRNUM, DEV-013). Rebuilt the three images (sg docker -c "make images"; api has fastapi 0.135.4, starlette 1.10.0) and rolled api and ui out with `kubectl rollout restart`; the 980-chunk index stayed on its PVC. Evidence in docs/evidence/ (README.md indexes it): k10-top-pods.txt, k10-top-during-eval.txt, k10-indexer-peak.txt (428 Mi peak, no OOM), k10-endpoints.txt (3 then 5 IPs then 3, 0 of 34 failed), k10-hpa.txt (3 to 8 under load), k10-rollout-update-undo.txt (v2 with APP_VERSION 2.0.0, undo back to 0.1.0, 0 of 49 failed), k10-pod-delete.txt (0 of 38), k10-embed-pin-mismatch.txt (0/1, 503 embed_pin, log line, recovery), k10-cache-and-reindex.txt (MISS, HIT, make index, new index_id, MISS, HIT), k10-networkpolicy-proof.txt, k10-eval-gate.txt + k10-eval-results.json. `make eval` through the Ingress: gate passed, metrics equal to eval/baseline.json (not edited), p50 30.99 s, p95 129.99 s. Requests and limits in k8s/base changed to measured values (docs/evidence/resources.md, architecture 4.2 edited, DEV-013); the Job template is immutable so the Job was deleted and re-applied, which re-indexed under the new limits (9 min 59 s, peak 484 Mi, 0 OOM, k10-resources-applied.txt). Pitfall met: Ollama started without OLLAMA_HOST=0.0.0.0 makes every cluster answer a provider_error fallback (connection refused from the pods). D-102 decided. Not captured: UI screenshots (need a browser).
 ```
 
 ---
@@ -149,8 +152,8 @@ Numbers this lane must measure. Nothing here is a guess: leave `-` until measure
 | Time from `make apply` to all pods Ready (no Job yet) | chroma, redis, ui Ready 3 s after pod creation with images cached (api stays 0/1 by design); first pull of chroma and redis images not timed | K1 | pod `Ready` transition minus creation time |
 | Indexer Job wall time and peak memory in the cluster | 13 min 18 s Job (798 s in the pipeline: embed 414 s, OCR 76 s for the 8-page policy), `make index` 9 min 24 s; peak 483 Mi of 2 Gi (run 1: 484 Mi), CPU at the 1-core limit while chunking/OCR | K2 | `kubectl logs job/indexer`, `kubectl top pod` |
 | Collection chunk count in the cluster (must equal 981) | 980 (DEV-010: OCR'd faculty policy 39 vs 40 chunks); `index_id` 20261106T103106Z-41fe5d, after `make index` 20261106T125625Z-ba262b | K2 | `scripts/check_index.py` or `/readyz`, `rahbar_index_info` |
-| Api request and limit, actual `kubectl top` per pod, idle and under load | - | K10 | `kubectl top pods -n rahbar` |
-| HPA reading (current/target) idle and under load | idle `cpu: 4%/70%` (3 replicas); cached-question loop with target forced to 5%: `32%/5%`, 3 to 6 to 8 replicas in 30 s; back to 3 about 5 min after the revert (K3; K10 repeats) | K3, K10 | `kubectl get hpa -n rahbar` |
+| Api request and limit, actual `kubectl top` per pod, idle and under load | actual: idle 2 m / 68-70 Mi, cache-miss in flight 4 m / 68 Mi, 18-question eval at most 4 m / 70 Mi, cached burst 14-23 m, first minute after restart 135 m. Set 100 m / 128 Mi request, 500 m / 256 Mi limit (was 256 Mi / 512 Mi); table for all workloads in `docs/evidence/resources.md` (DEV-013) | K10 | `kubectl top pods -n rahbar` |
+| HPA reading (current/target) idle and under load | idle `cpu: 4%/70%` (3 replicas); cached-question loop with target forced to 5%: `32%/5%`, 3 to 6 to 8 replicas in 30 s; back to 3 about 5 min after the revert (K3). K10 repeat: idle `cpu: 3%/70%`; six parallel cached loops with target 5%: `14%/5%` then `23%/5%`, 3 to 6 to 8 replicas within 30 s; back to 3 within about 10 min (`k10-hpa.txt`) | K3, K10 | `kubectl get hpa -n rahbar` |
 | Failed requests during `rollout restart` of the api | 0 of 42 (cached question through the Ingress every 0.5 s) | K3 | request loop |
 | `ci` e2e-eval wall time on kind | 2 m 39 s job (kind create, images load, ingress-nginx, Job 30 s, gate 1 s); whole pipeline about 5 min 35 s | K7 | Actions run 42238088989 |
 | Fixture eval result in CI (recall@5, citation validity, abstention) | recall@3 0.80, recall@5 0.80 (= baseline), citation validity 1.00 (5/5), abstention correctness 1.00 (1/1), fallback 0; p50 0.01 s. kind does not enforce NetworkPolicy: CI proves behaviour, isolation is proven on minikube (K4, R-07, D-100) | K7 | artifact `results-fixture` of run 42238088989; `docs/evidence/k07-e2e-green.txt` |
@@ -159,7 +162,9 @@ Numbers this lane must measure. Nothing here is a guess: leave `-` until measure
 | CI `test` job: api tests run, coverage | 302 passed, 0 skipped (Redis service container, D-097); api coverage gate 60% passes | K6 | Actions run 42234718843 |
 | CI wall time (lint, test, manifests parallel; build; scan) | about 1 min, 1 min, 7 s; build 1.5 min; scan 55 s; about 4.5 min end to end | K6 | `gh pr checks 25` |
 | CD wall time (rehearsal) | test 1 m 17 s, build-push 1 m 20 s, deploy 2 m 03 s; about 5 m 40 s end to end | K8 | Actions run 42247612689 |
-| Cold answer latency through the Ingress in the cluster (p50, p95) | - | K10 | `make eval` |
+| Cold answer latency through the Ingress in the cluster (p50, p95) | p50 30.99 s, p95 129.99 s over 18 questions, all 18 cache MISS, llama3.2:3b on the laptop CPU (baseline.json: 38.98 s, 138.64 s). Gate passed; recall@3 and @5 0.875, citation validity 1.0 (17/17), abstention 1.0, fallback 0.0, all equal to the baseline (`k10-eval-gate.txt`) | K10 | `make eval` |
+| Indexer under the K10 limits (384Mi request, 1Gi limit) | Job 9 min 59 s, peak 484 Mi, exit 0, 0 OOM events; manual re-index 9 min 43 s, peak 428 Mi | K10 | `k10-indexer-peak.txt`, `k10-resources-applied.txt` |
+| Failed requests: rollout to v2 and undo, pod deletion, scale 3 to 5 to 3 | 0 of 49, 0 of 38, 0 of 34 (cached question through the Ingress every 0.5 s) | K10 | request loops in `k10-*.txt` |
 
 ---
 
@@ -212,8 +217,6 @@ kubectl apply -k k8s/overlays/dev && kubectl get pods,pvc -n rahbar
 kubectl port-forward -n rahbar deploy/api 8000:8000 & sleep 2; curl -s localhost:8000/healthz; curl -si localhost:8000/readyz | head -12; kill %1
 python3 scripts/check_submission.py | sed -n '/G · kubernetes/,/H · evaluation/p'
 ```
-2026-11-06  K8  DONE (#29, DEV-012). .github/workflows/cd.yml: `test` (make lint, make test, Redis service) -> `build-push` (needs: test; docker/login-action v4.8.0 with the two secrets, build-push-action v7.4.0, tag `${{ github.sha }}` only, push only from main or dev) -> `deploy` (needs: build-push; anonymous pull proves the images are public and hold no /corpus content, kind v0.33.0, ci overlay with `kustomize edit set image`, mutable-tag guard, Job and rollout waits, Ingress route poll, smoke test: BS fee question answered with a citation, hostel question abstains, UI 200). workflow_dispatch needs the file on the default branch, so the rehearsal was a push to ci/k08-cd (temporary trigger, removed): https://github.com/Zain-Shykh/RAHBAR-Grounded-RAG/actions/runs/42247612689 green (first run 42246763004 also green); images https://hub.docker.com/r/zain13sv/rahbar-api, /rahbar-indexer, /rahbar-ui tagged ed50609d1ae31d051aa758f4796a5930878e2665 (anonymous Docker Hub API: HTTP 200, tag present). The namespace equals a secret value, so Actions masks it as *** in the build-push job: the digest summary is written in deploy. Run logs: 0 hits for a token value; the only secret references are the two in the login step. check_submission section I: CD, needs, permissions, :latest all ok. The run that counts for R-SUB-2 is the first push to main after the dev to main merge (Phase 15). Evidence docs/evidence/k08-cd-run.txt. D-013 decided (HP-1 done), D-101.
-2026-11-06  K9  DONE (#31). main protection read back (applied by the orchestrator, no settings changed by this session): required checks lint, test, manifests, build, scan, e2e-eval, strict, 1 approval with stale-review dismissal, conversation resolution, no force push or deletion, enforce_admins OFF (Ahmad is the only second approver and is unavailable; owner can override for the final merge). docs/evidence/k09-branch-protection.txt. Gate demo PR #30 (https://github.com/Zain-Shykh/RAHBAR-Grounded-RAG/pull/30, base main, apps/v99 in k8s/base/ui.yaml): manifests failed, build/scan/e2e-eval skipped, merge without --admin refused ("base branch policy prohibits the merge"; first attempt "head branch is not up to date" because main has two old merge commits dev lacks: merged origin/main into the demo branch) -> docs/evidence/k09-blocked-merge.txt. Fix pushed: all six green, still BLOCKED/REVIEW_REQUIRED (one-approval rule) -> docs/evidence/k09-green-pr.txt. PR closed unmerged, branch deleted. D-014 decided. Page screenshots of PR #30 are an optional extra for Zain (needs a logged-in browser).
 
 ### Hand-off
 None. Record "k8s base running" in the progress log.
@@ -592,7 +595,7 @@ Tell Zain the exact situation of the one-approval rule for the final merge (Phas
 
 ## Phase K10: Cluster evidence (A-13)
 
-**Status:** NOT STARTED · **Branch:** `docs/k10-evidence` · **Est:** 3 h · **Priority:** P0
+**Status:** DONE (with deviation DEV-013) · **Branch:** `docs/k10-evidence` · **Est:** 3 h · **Priority:** P0
 
 ### Objective
 `docs/evidence/` holds one plain-text file per demonstration the assignment asks for, each with the command and its real output from the running cluster, and the resource numbers in the manifests are justified by them.
@@ -623,14 +626,14 @@ For each item, run it for real on minikube with the application deployed (apply 
 New features.
 
 ### Acceptance criteria
-- [ ] At least ten evidence files exist as listed, each with its command at the top and real output; `docs/evidence/README.md` indexes them.
-- [ ] `resources.md` justifies every request and limit with a measured number, and `k8s/base` was updated to match (and `kubeconform` still passes).
-- [ ] The rollout, the pod deletion and the endpoints demonstrations show zero failed requests and 3 or more IPs.
-- [ ] The pin demonstration shows `0/1`, the 503 body naming `embed_pin`, the log line, and the recovery.
-- [ ] The cache sequence shows MISS, HIT, (re-index), MISS, HIT.
-- [ ] `make eval` through the Ingress passes the gate; numbers recorded.
-- [ ] `python3 scripts/check_submission.py` shows at least five evidence files and no evidence failure.
-- [ ] `make test && make lint` green.
+- [x] At least ten evidence files exist as listed, each with its command at the top and real output; `docs/evidence/README.md` indexes them.
+- [x] `resources.md` justifies every request and limit with a measured number, and `k8s/base` was updated to match (and `kubeconform` still passes).
+- [x] The rollout, the pod deletion and the endpoints demonstrations show zero failed requests and 3 or more IPs.
+- [x] The pin demonstration shows `0/1`, the 503 body naming `embed_pin`, the log line, and the recovery.
+- [x] The cache sequence shows MISS, HIT, (re-index), MISS, HIT.
+- [x] `make eval` through the Ingress passes the gate; numbers recorded.
+- [x] `python3 scripts/check_submission.py` shows at least five evidence files and no evidence failure.
+- [x] `make test && make lint` green.
 
 ### Verify
 ```bash
@@ -639,7 +642,7 @@ make eval
 ```
 
 ### Hand-off
-Tell Zain which screenshots still need a browser (UI chat with a citation and an abstention) if tooling could not capture them.
+The UI chat screenshots (an answer with a citation, an abstention, through `http://rahbar.local`) were not captured by this session (no browser session); they still need a browser. Zain to take them, or K11/Phase 15 if a browser is available.
 
 ---
 

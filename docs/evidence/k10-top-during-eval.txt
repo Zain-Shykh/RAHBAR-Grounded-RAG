@@ -10,3 +10,102 @@ redis-85454df54f-gzfxb   redis    13m    8Mi
 ui-5d994769c6-q7kw9      ui       1m     2Mi     
 api   Deployment/api   cpu: <unknown>/70%   3     8     3     5h48m
 
+19:05:10
+api-7cd86cfdd5-bg4sp     api      4m    68Mi    
+api-7cd86cfdd5-f9s5l     api      4m    68Mi    
+api-7cd86cfdd5-hvs8m     api      4m    69Mi    
+chroma-0                 chroma   2m    130Mi   
+redis-85454df54f-gzfxb   redis    13m   8Mi     
+ui-5d994769c6-q7kw9      ui       1m    2Mi     
+api   Deployment/api   cpu: 4%/70%   3     8     3     5h49m
+
+19:06:11
+api-7cd86cfdd5-bg4sp     api      3m    68Mi    
+api-7cd86cfdd5-f9s5l     api      3m    70Mi    
+api-7cd86cfdd5-hvs8m     api      3m    69Mi    
+chroma-0                 chroma   2m    130Mi   
+redis-85454df54f-gzfxb   redis    11m   8Mi     
+ui-5d994769c6-q7kw9      ui       1m    2Mi     
+api   Deployment/api   cpu: 3%/70%   3     8     3     5h50m
+
+19:07:11
+api-7cd86cfdd5-bg4sp     api      3m    68Mi    
+api-7cd86cfdd5-f9s5l     api      3m    69Mi    
+api-7cd86cfdd5-hvs8m     api      3m    68Mi    
+chroma-0                 chroma   2m    130Mi   
+redis-85454df54f-gzfxb   redis    12m   7Mi     
+ui-5d994769c6-q7kw9      ui       1m    2Mi     
+api   Deployment/api   cpu: 3%/70%   3     8     3     5h51m
+
+19:08:11
+api-7cd86cfdd5-bg4sp     api      3m    68Mi    
+api-7cd86cfdd5-f9s5l     api      3m    69Mi    
+api-7cd86cfdd5-hvs8m     api      3m    68Mi    
+chroma-0                 chroma   2m    131Mi   
+redis-85454df54f-gzfxb   redis    12m   8Mi     
+ui-5d994769c6-q7kw9      ui       1m    2Mi     
+api   Deployment/api   cpu: 3%/70%   3     8     3     5h52m
+
+19:09:11
+api-7cd86cfdd5-bg4sp     api      3m    68Mi    
+api-7cd86cfdd5-f9s5l     api      3m    69Mi    
+api-7cd86cfdd5-hvs8m     api      3m    68Mi    
+chroma-0                 chroma   2m    130Mi   
+redis-85454df54f-gzfxb   redis    11m   8Mi     
+ui-5d994769c6-q7kw9      ui       1m    2Mi     
+api   Deployment/api   cpu: 3%/70%   3     8     3     5h53m
+
+19:10:11
+api-7cd86cfdd5-bg4sp     api      3m    68Mi    
+api-7cd86cfdd5-f9s5l     api      3m    69Mi    
+api-7cd86cfdd5-hvs8m     api      3m    68Mi    
+chroma-0                 chroma   2m    131Mi   
+redis-85454df54f-gzfxb   redis    13m   8Mi     
+ui-5d994769c6-q7kw9      ui       1m    2Mi     
+api   Deployment/api   cpu: 3%/70%   3     8     3     5h54m
+
+19:11:11
+api-7cd86cfdd5-bg4sp     api      3m    68Mi    
+api-7cd86cfdd5-f9s5l     api      3m    69Mi    
+api-7cd86cfdd5-hvs8m     api      3m    68Mi    
+chroma-0                 chroma   2m    130Mi   
+redis-85454df54f-gzfxb   redis    11m   8Mi     
+ui-5d994769c6-q7kw9      ui       1m    2Mi     
+api   Deployment/api   cpu: 3%/70%   3     8     3     5h55m
+
+19:12:11
+api-7cd86cfdd5-bg4sp     api      3m    68Mi    
+api-7cd86cfdd5-f9s5l     api      3m    69Mi    
+api-7cd86cfdd5-hvs8m     api      3m    68Mi    
+chroma-0                 chroma   2m    130Mi   
+redis-85454df54f-gzfxb   redis    11m   8Mi     
+ui-5d994769c6-q7kw9      ui       1m    2Mi     
+api   Deployment/api   cpu: 3%/70%   3     8     3     5h56m
+
+19:13:12
+api-7cd86cfdd5-bg4sp     api      3m    69Mi    
+api-7cd86cfdd5-f9s5l     api      3m    69Mi    
+api-7cd86cfdd5-hvs8m     api      3m    68Mi    
+chroma-0                 chroma   2m    131Mi   
+redis-85454df54f-gzfxb   redis    12m   8Mi     
+ui-5d994769c6-q7kw9      ui       1m    2Mi     
+api   Deployment/api   cpu: 3%/70%   3     8     3     5h57m
+
+19:14:12
+api-7cd86cfdd5-bg4sp     api      3m    68Mi    
+api-7cd86cfdd5-f9s5l     api      3m    69Mi    
+api-7cd86cfdd5-hvs8m     api      3m    68Mi    
+chroma-0                 chroma   2m    130Mi   
+redis-85454df54f-gzfxb   redis    12m   8Mi     
+ui-5d994769c6-q7kw9      ui       1m    2Mi     
+api   Deployment/api   cpu: 3%/70%   3     8     3     5h58m
+
+19:15:12
+api-7cd86cfdd5-bg4sp     api      3m    68Mi    
+api-7cd86cfdd5-f9s5l     api      3m    69Mi    
+api-7cd86cfdd5-hvs8m     api      3m    69Mi    
+chroma-0                 chroma   2m    131Mi   
+redis-85454df54f-gzfxb   redis    12m   8Mi     
+ui-5d994769c6-q7kw9      ui       1m    2Mi     
+api   Deployment/api   cpu: 3%/70%   3     8     3     5h59m
+

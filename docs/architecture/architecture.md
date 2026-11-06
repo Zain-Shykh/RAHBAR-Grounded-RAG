@@ -218,11 +218,11 @@ Resource numbers are initial. They are replaced by figures justified with `kubec
 
 | Object | Kind | Replicas | Image | Port | ServiceAccount | Storage | Requests (cpu / mem) | Limits (cpu / mem) |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `api` | Deployment | 3 (HPA 3 to 8) | `rahbar-api:<tag>` | 8000 | `api` | `emptyDir` `/tmp` | 100m / 256Mi | 500m / 512Mi |
-| `ui` | Deployment | 1 | `rahbar-ui:<tag>` | 8080 | `ui` | `emptyDir` `/tmp` | 25m / 32Mi | 100m / 64Mi |
-| `chroma` | StatefulSet | 1 | `chromadb/chroma:1.0.12` | 8000 | `chroma` | PVC `chroma-data` (2Gi) at `/data` | 100m / 256Mi | 500m / 1Gi |
-| `redis` | Deployment | 1 | `redis/redis-stack-server:<pinned>` | 6379 | `redis` | PVC `cache-data` (1Gi) at `/data` | 100m / 256Mi | 500m / 512Mi |
-| `indexer` | Job | 1 (completions 1) | `rahbar-indexer:<tag>` | none | `indexer` | PVC `corpus-data` read-only at `/corpus`, `emptyDir` `/tmp` | 250m / 512Mi | 1 / 2Gi |
+| `api` | Deployment | 3 (HPA 3 to 8) | `rahbar-api:<tag>` | 8000 | `api` | `emptyDir` `/tmp` | 100m / 128Mi | 500m / 256Mi |
+| `ui` | Deployment | 1 | `rahbar-ui:<tag>` | 8080 | `ui` | `emptyDir` `/tmp` | 10m / 16Mi | 100m / 32Mi |
+| `chroma` | StatefulSet | 1 | `chromadb/chroma:1.0.12` | 8000 | `chroma` | PVC `chroma-data` (2Gi) at `/data` | 50m / 192Mi | 500m / 512Mi |
+| `redis` | Deployment | 1 | `redis/redis-stack-server:<pinned>` | 6379 | `redis` | PVC `cache-data` (1Gi) at `/data` | 50m / 64Mi | 250m / 256Mi |
+| `indexer` | Job | 1 (completions 1) | `rahbar-indexer:<tag>` | none | `indexer` | PVC `corpus-data` read-only at `/corpus`, `emptyDir` `/tmp` | 250m / 384Mi | 1 / 1Gi |
 | `reindex` | CronJob (weekly, `0 3 * * 0`) | creates the Job above | same image and arguments as `indexer` | none | `indexer` | same | same | same |
 
 Labels on every object: `app.kubernetes.io/name: <api|ui|chroma|redis|indexer>`, `app.kubernetes.io/part-of: rahbar`. NetworkPolicies and Services select on `app.kubernetes.io/name`.

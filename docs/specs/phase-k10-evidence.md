@@ -5,7 +5,7 @@
 | Phase | K10, from `docs/IMPLEMENTATION_PLAN_PLATFORM.md` |
 | Work plan task | A-13 |
 | Branch | `docs/k10-evidence` |
-| Stage | IMPLEMENTING |
+| Stage | READY FOR PR |
 | Started | 2026-11-06 |
 | Approved (spec and plan) | pre-approved by Zain (no gate in the platform plan) |
 | Depends on | K1 to K9 |
@@ -26,13 +26,13 @@ No new config keys. Only `resources:` values in `k8s/base/*.yaml` may change. A 
 Evidence files are `k10-<topic>.txt`, names containing `top`, `endpoints`, `hpa`, `branch`, `blocked` where the checker needs them (K9 files already match branch/blocked; K10 copies/reference them). Command line first, real output unedited. Rollout/pod-delete/endpoints demonstrations run a 0.5 s request loop with a cached question through the Ingress and count non-200. Pin demonstration reverts the ConfigMap afterwards. `make eval` runs once, in the background, after the other heavy jobs.
 
 ## 6. Acceptance criteria
-- [ ] **AC-1**: at least ten evidence files with command and output; `docs/evidence/README.md` indexes them.
-- [ ] **AC-2**: `resources.md` justifies every request/limit with a measurement; `k8s/base` matches; `make manifests` passes.
-- [ ] **AC-3**: rollout, pod deletion, endpoints: zero failed requests, 3+ IPs.
-- [ ] **AC-4**: pin demo shows `0/1`, 503 `embed_pin`, log line, recovery.
-- [ ] **AC-5**: cache sequence MISS, HIT, re-index, MISS, HIT.
-- [ ] **AC-6**: `make eval` through the Ingress passes the gate; numbers recorded.
-- [ ] **AC-7**: `check_submission.py` shows no evidence failure; `make test && make lint` green; CI green on the PR.
+- [x] **AC-1**: at least ten evidence files with command and output; `docs/evidence/README.md` indexes them.
+- [x] **AC-2**: `resources.md` justifies every request/limit with a measurement; `k8s/base` matches; `make manifests` passes.
+- [x] **AC-3**: rollout, pod deletion, endpoints: zero failed requests, 3+ IPs.
+- [x] **AC-4**: pin demo shows `0/1`, 503 `embed_pin`, log line, recovery.
+- [x] **AC-5**: cache sequence MISS, HIT, re-index, MISS, HIT.
+- [x] **AC-6**: `make eval` through the Ingress passes the gate; numbers recorded.
+- [x] **AC-7**: `check_submission.py` shows no evidence failure; `make test && make lint` green; CI green on the PR.
 
 ## 7. Test strategy and traceability
 All manual on the real cluster; commands in the evidence files. Tester subagent re-runs the read-only commands and checks the files.
@@ -43,7 +43,7 @@ All manual on the real cluster; commands in the evidence files. Tester subagent 
 | AC-7 | manual | `python3 scripts/check_submission.py`, `make test && make lint`, `gh pr checks` |
 
 ## 8. Open questions
-None. D-102 (how the v2 image and the resource numbers are derived) is recorded.
+None. D-102 (how the v2 image and the resource numbers are derived) is DECIDED.
 
 ## 9. Risks and assumptions
 Laptop load: one heavy job at a time (images, then re-index, then eval). Re-index while Ollama is busy may be slow. A gate miss in the eval is diagnosed and reported, never fixed by editing the baseline.
@@ -57,3 +57,6 @@ Laptop load: one heavy job at a time (images, then re-index, then eval). Re-inde
 | 4 | final eval, README index, plan, AI-USAGE, tester | `docs(k10): eval, index, plan, AI-USAGE` |
 
 Rollback: revert the `k8s/base` resource commit; evidence files are additive.
+
+## 11. Implementation notes
+DEV-013 (requests/limits). The `indexer` Job is immutable: deleted and re-applied, which re-indexed under the new limits. Ollama must run with `OLLAMA_HOST=0.0.0.0` or every answer is a `provider_error` fallback.
