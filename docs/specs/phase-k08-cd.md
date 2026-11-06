@@ -35,7 +35,7 @@ Honesty: the first run that counts for R-SUB-2 happens after the `dev` to `main`
 ## 6. Acceptance criteria
 - [x] **AC-1**: `cd.yml` has `test` -> `build-push` (`needs: test`) -> `deploy` (`needs: build-push`), `permissions:`, pinned actions, SHA tags only.
 - [x] **AC-2**: rehearsal run green from `dev`: three images on Docker Hub tagged with the SHA, smoke test passed.
-- [x] **AC-3**: no secret in any log or file; run logs show `***` for secrets only; `git log -p | grep -iE "dckr_pat|password"` empty.
+- [x] **AC-3**: no secret in any log or file; run logs show `***` for secrets only; `git log -p --all | grep -E "dckr_pat_[A-Za-z0-9_-]{10,}"` empty (the word "password" appears in docs and in `password: ${{ secrets.DOCKERHUB_TOKEN }}`; no value).
 - [x] **AC-4**: `check_submission.py` section I has no CD, `needs:`, `permissions:` or `:latest` failure.
 - [x] **AC-5**: `make test && make lint` green; public images contain no documents.
 
@@ -74,8 +74,10 @@ Estimate 3 h.
 ## 12. Test report
 | Round | Date | Command | Result | Notes |
 | --- | --- | --- | --- | --- |
+| 1 | 2026-11-06 | independent subagent: make test (283+257+91 passed), make lint, check_submission (0 failures), workflow review, run and Docker Hub cross-check, secret scans | PASS | AC-1..5 PASS. Two low doc defects: AC-3 grep wording (fixed above), plan said "K8 is merged" before the merge (true once merged). |
 
 ## 13. Sign-offs
 | Gate | Date | Approved by | Notes |
 | --- | --- | --- | --- |
 | Spec and plan | 2026-11-06 | pre-approved by Zain | |
+| Tester verdict PASS | 2026-11-06 | subagent | rounds: 1 |

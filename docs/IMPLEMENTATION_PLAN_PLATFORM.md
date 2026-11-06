@@ -533,7 +533,7 @@ Deploying to a real cloud cluster.
 ### Acceptance criteria
 - [x] `cd.yml` exists with `test` -> `build-push` (`needs: test`) -> `deploy` (`needs: build-push`), a `permissions:` block, pinned actions, SHA tags only.
 - [x] (rehearsal from branch ci/k08-cd, run 42247612689; the first run after the dev to main merge is Phase 15) A rehearsal run is green: three images visible on Docker Hub tagged with the SHA, and the deploy job's smoke test passed (run URL in the log).
-- [x] No secret value appears in any log or file (`git log -p | grep -iE "dckr_pat|password"` returns nothing; the run logs show `***`).
+- [x] No secret value appears in any log or file (`git log -p --all | grep -E "dckr_pat_[A-Za-z0-9_-]{10,}"` returns nothing; the run logs show `***`).
 - [x] `python3 scripts/check_submission.py` section I has no failure about CD, `needs:`, `permissions:` or `:latest`.
 - [x] `make test && make lint` green.
 
