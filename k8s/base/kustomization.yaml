@@ -13,6 +13,7 @@ resources:
   - ingress.yaml
   - hpa.yaml
   - pdb.yaml
+  - networkpolicy.yaml
   - corpus-pvc.yaml
   - indexer-job.yaml
   - reindex-cronjob.yaml

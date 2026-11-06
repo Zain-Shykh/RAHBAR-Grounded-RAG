@@ -14,3 +14,11 @@ images:
   - name: rahbar-ui
     newName: rahbar-ui
     newTag: dev
+# Ollama host on the minikube docker bridge (architecture 4.6).
+patches:
+  - target: {kind: NetworkPolicy, name: api-egress}
+    patch: |-
+      - {op: replace, path: /spec/egress/2/to/0/ipBlock/cidr, value: 192.168.49.1/32}
+  - target: {kind: NetworkPolicy, name: indexer-egress}
+    patch: |-
+      - {op: replace, path: /spec/egress/1/to/0/ipBlock/cidr, value: 192.168.49.1/32}

@@ -276,7 +276,7 @@ Make sure minikube can reach Ollama:
 
 ```bash
 minikube ssh "curl -s http://host.minikube.internal:11434/api/tags | head -c 200"
-minikube ssh "grep host.minikube.internal /etc/hosts"     # the host IP; used in the NetworkPolicy
+minikube ssh "grep host.minikube.internal /etc/hosts"     # the host IP; used in the NetworkPolicy (if it is not 192.168.49.1, edit the two cidr values in k8s/overlays/dev/kustomization.yaml)
 ```
 
 If the first command prints nothing, Ollama is not listening on `0.0.0.0` or a firewall blocks it (see Troubleshooting).
