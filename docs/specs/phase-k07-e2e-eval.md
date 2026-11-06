@@ -64,6 +64,7 @@ Estimate 4 h.
 
 ## 11. Implementation notes
 - First push went green (run 42238088989, 2 m 39 s). The only YAML slip was a colon inside a step `name:` (fixed before the first push), so the list of CI-only failures the plan predicted (image loading, ingress readiness, Host routing) did not occur: kind config with the `ingress-ready` label and 80:80 mapping plus the `provider/kind` ingress-nginx manifest worked as is.
+- Race found by the second run (42241904298): `kubectl apply` of the overlay hit `connection refused` from the ingress-nginx admission webhook although the controller pod was Ready. The job failed closed. Fix: build to `ci.yaml`, retry the apply up to 6 times 10 s apart, `exit 1` if it never works (final run 42242724142 green).
 - eval needs only `httpx` and `pyyaml`: installed with pinned versions in the job, no new requirements file.
 - RELEVANCE_FLOOR=0.0 does not break the gate (f05 abstains on no hits). RETRIEVER=stub does (recall@5 0.80 -> 0.00). Evidence: `docs/evidence/k07-gate-fail.txt`.
 - Failure dump step uses `set +e` instead of `|| true` so every diagnostic prints; the gate steps have no `|| true`.
