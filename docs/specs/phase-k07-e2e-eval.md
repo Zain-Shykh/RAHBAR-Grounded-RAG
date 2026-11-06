@@ -17,7 +17,7 @@ A sixth job `e2e-eval` in `.github/workflows/ci.yml` creates a kind cluster, dep
 Architecture 4.15 (e2e-eval row), 5.13, AD-19, AD-27; R-CI-6; risk R-07 (kind default CNI does not enforce NetworkPolicy); H-8 (`RELEVANCE_FLOOR=0.20` in `ci`). K5 rehearsal: `docs/evidence/k05-ci-overlay-rehearsal.txt` (Job 8 s, 16 chunks, gate passed).
 
 ## 3. Scope
-In: the `e2e-eval` job, `workflow_dispatch` trigger, evidence (`k07-*.txt`), results register, check_submission section I, five `STARTER-TODO` prose rewordings (the checker greps that literal). Out: CD (K8), repo settings (K9), pushing images.
+In: the `e2e-eval` job, `workflow_dispatch` trigger, evidence (`k07-*.txt`), results register, check_submission section I, five prose rewordings of the old starter-kit marker name (the checker greps that literal). Out: CD (K8), repo settings (K9), pushing images.
 
 ## 4. Interfaces and contracts
 - Job name exactly `e2e-eval`, `needs: build`, `timeout-minutes: 20`. Other job names unchanged.
@@ -34,7 +34,7 @@ Order: checkout, download artifact, `docker load`, retag, install kind and kusto
 - [ ] **AC-1**: job green on the PR and on `dev`; `results.fixture.json` uploaded; metrics and wall time in the results register.
 - [ ] **AC-2**: a branch that breaks retrieval turns `e2e-eval` red with the gate message; `docs/evidence/k07-gate-fail.txt`; PR closed unmerged.
 - [ ] **AC-3**: fails closed (no `|| true`, timeouts set, failure dump present).
-- [ ] **AC-4**: `check_submission.py` section I shows kind and `needs:` satisfied; starter-kit section has no STARTER-TODO failure from docs.
+- [ ] **AC-4**: `check_submission.py` section I shows kind and `needs:` satisfied; starter-kit section has no old marker failure from docs.
 - [ ] **AC-5**: `make test && make lint` green; other five jobs still green.
 
 ## 7. Test strategy and traceability
@@ -56,7 +56,7 @@ Image loading, ingress readiness and Host routing are the likely CI-only failure
 | Step | What | Verify | Commit |
 | --- | --- | --- | --- |
 | 1 | spec | pushed | `docs(spec): K7 spec and plan` |
-| 2 | STARTER-TODO rewording | checker section | `docs: reword the starter-kit marker name` |
+| 2 | marker rewording | checker section | `docs: reword the starter-kit marker name` |
 | 3 | `e2e-eval` job | PR run green | `ci: e2e-eval on kind` |
 | 4 | gate-fail demo (throwaway branch) | red run, PR closed | evidence commit |
 | 5 | tester, docs, plan, PR, merge | tester PASS | `docs(k7): ...` |

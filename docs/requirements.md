@@ -407,7 +407,7 @@ Answer seven questions, pointing to our own files and line numbers. A generic an
 | R-SUB-2 | Link to a successful `cd.yml` run that tested, published and deployed. |
 | R-SUB-3 | Link to images on Docker Hub, showing SHA tags. |
 | R-SUB-4 | `eval/results.json` and `eval/baseline.json`, committed in the repository. |
-| R-SUB-5 | Before submitting, run `python scripts/check_submission.py` (`make check`) from the repo root. It is a lint, not a grader; a dirty run nearly guarantees a bad mark. Its section "0 · starter kit" fails until every `STARTER-TODO` marker and every `raise NotImplementedError` is gone (find with `grep -rn STARTER-TODO --exclude-dir=.venv .`). |
+| R-SUB-5 | Before submitting, run `python scripts/check_submission.py` (`make check`) from the repo root. It is a lint, not a grader; a dirty run nearly guarantees a bad mark. Its section "0 · starter kit" fails until every starter-kit placeholder marker marker and every `raise NotImplementedError` is gone (find with the placeholder-marker grep printed by `make check`). |
 
 ### 8.3 Automatic deductions
 

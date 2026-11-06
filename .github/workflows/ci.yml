@@ -5,6 +5,7 @@ on:
     branches: [main, dev]
   push:
     branches: [dev]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -116,3 +117,81 @@ jobs:
           ignore-unfixed: true
           exit-code: "1"
           format: table
+
+  e2e-eval:
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+      - run: pip install httpx==0.28.1 pyyaml==6.0.2
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: images
+      - name: load images and retag to :ci (the ci overlay tag)
+        run: |
+          docker load -i images.tar
+          for i in api indexer ui; do docker tag rahbar-$i:${{ github.sha }} rahbar-$i:ci; done
+      - name: install kind 0.33.0 and kustomize 5.8.3
+        run: |
+          mkdir -p "$HOME/.local/bin"
+          curl -fsSL -o "$HOME/.local/bin/kind" https://github.com/kubernetes-sigs/kind/releases/download/v0.33.0/kind-linux-amd64
+          chmod +x "$HOME/.local/bin/kind"
+          curl -fsSL https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv5.8.3/kustomize_v5.8.3_linux_amd64.tar.gz | tar -xz -C "$HOME/.local/bin" kustomize
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: kind cluster (port 80 mapped for ingress-nginx)
+        run: |
+          cat > kind-config.yaml <<'KIND'
+          kind: Cluster
+          apiVersion: kind.x-k8s.io/v1alpha4
+          nodes:
+            - role: control-plane
+              kubeadmConfigPatches:
+                - |
+                  kind: InitConfiguration
+                  nodeRegistration:
+                    kubeletExtraArgs:
+                      node-labels: "ingress-ready=true"
+              extraPortMappings:
+                - {containerPort: 80, hostPort: 80, protocol: TCP}
+          KIND
+          kind create cluster --config kind-config.yaml --wait 120s
+          kind load docker-image rahbar-api:ci rahbar-indexer:ci rahbar-ui:ci
+      - name: ingress-nginx controller-v1.15.1
+        run: |
+          kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.15.1/deploy/static/provider/kind/deploy.yaml
+          kubectl wait -n ingress-nginx --for=condition=ready pod -l app.kubernetes.io/component=controller --timeout=180s
+      - name: apply the ci overlay (DEV-011, load restrictor off)
+        run: kustomize build --load-restrictor LoadRestrictionsNone k8s/overlays/ci | kubectl apply -f -
+      - name: wait for the indexer Job and the workloads
+        run: |
+          kubectl wait -n rahbar --for=condition=complete job/indexer --timeout=300s
+          kubectl rollout status -n rahbar statefulset/chroma --timeout=180s
+          kubectl rollout status -n rahbar deployment/redis --timeout=180s
+          kubectl rollout status -n rahbar deployment/api --timeout=180s
+          kubectl rollout status -n rahbar deployment/ui --timeout=180s
+      - name: eval gate through the Ingress
+        run: |
+          python eval/run_eval.py --api http://localhost --host rahbar.local \
+            --golden eval/fixtures/golden.fixture.yaml \
+            --baseline eval/fixtures/baseline.fixture.json \
+            --out eval/fixtures/results.fixture.json
+      - name: dump cluster state on failure
+        if: failure()
+        run: |
+          kubectl get pods,jobs,svc,ingress -A -o wide || true
+          kubectl describe pods,job -n rahbar || true
+          for t in deployment/api statefulset/chroma deployment/redis job/indexer; do
+            echo "=== logs $t"; kubectl logs -n rahbar "$t" --all-containers --tail=200 || true
+          done
+          kubectl logs -n ingress-nginx -l app.kubernetes.io/component=controller --tail=100 || true
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: results-fixture
+          path: eval/fixtures/results.fixture.json
+          if-no-files-found: warn
+          retention-days: 7

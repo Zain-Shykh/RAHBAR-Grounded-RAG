@@ -690,7 +690,7 @@ HP-5: tell Zain what Ahmad still owns (A-00 and A-12) and what he should review 
 [`IMPLEMENTATION_PLAN.md`](IMPLEMENTATION_PLAN.md) lists **Phase 15, integration support and final verification**, as the last phase. It was written when two people were building two lanes in parallel, so it said "integration support": make the lanes meet. With this plan the integration happens inside K2 (the real index in the cluster, milestone I-2), K7 (the fixture gate in CI, milestone I-3 for CI), K10 (the real corpus evaluated through the Ingress, I-3 on the cluster) and K11 (the clean clone). What remains of Phase 15 after K11 is only the final verification, in this order:
 
 1. `make test && make lint && make check`, every remaining warning explained.
-2. No leftover placeholder marker (`grep -rn STARTER-TODO --exclude-dir=.venv .`) and no `NotImplementedError`.
+2. No leftover placeholder marker (the placeholder-marker grep printed by `make check`) and no `NotImplementedError`.
 3. Secret scan of the Git history; no `corpus/raw` content committed.
 4. Deviation log and `OPEN_DECISIONS.md` reviewed: nothing open that affects the delivered system.
 5. Baselines consistent with the shipped config; every number in `PIPELINE.md` matches the committed results.
