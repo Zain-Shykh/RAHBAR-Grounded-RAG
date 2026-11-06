@@ -5,7 +5,7 @@
 | Phase | K4, from `docs/IMPLEMENTATION_PLAN_PLATFORM.md` |
 | Work plan task | A-06 |
 | Branch | `feat/k8s-k04-networkpolicy` |
-| Stage | TESTING |
+| Stage | READY FOR PR |
 | Started | 2026-11-06 |
 | Approved (spec and plan) | pre-approved by Zain, platform plan 0.1 |
 | Depends on | K1 to K3 (system works before the deny is applied) |
@@ -20,7 +20,7 @@ Architecture 4.6, 4.7; R-K8S-NP, R-SEC-4. Calico enforces (minikube `--cni=calic
 In: `k8s/base/networkpolicy.yaml`, kustomization entry, `dev` overlay patch for the Ollama `ipBlock`, evidence, SETUP note. Out: TLS, hosted-mode 443 egress.
 
 ## 4. Interfaces and contracts
-Eight policies named as in 4.6. Selectors: `app.kubernetes.io/name` and namespace `kubernetes.io/metadata.name` only. Base `ipBlock` is the placeholder `203.0.113.1/32` (TEST-NET-3), patched in `dev` to `192.168.49.1/32`. No ConfigMap key added.
+Eight policies named as in 4.6. Selectors: `app.kubernetes.io/name` and namespace `kubernetes.io/metadata.name` only, plus `k8s-app=kube-dns` for the DNS rule (architecture 4.6). Base `ipBlock` is the placeholder `203.0.113.1/32` (TEST-NET-3), patched in `dev` to `192.168.49.1/32`. No ConfigMap key added.
 
 ## 5. Behaviour and design details
 - "Before" is captured with policies absent; then applied; then re-proved. `ui` image has no curl: use `wget` if present, else a `kubectl debug` ephemeral container; api uses `python -c`.
@@ -54,4 +54,4 @@ R-07 policy unenforced: proven not assumed. Ollama needed for cache-miss and ind
 See progress log.
 
 ## 12. Test report
-(filled after tester)
+Round 1, 2026-11-06, branch feat/k8s-k04-networkpolicy: **PASS**. AC-1..AC-5 PASS (tester re-ran live: ui to chroma, redis and api blocked; api to chroma and redis open; unlabelled pod blocked everywhere; indexer-labelled pod reaches chroma, blocked to redis; chroma-labelled pod blocked to redis and api; 30 resources kubeconform valid; 257 + 91 tests, lint clean). Notes: the DNS rule uses `k8s-app` (architecture 4.6; spec wording fixed); ui to api is admitted on the api side only, ui has no egress by design (architecture 4.6 diagram, 'unused today'), shown in the evidence note.
