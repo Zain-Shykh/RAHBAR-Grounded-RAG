@@ -5,7 +5,7 @@
 | Phase | 15, from `docs/IMPLEMENTATION_PLAN.md` |
 | Work plan task | joint (WORKPLAN section 8, I-4) |
 | Branch | `feat/final-verification` |
-| Stage | TESTING |
+| Stage | READY FOR PR |
 | Started | 2026-11-07 |
 | Approved (spec and plan) | 2026-11-07, pre-approved by Zain (headless run, no gate) |
 | Depends on | K1 to K11 DONE; PR #34 (main merged into dev) |
@@ -61,7 +61,7 @@ Disk is 98% full: no image is built in this phase. A push to the release PR bran
 2026-11-07: steps 1 to 6 committed on `feat/final-verification`. Found and recorded an undocumented drift (api PodDisruptionBudget, DEV-014).
 
 ## 12. Test report
-(see below, filled by round)
+Round 1, 2026-11-07, commit f4e4e94: PASS (AC-1 to AC-7; AC-8 N/A). Low defects D1 (rubric ticked failure stages B and D, which were not run), D2 (author statement), D3 (cache figure cited to the wrong file), D4 (indexer peak cited to the old-limit file) fixed in the next commit.
 
 ## 13. Gate and PR
 Merged by Claude after the tester passed; the release PR is left for Zain.

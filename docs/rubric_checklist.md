@@ -170,9 +170,9 @@ Extra "don't" items from the text (not listed as deductions but explicitly forbi
 At least four of six, each with symptom, diagnosis, stage, remedy, and "how I'd have found it" with the metric or log number.
 
 - [x] A · Extraction (index scanned PDF without OCR)
-- [x] B · Chunking (100-token fixed, no overlap)
+- [ ] B · Chunking (100-token fixed, no overlap) (not run; four of six are required)
 - [x] C · Retrieval (`top_k: 1` or API-only `EMBED_MODEL` change)
-- [x] D · Prompt (remove "use supplied context")
+- [ ] D · Prompt (remove "use supplied context") (not run; four of six are required)
 - [x] E · Source (remove superseded filter, ask version question)
 - [x] F · Generation (temperature 1.2)
 
@@ -269,7 +269,7 @@ Every ticked box in section B rests on one of these. Nothing is ticked on memory
 
 - **UI polish (A-12) and Ahmad's onboarding (A-00) were not done.** Ahmad was unavailable for the whole window; the platform lane was built by Zain's session (platform plan K1 to K11). `ui/index.html` and `ui/nginx.conf` are the starter's.
 - **No UI screenshots** (chat answer with a citation, an abstention) and the gate demos are text output from `gh`, not screenshots. `docs/evidence/README.md` says so.
-- **One commit author.** Both partners were meant to commit under their own identity; only Zain's identity exists in the history. `make check` warns about it.
+- **One commit author.** Both partners were meant to commit under their own identity; every work commit is under Zain's identity (the only other author is Ahmad on the GitHub merge commits of PR #1 and #2). `make check` warns about it.
 - **First `cd.yml` run on `main` is pending** until the release PR is merged. The one saved run (`k08-cd-run.txt`) was a `workflow_dispatch` from `dev` (DEV-012) that pushed SHA-tagged images to Docker Hub.
 - **Admin enforcement on `main` is OFF** (D-014): Ahmad, the only second approver, is unavailable, so the release PR needs his approval or the owner's override.
 - **No LICENSE file** (decision of 2026-11-04: none for now).

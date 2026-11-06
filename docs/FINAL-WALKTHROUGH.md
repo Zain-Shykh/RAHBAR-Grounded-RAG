@@ -50,7 +50,7 @@ Two pages, one per lane. Every pointer is a file you can open. Numbers come from
 | citation validity | **1.0** (16 of 16) | same |
 | abstention correctness | **1.0** (2 of 2, both stopped at the floor) | same |
 | chunks | **981** on the host (all measurements), **980** in the cluster (Tesseract difference, DEV-010) | `docs/PIPELINE.md`, `deviations.md` |
-| latency per uncached question | p50 **39.0 s**, p95 **138.6 s** on CPU llama3.2:3b; cache HIT about 0.1 s | `results.json`; phase 11 log in `IMPLEMENTATION_PLAN.md` |
+| latency per uncached question | p50 **39.0 s**, p95 **138.6 s** on CPU llama3.2:3b; cache HIT about 0.1 s | `results.json`; `docs/specs/phase-11-semantic-cache.md` |
 
 ### Eight questions an examiner will ask
 
@@ -104,9 +104,9 @@ Two pages, one per lane. Every pointer is a file you can open. Numbers come from
 | Number | Value | Source |
 | --- | --- | --- |
 | api replicas / HPA range | **3**, scaling **3 to 8** | `k10-hpa.txt` |
-| indexer | **980** chunks in about **10 min** in the cluster, peak memory **428 to 484 MiB**, limit 1Gi | `k11-clean-clone.txt`, `k10-indexer-peak.txt` |
+| indexer | **980** chunks in about **10 min** in the cluster, peak memory **428 to 484 MiB**, limit 1Gi | `k11-clean-clone.txt`, `k10-resources-applied.txt` (484 Mi under the 1Gi limit; 428 Mi in `k10-indexer-peak.txt` was under the old limit) |
 | rolling update / pod delete | **0** failed requests | `k10-rollout-update-undo.txt`, `k10-pod-delete.txt` |
-| cache | MISS 32.8 s then HIT **0.098 s** (about 330 times faster, phase 11 live run); HIT, re-index, new `index_id`, MISS, HIT on the cluster | phase 11 log in `IMPLEMENTATION_PLAN.md`; `k10-cache-and-reindex.txt` |
+| cache | MISS 32.8 s then HIT **0.098 s** (about 330 times faster, phase 11 live run); HIT, re-index, new `index_id`, MISS, HIT on the cluster | `docs/specs/phase-11-semantic-cache.md` line 188; `k10-cache-and-reindex.txt` |
 | CI | **6** jobs, all required; `e2e-eval` on kind about 3 min | `ci.yml`, `k07-e2e-green.txt` |
 
 ### Eight questions an examiner will ask
