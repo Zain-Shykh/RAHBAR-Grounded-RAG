@@ -17,6 +17,10 @@ Rule used: **request** = the steady figure plus a margin (the scheduler guarante
 - `kubectl get events -n rahbar | grep -ci oomkill` returned `0` after the re-index and after the evaluation run; every container's `lastState.terminated` is empty and the reindex pod ended `Completed exit=0` (`k10-indexer-peak.txt`).
 - The re-index was run again with the new limits applied: Job `Complete` in 9 min 59 s, `Completed exit=0`, peak sampled 484 Mi of the 1 Gi limit, 0 OOM events (`k10-resources-applied.txt`).
 
+## K11 re-check under the final limits
+
+After the clean-clone redeploy (all pods on the K10 limits, a fresh 980-chunk index) six different golden questions were asked through the Ingress, all cache misses, while `kubectl top` was sampled every 10 s (`k11-limits-sanity.txt`): api at most 4 m / 71 Mi per pod, chroma 2 m / 55 Mi, redis 12 m / 10 Mi, ui 1 m / 2 Mi. Every container has `restartCount=0` and an empty `lastState.terminated`, `kubectl get events | grep -ci oomkill` is `0`, the HPA stayed at 3 replicas (`3%/70%`). No limit was raised. The indexer was re-run from scratch under its limits in the same session (Job `Complete` in 10 min, `docs/evidence/k11-clean-clone.txt`); its memory was not sampled that time, the 484 Mi peak from K10 stands.
+
 ## Honest limits of the measurement
 
 - `kubectl top` samples every 15 s or more: a shorter CPU spike (the OCR stage) can be higher than any sample. The indexer CPU is therefore stated as "at the limit".

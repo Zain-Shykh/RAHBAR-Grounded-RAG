@@ -88,7 +88,7 @@ Helm charts, a service mesh, an operator, an Ingress TLS setup, Prometheus or Gr
 | K8 | CD: Docker Hub, build-push, deploy | A-10 | 3 h | DONE (with deviation DEV-012) | #29 |
 | K9 | Branch protection and the gate demonstration | A-11 | 1.5 h | DONE | #31 |
 | K10 | Cluster evidence | A-13 | 3 h | DONE (with deviation DEV-013) | #32 |
-| K11 | Platform documents | A-14 | 3 h | NOT STARTED | |
+| K11 | Platform documents | A-14 | 3 h | DONE | #33 |
 
 After K11 comes **Phase 15** of the RAG plan (integration support and final verification, the joint phase). It is deliberately last, see section 6.
 
@@ -97,12 +97,12 @@ Hours spent so far (fill in at each phase end): planned 33.5 h, actual `____`.
 ## 2. Current focus
 
 ```
-Phase:        K11  Platform documents
+Phase:        Phase 15 (RAG plan, IMPLEMENTATION_PLAN.md): final verification. K1 to K11 are DONE; this plan is complete.
 Stage:        not started   (SPEC DRAFT, IMPLEMENTING, TESTING, READY FOR PR, MERGED)
 Branch:       (none yet)
 Spec:         (none yet)
-Next action:  fresh session: stage 0 then stage 1 for K11. K10 is merged: evidence in docs/evidence (README.md indexes it), requests and limits in k8s/base replaced by measured values (DEV-013, architecture 4.2 edited). K11 must update docs/ENGINEERING-NOTES.md where it quotes the old indexer limits, and absorb DEV-012 into architecture 4.15. Cluster is running the rebuilt images (rahbar-api:dev, fastapi 0.135.4) with the 980-chunk index. UI screenshots (chat with a citation, an abstention) are still missing: they need a browser at http://rahbar.local. Phase 15 note: origin/main holds two old merge commits (PR #1, #2) that dev lacks; with strict checks the dev to main PR is BEHIND until main is merged into dev.
-Waiting on:   Nothing. Phase 15: Ahmad approves the dev to main PR, or Zain merges as owner (enforcement off).
+Next action:  fresh session: Phase 15. Order in section 6: make test/lint/check, clean-clone result is already in docs/evidence/k11-clean-clone.txt, merge origin/main into dev first (main holds the merge commits of PR #1 and #2 that dev lacks, so strict required checks show BEHIND), open the dev to main PR, final checklist, the first cd.yml run happens on that push to main (not yet seen: do not claim it before it exists). Cluster is running with the 980-chunk index rebuilt by the clean-clone run (api x3, ui, chroma-0, redis, indexer Completed). Ollama is stopped; start it with `OLLAMA_HOST=0.0.0.0 ollama serve` before any cache-miss question. Docker needs sg docker -c "..." (also `make ask` and `make eval`, which call `minikube ip`). Still missing: UI screenshots (chat with a citation, an abstention) need a browser at http://rahbar.local; ADR 0001 and the engineering-notes Kubernetes answers have not been reviewed by Ahmad (HP-5).
+Waiting on:   Nothing for Phase 15 itself. Phase 15: Ahmad approves the dev to main PR, or Zain merges as owner (enforcement off).
 Last updated: 2026-11-07
 ```
 
@@ -118,7 +118,7 @@ Update this block at the end of every work session, even if the phase is unfinis
 | HP-2 | Zain (human) | Approve changing branch protection on `main` (required checks, admin enforcement) when K9 asks | K9 | [ ] |
 | HP-3 | RAG lane to platform | H-7 to H-14 values: ConfigMap values, `ci` overlay floor 0.20, `LLM_TIMEOUT_SECONDS=300`, Ingress timeout at least 310 s, Redis settings, health and metrics paths. Texts are in the progress log of `IMPLEMENTATION_PLAN.md`. Already delivered, listed here so nothing is missed | K1 to K5 | [x] |
 | HP-4 | Platform to RAG lane | Final status of H-9 (manifests running in minikube) and H-10 (real corpus on the PVC, Job runnable) recorded in `IMPLEMENTATION_PLAN.md` section 3 | K2 | [x] |
-| HP-5 | Platform to Ahmad (when back) | `ui/Dockerfile` is done and merged; A-12 (UI polish and version label) and A-00 (onboarding) are his | K11 | [ ] |
+| HP-5 | Platform to Ahmad (when back) | `ui/Dockerfile` is done and merged; A-12 (UI polish and version label) and A-00 (onboarding) are his. He should also review ADR 0001 and the "In the cluster" answers in `docs/ENGINEERING-NOTES.md` Q1 to Q4 and Q6 (written by Zain's session from the manifests, not by him; the text says so). Told to Zain at K11 | K11 | [x] |
 
 ---
 
@@ -138,6 +138,7 @@ Append-only, newest at the bottom. One line per event: date, phase, what happene
 2026-11-06  K8  DONE (#29, DEV-012). .github/workflows/cd.yml: `test` (make lint, make test, Redis service) -> `build-push` (needs: test; docker/login-action v4.8.0 with the two secrets, build-push-action v7.4.0, tag `${{ github.sha }}` only, push only from main or dev) -> `deploy` (needs: build-push; anonymous pull proves the images are public and hold no /corpus content, kind v0.33.0, ci overlay with `kustomize edit set image`, mutable-tag guard, Job and rollout waits, Ingress route poll, smoke test: BS fee question answered with a citation, hostel question abstains, UI 200). workflow_dispatch needs the file on the default branch, so the rehearsal was a push to ci/k08-cd (temporary trigger, removed): https://github.com/Zain-Shykh/RAHBAR-Grounded-RAG/actions/runs/42247612689 green (first run 42246763004 also green); images https://hub.docker.com/r/zain13sv/rahbar-api, /rahbar-indexer, /rahbar-ui tagged ed50609d1ae31d051aa758f4796a5930878e2665 (anonymous Docker Hub API: HTTP 200, tag present). The namespace equals a secret value, so Actions masks it as *** in the build-push job: the digest summary is written in deploy. Run logs: 0 hits for a token value; the only secret references are the two in the login step. check_submission section I: CD, needs, permissions, :latest all ok. The run that counts for R-SUB-2 is the first push to main after the dev to main merge (Phase 15). Evidence docs/evidence/k08-cd-run.txt. D-013 decided (HP-1 done), D-101.
 2026-11-06  K9  DONE (#31). main protection read back (applied by the orchestrator, no settings changed by this session): required checks lint, test, manifests, build, scan, e2e-eval, strict, 1 approval with stale-review dismissal, conversation resolution, no force push or deletion, enforce_admins OFF (Ahmad is the only second approver and is unavailable; owner can override for the final merge). docs/evidence/k09-branch-protection.txt. Gate demo PR #30 (https://github.com/Zain-Shykh/RAHBAR-Grounded-RAG/pull/30, base main, apps/v99 in k8s/base/ui.yaml): manifests failed, build/scan/e2e-eval skipped, merge without --admin refused ("base branch policy prohibits the merge"; first attempt "head branch is not up to date" because main has two old merge commits dev lacks: merged origin/main into the demo branch) -> docs/evidence/k09-blocked-merge.txt. Fix pushed: all six green, still BLOCKED/REVIEW_REQUIRED (one-approval rule) -> docs/evidence/k09-green-pr.txt. PR closed unmerged, branch deleted. D-014 decided. Page screenshots of PR #30 are an optional extra for Zain (needs a logged-in browser).
 2026-11-07  K10  DONE (#32, DEV-013). Rebuilt the three images (sg docker -c "make images"; api has fastapi 0.135.4, starlette 1.10.0) and rolled api and ui out with `kubectl rollout restart`; the 980-chunk index stayed on its PVC. Evidence in docs/evidence/ (README.md indexes it): k10-top-pods.txt, k10-top-during-eval.txt, k10-indexer-peak.txt (428 Mi peak, no OOM), k10-endpoints.txt (3 then 5 IPs then 3, 0 of 34 failed), k10-hpa.txt (3 to 8 under load), k10-rollout-update-undo.txt (v2 with APP_VERSION 2.0.0, undo back to 0.1.0, 0 of 49 failed), k10-pod-delete.txt (0 of 38), k10-embed-pin-mismatch.txt (0/1, 503 embed_pin, log line, recovery), k10-cache-and-reindex.txt (MISS, HIT, make index, new index_id, MISS, HIT), k10-networkpolicy-proof.txt, k10-eval-gate.txt + k10-eval-results.json. `make eval` through the Ingress: gate passed, recall, citation validity, abstention and fallback equal to eval/baseline.json (not edited; citations_total 17 against 16), p50 30.99 s, p95 129.99 s. Requests and limits in k8s/base changed to measured values (docs/evidence/resources.md, architecture 4.2 edited, DEV-013); the Job template is immutable so the Job was deleted and re-applied, which re-indexed under the new limits (9 min 59 s, peak 484 Mi, 0 OOM, k10-resources-applied.txt). Pitfall met: Ollama started without OLLAMA_HOST=0.0.0.0 makes every cluster answer a provider_error fallback (connection refused from the pods). D-102 decided. Not captured: UI screenshots (need a browser).
+2026-11-07  K11  DONE (#33). Clean clone (fresh directory, no .venv, no corpus/raw) followed the README on the existing minikube after `make down`: install, test 283/257/91, lint, fetch (9 of 9 hashes match), images, corpus, apply, indexer Job 980 chunks in 10 min, `make ask` answered with a citation (2.00, section 5.4) and declined the hostel question: docs/evidence/k11-clean-clone.txt. Two steps failed on a session without the docker group (`make images`, and `make ask` through an empty `minikube ip`): README and SETUP now say `sg docker -c`, the Makefile `ask`/`eval` stop with a message when INGRESS_IP is empty; stale README lines removed, wait step added. Limits sanity under the K10 limits: six different cache-miss golden questions (19 to 51 s), api at most 4 m / 71 Mi, chroma 55 Mi, redis 12 m / 10 Mi, ui 2 Mi, restartCount 0, no OOMKilled, no limit changed (first sampler attempt never started, repeated with other questions): docs/evidence/k11-limits-sanity.txt, resources.md. ENGINEERING-NOTES: all five AHMAD markers replaced with first-person-plural answers citing k8s/...:line and saved evidence, flagged as written without Ahmad; Q3 uses the K3/K10 HPA numbers (3%/70% idle, 4 m per pod in flight, forced target 5%: 3 to 6 to 8 in 30 s) and only exported metrics; 981 (host) vs 980 (cluster) stated once at the top and in README, PIPELINE, ADR 0001/0002, architecture 4.5. `scripts/check_refs.py`: 40 references, 0 unresolved (docs/evidence/k11-reference-check.txt). ADR 0001 got a manifest and evidence section and a status line saying Ahmad has not reviewed it. Architecture 4.11 (load restrictor) and 4.15 (cd.yml triggers and push guard) amended; DEV-009 to DEV-012 set to ABSORBED, DEV-013 wording aligned, index table completed: no deviation is OPEN. README: cd badge added (workflow file exists), status table says what is built, rehearsed and deferred; no claim of a green cd.yml run on main (the first one is the Phase 15 push). `check_submission.py`: 164 passed, 0 failures; warnings are the placeholder Secret template, one commit author (Ahmad unavailable), two heuristic misses (readiness does check the collection, `cacheable()` is the never-cache rule) and sleep in tests. D-103. Ollama stopped. Not done: UI screenshots (no browser).
 ```
 
 ---
@@ -165,6 +166,8 @@ Numbers this lane must measure. Nothing here is a guess: leave `-` until measure
 | Cold answer latency through the Ingress in the cluster (p50, p95) | p50 30.99 s, p95 129.99 s over 18 questions, all 18 cache MISS, llama3.2:3b on the laptop CPU (baseline.json: 38.98 s, 138.64 s). Gate passed; recall@3 and @5 0.875, citation validity 1.0 (17/17 against 16/16), abstention 1.0, fallback 0.0, equal to the baseline (`k10-eval-gate.txt`) | K10 | `make eval` |
 | Indexer under the K10 limits (384Mi request, 1Gi limit) | Job 9 min 59 s, peak 484 Mi, exit 0, 0 OOM events; manual re-index 9 min 43 s, peak 428 Mi | K10 | `k10-indexer-peak.txt`, `k10-resources-applied.txt` |
 | Failed requests: rollout to v2 and undo, pod deletion, scale 3 to 5 to 3 | 0 of 49, 0 of 38, 0 of 34 (cached question through the Ingress every 0.5 s) | K10 | request loops in `k10-*.txt` |
+| Limits sanity under the K10 limits (six different cache-miss questions, `kubectl top` every 10 s) | api at most 4 m / 71 Mi per pod, chroma 2 m / 55 Mi, redis 12 m / 10 Mi, ui 1 m / 2 Mi; answers 19 to 51 s; restartCount 0 everywhere, 0 OOM events, HPA 3%/70%, no limit raised | K11 | `k11-limits-sanity.txt` |
+| Clean clone: README to first answer | `make install` 36 s, `make fetch` under 1 min, `make images` 26 s (warm Docker cache), `make corpus` 5 s, indexer Job 10 min (599.7 s in the pipeline, 980 chunks); install to first cited answer about 14 min of which 10 min is the Job | K11 | `k11-clean-clone.txt` |
 
 ---
 
@@ -648,7 +651,7 @@ The UI chat screenshots (an answer with a citation, an abstention, through `http
 
 ## Phase K11: Platform documents (A-14)
 
-**Status:** NOT STARTED · **Branch:** `docs/k11-platform-docs` · **Est:** 3 h · **Priority:** P0
+**Status:** DONE (PR #33) · **Branch:** `docs/k11-platform-docs` · **Est:** 3 h · **Priority:** P0
 
 ### Objective
 The documents that explain the platform are accurate, specific to this repository and written from the actual deployment: the Kubernetes halves of the engineering notes, the README apply order tested on a clean clone, `SETUP.md`, the ADR 0001 manifest references.
@@ -675,11 +678,11 @@ Requirements R-ENG-* (all seven questions, their wording), R-DOC-*, the rubric d
 UI polish (A-12), new features.
 
 ### Acceptance criteria
-- [ ] No **AHMAD** marker is left in `docs/ENGINEERING-NOTES.md`; each Q1 to Q4 and the Q6 platform half has file and line references that exist (a script or the tester checks every `k8s/...:NN` reference resolves).
-- [ ] The clean-clone transcript exists and every README step worked, or the README was fixed until it did.
-- [ ] `python3 scripts/check_submission.py` shows no failure in sections G, I, J, and "structure" for evidence and workflows (what remains must be listed and explained).
-- [ ] `docs/architecture/deviations.md` has no entry that is OPEN without a decision.
-- [ ] `make test && make lint` green.
+- [x] No **AHMAD** marker is left in `docs/ENGINEERING-NOTES.md`; each Q1 to Q4 and the Q6 platform half has file and line references that exist (`scripts/check_refs.py`, 40 references, 0 unresolved: `docs/evidence/k11-reference-check.txt`).
+- [x] The clean-clone transcript exists and every README step worked, or the README was fixed until it did (`docs/evidence/k11-clean-clone.txt`: two steps failed on a docker-permission session, Makefile guard and README/SETUP notes added; a stale README line and `python` vs `.venv/bin/python` fixed).
+- [x] `python3 scripts/check_submission.py` shows no failure in sections G, I, J, and "structure" for evidence and workflows (164 passed, 0 failures; the 5 warnings are explained in the progress log).
+- [x] `docs/architecture/deviations.md` has no entry that is OPEN without a decision.
+- [x] `make test && make lint` green.
 
 ### Verify
 ```bash

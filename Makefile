@@ -101,6 +101,7 @@ index: ## run the indexer once, from the CronJob's template (needs yours: CronJo
 	@echo "watch it with: kubectl get jobs -n $(NS) -w"
 
 ask: ## ask through the Ingress: make ask Q="What CGPA puts a student on academic warning?"
+	@test -n "$(INGRESS_IP)" || { echo "INGRESS_IP is empty: 'minikube ip' failed. Docker permission? Run: sg docker -c 'make $@ ...'. macOS/Windows: minikube tunnel and INGRESS_IP=127.0.0.1"; exit 1; }
 	@curl -s -X POST "http://$(INGRESS_IP)/api/ask" -H "Host: $(HOST)" \
 	  -H 'Content-Type: application/json' -d "$$(Q="$(Q)" $(PY) -c 'import json,os; print(json.dumps({"question": os.environ["Q"]}))')" \
 	  | $(PY) -m json.tool
@@ -109,6 +110,7 @@ fetch: ## download the documents listed in corpus/sources.yaml
 	$(BIN)/python corpus/fetch.py
 
 eval: ## score eval/golden.yaml through the Ingress and apply the CI gate
+	@test -n "$(INGRESS_IP)" || { echo "INGRESS_IP is empty: 'minikube ip' failed. Docker permission? Run: sg docker -c 'make $@ ...'. macOS/Windows: minikube tunnel and INGRESS_IP=127.0.0.1"; exit 1; }
 	$(BIN)/python eval/run_eval.py --api "http://$(INGRESS_IP)" --host $(HOST)
 
 eval-fixtures: ## score the CI fixture golden set against a local `make dev`

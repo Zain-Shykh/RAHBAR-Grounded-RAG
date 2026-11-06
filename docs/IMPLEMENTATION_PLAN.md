@@ -82,13 +82,13 @@ Hours spent so far (fill in at each phase end): planned 37.5 h, actual `____`.
 ## 2. Current focus
 
 ```
-Phase:        15  Integration support and final verification (WAIT: run it only after platform phases K1 to K11 are DONE, see IMPLEMENTATION_PLAN_PLATFORM.md)
+Phase:        15  Integration support and final verification (K1 to K11 are DONE, so this is next)
 Stage:        not started   (SPEC DRAFT, APPROVED, IMPLEMENTING, TESTING, READY FOR PR, MERGED)
 Branch:       (none yet)
 Spec:         (none yet)
-Next action:  work on IMPLEMENTATION_PLAN_PLATFORM.md first (K1 to K11). Then, in a fresh session, stage 0 then stage 1 for phase 15. Phase 14 is DONE: ADRs 0001 to 0004, PIPELINE, ENGINEERING-NOTES (Q5, Q6, Q7 + lane facts), README API table. ADR 0001 needs Ahmad's review. Remaining checker failures are Ahmad's (evidence, workflows, k8s manifests, ui/Dockerfile) and 6 placeholder mentions in requirements.md, rubric_checklist.md, WORKFLOW.md, WORKPLAN.md (Zain to reword).
-Waiting on:   Ahmad (H-7, H-8, H-13, H-14; ADR 0001 review; Q1 to Q4 and his half of Q6)
-Last updated: 2026-11-05
+Next action:  fresh session: stage 0 then stage 1 for phase 15. The platform plan is complete (IMPLEMENTATION_PLAN_PLATFORM.md); the clean-clone run, the evidence folder and the platform documents exist. Merge origin/main into dev first (PR #1 and #2 merge commits), then the dev to main PR, final checklist. The first cd.yml run on main has not happened yet.
+Waiting on:   Nothing blocking. Ahmad has not reviewed ADR 0001 or the Kubernetes answers in ENGINEERING-NOTES (Q1 to Q4, Q6); they are flagged as written by Zain's session without him.
+Last updated: 2026-11-07
 ```
 
 Update this block at the end of every work session, even if the phase is unfinished.
@@ -200,6 +200,7 @@ Append-only, newest at the bottom. One line per event: date, phase, what happene
 2026-11-05  P14  Spec pushed, decisions D-86 (ADR 0001 written here, Ahmad to review), D-87 (hosted stub removed, ValueError), D-88 (notes: Q5, Q6, Q7 full, Q1 to Q4 lane facts), D-89 (placeholder mentions reworded in lane files).
 2026-11-05  P14  ADRs 0001 to 0004, PIPELINE embedding and document delivery, ENGINEERING-NOTES, README API table, AI-USAGE; hosted.py removed with a test. Tester round 1 FAIL (6 doc defects, fixed), round 2 PASS (5 low, fixed). Checker: 6 failures left, none this lane's: Ahmad's evidence, workflows, k8s, ui/Dockerfile, and the placeholder word in requirements.md, rubric_checklist.md, WORKFLOW.md, WORKPLAN.md (shared, listed for Zain). Register note: stage times (4 min 17 s + 422 s + 1.3 s) do not add up to the 9 min 39 s wall time; re-check.
 2026-11-06  K2 (platform lane)  H-9 and H-10 done: manifests run in minikube (K1) and the real corpus is on the `corpus-data` PVC; the indexer Job built 980 chunks in the cluster (DEV-010: 39 vs 40 chunks for the OCR'd faculty policy), api pods turned 1/1, cited answer and cache HIT proven. Evidence `docs/evidence/k02-*.txt`.
+2026-11-07  K11 (platform lane)  Platform documents done (PR #33): ENGINEERING-NOTES Q1 to Q4 and Q6 Kubernetes halves answered from the deployment (no AHMAD marker left), ADR 0001 manifest references, clean-clone run of the README (docs/evidence/k11-clean-clone.txt), deviations all decided. H-9 and H-10 remain final as recorded on 2026-11-06. Platform plan DONE.
 ```
 
 ---

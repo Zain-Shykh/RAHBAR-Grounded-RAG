@@ -1209,3 +1209,13 @@ Entry template:
 - Decision: A. Decided by: Claude, pre-approved by Zain.
 - Decided on: 2026-11-07
 
+### D-103 K11: how the platform documents were finished without Ahmad
+- Status: DECIDED
+- Raised: 2026-11-07 by Claude (phase K11)
+- Area: docs
+- Related: R-ENG-*, R-DOC-*, DEV-009 to DEV-013, ADR 0001, HP-5
+- Question: Who answers the Kubernetes halves of the engineering notes, what does the ADR say about review, which number (981 or 980) is quoted where, and how are the open deviations closed?
+- Options: A. Zain's session writes the answers from the manifests and saved evidence, flagged in the text as written without Ahmad and unreviewed by him; 981 is the host index (all RAG measurements), 980 the cluster index (all cluster evidence), stated once at the top of the notes and the README status table; DEV-009 to DEV-012 set to ABSORBED and written into the architecture (9.2 R-02, 4.5, 4.11, 4.15). B. Leave the markers for Ahmad. C. Rewrite the RAG numbers to 980 (needs a re-measurement; rejected).
+- Claude recommends: A. A marker left in the notes scores zero and the deadline is Sunday night; honesty is kept by the flag and by saying what was not run (swapped probes, provoked OOM, two concurrent Jobs).
+- Decision: A. Decided by: Claude, pre-approved by Zain.
+- Decided on: 2026-11-07
