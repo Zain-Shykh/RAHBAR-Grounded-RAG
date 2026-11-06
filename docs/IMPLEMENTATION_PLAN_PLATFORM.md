@@ -86,7 +86,7 @@ Helm charts, a service mesh, an operator, an Ingress TLS setup, Prometheus or Gr
 | K6 | CI part 1: lint, test, manifests, build, scan | A-08 | 3 h | DONE | #25 |
 | K7 | CI part 2: e2e-eval on kind | A-09 | 4 h | DONE | #27 |
 | K8 | CD: Docker Hub, build-push, deploy | A-10 | 3 h | DONE (with deviation DEV-012) | #29 |
-| K9 | Branch protection and the gate demonstration | A-11 | 1.5 h | NOT STARTED | |
+| K9 | Branch protection and the gate demonstration | A-11 | 1.5 h | DONE | #31 |
 | K10 | Cluster evidence | A-13 | 3 h | NOT STARTED | |
 | K11 | Platform documents | A-14 | 3 h | NOT STARTED | |
 
@@ -97,12 +97,12 @@ Hours spent so far (fill in at each phase end): planned 33.5 h, actual `____`.
 ## 2. Current focus
 
 ```
-Phase:        K9  Branch protection and the gate demonstration
+Phase:        K10  Cluster evidence
 Stage:        not started   (SPEC DRAFT, IMPLEMENTING, TESTING, READY FOR PR, MERGED)
 Branch:       (none yet)
 Spec:         (none yet)
-Next action:  fresh session: stage 0 then stage 1 for K9. K8 is merged: `.github/workflows/cd.yml` (test, build-push, deploy), rehearsed green on branch ci/k08-cd. Required check names on main: `lint`, `test`, `manifests`, `build`, `scan`, `e2e-eval` (ci.yml). cd.yml has `workflow_dispatch` but GitHub offers it only once the file is on main; the first run that counts for R-SUB-2 is the first push to main (Phase 15). Docker Hub: zain13sv/rahbar-{api,indexer,ui}, public. Settings changes are denied to Claude sessions: K9 needs HP-2 and Zain's own commands.
-Waiting on:   Zain: HP-2 (approve the branch-protection change; run the settings commands himself). Ahmad: nothing blocks.
+Next action:  fresh session: stage 0 then stage 1 for K10. K9 is merged: main is protected (six checks, strict, one approval, enforce_admins OFF), gate demonstrated with PR #30 (closed unmerged). Phase 15 note: origin/main holds two old merge commits (PR #1, #2) that dev lacks; with strict checks the dev to main PR is BEHIND until main is merged into dev.
+Waiting on:   Nothing. Phase 15: Ahmad approves the dev to main PR, or Zain merges as owner (enforcement off).
 Last updated: 2026-11-06
 ```
 
@@ -213,6 +213,7 @@ kubectl port-forward -n rahbar deploy/api 8000:8000 & sleep 2; curl -s localhost
 python3 scripts/check_submission.py | sed -n '/G · kubernetes/,/H · evaluation/p'
 ```
 2026-11-06  K8  DONE (#29, DEV-012). .github/workflows/cd.yml: `test` (make lint, make test, Redis service) -> `build-push` (needs: test; docker/login-action v4.8.0 with the two secrets, build-push-action v7.4.0, tag `${{ github.sha }}` only, push only from main or dev) -> `deploy` (needs: build-push; anonymous pull proves the images are public and hold no /corpus content, kind v0.33.0, ci overlay with `kustomize edit set image`, mutable-tag guard, Job and rollout waits, Ingress route poll, smoke test: BS fee question answered with a citation, hostel question abstains, UI 200). workflow_dispatch needs the file on the default branch, so the rehearsal was a push to ci/k08-cd (temporary trigger, removed): https://github.com/Zain-Shykh/RAHBAR-Grounded-RAG/actions/runs/42247612689 green (first run 42246763004 also green); images https://hub.docker.com/r/zain13sv/rahbar-api, /rahbar-indexer, /rahbar-ui tagged ed50609d1ae31d051aa758f4796a5930878e2665 (anonymous Docker Hub API: HTTP 200, tag present). The namespace equals a secret value, so Actions masks it as *** in the build-push job: the digest summary is written in deploy. Run logs: 0 hits for a token value; the only secret references are the two in the login step. check_submission section I: CD, needs, permissions, :latest all ok. The run that counts for R-SUB-2 is the first push to main after the dev to main merge (Phase 15). Evidence docs/evidence/k08-cd-run.txt. D-013 decided (HP-1 done), D-101.
+2026-11-06  K9  DONE (#31). main protection read back (applied by the orchestrator, no settings changed by this session): required checks lint, test, manifests, build, scan, e2e-eval, strict, 1 approval with stale-review dismissal, conversation resolution, no force push or deletion, enforce_admins OFF (Ahmad is the only second approver and is unavailable; owner can override for the final merge). docs/evidence/k09-branch-protection.txt. Gate demo PR #30 (https://github.com/Zain-Shykh/RAHBAR-Grounded-RAG/pull/30, base main, apps/v99 in k8s/base/ui.yaml): manifests failed, build/scan/e2e-eval skipped, merge without --admin refused ("base branch policy prohibits the merge"; first attempt "head branch is not up to date" because main has two old merge commits dev lacks: merged origin/main into the demo branch) -> docs/evidence/k09-blocked-merge.txt. Fix pushed: all six green, still BLOCKED/REVIEW_REQUIRED (one-approval rule) -> docs/evidence/k09-green-pr.txt. PR closed unmerged, branch deleted. D-014 decided. Page screenshots of PR #30 are an optional extra for Zain (needs a logged-in browser).
 
 ### Hand-off
 None. Record "k8s base running" in the progress log.
