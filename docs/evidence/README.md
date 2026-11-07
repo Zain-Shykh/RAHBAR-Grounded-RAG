@@ -2,6 +2,14 @@
 
 Plain text, the command first (`$ ...`), then the real output, unedited. Cluster files were captured on minikube (Calico, docker driver), namespace `rahbar`; the index there has 980 chunks (DEV-010: the container's Tesseract makes 39 chunks for the faculty policy, the host makes 40). CI and branch-protection files come from GitHub. Each file starts with its date.
 
+## Final release verification (2026-11-07)
+
+Remote GitHub read-back during documentation reconciliation confirmed [Phase 15 PR #35](https://github.com/Zain-Shykh/RAHBAR-Grounded-RAG/pull/35) merged into `dev` at `f3bc39312d07e10c7251389a542b5469be1230dd`, and [release PR #36](https://github.com/Zain-Shykh/RAHBAR-Grounded-RAG/pull/36) merged into `main` at `f59cd9ba17e37468e3c014f15a4ce49546b37a80`. [Main CD run 42297154091](https://github.com/Zain-Shykh/RAHBAR-Grounded-RAG/actions/runs/42297154091) concluded `success`; `test`, `build-push` and `deploy` each concluded `success`.
+
+Verification command: `gh run view 42297154091 --repo Zain-Shykh/RAHBAR-Grounded-RAG --json conclusion,headSha,jobs`. This is a verification summary with external source links, not an unedited raw-output capture. The existing K8 rehearsal logs are unchanged. The deploy uses the CI fixture overlay on ephemeral kind; success does not prove a new real-corpus/model evaluation or browser rendering.
+
+Submission links: [public repository](https://github.com/Zain-Shykh/RAHBAR-Grounded-RAG), [successful main CD](https://github.com/Zain-Shykh/RAHBAR-Grounded-RAG/actions/runs/42297154091), Docker Hub [API](https://hub.docker.com/r/zain13sv/rahbar-api/tags), [indexer](https://hub.docker.com/r/zain13sv/rahbar-indexer/tags), [UI](https://hub.docker.com/r/zain13sv/rahbar-ui/tags). Final tag for all three: `f59cd9ba17e37468e3c014f15a4ce49546b37a80`. Anonymous Docker Hub tag checks in the final audit found all three active with digests matching the CD summary. [Results](../../eval/results.json) and [baseline](../../eval/baseline.json) are committed. Classroom submission remains a human action, due 8 November 2026 at 23:59 PKT (18:59 UTC).
+
 ## K11: clean clone, limits check, reference check (2026-11-07)
 
 | File | Shows |
@@ -44,4 +52,4 @@ Plain text, the command first (`$ ...`), then the real output, unedited. Cluster
 
 ## Not captured
 
-UI screenshots (chat answer with a citation, an abstention) need a browser against `http://rahbar.local`; they are not in this folder.
+UI screenshots (chat answer with a citation, an abstention) need a browser against `http://rahbar.local`; they are not in this folder. The assignment-required failed-gate/blocked-merge and fixed-green screenshots (R-CD-6) are also missing; the K7/K9 text captures do not satisfy the screenshot requirement. Ahmad's ADR 0001, engineering-notes and walkthrough review is unconfirmed.

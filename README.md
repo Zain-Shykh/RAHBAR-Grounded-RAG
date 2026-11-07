@@ -166,7 +166,7 @@ All configuration is environment variables, supplied on the cluster by one Confi
 | `LLM_MODEL` | `llama3.2:3b` | |
 | `TOP_K` | `5` | Passages retrieved per question. |
 | `RELEVANCE_FLOOR` | `0.70` | Minimum similarity of the best passage, else abstain. Measured: midpoint of the gap between 0.658 and 0.746. |
-| `CACHE_THRESHOLD` | `0.96` | Minimum similarity for a cache hit. Lowest of three tried values with no false hit. |
+| `CACHE_THRESHOLD` | `0.96` | Minimum similarity for a cache hit. Lowest of five measured values with no false hit (Phase 11 results register). |
 | `TEMPERATURE` | `0.2` | Low, because the output is JSON and facts. |
 | `CHUNK_SIZE`, `CHUNK_OVERLAP` | `400`, `50` | Words. Chosen from three measured configurations (`docs/PIPELINE.md`). |
 | `LLM_TIMEOUT_SECONDS` | `300` | Model call limit; the Ingress read timeout must exceed it. |
@@ -238,7 +238,7 @@ The RAG lane (API, indexer, evaluation), the Kubernetes manifests, the images, C
 | Dockerfiles for api and indexer | Done |
 | Kubernetes manifests (dev, ci, prod overlays), ui image, NetworkPolicies, HPA, probes | Done, applied and demonstrated on minikube (`docs/evidence/k01-*` to `k10-*`) |
 | CI (`ci.yml`: lint, tests, manifests, build, Trivy, end-to-end evaluation on kind) | Done; green on pull requests into `dev`; branch protection on `main` shown in `docs/evidence/k09-*` |
-| CD (`cd.yml`: build, push `zain13sv/rahbar-*` by commit SHA, deploy to an ephemeral cluster) | Written and rehearsed from `dev` (`docs/evidence/k08-cd-run.txt`); its first run on `main` happens at the final `dev` to `main` merge |
+| CD (`cd.yml`: build, push `zain13sv/rahbar-*` by commit SHA, deploy to an ephemeral cluster) | Done: [release #36](https://github.com/Zain-Shykh/RAHBAR-Grounded-RAG/pull/36) merged; [first main CD run 42297154091](https://github.com/Zain-Shykh/RAHBAR-Grounded-RAG/actions/runs/42297154091) passed test, publish and ephemeral fixture deployment; final SHA tag `f59cd9ba17e37468e3c014f15a4ce49546b37a80` |
 | Clean-clone run of this README, platform documents | Done (`docs/evidence/k11-clean-clone.txt`) |
 | Deferred | Chat UI polish (states, narrow screens, version label); UI screenshots; hybrid retrieval and a re-ranker (non-goals); an HPA on a model-throughput metric (design only, ENGINEERING-NOTES Q3) |
 

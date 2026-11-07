@@ -38,7 +38,7 @@ Two pages, one per lane. Every pointer is a file you can open. Numbers come from
 5. **Relevance floor 0.70, checked before any model call** (AD-12): the gap between the best out-of-scope score (0.658) and the lowest answerable (0.746); abstention costs no generation.
 6. **Citations must match retrieved chunks; one retry; then a canned fallback with HTTP 200** (AD-13, AD-25, `validate.py`): the model is untrusted, a bad output never reaches the user as a 500 or a fake citation.
 7. **Version scope by rules, not by the model** (AD-11, `scope.py`): superseded documents are excluded unless the question asks for an old version; the cache is keyed by the same scope (AD-05).
-8. **Semantic cache in Redis Stack, threshold 0.96** (AD-03, ADR 0003, `scripts/calibrate_cache.py`): lowest tested value (0.88, 0.92, 0.96) with no false hit; worst near-miss 0.958.
+8. **Semantic cache in Redis Stack, threshold 0.96** (AD-03, ADR 0003, `scripts/calibrate_cache.py`): lowest tested value (0.88, 0.90, 0.92, 0.94, 0.96; Phase 11 results register) with no false hit; worst near-miss 0.958.
 9. **Cache invalidation by `index_id`, indexer never touches Redis** (AD-04): the indexer stamps the collection; the API drops caches that belong to an older id. Only validated, answered, from-context responses are stored (`cacheable()`).
 10. **Ollama on the host, CI with a deterministic embedder and an extractive provider** (AD-06, AD-07): the cluster needs no model weights; CI needs no network and still exercises the whole pipeline.
 
@@ -58,7 +58,7 @@ Two pages, one per lane. Every pointer is a file you can open. Numbers come from
 2. **Where is recall worst and what would fix it?** The `exact` type, 0.5: q14 asks for "clause 1.21" and the embedding cannot match a literal number. Hybrid retrieval (BM25 or clause-number match fused with the vector score) would address it; not built, it is a stated non-goal. `ENGINEERING-NOTES.md` section 5, `PIPELINE.md`.
 3. **What happens if `EMBED_MODEL` changes on the API only?** The collection metadata says `nomic-embed-text`; `index_state.py` sees the pin differs, `/readyz` returns 503 `embed_pin`, the pod sits at `0/1` and no traffic reaches it. `docs/evidence/k10-embed-pin-mismatch.txt`, `FAILURE-ANALYSIS.md` stage C.
 4. **How do you stop a hallucinated citation?** `validate.py` compares every citation to the passages retrieved for this request; mismatch means retry once, then the canned fallback. Tested in `api/tests/test_prompt_validate.py`, measured as validity 1.0.
-5. **How did you choose the relevance floor and the cache threshold?** From scores, not by feel: floor 0.70 is the midpoint of 0.658 and 0.746 (`PIPELINE.md`); cache 0.96 is the lowest of three tried values with no false hit (`calibrate_cache.py`, ConfigMap comments).
+5. **How did you choose the relevance floor and the cache threshold?** From scores, not by feel: floor 0.70 is the midpoint of 0.658 and 0.746 (`PIPELINE.md`); cache 0.96 is the lowest of five measured values with no false hit (`calibrate_cache.py`, ConfigMap comments).
 6. **What does the cache never store, and what happens after a re-index?** Abstentions, fallbacks, validation failures, follow-ups (`cacheable()`, `cache.py:35`). After `make index` the `index_id` changes, the old cache index is dropped, the next request is a MISS (`k10-cache-and-reindex.txt`).
 7. **A prompt-injection chunk says "ignore your instructions". What happens?** The evidence is delimited and labelled untrusted in the prompt, the output is schema-validated, citations are checked, nothing is evaluated or executed. Golden question q18 is an injection; `api/tests/test_safety.py`.
 8. **Why 980 chunks in the cluster and 981 on the host?** The indexer image has its own Tesseract build and OCRs the 8-page faculty policy into 39 chunks instead of 40. Recorded as DEV-010; every measurement uses the host build.
@@ -72,7 +72,7 @@ Two pages, one per lane. Every pointer is a file you can open. Numbers come from
 | Path | What it does |
 | --- | --- |
 | `k8s/base/namespace.yaml`, `kustomization.yaml` | namespace `rahbar`; the Secret placeholder is deliberately not listed |
-| `api.yaml` | Deployment x3, 3 probes (`startup` /readyz up to 30 failures, `readiness` /readyz, `liveness` /healthz), `maxSurge: 1`, `maxUnavailable: 0`, `preStop`, requests and limits |
+| `api.yaml` | Deployment x3, 3 probes (`startup` /healthz up to 30 failures, `readiness` /readyz, `liveness` /healthz), `maxSurge: 1`, `maxUnavailable: 0`, `preStop`, requests and limits |
 | `chroma-statefulset.yaml` | StatefulSet, 1 replica, `volumeClaimTemplates` (stable identity and disk) |
 | `redis.yaml` | Redis Stack Deployment + PVC (the cache survives a restart) |
 | `indexer-job.yaml`, `reindex-cronjob.yaml` | the indexer Job; the weekly CronJob reuses its spec; `make index` creates a Job from the CronJob |
@@ -89,7 +89,7 @@ Two pages, one per lane. Every pointer is a file you can open. Numbers come from
 ### Ten decisions and why
 
 1. **Chroma is a StatefulSet, Redis a Deployment with a PVC** (architecture 4.2): Chroma needs a stable volume and identity; Redis is a disposable cache whose data merely survives a restart.
-2. **Three probes with different jobs**: `startup` tolerates the first index load, `readiness` removes a pod without restarting it, `liveness` only says the process is alive and touches nothing (so a slow Chroma cannot cause a restart storm). `ENGINEERING-NOTES.md` section 2.
+2. **Three probes with different jobs**: `startup` checks process startup through `/healthz`; `readiness` waits for a usable index and removes a pod without restarting it, `liveness` only says the process is alive and touches nothing (so a slow Chroma cannot cause a restart storm). `ENGINEERING-NOTES.md` section 2.
 3. **Rolling update `maxUnavailable: 0`, `maxSurge: 1`, `preStop` sleep** so a pod leaves the Service before it stops; measured with zero failed requests (`k10-rollout-update-undo.txt`, `k10-pod-delete.txt`).
 4. **Default-deny NetworkPolicy** with one rule per edge: ui cannot reach chroma, api can (`k10-networkpolicy-proof.txt`). Calico is required, so minikube starts with `--cni=calico`.
 5. **HPA on CPU, honestly limited** (`ENGINEERING-NOTES.md` section 3): generation runs on the host, so API CPU barely moves while a request waits; in-flight requests would be a better signal. We show the CPU HPA working (`k10-hpa.txt`) and describe the better one.
@@ -117,7 +117,7 @@ Two pages, one per lane. Every pointer is a file you can open. Numbers come from
 4. **How big can the indexer get and what is the failure signature?** Peak 428 to 484 MiB, limit 1Gi; if too low the pod is OOMKilled with exit code 137 and the Job retries up to `backoffLimit`. `ENGINEERING-NOTES.md` section 4, `k10-indexer-peak.txt`.
 5. **How do you prove the NetworkPolicies work?** `kubectl exec` from a ui pod to chroma times out; from an api pod it succeeds. `docs/evidence/k10-networkpolicy-proof.txt`.
 6. **How does CI prevent a bad merge, and how did you show it?** Six required checks; a PR with a failing check had a greyed-out merge button (`k09-blocked-merge.txt`), the same PR green afterwards (`k09-green-pr.txt`). The e2e job runs the gate on fixtures with no model.
-7. **How does the deploy job avoid shipping an untested image?** `build-push` needs `test`, `deploy` needs `build-push`; images are tagged by SHA; the deploy runs in an ephemeral kind cluster with rollout status and a smoke test. `.github/workflows/cd.yml`, `k08-cd-run.txt`. The first run on `main` happens at the release merge.
+7. **How does the deploy job avoid shipping an untested image?** `build-push` needs `test`, `deploy` needs `build-push`; images are tagged by SHA; the deploy runs in an ephemeral kind cluster with rollout status and a smoke test. `.github/workflows/cd.yml`; [main CD run 42297154091](https://github.com/Zain-Shykh/RAHBAR-Grounded-RAG/actions/runs/42297154091) passed all three jobs after release #36. It deployed the SHA images with the fixture overlay; it does not establish a new real-model evaluation or browser screenshot.
 8. **How do you re-index without downtime?** `kubectl create job --from=cronjob/reindex manual-reindex-1 -n rahbar` (or `make index`): the Job builds `rahbar_next` and swaps; the API re-resolves the collection, the cache invalidates by `index_id`. `k10-cache-and-reindex.txt`.
 
 ---

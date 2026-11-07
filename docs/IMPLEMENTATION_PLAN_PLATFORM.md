@@ -90,19 +90,19 @@ Helm charts, a service mesh, an operator, an Ingress TLS setup, Prometheus or Gr
 | K10 | Cluster evidence | A-13 | 3 h | DONE (with deviation DEV-013) | #32 |
 | K11 | Platform documents | A-14 | 3 h | DONE | #33 |
 
-After K11 comes **Phase 15** of the RAG plan (integration support and final verification, the joint phase). It is deliberately last, see section 6.
+K1–K11 and Phase 15 are complete: PR #35 merged final verification into `dev`; [PR #36](https://github.com/Zain-Shykh/RAHBAR-Grounded-RAG/pull/36) merged the release into `main`. [Main CD run 42297154091](https://github.com/Zain-Shykh/RAHBAR-Grounded-RAG/actions/runs/42297154091) passed `test`, `build-push` and `deploy` on `f59cd9ba17e37468e3c014f15a4ce49546b37a80` (GitHub read-back, 2026-11-07). Human submission items remain, see section 2.
 
 Hours spent so far (fill in at each phase end): planned 33.5 h, actual `____`.
 
 ## 2. Current focus
 
 ```
-Phase:        Phase 15 (RAG plan, IMPLEMENTATION_PLAN.md): final verification. K1 to K11 are DONE; this plan is complete.
-Stage:        not started   (SPEC DRAFT, IMPLEMENTING, TESTING, READY FOR PR, MERGED)
-Branch:       (none yet)
-Spec:         (none yet)
-Next action:  fresh session: Phase 15. Order in section 6: make test/lint/check, clean-clone result is already in docs/evidence/k11-clean-clone.txt, merge origin/main into dev first (main holds the merge commits of PR #1 and #2 that dev lacks, so strict required checks show BEHIND), open the dev to main PR, final checklist, the first cd.yml run happens on that push to main (not yet seen: do not claim it before it exists). Cluster is running with the 980-chunk index rebuilt by the clean-clone run (api x3, ui, chroma-0, redis, indexer Completed). Ollama is stopped; start it with `OLLAMA_HOST=0.0.0.0 ollama serve` before any cache-miss question. Docker needs sg docker -c "..." (also `make ask` and `make eval`, which call `minikube ip`). Still missing: UI screenshots (chat with a citation, an abstention) need a browser at http://rahbar.local; ADR 0001 and the engineering-notes Kubernetes answers have not been reviewed by Ahmad (HP-5).
-Waiting on:   Nothing for Phase 15 itself. Phase 15: Ahmad approves the dev to main PR, or Zain merges as owner (enforcement off).
+Phase:        Final documentation reconciliation (implementation phases complete).
+Stage:        Documentation reconciled on 2026-11-07 against release and source evidence.
+Branch:       docs/final-doc-reconciliation
+Spec:         User-authorized documentation scope; no implementation changes.
+Next action:  Complete the outstanding screenshot, human-review and Classroom submission items.
+Waiting on:   Real UI and gate screenshots; Ahmad's understanding and ADR/engineering-notes/walkthrough review; historical HP-2 approval confirmation; Classroom submission.
 Last updated: 2026-11-07
 ```
 
@@ -115,7 +115,7 @@ Update this block at the end of every work session, even if the phase is unfinis
 | ID | Direction | Item | Phase | Done |
 | --- | --- | --- | --- | :---: |
 | HP-1 | Zain (human) | Create the Docker Hub account and an access token (read, write, delete scope on the repos). Run `gh secret set DOCKERHUB_USERNAME` and `gh secret set DOCKERHUB_TOKEN` with the `!` prefix. Decide the Docker Hub namespace (decision D-013). DONE 2026-11-06: namespace `zain13sv`, secrets set (token has a 30 day expiry, about 6 Dec 2026) | before K8 | [x] |
-| HP-2 | Zain (human) | Approve changing branch protection on `main` (required checks, admin enforcement) when K9 asks | K9 | [ ] |
+| HP-2 | Zain (human) | Historical approval hand-off: K9 completed (#31); settings read-back is in `docs/evidence/k09-branch-protection.txt`, admin enforcement OFF by D-014. The original human approval event has not been independently re-established; this box remains unresolved | K9 | [ ] |
 | HP-3 | RAG lane to platform | H-7 to H-14 values: ConfigMap values, `ci` overlay floor 0.20, `LLM_TIMEOUT_SECONDS=300`, Ingress timeout at least 310 s, Redis settings, health and metrics paths. Texts are in the progress log of `IMPLEMENTATION_PLAN.md`. Already delivered, listed here so nothing is missed | K1 to K5 | [x] |
 | HP-4 | Platform to RAG lane | Final status of H-9 (manifests running in minikube) and H-10 (real corpus on the PVC, Job runnable) recorded in `IMPLEMENTATION_PLAN.md` section 3 | K2 | [x] |
 | HP-5 | Platform to Ahmad (when back) | `ui/Dockerfile` is done and merged; A-12 (UI polish and version label) and A-00 (onboarding) are his. He should also review ADR 0001 and the "In the cluster" answers in `docs/ENGINEERING-NOTES.md` Q1 to Q4 and Q6 (written by Zain's session from the manifests, not by him; the text says so). Told to Zain at K11 | K11 | [x] |
@@ -140,6 +140,7 @@ Append-only, newest at the bottom. One line per event: date, phase, what happene
 2026-11-07  K10  DONE (#32, DEV-013). Rebuilt the three images (sg docker -c "make images"; api has fastapi 0.135.4, starlette 1.10.0) and rolled api and ui out with `kubectl rollout restart`; the 980-chunk index stayed on its PVC. Evidence in docs/evidence/ (README.md indexes it): k10-top-pods.txt, k10-top-during-eval.txt, k10-indexer-peak.txt (428 Mi peak, no OOM), k10-endpoints.txt (3 then 5 IPs then 3, 0 of 34 failed), k10-hpa.txt (3 to 8 under load), k10-rollout-update-undo.txt (v2 with APP_VERSION 2.0.0, undo back to 0.1.0, 0 of 49 failed), k10-pod-delete.txt (0 of 38), k10-embed-pin-mismatch.txt (0/1, 503 embed_pin, log line, recovery), k10-cache-and-reindex.txt (MISS, HIT, make index, new index_id, MISS, HIT), k10-networkpolicy-proof.txt, k10-eval-gate.txt + k10-eval-results.json. `make eval` through the Ingress: gate passed, recall, citation validity, abstention and fallback equal to eval/baseline.json (not edited; citations_total 17 against 16), p50 30.99 s, p95 129.99 s. Requests and limits in k8s/base changed to measured values (docs/evidence/resources.md, architecture 4.2 edited, DEV-013); the Job template is immutable so the Job was deleted and re-applied, which re-indexed under the new limits (9 min 59 s, peak 484 Mi, 0 OOM, k10-resources-applied.txt). Pitfall met: Ollama started without OLLAMA_HOST=0.0.0.0 makes every cluster answer a provider_error fallback (connection refused from the pods). D-102 decided. Not captured: UI screenshots (need a browser).
 2026-11-07  K11  DONE (#33). Clean clone (fresh directory, no .venv, no corpus/raw) followed the README on the existing minikube after `make down`: install, test 283/257/91, lint, fetch (9 of 9 hashes match), images, corpus, apply, indexer Job 980 chunks in 10 min, `make ask` answered with a citation (2.00, section 5.4) and declined the hostel question: docs/evidence/k11-clean-clone.txt. Two steps failed on a session without the docker group (`make images`, and `make ask` through an empty `minikube ip`): README and SETUP now say `sg docker -c`, the Makefile `ask`/`eval` stop with a message when INGRESS_IP is empty; stale README lines removed, wait step added. Limits sanity under the K10 limits: six different cache-miss golden questions (19 to 51 s), api at most 4 m / 71 Mi, chroma 55 Mi, redis 12 m / 10 Mi, ui 2 Mi, restartCount 0, no OOMKilled, no limit changed (first sampler attempt never started, repeated with other questions): docs/evidence/k11-limits-sanity.txt, resources.md. ENGINEERING-NOTES: all five AHMAD markers replaced with first-person-plural answers citing k8s/...:line and saved evidence, flagged as written without Ahmad; Q3 uses the K3/K10 HPA numbers (3%/70% idle, 4 m per pod in flight, forced target 5%: 3 to 6 to 8 in 30 s) and only exported metrics; 981 (host) vs 980 (cluster) stated once at the top and in README, PIPELINE, ADR 0001/0002, architecture 4.5. `scripts/check_refs.py`: 40 references, 0 unresolved (docs/evidence/k11-reference-check.txt). ADR 0001 got a manifest and evidence section and a status line saying Ahmad has not reviewed it. Architecture 4.11 (load restrictor) and 4.15 (cd.yml triggers and push guard) amended; DEV-009 to DEV-012 set to ABSORBED, DEV-013 wording aligned, index table completed: no deviation is OPEN. README: cd badge added (workflow file exists), status table says what is built, rehearsed and deferred; no claim of a green cd.yml run on main (the first one is the Phase 15 push). `check_submission.py`: 164 passed, 0 failures; warnings are the placeholder Secret template, one commit author (Ahmad unavailable), two heuristic misses (readiness does check the collection, `cacheable()` is the never-cache rule) and sleep in tests. D-103. Ollama stopped. Not done: UI screenshots (no browser).
 2026-11-07  P15  RAG plan phase 15 (final verification) DONE (#35): rubric checklist ticked, known gaps listed, FINAL-WALKTHROUGH.md written, release PR dev to main opened and green, awaiting Zain's merge. DEV-014 closes the PDB drift.
+2026-11-07  DOCS  Documentation reconciliation: PR #35 merged to dev (f3bc393), release #36 merged to main (f59cd9b); main CD 42297154091 test/build-push/deploy success verified through GitHub. Original log entries and unticked historical criteria retained; missing screenshots and human review remain unresolved. Release/phase status, source-based factual summaries and unsupported completion claims corrected on docs/final-doc-reconciliation; historical HP-2 approval and Classroom submission remain unconfirmed.
 ```
 
 ---
@@ -420,7 +421,9 @@ None.
 
 ## Phase K6: CI part 1: lint, test, manifests, build, scan (A-08)
 
-**Status:** NOT STARTED · **Branch:** `ci/k06-ci-core` · **Est:** 3 h · **Priority:** P0
+**Status:** DONE (#25) · **Branch:** `ci/k06-ci-core` · **Est:** 3 h · **Priority:** P0
+
+**Reconciliation (2026-11-07):** Merged status is confirmed by the dashboard PR and section 4 evidence. The unchecked acceptance boxes below are retained from the original checklist; they are not proof that implementation is pending and have not been retroactively ticked. Screenshot requirements remain unfulfilled.
 
 ### Objective
 A pull request runs five jobs in GitHub Actions and any of them can fail it: `lint`, `test`, `manifests`, `build`, `scan`.
@@ -559,7 +562,9 @@ Tell Zain the run URL and the Docker Hub repository links: both go in the submis
 
 ## Phase K9: Branch protection and the gate demonstration (A-11)
 
-**Status:** NOT STARTED · **Branch:** `docs/k09-gate-demo` · **Est:** 1.5 h · **Priority:** P0 · **Blocked until:** HP-2 (Zain approves the settings change)
+**Status:** DONE (#31) · **Branch:** `docs/k09-gate-demo` · **Est:** 1.5 h · **Priority:** P0
+
+**Reconciliation (2026-11-07):** Merged status is confirmed by the dashboard PR and section 4 evidence. The unchecked acceptance boxes below are retained from the original checklist; they are not proof that implementation is pending and have not been retroactively ticked. Screenshot requirements remain unfulfilled.
 
 ### Objective
 `main` accepts changes only through a pull request with passing required checks and one approval, and the repository contains the evidence: the settings, a merge button blocked by a failing check, and the same pull request green after the fix.
@@ -698,7 +703,7 @@ HP-5: tell Zain what Ahmad still owns (A-00 and A-12) and what he should review 
 
 ## 6. How this plan meets the RAG plan's Phase 15
 
-[`IMPLEMENTATION_PLAN.md`](IMPLEMENTATION_PLAN.md) lists **Phase 15, integration support and final verification**, as the last phase. It was written when two people were building two lanes in parallel, so it said "integration support": make the lanes meet. With this plan the integration happens inside K2 (the real index in the cluster, milestone I-2), K7 (the fixture gate in CI, milestone I-3 for CI), K10 (the real corpus evaluated through the Ingress, I-3 on the cluster) and K11 (the clean clone). What remains of Phase 15 after K11 is only the final verification, in this order:
+[`IMPLEMENTATION_PLAN.md`](IMPLEMENTATION_PLAN.md) lists **Phase 15, integration support and final verification**, as the last phase. It was written when two people were building two lanes in parallel, so it said "integration support": make the lanes meet. With this plan the integration happens inside K2 (the real index in the cluster, milestone I-2), K7 (the fixture gate in CI, milestone I-3 for CI), K10 (the real corpus evaluated through the Ingress, I-3 on the cluster) and K11 (the clean clone). The following was the Phase 15 sequence after K11; it is retained as the original plan, not a list of pending implementation work:
 
 1. `make test && make lint && make check`, every remaining warning explained.
 2. No leftover placeholder marker (the placeholder-marker grep printed by `make check`) and no `NotImplementedError`.
@@ -709,7 +714,7 @@ HP-5: tell Zain what Ahmad still owns (A-00 and A-12) and what he should review 
 7. The `dev` to `main` pull request (all required checks green, the one approval handled, see K9), the green `cd.yml` run on `main`, and the submission list: repository URL, the `cd.yml` run URL, the Docker Hub links, `eval/results.json` and `eval/baseline.json`.
 8. Both people can explain every part: a short walkthrough note per lane.
 
-Order of work from now: **K1 to K11, then Phase 15.** Platform first because nothing else can be proven without a running cluster and passing pipelines; Phase 15 last because it verifies the whole.
+Completed order: **K1 to K11, then Phase 15 (#35), then release (#36) and main CD 42297154091**. Classroom submission, screenshots and human understanding are still unconfirmed; a written walkthrough does not establish that both people can explain the system.
 
 ## 7. Schedule (from Thursday 5 Nov, 22:00 PKT)
 

@@ -69,7 +69,7 @@ Extra "don't" items from the text (not listed as deductions but explicitly forbi
 
 ### B1. Setup and process
 
-- [x] Public repo, `.gitignore`, `dev` branch, `main` protected [R-DEV-1, R-DEV-2] — remaining: add CI job names as required status checks; keep "one approval".
+- [x] Public repo, `.gitignore`, `dev` branch, `main` protected [R-DEV-1, R-DEV-2] — six required checks, strict, one approval recorded in `docs/evidence/k09-branch-protection.txt`; admin enforcement OFF by D-014.
 - [x] Collaborator (Ahmad) added.
 - [x] PR #1 (corpus) approved and merged; corpus named in first PR [R-LOG-3].
 - [x] Dependencies documented in root `requirements.txt`.
@@ -184,8 +184,8 @@ At least four of six, each with symptom, diagnosis, stage, remedy, and "how I'd 
 - [x] `permissions:` least-privilege in every workflow.
 - [x] Secrets only from GitHub Secrets (Docker Hub token).
 - [x] CI job names added as required status checks on `main`.
-- [x] Gate demo: failing PR with greyed-out merge button, then green PR; both screenshots.
-- [x] Successful `cd.yml` run link saved.
+- [ ] Gate demo screenshots: failing eval gate with greyed-out merge button, then fixed green PR [R-CD-6]. Text evidence exists (`k07-gate-fail.txt`, `k09-blocked-merge.txt`, `k09-green-pr.txt`); the required screenshots have not been captured.
+- [x] Successful main `cd.yml` run 42297154091 linked in `docs/evidence/README.md` (all three jobs verified).
 - [x] Docker Hub images visible with SHA tags.
 
 ### B10. Docs [§10, R-AI-1, R-ENG-*]
@@ -211,7 +211,7 @@ At least four of six, each with symptom, diagnosis, stage, remedy, and "how I'd 
 ### B11. Evidence screenshots/outputs in `docs/evidence/`
 
 - [x] Branch protection settings.
-- [x] Blocked merge (gate failing, greyed-out button) and green merge.
+- [x] Text output of a blocked merge and the fixed PR with green checks (`k09-blocked-merge.txt`, `k09-green-pr.txt`); the PR was closed unmerged. Button screenshots are missing; see unchecked B9 [R-CD-6].
 - [x] `kubectl top pods` (api, chroma, redis, ui, indexer peak) justifying requests/limits.
 - [x] `kubectl get endpoints` with 3+ IPs.
 - [x] `kubectl get hpa` with real percentage.
@@ -255,12 +255,12 @@ Every ticked box in section B rests on one of these. Nothing is ticked on memory
 | B1 setup | `gh repo view` = PUBLIC; `k09-branch-protection.txt` (six required checks, strict, one approval); PR #1 and #2 merge commits on `origin/main`; Docker Hub images pushed by `cd.yml` (`k08-cd-run.txt`); README is ours |
 | B2 corpus | `docs/CORPUS.md`, `corpus/MANIFEST.md`, `corpus/sources.yaml`; README "corpus is fetched, not committed"; `git log --all --stat -- corpus/raw` is empty (`final-history-scan.txt`) |
 | B3 indexing | `docs/PIPELINE.md` (tables, 3 configs at 200/25, 400/50, 600/100 in `eval/tuning/`), `docs/examples/` before/after, `indexer/tests/` |
-| B4 query and generation | `api/tests/` (481 test functions per `make check`; `test_safety.py` injection, `test_answer.py` abstain and fallback, `test_cache*.py`), `docs/adr/0003-cache-store.md`, `docs/adr/0004-llm-provider-and-data-governance.md`; ConfigMap comments give the one-line justifications (TEMPERATURE, CACHE_THRESHOLD, RELEVANCE_FLOOR) |
+| B4 query and generation | `api/tests/` (the checker counts 481 test functions across `api/tests/`, `indexer/tests/` and root `tests/`, not API alone; `test_safety.py` injection, `test_answer.py` abstain and fallback, `test_cache*.py`), `docs/adr/0003-cache-store.md`, `docs/adr/0004-llm-provider-and-data-governance.md`; ConfigMap comments give the one-line justifications (TEMPERATURE, CACHE_THRESHOLD, RELEVANCE_FLOOR) |
 | B5 Kubernetes | `k8s/base/*`, `docs/evidence/k01` to `k05`, `k10-*`; ADR 0001; `docs/architecture/architecture.md` 4.2 and 4.7 (why Chroma is a StatefulSet) |
 | B6 observability | `api/app/logjson.py`, `api/app/routes/metrics.py`, `api/tests/test_metrics.py`; the `answered` line is in `k02-first-answer.txt` |
 | B7 evaluation | `eval/golden.yaml` (18 questions), `eval/results.json` = `eval/baseline.json`, `final-numbers-check.txt`, `eval/tests/` |
 | B8 failure analysis | `docs/FAILURE-ANALYSIS.md` (A, C, E, F; D-015) |
-| B9 CI/CD | `.github/workflows/ci.yml` (six jobs), `cd.yml`; `k06`, `k07`, `k08`, `k09-*` evidence. Gate demos are saved as `gh` command output, not screenshots |
+| B9 CI/CD | `.github/workflows/ci.yml` (six jobs), `cd.yml`; `k06`, `k07`, `k08`, `k09-*` evidence; final main CD 42297154091 linked in `docs/evidence/README.md`. Gate demos are saved as `gh` command output, not screenshots |
 | B10 docs | `docs/adr/0001` to `0004`, `PIPELINE.md`, `FAILURE-ANALYSIS.md`, `ENGINEERING-NOTES.md` (7 answers, `k11-reference-check.txt` resolves every path:line), `AI-USAGE.md`, `README.md` |
 | B11 evidence | `docs/evidence/README.md` indexes every file |
 | B12 gate | `make test && make lint && make manifests` green; `make check`: 164 passed, 5 warnings, 0 failures (explained below); `final-history-scan.txt`; `k11-clean-clone.txt` |
@@ -270,11 +270,11 @@ Every ticked box in section B rests on one of these. Nothing is ticked on memory
 - **UI polish (A-12) and Ahmad's onboarding (A-00) were not done.** Ahmad was unavailable for the whole window; the platform lane was built by Zain's session (platform plan K1 to K11). `ui/index.html` and `ui/nginx.conf` are the starter's.
 - **No UI screenshots** (chat answer with a citation, an abstention) and the gate demos are text output from `gh`, not screenshots. `docs/evidence/README.md` says so.
 - **One commit author.** Both partners were meant to commit under their own identity; every work commit is under Zain's identity (the only other author is Ahmad on the GitHub merge commits of PR #1 and #2). `make check` warns about it.
-- **First `cd.yml` run on `main` is pending** until the release PR is merged. The one saved run (`k08-cd-run.txt`) was a `workflow_dispatch` from `dev` (DEV-012) that pushed SHA-tagged images to Docker Hub.
-- **Admin enforcement on `main` is OFF** (D-014): Ahmad, the only second approver, is unavailable, so the release PR needs his approval or the owner's override.
+- **Release and main CD complete:** [PR #36](https://github.com/Zain-Shykh/RAHBAR-Grounded-RAG/pull/36) merged; [run 42297154091](https://github.com/Zain-Shykh/RAHBAR-Grounded-RAG/actions/runs/42297154091) passed `test`, `build-push`, `deploy`. The older `k08-cd-run.txt` is a rehearsal from `ci/k08-cd` using a temporary push trigger, not the final main run. See `docs/evidence/README.md` for final links.
+- **Admin enforcement on `main` is OFF** (D-014): Ahmad, the only second approver, is unavailable. The release PR has merged. The reconciliation does not infer an approval or override event from merge success alone.
 - **No LICENSE file** (decision of 2026-11-04: none for now).
 - **Not built, by design (non-goals):** `ollama-incluster`, `hosted`, hybrid retrieval (the fix for the `exact` recall of 0.5 is described in `ENGINEERING-NOTES.md` section 5), extra version pairs.
-- **Ahmad has not reviewed** ADR 0001 or the Kubernetes answers in `ENGINEERING-NOTES.md` (Q1 to Q4, Q6); they are flagged as written without him. "Both people can explain every module" is therefore only true for Zain until Ahmad reads `docs/FINAL-WALKTHROUGH.md`.
+- **Ahmad has not reviewed** ADR 0001 or the Kubernetes answers in `ENGINEERING-NOTES.md` (Q1 to Q4, Q6); they are flagged as written without him. Both people's ability to explain every module remains unconfirmed; reading `docs/FINAL-WALKTHROUGH.md` alone is not proof of understanding.
 - **Submission to Google Classroom** and the 23:59 PKT deadline are Zain's to do.
 - **Chunk count:** 981 (host build, all measurements) vs 980 (cluster build, Tesseract difference): DEV-010.
 
@@ -284,4 +284,4 @@ Every ticked box in section B rests on one of these. Nothing is ticked on memory
 2. *only one commit author*: see above.
 3. *readiness does not look like it checks for a NON-EMPTY collection*: **false positive.** `readyz` calls `IndexState.get()`, which raises `IndexUnavailable("collection")` when `col.count() == 0` (`api/app/services/index_state.py:72-79`), and `/readyz` turns that into 503 naming `collection`. Tested in `api/tests/test_index_state.py` and `test_health.py`. The checker only reads the `readyz` function body and ignores comments, so it cannot see the delegation. Not changed to satisfy a regex (D-104).
 4. *no never-cache rule found*: **false positive.** The rule is `cacheable()` (`api/app/services/cache.py:35`): only a validated, answered, from-context, non-follow-up response with valid citations is stored; tested in `api/tests/test_cache_answer.py`. The code names it `follow_up`/`cacheable`, not `is_followup`/`never_cache`, which is all the regex looks for (D-104).
-5. *time.sleep() in tests*: five uses, none to wait for a result. `test_health.py` (3) and `test_ollama_provider.py` (1) simulate a hung dependency to prove the timeout fires; `test_cache_redis_adversarial.py` waits 2.2 s for a real Redis TTL of 1 s to expire (the TTL is Redis's clock, not patchable from the test). Removing them would remove the behaviour under test.
+5. *time.sleep() in tests*: five deliberate delays, with some residual timing sensitivity. `test_health.py` (3) simulates slow dependencies for timeout/probe tests; `test_ollama_provider.py` (1) holds concurrent calls open to exercise the semaphore; `test_cache_redis_adversarial.py` waits 2.2 s for a real Redis TTL of 1 s to expire (the TTL is Redis's clock, not patchable from the test). Removing them would remove the behaviour under test.
