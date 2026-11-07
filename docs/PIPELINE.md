@@ -42,7 +42,7 @@ Unit: **words** (whitespace split, AD-10). Defaults 400 words and 50 overlap; th
 
 *Chunk counts: 981 is the host build, which every measurement in this file uses; the indexer image inside the cluster builds 980 because its Tesseract OCRs the faculty policy into 39 chunks instead of 40 (DEV-010).*
 
-**Measured at 400 / 50 on the nine real documents** (`scripts/chunk_report.py`, 2026-11-05): 981 chunks; stored words 75 644 over 73 051 source words, **storage amplification 1.04** (1.00 for the Aug 2023 rules, Prospectus, fee, grading and policy; 1.02 Academic Rules Handbook; 1.02 Student Handbook; 1.03 and 1.06 the Annual Reports). Median chunk size 23 words (faculty policy) to 117 (Annual Report 2023-24); the largest is 400.
+**Chunking was also broken on purpose** (100 words, no overlap: 1 402 chunks, recall unchanged, lists and long clauses cut; `docs/FAILURE-ANALYSIS.md`, stage B). **Measured at 400 / 50 on the nine real documents** (`scripts/chunk_report.py`, 2026-11-05): 981 chunks; stored words 75 644 over 73 051 source words, **storage amplification 1.04** (1.00 for the Aug 2023 rules, Prospectus, fee, grading and policy; 1.02 Academic Rules Handbook; 1.02 Student Handbook; 1.03 and 1.06 the Annual Reports). Median chunk size 23 words (faculty policy) to 117 (Annual Report 2023-24); the largest is 400.
 
 **Chunking experiment (phase 12, 2026-11-05).** Same nine documents, same golden set (18 questions, 16 with relevant passages), real `nomic-embed-text`, scope `current`; recall from `eval/retrieval_only.py recall` (the `retrieved` list the API builds before the model is called, scored by the same `run_eval.summarise` as the gate; raw output in `eval/tuning/`). Size and overlap are in words (AD-10), not tokens.
 

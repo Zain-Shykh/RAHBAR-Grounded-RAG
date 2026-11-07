@@ -167,12 +167,12 @@ Extra "don't" items from the text (not listed as deductions but explicitly forbi
 
 ### B8. Failure analysis [R-FAI-*]
 
-At least four of six, each with symptom, diagnosis, stage, remedy, and "how I'd have found it" with the metric or log number.
+At least four of six, each with symptom, diagnosis, stage, remedy, and "how I'd have found it" with the metric or log number. All six are done (phase 16 added B and D, `docs/specs/phase-16-failure-experiments-bd.md`).
 
 - [x] A · Extraction (index scanned PDF without OCR)
-- [ ] B · Chunking (100-token fixed, no overlap) (not run; four of six are required)
+- [x] B · Chunking (100-word chunks, no overlap, 981 to 1 402 chunks; recall unchanged, expect-text in top 5 14/16 to 13/16; `docs/evidence/k16-b-*.txt`)
 - [x] C · Retrieval (`top_k: 1` or API-only `EMBED_MODEL` change)
-- [ ] D · Prompt (remove "use supplied context") (not run; four of six are required)
+- [x] D · Prompt ("use only the evidence" removed in memory; 12 questions, intact vs D1 vs D2; D2 answers "120" credit hours from outside the cited chunk; `docs/evidence/k16-d-*.txt`)
 - [x] E · Source (remove superseded filter, ask version question)
 - [x] F · Generation (temperature 1.2)
 
@@ -260,7 +260,7 @@ Every ticked box in section B rests on one of these. Nothing is ticked on memory
 | B5 Kubernetes | `k8s/base/*`, `docs/evidence/k01` to `k05`, `k10-*`; ADR 0001; `docs/architecture/architecture.md` 4.2 and 4.7 (why Chroma is a StatefulSet) |
 | B6 observability | `api/app/logjson.py`, `api/app/routes/metrics.py`, `api/tests/test_metrics.py`; the `answered` line is in `k02-first-answer.txt` |
 | B7 evaluation | `eval/golden.yaml` (18 questions), `eval/results.json` = `eval/baseline.json`, `final-numbers-check.txt`, `eval/tests/` |
-| B8 failure analysis | `docs/FAILURE-ANALYSIS.md` (A, C, E, F; D-015) |
+| B8 failure analysis | `docs/FAILURE-ANALYSIS.md` (all six: A, C, E, F from D-015; B and D from phase 16, D-105, D-106) |
 | B9 CI/CD | `.github/workflows/ci.yml` (six jobs), `cd.yml`; `k06`, `k07`, `k08`, `k09-*` evidence; final main CD 42297154091 linked in `docs/evidence/README.md`. PR #30 failed manifests and separate PR #37 six-job success screenshots indexed in `docs/evidence/README.md`; disabled Merge button and same-PR recovery screenshots remain missing |
 | B10 docs | `docs/adr/0001` to `0004`, `PIPELINE.md`, `FAILURE-ANALYSIS.md`, `ENGINEERING-NOTES.md` (7 answers, `k11-reference-check.txt` resolves every path:line), `AI-USAGE.md`, `README.md` |
 | B11 evidence | `docs/evidence/README.md` indexes every file |

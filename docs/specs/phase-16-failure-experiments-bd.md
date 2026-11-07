@@ -5,7 +5,7 @@
 | Phase | 16 (extra RAG-lane phase, `docs/IMPLEMENTATION_PLAN.md`) |
 | Work plan task | Z-14 extended (R-FAI-B, R-FAI-D) |
 | Branch | `feat/rag-z16-failure-bd` |
-| Stage | IMPLEMENTING |
+| Stage | TESTING |
 | Started | 2026-11-07 |
 | Approved (spec and plan) | 2026-11-07, pre-approved by Zain (no gate for this run) |
 | Depends on | phase 13 (`docs/FAILURE-ANALYSIS.md`, method D-83 to D-85) |
@@ -85,7 +85,7 @@ None blocking. Decisions D-105 (B on the full corpus; 100 words = "100 tokens"),
 
 ## 11. Implementation notes
 
-(filled during implementation)
+B ran as specified (env only, full corpus, 431 s, 1 402 chunks, `rahbar_exp_b` deleted afterwards). Findings that shaped the write-up: (1) the section-level recall cannot see a chunk cut, so a stricter, throw-away "golden `expect` text in the top 5" check was added to the experiment (14/16 to 13/16); (2) the chunker is structure-aware, so 100/0 is a milder break than a blind 100-word window (stated in the document); (3) the corpus holds two copies of the Generative AI text, so a single-copy run (`ONLY_SOURCE` filter in the throw-away script) was added. D ran with two variants (D1 literal, D2 with the abstain rule also removed) on 12 questions; one D2 fallback was re-run with JSON logging to see the reason. Nothing in `api/`, `indexer/`, `eval/`, `k8s/`, `ui/`, `.github/` changed; no deviation (deviations.md untouched). Disk: 1.6 GB free before, 5.1 GB after `docker builder prune`, 5.1 GB at the end.
 
 ## 12. Test report
 
