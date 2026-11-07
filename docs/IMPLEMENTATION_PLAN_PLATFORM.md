@@ -101,8 +101,8 @@ Phase:        Final documentation reconciliation (implementation phases complete
 Stage:        Documentation reconciled on 2026-11-07 against release and source evidence.
 Branch:       docs/final-doc-reconciliation
 Spec:         User-authorized documentation scope; no implementation changes.
-Next action:  Complete the remaining R-CD-6 screenshot, human-review and Classroom submission items.
-Waiting on:   Disabled Merge button and same-PR fixed-green screenshots (R-CD-6); Ahmad's understanding and ADR/engineering-notes/walkthrough review; historical HP-2 approval confirmation; Classroom submission.
+Next action:  Human-review and Classroom submission items (R-CD-6 screenshots done, PR #39).
+Waiting on:   Ahmad's understanding and ADR/engineering-notes/walkthrough review; historical HP-2 approval confirmation; Classroom submission.
 Last updated: 2026-11-07
 ```
 
@@ -715,7 +715,7 @@ HP-5: tell Zain what Ahmad still owns (A-00 and A-12) and what he should review 
 7. The `dev` to `main` pull request (all required checks green, the one approval handled, see K9), the green `cd.yml` run on `main`, and the submission list: repository URL, the `cd.yml` run URL, the Docker Hub links, `eval/results.json` and `eval/baseline.json`.
 8. Both people can explain every part: a short walkthrough note per lane.
 
-Completed order: **K1 to K11, then Phase 15 (#35), then release (#36) and main CD 42297154091**. Classroom submission, full R-CD-6 screenshot compliance and human understanding are still unconfirmed; a written walkthrough does not establish that both people can explain the system.
+Completed order: **K1 to K11, then Phase 15 (#35), then release (#36) and main CD 42297154091**. Classroom submission, human understanding is still unconfirmed (R-CD-6 screenshots captured on PR #39); a written walkthrough does not establish that both people can explain the system.
 
 ## 7. Schedule (from Thursday 5 Nov, 22:00 PKT)
 

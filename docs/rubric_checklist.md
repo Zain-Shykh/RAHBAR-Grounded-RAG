@@ -184,7 +184,7 @@ At least four of six, each with symptom, diagnosis, stage, remedy, and "how I'd 
 - [x] `permissions:` least-privilege in every workflow.
 - [x] Secrets only from GitHub Secrets (Docker Hub token).
 - [x] CI job names added as required status checks on `main`.
-- [ ] Gate demo screenshots: failing eval gate with greyed-out merge button, then fixed green PR [R-CD-6]. Partial screenshot evidence: [PR #30 failed manifests](evidence/screenshots/k09-failing-gate.png) and [PR #37 six-job success](evidence/screenshots/k09-passing-gate.png). The first does not show a disabled Merge button; the second is a separate PR, not the recovered PR #30. Text evidence remains in `k07-gate-fail.txt`, `k09-blocked-merge.txt` and `k09-green-pr.txt`; full R-CD-6 screenshot compliance remains unresolved.
+- [x] Gate demo screenshots: failing eval gate with greyed-out Merge button, then the same PR fixed and green [R-CD-6]: [red](evidence/screenshots/k09-rcd6-eval-gate-red.jpg) and [green](evidence/screenshots/k09-rcd6-eval-gate-green.jpg), PR #39, log in `k09-rcd6-demo.txt`. Earlier partial captures: PR #30 and PR #37 (`k09-failing-gate.png`, `k09-passing-gate.png`).
 - [x] Successful main `cd.yml` run 42297154091 linked in `docs/evidence/README.md` (all three jobs verified).
 - [x] Docker Hub images visible with SHA tags.
 
@@ -212,7 +212,7 @@ At least four of six, each with symptom, diagnosis, stage, remedy, and "how I'd 
 
 - [x] UI cited answer about academic warning and hostel-curfew abstention: [answer](evidence/screenshots/k10-ui-cited-answer.png), [abstention](evidence/screenshots/k10-ui-abstention.png); supporting K10 text evidence indexed in [evidence README](evidence/README.md).
 - [x] Branch protection settings.
-- [x] Text output of a blocked merge and the fixed PR with green checks (`k09-blocked-merge.txt`, `k09-green-pr.txt`); the PR was closed unmerged. Button screenshots are missing; see unchecked B9 [R-CD-6].
+- [x] Text output of a blocked merge and the fixed PR with green checks (`k09-blocked-merge.txt`, `k09-green-pr.txt`); the PR was closed unmerged. Button screenshots: see B9 [R-CD-6] (PR #39).
 - [x] `kubectl top pods` (api, chroma, redis, ui, indexer peak) justifying requests/limits.
 - [x] `kubectl get endpoints` with 3+ IPs.
 - [x] `kubectl get hpa` with real percentage.
@@ -269,7 +269,7 @@ Every ticked box in section B rests on one of these. Nothing is ticked on memory
 ## E. Known gaps (honest list)
 
 - **UI polish (A-12) and Ahmad's onboarding (A-00) were not done.** Ahmad was unavailable for the whole window; the platform lane was built by Zain's session (platform plan K1 to K11). `ui/index.html` and `ui/nginx.conf` are the starter's.
-- **R-CD-6 screenshot gap:** PR #30 failed manifests and PR #37 six-job success are captured, but a disabled Merge button and the failed PR after recovery are not shown. UI cited-answer and abstention screenshots are now indexed in `docs/evidence/README.md`.
+- **R-CD-6:** closed by the PR #39 demo (red then green on the same PR, greyed-out Merge button). UI cited-answer and abstention screenshots are now indexed in `docs/evidence/README.md`.
 - **One commit author.** Both partners were meant to commit under their own identity; every work commit is under Zain's identity (the only other author is Ahmad on the GitHub merge commits of PR #1 and #2). `make check` warns about it.
 - **Release and main CD complete:** [PR #36](https://github.com/Zain-Shykh/RAHBAR-Grounded-RAG/pull/36) merged; [run 42297154091](https://github.com/Zain-Shykh/RAHBAR-Grounded-RAG/actions/runs/42297154091) passed `test`, `build-push`, `deploy`. The older `k08-cd-run.txt` is a rehearsal from `ci/k08-cd` using a temporary push trigger, not the final main run. See `docs/evidence/README.md` for final links.
 - **Admin enforcement on `main` is OFF** (D-014): Ahmad, the only second approver, is unavailable. The release PR has merged. The reconciliation does not infer an approval or override event from merge success alone.
