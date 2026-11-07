@@ -50,6 +50,19 @@ Submission links: [public repository](https://github.com/Zain-Shykh/RAHBAR-Groun
 | `k08-cd-run.txt` | CD run: images pushed to Docker Hub by commit SHA |
 | `k09-branch-protection.txt`, `k09-blocked-merge.txt`, `k09-green-pr.txt` | branch protection settings, a merge blocked by a red check, the same PR green and still waiting for review |
 
-## Not captured
+## Manually captured screenshots (verified 2026-11-07)
 
-UI screenshots (chat answer with a citation, an abstention) need a browser against `http://rahbar.local`; they are not in this folder. The assignment-required failed-gate/blocked-merge and fixed-green screenshots (R-CD-6) are also missing; the K7/K9 text captures do not satisfy the screenshot requirement. Ahmad's ADR 0001, engineering-notes and walkthrough review is unconfirmed.
+These PNGs were captured manually from real GitHub/RAHBAR interfaces. Codex visually inspected all four without editing them.
+
+| Image | Shows and supporting text evidence |
+| --- | --- |
+| [Failed manifests job](screenshots/k09-failing-gate.png) | PR #30's failed `manifests` job, Actions run #26 ([42269897845](https://github.com/Zain-Shykh/RAHBAR-Grounded-RAG/actions/runs/42269897845)); UI Deployment schema validation fails and the process exits 2. The screenshot does not show a Merge button. PR/run association and refused merge are recorded in [K9 blocked merge](k09-blocked-merge.txt); settings in [K9 branch protection](k09-branch-protection.txt). |
+| [Successful six-job CI](screenshots/k09-passing-gate.png) | PR #37, Actions run #42: lint, test, manifests, build, scan and e2e-eval all successful. This is a separate PR, not PR #30 after recovery. PR #30's actual fixed state is preserved in [K9 green PR](k09-green-pr.txt). |
+| [Cited academic-warning answer](screenshots/k10-ui-cited-answer.png) | Real RAHBAR chat UI asks what CGPA puts a student on academic warning; answer `2.00`, with a source citing the June 2026 academic rules handbook, section 5.4, page 24. UI labels it “From the documents” and cache hit. Supporting runtime evaluation: [K10 eval gate](k10-eval-gate.txt) and [per-question results](k10-eval-results.json). |
+| [Hostel-curfew abstention](screenshots/k10-ui-abstention.png) | Real RAHBAR chat UI asks the campus-hostel curfew time and responds “The documents in the corpus do not cover this question.” UI labels it “Not covered by the documents” and cache miss. Supporting runtime evaluation: [K10 eval gate](k10-eval-gate.txt) and [per-question results](k10-eval-results.json). |
+
+The K10 text evidence supports runtime behavior; it is not a capture log for these manually taken screenshots.
+
+## Still unresolved
+
+R-CD-6's disabled Merge button and fixed-green state of the same failed PR are not shown by this screenshot pair. The original K9 text captures remain available, but full screenshot compliance is unresolved. Ahmad's ADR 0001, engineering-notes and walkthrough review is unconfirmed.

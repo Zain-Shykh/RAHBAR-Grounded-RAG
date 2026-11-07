@@ -101,8 +101,8 @@ Phase:        Final documentation reconciliation (implementation phases complete
 Stage:        Documentation reconciled on 2026-11-07 against release and source evidence.
 Branch:       docs/final-doc-reconciliation
 Spec:         User-authorized documentation scope; no implementation changes.
-Next action:  Complete the outstanding screenshot, human-review and Classroom submission items.
-Waiting on:   Real UI and gate screenshots; Ahmad's understanding and ADR/engineering-notes/walkthrough review; historical HP-2 approval confirmation; Classroom submission.
+Next action:  Complete the remaining R-CD-6 screenshot, human-review and Classroom submission items.
+Waiting on:   Disabled Merge button and same-PR fixed-green screenshots (R-CD-6); Ahmad's understanding and ADR/engineering-notes/walkthrough review; historical HP-2 approval confirmation; Classroom submission.
 Last updated: 2026-11-07
 ```
 
@@ -423,7 +423,7 @@ None.
 
 **Status:** DONE (#25) · **Branch:** `ci/k06-ci-core` · **Est:** 3 h · **Priority:** P0
 
-**Reconciliation (2026-11-07):** Merged status is confirmed by the dashboard PR and section 4 evidence. The unchecked acceptance boxes below are retained from the original checklist; they are not proof that implementation is pending and have not been retroactively ticked. Screenshot requirements remain unfulfilled.
+**Reconciliation (2026-11-07):** Merged status is confirmed by the dashboard PR and section 4 evidence. The unchecked acceptance boxes below are retained from the original checklist; they are not proof that implementation is pending and have not been retroactively ticked. Four manually captured screenshots are indexed in `docs/evidence/README.md`: PR #30 failed manifests, separate PR #37 six-job success, UI cited answer and UI abstention. R-CD-6 remains incomplete: no disabled Merge button or same-PR recovered-state screenshot.
 
 ### Objective
 A pull request runs five jobs in GitHub Actions and any of them can fail it: `lint`, `test`, `manifests`, `build`, `scan`.
@@ -564,7 +564,7 @@ Tell Zain the run URL and the Docker Hub repository links: both go in the submis
 
 **Status:** DONE (#31) · **Branch:** `docs/k09-gate-demo` · **Est:** 1.5 h · **Priority:** P0
 
-**Reconciliation (2026-11-07):** Merged status is confirmed by the dashboard PR and section 4 evidence. The unchecked acceptance boxes below are retained from the original checklist; they are not proof that implementation is pending and have not been retroactively ticked. Screenshot requirements remain unfulfilled.
+**Reconciliation (2026-11-07):** Merged status is confirmed by the dashboard PR and section 4 evidence. The unchecked acceptance boxes below are retained from the original checklist; they are not proof that implementation is pending and have not been retroactively ticked. Four manually captured screenshots are indexed in `docs/evidence/README.md`: PR #30 failed manifests, separate PR #37 six-job success, UI cited answer and UI abstention. R-CD-6 remains incomplete: no disabled Merge button or same-PR recovered-state screenshot.
 
 ### Objective
 `main` accepts changes only through a pull request with passing required checks and one approval, and the repository contains the evidence: the settings, a merge button blocked by a failing check, and the same pull request green after the fix.
@@ -651,7 +651,7 @@ make eval
 ```
 
 ### Hand-off
-The UI chat screenshots (an answer with a citation, an abstention, through `http://rahbar.local`) were not captured by this session (no browser session); they still need a browser. Zain to take them, or K11/Phase 15 if a browser is available.
+The original K10 session did not capture UI screenshots. Current evidence now includes manually captured real RAHBAR UI screenshots of a cited academic-warning answer and a hostel-curfew abstention, indexed in `docs/evidence/README.md`. The images do not display the browser address bar.
 
 ---
 
@@ -714,7 +714,7 @@ HP-5: tell Zain what Ahmad still owns (A-00 and A-12) and what he should review 
 7. The `dev` to `main` pull request (all required checks green, the one approval handled, see K9), the green `cd.yml` run on `main`, and the submission list: repository URL, the `cd.yml` run URL, the Docker Hub links, `eval/results.json` and `eval/baseline.json`.
 8. Both people can explain every part: a short walkthrough note per lane.
 
-Completed order: **K1 to K11, then Phase 15 (#35), then release (#36) and main CD 42297154091**. Classroom submission, screenshots and human understanding are still unconfirmed; a written walkthrough does not establish that both people can explain the system.
+Completed order: **K1 to K11, then Phase 15 (#35), then release (#36) and main CD 42297154091**. Classroom submission, full R-CD-6 screenshot compliance and human understanding are still unconfirmed; a written walkthrough does not establish that both people can explain the system.
 
 ## 7. Schedule (from Thursday 5 Nov, 22:00 PKT)
 
