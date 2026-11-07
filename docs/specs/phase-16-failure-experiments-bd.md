@@ -5,7 +5,7 @@
 | Phase | 16 (extra RAG-lane phase, `docs/IMPLEMENTATION_PLAN.md`) |
 | Work plan task | Z-14 extended (R-FAI-B, R-FAI-D) |
 | Branch | `feat/rag-z16-failure-bd` |
-| Stage | TESTING |
+| Stage | MERGED |
 | Started | 2026-11-07 |
 | Approved (spec and plan) | 2026-11-07, pre-approved by Zain (no gate for this run) |
 | Depends on | phase 13 (`docs/FAILURE-ANALYSIS.md`, method D-83 to D-85) |
@@ -98,3 +98,5 @@ B ran as specified (env only, full corpus, 431 s, 1 402 chunks, `rahbar_exp_b` d
 | Gate | Date | Approved by | Notes |
 | --- | --- | --- | --- |
 | Spec and plan | 2026-11-07 | Zain (pre-approved) | |
+| Tester verdict PASS | 2026-11-07 | independent subagent | rounds: 2 |
+| Merged | 2026-11-07 | Claude, pre-approved by Zain | PR #41 |

@@ -76,7 +76,7 @@ Hybrid retrieval, the `hosted` provider, the in-cluster Ollama mode, authenticat
 | 13 | Failure analysis | Z-14 | Sun 11:00 | DONE (DEV-007 absorbed) | #18 |
 | 14 | Documents and ADRs | Z-15 | Sun 14:00 | DONE | #19 |
 | 15 | Integration support and final verification | joint | Sun 14:00 to 18:00 | DONE (DEV-014; #35 merged to dev, release #36 merged to main; main CD passed) | #34, #35 |
-| 16 | Failure experiments B and D (extra) | Z-14 extended | Sat 7 Nov | DONE | #PR |
+| 16 | Failure experiments B and D (extra) | Z-14 extended | Sat 7 Nov | DONE | #41 |
 
 Hours spent so far (fill in at each phase end): planned 37.5 h, actual `____`.
 
@@ -84,7 +84,7 @@ Hours spent so far (fill in at each phase end): planned 37.5 h, actual `____`.
 
 ```
 Phase:        Final documentation reconciliation (implementation phases complete).
-Stage:        Documentation reconciled on 2026-11-07 against release and source evidence. Extra phase 16 (failure experiments B and D) DONE on 2026-11-07 (PR #PR).
+Stage:        Documentation reconciled on 2026-11-07 against release and source evidence. Extra phase 16 (failure experiments B and D) DONE on 2026-11-07 (PR #41).
 Branch:       docs/final-doc-reconciliation
 Spec:         User-authorized documentation scope; no implementation changes.
 Next action:  Complete the outstanding screenshot, human-review and Classroom submission items.
@@ -214,7 +214,7 @@ Append-only, newest at the bottom. One line per event: date, phase, what happene
 2026-11-07  P16  B: 100/0 indexer run on the full corpus into rahbar_exp_b: 1402 chunks (431 s) against 981; recall@3 = recall@5 = 0.875 on both (section-level scoring cannot see a cut); golden expect text in top 5: 14/16 to 13/16; 7 mid-sentence cuts; the 6-item list question answered with the first group only. docs/evidence/k16-b-*.txt.
 2026-11-07  P16  D: 12 questions x intact, D1 (Use ONLY removed), D2 (abstain rule removed too), llama3.2:3b. D1: no visible shift. D2: outside-knowledge answer (trimester), "120" credit hours not in the cited chunk, "no information" flagged answered (Harvard), 1 fallback; floor-protected golden abstention stays 1.0. docs/evidence/k16-d-*.txt.
 2026-11-07  P16  Restore: rahbar_exp_b deleted, recall@3 = recall@5 = 0.875 on the live index (k16-restore.txt), git diff dev -- api indexer eval empty, check_submission 6 of 6 stages, check_numbers 0 mismatches. Ollama and dev containers stopped.
-2026-11-07  P16  DONE (#PR). FAILURE-ANALYSIS.md has all six stages; rubric B8 ticked.
+2026-11-07  P16  DONE (#41). FAILURE-ANALYSIS.md has all six stages; rubric B8 ticked.
 2026-11-07  DOCS  Documentation reconciliation: PR #35 merged to dev (f3bc393), release #36 merged to main (f59cd9b); main CD 42297154091 test/build-push/deploy success verified through GitHub. Original log entries and unticked historical criteria retained; missing screenshots and human review remain unresolved. Release/phase status, source-based factual summaries and unsupported completion claims corrected on docs/final-doc-reconciliation; historical HP-2 approval and Classroom submission remain unconfirmed.
 ```
 
@@ -967,7 +967,7 @@ Final status of H-1 to H-10 recorded in section 3.
 
 ## Phase 16: Failure experiments B and D (extra, Z-14 extended)
 
-**Status:** DONE (#PR) · **Branch:** `feat/rag-z16-failure-bd` · **Spec:** `docs/specs/phase-16-failure-experiments-bd.md` · **Priority:** P1
+**Status:** DONE (#41) · **Branch:** `feat/rag-z16-failure-bd` · **Spec:** `docs/specs/phase-16-failure-experiments-bd.md` · **Priority:** P1
 
 ### Objective
 Run the two experiments of R-FAI that phase 13 left out, B (chunking) and D (prompt), with the same method and rigour (no default changed; env var, in-memory patch, separate collection), and put them in `docs/FAILURE-ANALYSIS.md` so all six stages are measured.
