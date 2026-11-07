@@ -1237,3 +1237,25 @@ Entry template:
 - Decision: A. Decided by: Claude, pre-approved by Zain.
 - Decided on: 2026-11-07
 - 2026-11-07: phase 15: D-104 added; all PROVISIONAL and OPEN entries closed as DECIDED.
+
+### D-105 Experiment B: full corpus, words as the chunk unit
+- Status: DECIDED
+- Raised: 2026-11-07 by Claude
+- Area: eval
+- Related: R-FAI-B, AD-10, D-83, D-84, `docs/specs/phase-16-failure-experiments-bd.md`
+- Question: index which corpus at "100 tokens, no overlap", and what is a token here?
+- Options: A. Full corpus, env only (`CHUNK_SIZE=100 CHUNK_OVERLAP=0`), separate collection `rahbar_exp_b`; 100 words, because the chunker's unit is words (AD-10). B. A subset. C. Add a token counter. 
+- Claude recommends: A. Counts and recall compare 1:1 with the live index; the chunker already reads the two env vars; no new code.
+- Decision: A. Decided by: Claude, pre-approved by Zain.
+- Decided on: 2026-11-07
+
+### D-106 Experiment D: in-memory patch of the system prompt
+- Status: DECIDED
+- Raised: 2026-11-07 by Claude
+- Area: eval
+- Related: R-FAI-D, D-83, `api/app/services/prompt.py`
+- Question: how to remove the "use only the supplied context" instruction without touching a default?
+- Options: A. Throw-away script sets `app.services.prompt.SYSTEM` in memory before calling the real `answer_question`. B. Env flag in the API (new code, rejected by D-83). C. Edit and `git checkout`.
+- Claude recommends: A. Same pipeline, validator and provider as production; nothing to revert.
+- Decision: A. Decided by: Claude, pre-approved by Zain.
+- Decided on: 2026-11-07
