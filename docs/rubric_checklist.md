@@ -184,7 +184,7 @@ At least four of six, each with symptom, diagnosis, stage, remedy, and "how I'd 
 - [x] `permissions:` least-privilege in every workflow.
 - [x] Secrets only from GitHub Secrets (Docker Hub token).
 - [x] CI job names added as required status checks on `main`.
-- [ ] Gate demo screenshots: failing eval gate with greyed-out merge button, then fixed green PR [R-CD-6]. Text evidence exists (`k07-gate-fail.txt`, `k09-blocked-merge.txt`, `k09-green-pr.txt`); the required screenshots have not been captured.
+- [ ] Gate demo screenshots: failing eval gate with greyed-out merge button, then fixed green PR [R-CD-6]. Partial screenshot evidence: [PR #30 failed manifests](evidence/screenshots/k09-failing-gate.png) and [PR #37 six-job success](evidence/screenshots/k09-passing-gate.png). The first does not show a disabled Merge button; the second is a separate PR, not the recovered PR #30. Text evidence remains in `k07-gate-fail.txt`, `k09-blocked-merge.txt` and `k09-green-pr.txt`; full R-CD-6 screenshot compliance remains unresolved.
 - [x] Successful main `cd.yml` run 42297154091 linked in `docs/evidence/README.md` (all three jobs verified).
 - [x] Docker Hub images visible with SHA tags.
 
@@ -210,6 +210,7 @@ At least four of six, each with symptom, diagnosis, stage, remedy, and "how I'd 
 
 ### B11. Evidence screenshots/outputs in `docs/evidence/`
 
+- [x] UI cited answer about academic warning and hostel-curfew abstention: [answer](evidence/screenshots/k10-ui-cited-answer.png), [abstention](evidence/screenshots/k10-ui-abstention.png); supporting K10 text evidence indexed in [evidence README](evidence/README.md).
 - [x] Branch protection settings.
 - [x] Text output of a blocked merge and the fixed PR with green checks (`k09-blocked-merge.txt`, `k09-green-pr.txt`); the PR was closed unmerged. Button screenshots are missing; see unchecked B9 [R-CD-6].
 - [x] `kubectl top pods` (api, chroma, redis, ui, indexer peak) justifying requests/limits.
@@ -260,7 +261,7 @@ Every ticked box in section B rests on one of these. Nothing is ticked on memory
 | B6 observability | `api/app/logjson.py`, `api/app/routes/metrics.py`, `api/tests/test_metrics.py`; the `answered` line is in `k02-first-answer.txt` |
 | B7 evaluation | `eval/golden.yaml` (18 questions), `eval/results.json` = `eval/baseline.json`, `final-numbers-check.txt`, `eval/tests/` |
 | B8 failure analysis | `docs/FAILURE-ANALYSIS.md` (A, C, E, F; D-015) |
-| B9 CI/CD | `.github/workflows/ci.yml` (six jobs), `cd.yml`; `k06`, `k07`, `k08`, `k09-*` evidence; final main CD 42297154091 linked in `docs/evidence/README.md`. Gate demos are saved as `gh` command output, not screenshots |
+| B9 CI/CD | `.github/workflows/ci.yml` (six jobs), `cd.yml`; `k06`, `k07`, `k08`, `k09-*` evidence; final main CD 42297154091 linked in `docs/evidence/README.md`. PR #30 failed manifests and separate PR #37 six-job success screenshots indexed in `docs/evidence/README.md`; disabled Merge button and same-PR recovery screenshots remain missing |
 | B10 docs | `docs/adr/0001` to `0004`, `PIPELINE.md`, `FAILURE-ANALYSIS.md`, `ENGINEERING-NOTES.md` (7 answers, `k11-reference-check.txt` resolves every path:line), `AI-USAGE.md`, `README.md` |
 | B11 evidence | `docs/evidence/README.md` indexes every file |
 | B12 gate | `make test && make lint && make manifests` green; `make check`: 164 passed, 5 warnings, 0 failures (explained below); `final-history-scan.txt`; `k11-clean-clone.txt` |
@@ -268,7 +269,7 @@ Every ticked box in section B rests on one of these. Nothing is ticked on memory
 ## E. Known gaps (honest list)
 
 - **UI polish (A-12) and Ahmad's onboarding (A-00) were not done.** Ahmad was unavailable for the whole window; the platform lane was built by Zain's session (platform plan K1 to K11). `ui/index.html` and `ui/nginx.conf` are the starter's.
-- **No UI screenshots** (chat answer with a citation, an abstention) and the gate demos are text output from `gh`, not screenshots. `docs/evidence/README.md` says so.
+- **R-CD-6 screenshot gap:** PR #30 failed manifests and PR #37 six-job success are captured, but a disabled Merge button and the failed PR after recovery are not shown. UI cited-answer and abstention screenshots are now indexed in `docs/evidence/README.md`.
 - **One commit author.** Both partners were meant to commit under their own identity; every work commit is under Zain's identity (the only other author is Ahmad on the GitHub merge commits of PR #1 and #2). `make check` warns about it.
 - **Release and main CD complete:** [PR #36](https://github.com/Zain-Shykh/RAHBAR-Grounded-RAG/pull/36) merged; [run 42297154091](https://github.com/Zain-Shykh/RAHBAR-Grounded-RAG/actions/runs/42297154091) passed `test`, `build-push`, `deploy`. The older `k08-cd-run.txt` is a rehearsal from `ci/k08-cd` using a temporary push trigger, not the final main run. See `docs/evidence/README.md` for final links.
 - **Admin enforcement on `main` is OFF** (D-014): Ahmad, the only second approver, is unavailable. The release PR has merged. The reconciliation does not infer an approval or override event from merge success alone.
