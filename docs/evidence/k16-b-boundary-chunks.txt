@@ -1,0 +1,86 @@
+$ for q in "According to the Student Handbook's policy on Generative AI tools, what counts as unacceptable use?" "Why should students not put their work into generative AI platforms, according to the Academic Rules Handbook?" "Where must an AI-generated image or figure be referenced in an assignment?"; do .venv/bin/python /tmp/k16/showq.py "$q" 2 "never-matches"; done
+### According to the Student Handbook's policy on Generative AI tools, what counts as unacceptable use?
+rank 1 0.873 academic-rules-handbook-jun-2026-p045-c227 [5. Unacceptable Uses of Generative AI Tools] 62w  contains: []
+   5.
+   Unacceptable Uses of Generative AI Tools
+   The unacceptable use of Generative AI software broadly falls in line
+   with other examples of academic misconduct that exist outside of
+   Generative AI space.
+   Students using the technology to simply
+   circumvent the requirements of an assessment or using it to create
+   entire assessments that they then disguise as their own original work
+   is not acceptable.
+
+rank 2 0.873 student-handbook-jun-2026-p052-c282 [5. Unacceptable Uses of Generative AI Tools] 62w  contains: []
+   5.
+   Unacceptable Uses of Generative AI Tools
+   The unacceptable use of Generative AI software broadly falls in
+   line with other examples of academic misconduct that exist
+   outside of Generative AI space.
+   Students using the technology to
+   simply circumvent the requirements of an assessment or using it
+   to create entire assessments that they then disguise as their own
+   original work is not acceptable.
+
+rank 3 0.866 academic-rules-handbook-jun-2026-p045-c228 [5. Unacceptable Uses of Generative AI Tools] 72w  contains: []
+rank 4 0.865 student-handbook-jun-2026-p052-c283 [5. Unacceptable Uses of Generative AI Tools] 76w  contains: []
+rank 5 0.858 academic-rules-handbook-jun-2026-p047-c235 [5. Unacceptable Uses of Generative AI Tools] 37w  contains: []
+### Why should students not put their work into generative AI platforms, according to the Academic Rules Handbook?
+rank 1 0.831 student-handbook-jun-2026-p052-c281 [4. Acceptable Uses of Generative AI Tools] 77w  contains: []
+   If work uploaded to Generative AI
+   platforms is used to train the dataset from which it creates new
+   responses for others, your work might be used in another’s work,
+   thereby risking plagiarism.
+   Therefore, students should not upload
+   their work to sites that do not have clear privacy policies and opt
+   outs.
+   Equally, it is not permissible to upload any personal or
+   sensitive data, or University materials (e.g.
+   lecture slides, teaching
+   content, etc.) onto these systems without permission.
+
+rank 2 0.824 academic-rules-handbook-jun-2026-p045-c226 [4. Acceptable Uses of Generative AI Tools] 52w  contains: []
+   used in another’s work, thereby risking plagiarism. Therefore, students
+   should not upload their work to sites that do not have clear privacy
+   policies and opt outs. Equally, it is not permissible to upload any
+   personal or sensitive data, or University materials (e.g. lecture slides,
+   teaching content, etc.) onto these systems without permission.
+
+rank 3 0.822 student-handbook-jun-2026-p054-c292 [5. Unacceptable Uses of Generative AI Tools] 59w  contains: []
+rank 4 0.821 academic-rules-handbook-jun-2026-p045-c228 [5. Unacceptable Uses of Generative AI Tools] 72w  contains: []
+rank 5 0.820 student-handbook-jun-2026-p052-c283 [5. Unacceptable Uses of Generative AI Tools] 76w  contains: []
+### Where must an AI-generated image or figure be referenced in an assignment?
+rank 1 0.796 academic-rules-handbook-jun-2026-p052-c249 [8. Referencing Generative AI Tools] 93w  contains: []
+   It is unlikely that students will need to
+   directly quote content from AI-generated sources very often due to
+   the limitations of Generative AI tools.
+   However, students must critically
+   evaluate any content generated using AI.
+   In certain circumstances, or
+   for specific content types, referencing may be required.
+   For example,
+   part of the assessment may involve using AI to generate text that the
+   student then critiques.
+   In these instances, if students' work includes a
+   verbatim quotation, embedded image, or figure, this should be
+   referenced within the text or content of the assignment and in the
+
+rank 2 0.792 student-handbook-jun-2026-p058-c313 [8. Referencing Generative AI Tools] 95w  contains: []
+   It is
+   unlikely that students will need to directly quote content from AIgenerated sources very often due to the limitations of Generative
+   AI tools.
+   However, students must critically evaluate any content
+   generated using AI.
+   In certain circumstances, or for specific
+   content types, referencing may be required.
+   For example, part of
+   the assessment may involve using AI to generate text that the
+   student then critiques.
+   In these instances, if students' work
+   includes a verbatim quotation, embedded image, or figure, this
+   should be referenced within the text or content of the assignment
+   and in the reference list.
+
+rank 3 0.792 student-handbook-jun-2026-p059-c317 [8. Referencing Generative AI Tools] 95w  contains: []
+rank 4 0.778 student-handbook-jun-2026-p058-c314 [8. Referencing Generative AI Tools] 21w  contains: []
+rank 5 0.778 student-handbook-jun-2026-p059-c318 [8. Referencing Generative AI Tools] 21w  contains: []

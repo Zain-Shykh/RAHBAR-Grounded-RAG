@@ -1,0 +1,11 @@
+$ .venv/bin/python /tmp/k16/hist.py rahbar rahbar_exp_b
+rahbar: chunks=981 words mean=77.1 median=31 max=400
+  words-per-chunk histogram: {'1-10': 85, '11-25': 305, '26-50': 246, '51-75': 67, '76-100': 61, '101-200': 99, '201-400': 118, '401-+': 0}
+  chunks ending in sentence punctuation (. ! ? : ;): 677 of 981 (69.0%)
+  collection metadata: {'chunk_count': 981, 'chunk_size': 400, 'chunk_overlap': 50, 'embed_model': 'nomic-embed-text'}
+  per source: {'academic-rules-handbook-jun-2026.pdf': 238, 'annual-report-2019-20.pdf': 65, 'annual-report-2023-24.pdf': 182, 'faculty-entrepreneurship-and-technical-start-ups-policy.pdf': 40, 'fee-structure-page.html': 7, 'grading-page.html': 8, 'prospectus-2026-academic-rules-and-regulations.pdf': 44, 'student-handbook-jun-2026.pdf': 245, 'undergraduate-academic-rules-aug-2023.pdf': 152}
+rahbar_exp_b: chunks=1402 words mean=52.1 median=44.0 max=100
+  words-per-chunk histogram: {'1-10': 93, '11-25': 337, '26-50': 300, '51-75': 167, '76-100': 505, '101-200': 0, '201-400': 0, '401-+': 0}
+  chunks ending in sentence punctuation (. ! ? : ;): 1069 of 1402 (76.2%)
+  collection metadata: {'chunk_count': 1402, 'chunk_size': 100, 'chunk_overlap': 0, 'embed_model': 'nomic-embed-text'}
+  per source: {'academic-rules-handbook-jun-2026.pdf': 272, 'annual-report-2019-20.pdf': 117, 'annual-report-2023-24.pdf': 394, 'faculty-entrepreneurship-and-technical-start-ups-policy.pdf': 47, 'fee-structure-page.html': 9, 'grading-page.html': 11, 'prospectus-2026-academic-rules-and-regulations.pdf': 58, 'student-handbook-jun-2026.pdf': 336, 'undergraduate-academic-rules-aug-2023.pdf': 158}

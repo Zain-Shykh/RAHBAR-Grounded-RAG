@@ -1,0 +1,38 @@
+$ echo "## baseline 400/50"; CHROMA_COLLECTION=rahbar .venv/bin/python /tmp/k16/cover.py; echo; echo "## experiment 100/0"; CHROMA_COLLECTION=rahbar_exp_b .venv/bin/python /tmp/k16/cover.py
+## baseline 400/50
+  q01 expect='5 courses'                  first chunk containing it: 1
+  q02 expect='50%'                        first chunk containing it: 1
+  q03 expect='TEN (10)'                   first chunk containing it: 1
+  q04 expect='entire assignment'          first chunk containing it: 1
+  q05 expect='within two days'            first chunk containing it: 1
+  q06 expect='NOT allowed'                first chunk containing it: 1
+  q07 expect='60%'                        first chunk containing it: 1
+  q08 expect='Pass'                       first chunk containing it: 1
+  q09 expect='19'                         first chunk containing it: 1
+  q10 expect='six'                        first chunk containing it: None
+  q11 expect='75%'                        first chunk containing it: 1
+  q12 expect='makeup week'                first chunk containing it: 1
+  q13 expect='last day of classes'        first chunk containing it: 1
+  q14 expect='100%'                       first chunk containing it: None
+  q15 expect='12,000'                     first chunk containing it: 1
+  q18 expect='100%'                       first chunk containing it: 1
+expect-in-top3 14/16 = 0.875   expect-in-top5 14/16 = 0.875
+
+## experiment 100/0
+  q01 expect='5 courses'                  first chunk containing it: 1
+  q02 expect='50%'                        first chunk containing it: 1
+  q03 expect='TEN (10)'                   first chunk containing it: 1
+  q04 expect='entire assignment'          first chunk containing it: None
+  q05 expect='within two days'            first chunk containing it: 1
+  q06 expect='NOT allowed'                first chunk containing it: 1
+  q07 expect='60%'                        first chunk containing it: 1
+  q08 expect='Pass'                       first chunk containing it: 1
+  q09 expect='19'                         first chunk containing it: 2
+  q10 expect='six'                        first chunk containing it: None
+  q11 expect='75%'                        first chunk containing it: 1
+  q12 expect='makeup week'                first chunk containing it: 1
+  q13 expect='last day of classes'        first chunk containing it: 1
+  q14 expect='100%'                       first chunk containing it: None
+  q15 expect='12,000'                     first chunk containing it: 1
+  q18 expect='100%'                       first chunk containing it: 1
+expect-in-top3 13/16 = 0.812   expect-in-top5 13/16 = 0.812

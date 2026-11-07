@@ -36,6 +36,24 @@ Submission links: [public repository](https://github.com/Zain-Shykh/RAHBAR-Groun
 | `k10-networkpolicy-proof.txt` | default-deny proof re-run on the final deployment |
 | `k10-eval-gate.txt`, `k10-eval-results.json` | `make eval` through the Ingress: gate passed, numbers against `eval/baseline.json`; per-question results |
 
+## Failure experiments B and D (phase 16, 2026-11-07, host stack)
+
+Run on the dev Chroma (`:8100`) and host Ollama against the 981-chunk `rahbar` index and a throw-away `rahbar_exp_b` collection (deleted afterwards). The experiment scripts were throw-away (D-83) and are not in the repository; the command lines show what was run. Where a file says `grep` in its command, the echo of the system prompt was filtered out of the JSON lines; the JSON lines themselves are unedited.
+
+| File | Shows |
+| --- | --- |
+| `k16-b-indexer-log.txt` | the experiment indexer's start, `chunked total` (1 402 chunks), `embedded` and `indexer finished` lines |
+| `k16-d-cited-chunks.txt` | text of chunks cited in D (no "120" in them; the 80% clause; the preamble) |
+| `k16-b-chunk-stats.txt` | chunk counts, words-per-chunk histogram, collection metadata, per source: 400/50 against 100/0 |
+| `k16-b-recall.txt` | `eval/retrieval_only.py recall` on both collections (recall@3 and @5 0.875 on both) |
+| `k16-b-expect-coverage.txt` | the golden `expect` text in the top 5: 14/16 against 13/16 |
+| `k16-b-boundary-chunks.txt` | the retrieved chunk text for three questions whose answer sits on a chunk boundary (100/0) |
+| `k16-b-answers.txt`, `k16-b-single-copy.txt` | the real pipeline's answers and citations on both collections, and with retrieval limited to one copy of the text |
+| `k16-d-intact.txt`, `k16-d-d1.txt`, `k16-d-d2.txt` | the same 12 questions with the intact prompt, with "Use ONLY the evidence" removed (D1), and with the abstain rule removed as well (D2); each file starts with the patched system prompt |
+| `k16-d-d2-fallback-log.txt` | a D2 rerun with JSON logging: `bad_citation` retry, then an answer with outside knowledge |
+| `k16-d-golden-abstain-intact.txt`, `k16-d-golden-abstain-d2.txt` | golden q16, q17, q18 under both prompts |
+| `k16-restore.txt` | experiment collection deleted, recall equal to `eval/baseline.json`, `git diff dev -- api indexer eval` empty |
+
 ## Earlier phases
 
 | File | Shows |
