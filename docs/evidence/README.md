@@ -42,6 +42,8 @@ Run on the dev Chroma (`:8100`) and host Ollama against the 981-chunk `rahbar` i
 
 | File | Shows |
 | --- | --- |
+| `k16-b-indexer-log.txt` | the experiment indexer's start, `chunked total` (1 402 chunks), `embedded` and `indexer finished` lines |
+| `k16-d-cited-chunks.txt` | text of chunks cited in D (no "120" in them; the 80% clause; the preamble) |
 | `k16-b-chunk-stats.txt` | chunk counts, words-per-chunk histogram, collection metadata, per source: 400/50 against 100/0 |
 | `k16-b-recall.txt` | `eval/retrieval_only.py recall` on both collections (recall@3 and @5 0.875 on both) |
 | `k16-b-expect-coverage.txt` | the golden `expect` text in the top 5: 14/16 against 13/16 |

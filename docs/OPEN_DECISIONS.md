@@ -269,7 +269,7 @@ Entry template:
 - Question: Four of A to F are required. Which four?
 - Claude recommends: A (scanned PDF without OCR), C (change `EMBED_MODEL` on the API only, which doubles as the pin demo), E (remove the superseded filter, version question), F (temperature 1.2). Chosen because each has a clear metric. B and D are cheap extras if time remains.
 - Blocks: FAILURE-ANALYSIS.md.
-- Decision: A, C, E and F as recommended (A: scanned policy without OCR; C: `EMBED_MODEL` on the API only, which doubles as the pin demonstration; E: superseded filter removed; F: `TEMPERATURE=1.2`). B and D are not run. Decided by: Claude, pre-approved by Zain.
+- Decision: A, C, E and F as recommended (A: scanned policy without OCR; C: `EMBED_MODEL` on the API only, which doubles as the pin demonstration; E: superseded filter removed; F: `TEMPERATURE=1.2`). B and D are not run. Decided by: Claude, pre-approved by Zain. Stages B and D were run later, in phase 16 (D-105, D-106).
 - Decided on: 2026-11-05
 
 ### D-016 Duplicate content: Prospectus 2026 vs Handbook 2026

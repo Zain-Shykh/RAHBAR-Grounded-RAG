@@ -27,7 +27,7 @@ Run the two missing experiments of `docs/requirements.md` 5.5, B (chunking) and 
 
 1. B: real indexer, full corpus, `CHUNK_SIZE=100 CHUNK_OVERLAP=0 CHROMA_COLLECTION=rahbar_exp_b` (env only). Compare with the live 400/50 index.
 2. D: throw-away script that patches `app.services.prompt.SYSTEM` in memory (removes the "use only the evidence" instruction), runs the real `answer_question` pipeline; compare with the intact prompt on the same questions.
-3. Docs: `FAILURE-ANALYSIS.md` (B and D, six of six), `rubric_checklist.md`, `PIPELINE.md`, `ENGINEERING-NOTES.md`, `FINAL-WALKTHROUGH.md`, `AI-USAGE.md`, plans; raw captures `docs/evidence/k16-*.txt`.
+3. Docs: `FAILURE-ANALYSIS.md` (B and D, six of six), `rubric_checklist.md`, `PIPELINE.md`, `AI-USAGE.md`, evidence index, plans (`ENGINEERING-NOTES.md` and `FINAL-WALKTHROUGH.md` hold no four-of-six statement and were left as they are); raw captures `docs/evidence/k16-*.txt`.
 
 **Out of scope**
 
@@ -89,7 +89,9 @@ B ran as specified (env only, full corpus, 431 s, 1 402 chunks, `rahbar_exp_b` d
 
 ## 12. Test report
 
-(filled by the tester)
+| Round | Date | Command | Result | Notes |
+| --- | --- | --- | --- | --- |
+| 1 | 2026-11-07 | make test, make lint, check_submission (6 of 6), check_numbers, check_refs, diff against dev, number cross-check against `k16-*.txt` | FAIL (docs only) | AC-1..AC-5 pass; D1..D10: unsupported "q18 held in all variants" (D1 not run), the D2 count overstated (Harvard and GPA are not outside knowledge), "0.85 to 0.91" contradicted, France timing, latency range, claims without a saved capture (indexer log, cited chunks), n=1 caveat missing for B, stale D-015 line, DONE before the PR existed. All fixed; indexer log and cited chunks saved as evidence. |
 
 ## 13. Sign-offs
 
