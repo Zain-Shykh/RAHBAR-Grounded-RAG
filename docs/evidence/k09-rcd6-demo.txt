@@ -1,0 +1,10 @@
+# R-CD-6 demo: one PR (#39, base main) fails the eval gate, then is fixed. Closed unmerged, branch deleted.
+$ git diff origin/main -- k8s/overlays/ci/kustomization.yaml     (commit cb3b995, the only change)
++        RETRIEVER: "stub"
+# Run 42383649218 on cb3b995: e2e-eval failure, lint/test/manifests/build/scan success.
+# Screenshot: screenshots/k09-rcd6-eval-gate-red.jpg  (e2e-eval failing, "Merging is blocked", Merge pull request button greyed out)
+$ git revert HEAD    (commit 28265ea, same PR #39)
+# Run 42384111266 on 28265ea: all six checks success.
+$ gh pr view 39 --json mergeStateStatus,reviewDecision
+{"m":"BLOCKED","r":"REVIEW_REQUIRED"}
+# Screenshot: screenshots/k09-rcd6-eval-gate-green.jpg  ("All checks have passed", still blocked: one approving review required)

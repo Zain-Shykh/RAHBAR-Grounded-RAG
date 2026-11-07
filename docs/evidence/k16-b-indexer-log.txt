@@ -1,0 +1,5 @@
+$ grep "indexer starting\|chunked total\|embedded\|indexer finished" /tmp/k16/index-b.log | cut -c1-330
+{"ts": "2026-11-07T14:53:06Z", "logger": "rahbar.indexer", "msg": "indexer starting", "dummy": false, "embed_model": "nomic-embed-text", "collection": "rahbar_exp_b", "chroma": "localhost:8100", "pod": "-"}
+{"ts": "2026-11-07T14:54:43Z", "logger": "rahbar.indexer", "msg": "chunked total", "documents": 9, "chunks": 1402, "words": 73051, "source_words": 73051, "amplification": 1.0}
+{"ts": "2026-11-07T15:00:15Z", "logger": "rahbar.indexer", "msg": "embedded", "vectors": 1402, "model": "nomic-embed-text", "batches": 44, "seconds": 332.3}
+{"ts": "2026-11-07T15:00:17Z", "logger": "rahbar.indexer", "msg": "indexer finished", "chunks": 1402, "seconds": 430.9}

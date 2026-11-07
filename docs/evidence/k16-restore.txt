@@ -1,0 +1,27 @@
+$ .venv/bin/python -c "import chromadb; c=chromadb.HttpClient(host=\"localhost\",port=8100); c.delete_collection(\"rahbar_exp_b\"); print(\"collections:\", [x.name for x in c.list_collections()])"; .venv/bin/python eval/retrieval_only.py recall | head -8; echo; git diff dev --stat -- api indexer eval; echo "(git diff dev -- api indexer eval: empty above)"; git status --short; python3 -c "import json;b=json.load(open(\"eval/baseline.json\"));print({k:b[k] for k in b if \"recall\" in k})"
+collections: ['rahbar_fx', 'rahbar']
+recall@3 0.875   recall@5 0.875
+  exact      n=2   recall@3 0.500  recall@5 0.500
+  injection  n=1   recall@3 1.000  recall@5 1.000
+  ordinary   n=11  recall@3 0.909  recall@5 0.909
+  version    n=2   recall@3 1.000  recall@5 1.000
+  miss q10 (ordinary): recall@3 0.0 recall@5 0.0 scope current
+  miss q14 (exact): recall@3 0.0 recall@5 0.0 scope current
+  scores (top = best retrieved, hit = best passage holding the answer):
+
+(git diff dev -- api indexer eval: empty above)
+ M docs/FAILURE-ANALYSIS.md
+?? docs/evidence/k16-b-answers.txt
+?? docs/evidence/k16-b-boundary-chunks.txt
+?? docs/evidence/k16-b-chunk-stats.txt
+?? docs/evidence/k16-b-expect-coverage.txt
+?? docs/evidence/k16-b-recall.txt
+?? docs/evidence/k16-b-single-copy.txt
+?? docs/evidence/k16-d-d1.txt
+?? docs/evidence/k16-d-d2-fallback-log.txt
+?? docs/evidence/k16-d-d2.txt
+?? docs/evidence/k16-d-golden-abstain-d2.txt
+?? docs/evidence/k16-d-golden-abstain-intact.txt
+?? docs/evidence/k16-d-intact.txt
+?? docs/evidence/k16-restore.txt
+{'recall_at_3': 0.875, 'recall_at_5': 0.875}
