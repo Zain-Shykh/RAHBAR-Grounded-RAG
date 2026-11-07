@@ -68,26 +68,26 @@ Hybrid retrieval, the `hosted` provider, the in-cluster Ollama mode, authenticat
 | 5 | Evaluation runner | Z-11 | Thu 18:30 | DONE | #8 |
 | 6 | Chunker | Z-05 | Fri 12:00 | DONE | #10 |
 | 7 | Embed and store, full indexer run | Z-06 | Fri 14:00 | DONE | #12 |
-| 8 | Retriever, index state, version scope | Z-07 | Fri 17:00 | DONE | #19 |
-| 9 | Prompt, validation, CI-mode components | Z-08 | Fri 20:00 | DONE | #19 |
+| 8 | Retriever, index state, version scope | Z-07 | Fri 17:00 | DONE | #13 |
+| 9 | Prompt, validation, CI-mode components | Z-08 | Fri 20:00 | DONE | #14 |
 | 10 | Generation, orchestration, readiness, metrics | Z-09 | Sat 13:00 | DONE | #15 |
 | 11 | Semantic cache | Z-10 | Sat 16:00 | DONE (with deviation DEV-006) | #16 |
-| 12 | Tuning, calibration, baselines | Z-12 | Sat 19:00 | DONE (with open deviation DEV-007) | #17 |
+| 12 | Tuning, calibration, baselines | Z-12 | Sat 19:00 | DONE (DEV-007 subsequently accepted and absorbed) | #17 |
 | 13 | Failure analysis | Z-14 | Sun 11:00 | DONE (DEV-007 absorbed) | #18 |
 | 14 | Documents and ADRs | Z-15 | Sun 14:00 | DONE | #19 |
-| 15 | Integration support and final verification | joint | Sun 14:00 to 18:00 | DONE (DEV-014; release PR to main open, awaiting approval) | #34, #35 |
+| 15 | Integration support and final verification | joint | Sun 14:00 to 18:00 | DONE (DEV-014; #35 merged to dev, release #36 merged to main; main CD passed) | #34, #35 |
 
 Hours spent so far (fill in at each phase end): planned 37.5 h, actual `____`.
 
 ## 2. Current focus
 
 ```
-Phase:        none. All phases (1 to 15, K1 to K11) are DONE; the release PR dev to main is open.
-Stage:        MERGED (phase 15, PR #35). Release PR "Release: RAHBAR final submission" is open, six required checks green, NOT merged.
-Branch:       (none)
-Spec:         docs/specs/phase-15-final-verification.md
-Next action:  Zain: merge the release PR (Ahmad's approval or owner override), then watch the first cd.yml run on main and save its link; submit to Google Classroom before Sun 8 Nov 2026 23:59 PKT (repo URL, cd.yml run link, Docker Hub images link).
-Waiting on:   Zain's go on the release merge. Ahmad has not reviewed ADR 0001, the Kubernetes answers in ENGINEERING-NOTES, or docs/FINAL-WALKTHROUGH.md.
+Phase:        Final documentation reconciliation (implementation phases complete).
+Stage:        Documentation reconciled on 2026-11-07 against release and source evidence.
+Branch:       docs/final-doc-reconciliation
+Spec:         User-authorized documentation scope; no implementation changes.
+Next action:  Complete the outstanding screenshot, human-review and Classroom submission items.
+Waiting on:   Real UI and gate screenshots; Ahmad's understanding and ADR/engineering-notes/walkthrough review; historical HP-2 approval confirmation; Classroom submission.
 Last updated: 2026-11-07
 ```
 
@@ -110,8 +110,8 @@ Things this lane owes Ahmad or needs from him. Tick when delivered. Newest at th
 | H-11 | Zain to Ahmad | Real `/healthz` and `/readyz` merged (his A-13 pin demonstration needs it). Text in the log | 10 | [x] |
 | H-12 | Zain to Ahmad | Cache is merged: Redis settings, env vars, index name, `X-Cache` values, demo steps. Text in the log | 11 | [x] |
 | H-7 | Zain to Ahmad | Final ConfigMap values: `CHUNK_SIZE`, `CHUNK_OVERLAP`, `RELEVANCE_FLOOR`, `CACHE_THRESHOLD`, `TEMPERATURE` with one-line justifications. Text in the log | 12 | [x] |
-| H-13 | Zain to Ahmad | DEV-007 accepted (option A): ConfigMap `LLM_TIMEOUT_SECONDS=300` and Ingress `nginx.ingress.kubernetes.io/proxy-read-timeout: "310"` (at least 310 s; the Ingress must stay above the model timeout). Replaces the 90 s and 120 s in the architecture | 13 | [ ] |
-| H-14 | Zain to Ahmad | The pin demonstration capture is reusable as his A-13 evidence: `/readyz` 503 body and the API log line are in `docs/FAILURE-ANALYSIS.md` stage C (local run, `EMBED_MODEL=hashing-bow-768` on the api only). On the cluster set the same key in the api ConfigMap only, wait for the rollout, `kubectl get pods` (0/1) and `curl /readyz`, then revert | 13 | [ ] |
+| H-13 | Zain to Ahmad | DEV-007 accepted (option A): ConfigMap `LLM_TIMEOUT_SECONDS=300` and Ingress `nginx.ingress.kubernetes.io/proxy-read-timeout: "310"` (at least 310 s; the Ingress must stay above the model timeout). Replaces the 90 s and 120 s in the architecture. Delivered configuration is present in `k8s/base/configmap.yaml` and `k8s/base/ingress.yaml`; Ahmad's acknowledgement is unconfirmed | 13 | [ ] |
+| H-14 | Zain to Ahmad | The pin demonstration capture is reusable as his A-13 evidence: `/readyz` 503 body and the API log line are in `docs/FAILURE-ANALYSIS.md` stage C (local run, `EMBED_MODEL=hashing-bow-768` on the api only). On the cluster set the same key in the api ConfigMap only, wait for the rollout, `kubectl get pods` (0/1) and `curl /readyz`, then revert. Cluster demonstration is now saved in `docs/evidence/k10-embed-pin-mismatch.txt`; Ahmad's acknowledgement is unconfirmed | 13 | [ ] |
 | H-8 | Zain to Ahmad | `eval/fixtures/baseline.fixture.json` committed (and the `ci` overlay floor). Text in the log | 12 | [x] |
 | H-9 | Ahmad to Zain | ConfigMap, Redis Stack and Chroma manifests running in minikube (milestone I-1) | n/a | [x] |
 | H-10 | Ahmad to Zain | Real corpus on `corpus-data` PVC and the Job runnable in the cluster (milestone I-2) | n/a | [x] |
@@ -209,6 +209,7 @@ Append-only, newest at the bottom. One line per event: date, phase, what happene
 2026-11-07  P15  scripts/check_numbers.py: 0 mismatches between eval/results.json, baseline.json, ConfigMap, PIPELINE.md, ENGINEERING-NOTES.md, README. docs/evidence/final-numbers-check.txt
 2026-11-07  P15  rubric_checklist.md ticked with evidence pointers; known gaps listed (section E). docs/FINAL-WALKTHROUGH.md written.
 2026-11-07  P15  DONE (#35). Independent tester passed (see spec section 12). Release PR dev to main opened, not merged: needs Ahmad's approval or Zain's override.
+2026-11-07  DOCS  Documentation reconciliation: PR #35 merged to dev (f3bc393), release #36 merged to main (f59cd9b); main CD 42297154091 test/build-push/deploy success verified through GitHub. Original log entries and unticked historical criteria retained; missing screenshots and human review remain unresolved. Release/phase status, source-based factual summaries and unsupported completion claims corrected on docs/final-doc-reconciliation; historical HP-2 approval and Classroom submission remain unconfirmed.
 ```
 
 ---
@@ -234,7 +235,7 @@ Numbers this lane must measure. The agent fills them in as they are produced; th
 | Best-score range, must-abstain questions | 0.655 (q16 hostel curfew) and 0.658 (q17 hostel fee); same on all three chunk configurations | 12 | `eval/run_eval.py`, `eval/retrieval_only.py recall` |
 | Shipped `RELEVANCE_FLOOR` | 0.70 (D-78), the midpoint of the gap between the must-abstain maximum 0.658 and the lowest answerable hit 0.746 (margin 0.042 below, 0.046 above). Trade-off: the 0.50 default let both hostel questions through to the model (the 3B model happened to abstain); at 0.70 both abstain before any model call (0.1 to 0.3 s, `abstained`, `abstain_reason=below_floor`). The cost is that a real question whose best passage scores under 0.70 is refused: 18 questions are a small sample, and a user paraphrase could score lower than the golden wording. q14 (best 0.713) sits 0.013 above the floor | 12 | `eval/run_eval.py`, `eval/retrieval_only.py recall` |
 | Cache thresholds tried and false hits | Phase 11, real nomic-embed-text, Redis Stack 7.4.0-v8, 9 paraphrase and 9 near-miss pairs, looked up under the SAME scope tag (measures the embedding, not the scope guard). 0.88: 8/9 paraphrases hit, 7/9 false hits (first: withdrawal deadline 2023 vs 2026 rules, cosine 0.934). 0.90: 7/9, 5/9. 0.92: 7/9, 4/9 (2023 vs 2026 0.934; clause 1.21 vs 1.22 0.927; BS vs MS fee per credit hour 0.924; undergraduate vs graduate attendance 0.958). 0.94: 5/9, 1/9 (attendance undergraduate vs graduate, 0.958, ruled 0.94 out). 0.96: 4/9, 0/9. Paraphrase cosines 0.846 to 0.998; near-miss 0.822 to 0.958. The 2023 and 2026 questions also get different scope tags, so the scope guard blocks that pair at any threshold | 11 | `python scripts/calibrate_cache.py --thresholds 0.88 0.90 0.92 0.94 0.96` |
-| Shipped `CACHE_THRESHOLD` | 0.96, the lowest of 0.88/0.92/0.96 with zero false hits. Margin over the worst near-miss (0.958) is 0.002 and only 4 of 9 paraphrases hit, so hits are rare and safe; the set is small (18 pairs). Not repeated in phase 12 (D-80): chunking does not change question embeddings; live demo pairs recorded below | 11 | same |
+| Shipped `CACHE_THRESHOLD` | 0.96, the lowest of five measured values (0.88/0.90/0.92/0.94/0.96) with zero false hits. Margin over the worst near-miss (0.958) is 0.002 and only 4 of 9 paraphrases hit, so hits are rare and safe; the set is small (18 pairs). Not repeated in phase 12 (D-80): chunking does not change question embeddings; live demo pairs recorded below | 11 | same |
 | Citation validity | 100% (16 of 16 citations name a retrieved chunk), real run, 400/50, floor 0.70. Phase 12 | 12 | `eval/run_eval.py`, `eval/retrieval_only.py recall` |
 | Abstention correctness | 100% (2 of 2 must-abstain questions; both stopped by the floor, none by fallback: `must_abstain_fallback` 0). Two answerable questions (q10, q14) were also answered `false` by the model, see the exact-term finding. Phase 12 | 12 | `eval/run_eval.py`, `eval/retrieval_only.py recall` |
 | Exact-term finding (q10, q14) (required finding for engineering note Q5) | Both are retrieval misses at every chunk size, not model errors, and the model abstained on both rather than inventing an answer. q14 "clause 1.21" (Academic Rules Handbook Jun 2026, p.10, a text PDF): the question is nearly all generic words ("academic rules require") plus one number, and the embedding gives the number almost no weight, so the top 5 are generic "Academic Rules" chunks (Prospectus, Student Handbook, rule 5.3; best 0.713) and clause 1.21 is not among them. Embeddings blur digits (1.21 and 1.22 sit at cosine 0.927, the reason the cache threshold had to be 0.96). q10 (start-up policy, a scanned PDF, OCR'd): the policy's sections are named by title because OCR put the numbering apart (`six. monthly`), and the question's words match "Evaluation criteria" and "Eligibility criteria" chunks of the same document (0.821, 0.811) better than the "Mandatory periodic (six. monthly) deliverables" chunk. Exact recall 0.50 against definitional (ordinary) 0.909. The technique that addresses it is hybrid retrieval (BM25 or a clause-number match fused with the vector score), out of scope (5.13.2) | 12 | `eval/run_eval.py`, `scripts/calibrate_cache.py`, API logs |
@@ -454,6 +455,8 @@ None.
 
 **Status:** DONE · **Branch:** `feat/rag-z11-eval-runner` · **Est:** 2 h · **Priority:** P0 · **Needed by:** Ahmad's A-09 (e2e job)
 
+**Reconciliation (2026-11-07):** This phase is merged (dashboard and section 4). Any unchecked original acceptance boxes below remain as historical checklist gaps, not pending implementation. Their exact original verification has not been re-run for this documentation change.
+
 ### Objective
 Implement the four functions in `eval/run_eval.py` and make the gate trustworthy before any numbers matter.
 
@@ -591,7 +594,9 @@ H-4 to Ahmad: peak memory and timing so he sets the Job limit.
 
 ## Phase 8: Retriever, index state, version scope (Z-07)
 
-**Status:** NOT STARTED · **Branch:** `feat/rag-z07-retriever` · **Est:** 3 h · **Priority:** P0
+**Status:** DONE (#13) · **Branch:** `feat/rag-z07-retriever` · **Est:** 3 h · **Priority:** P0
+
+**Reconciliation (2026-11-07):** This phase is merged (dashboard and section 4). Any unchecked original acceptance boxes below remain as historical checklist gaps, not pending implementation. Their exact original verification has not been re-run for this documentation change.
 
 ### Objective
 The API can embed a question, find the right passages under the right version filter, survive an index swap, and detect an embedding mismatch.
@@ -791,7 +796,7 @@ Tell Ahmad cache behaviour is ready for his evidence capture (HIT then MISS afte
 
 ## Phase 12: Tuning, calibration, baselines (Z-12)
 
-**Status:** DONE (with open deviation DEV-007) · **Branch:** `feat/rag-z12-tuning` · **Est:** 3 h · **Priority:** P0
+**Status:** DONE (DEV-007 subsequently accepted and absorbed) · **Branch:** `feat/rag-z12-tuning` · **Est:** 3 h · **Priority:** P0
 
 ### Objective
 Choose the shipped numbers by measurement, and commit the baselines that gate CI and the submission.
@@ -840,6 +845,8 @@ H-7, H-8.
 
 **Status:** DONE · **Branch:** `feat/rag-z14-failure-analysis` · **Est:** 2 h · **Priority:** P0
 
+**Reconciliation (2026-11-07):** This phase is merged (dashboard and section 4). Any unchecked original acceptance boxes below remain as historical checklist gaps, not pending implementation. Their exact original verification has not been re-run for this documentation change.
+
 ### Objective
 Break four stages on purpose, one at a time, and record symptom, diagnosis, stage, remedy, and the number that would have shown it.
 
@@ -876,6 +883,8 @@ Tell Ahmad if he can reuse the pin demonstration capture for his evidence.
 ## Phase 14: Documents and ADRs (Z-15)
 
 **Status:** DONE · **Branch:** `feat/rag-z15-docs` · **Est:** 3 h · **Priority:** P0
+
+**Reconciliation (2026-11-07):** This phase is merged (dashboard and section 4). Any unchecked original acceptance boxes below remain as historical checklist gaps, not pending implementation. Their exact original verification has not been re-run for this documentation change.
 
 ### Objective
 Write the RAG-lane documents from real measurements, in your own words, with file and line references.
@@ -939,10 +948,10 @@ Make the lanes meet: real index in the cluster, gate green in CI, and a clean su
 - [x] `docs/OPEN_DECISIONS.md` has no `OPEN` item that affects the delivered system.
 - [x] `eval/results.json` and `eval/baseline.json` committed and consistent with the shipped config.
 - [x] Every number in `docs/PIPELINE.md` matches the committed results.
-- [x] Both people can explain every module in this lane. (Written down in `docs/FINAL-WALKTHROUGH.md`; Ahmad has not yet read it.)
+- [ ] Both people can explain every module in this lane. The walkthrough is written, but Ahmad's reading and understanding have not been confirmed.
 
 ### Acceptance criteria
-- [x] I-2 and I-3 passed in K2/K10 (`k02-first-answer.txt`, `k10-eval-gate.txt`), I-4 checklist ticked above (evidence: `docs/rubric_checklist.md` sections A, D, E).
+- [x] I-2 and I-3 passed in K2/K10 (`k02-first-answer.txt`, `k10-eval-gate.txt`); mechanical I-4 verification is recorded in `docs/rubric_checklist.md` sections A, D, E. Human understanding remains unchecked above.
 - [x] README apply order works from a clean clone (done by Zain's session, `docs/evidence/k11-clean-clone.txt`); Ahmad was unavailable to confirm on his own.
 
 ### Hand-off
