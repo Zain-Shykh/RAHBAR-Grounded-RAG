@@ -191,6 +191,32 @@ The full list is in [`docs/architecture/architecture.md`](docs/architecture/arch
 └── requirements.txt
 ```
 
+## Assignment 03: RAGOps (parts A to F)
+
+The RAGOps layer on top of RAHBAR: verification and incremental updates of the data, three-level offline testing, a
+release gate, a trace for every query, drift checking, and a controlled release on Kubernetes. Design:
+[`docs/architecture/architecture-a3.md`](docs/architecture/architecture-a3.md); requirements:
+[`docs/requirements-a3.md`](docs/requirements-a3.md); plan and progress: [`docs/IMPLEMENTATION_PLAN_A3.md`](docs/IMPLEMENTATION_PLAN_A3.md);
+the cluster procedure: [`k8s/README.md`](k8s/README.md). Result files are in [`eval/results/`](eval/results), traces in
+[`traces/`](traces), screenshots in [`docs/evidence/a3/`](docs/evidence/a3).
+
+Prerequisites: a running cluster with the application deployed (`make cluster`, `make images`,
+`kubectl apply -k k8s/overlays/dev`, `make corpus`, `make gate-config`) and Ollama on the host.
+
+| Part | What | Command |
+| --- | --- | --- |
+| A | Generate Batch B (12 files, 7 planted problems) | `python scripts/make_batch_b.py --out corpus/batch_b` |
+| A1 | Verification of a batch, report and quarantine | `make ingest-batch BATCH=corpus/batch_b` then `make lake-ls`; locally `python -m pipeline.run --verify-only` (from `indexer/`, with `LAKE_DIR`) |
+| A2 | Incremental update: unchanged run embeds 0, changed, deleted, superseded, restore | `make index` twice; `python -m pipeline.restore --source <file> --supersede <newer>` |
+| B | The whole suite, one command, timestamped result | `make suite API_URL=... LABEL=baseline` (writes `eval/results/suite-<ts>-baseline.json` and `.md`); `make suite-twice` for the two-run comparison |
+| B | Golden set check | `python -m eval.suite.golden --check` |
+| C | Compare, gate (exit 0 pass, 1 fail) | `python -m eval.suite.compare base.json cand.json`; `python -m eval.suite.gate --baseline base.json --candidate cand.json` |
+| C, F | Gate as a Kubernetes Job | `make eval-job SET_BASELINE=true LABEL=baseline`, then `kubectl apply -f k8s/eval-job.yaml` |
+| D | One trace, rebuilt prompt | `python scripts/trace_tool.py show <trace_id> --kubectl deploy/api` (or `--dir traces/samples`) |
+| D | Metrics over a window | `python scripts/trace_report.py --dir traces/samples --since 24h`, or `kubectl apply -f k8s/trace-report-job.yaml` |
+| E | Coverage of live queries by the golden set (exit 1 below target) | `python -m eval.suite.coverage --live eval/live_queries.jsonl --golden eval/golden.jsonl` |
+| F | Candidate, release, rollback | `make candidate CHUNK=300 OVERLAP=50`, `make eval-job API=http://api-candidate:8000 LABEL=cand`, `make release COLLECTION=rahbar_cand`, `make rollback` |
+
 ## Documentation
 
 | Document | What it is |

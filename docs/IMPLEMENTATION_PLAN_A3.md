@@ -67,16 +67,16 @@ Anything that is not in `requirements-a3.md`. In particular: a reranker (the exp
 | # | Phase | Requirements | Est | Status | PR |
 | --- | --- | --- | --- | --- | --- |
 | R0 | Planning set: requirements, architecture, plan, decisions | all | 2 h | DONE (approved by Zain 2026-11-21) | #46 |
-| R1 | Batch B and the manifest contract | R3-AB-1 | 3 h | IN PROGRESS | |
-| R2 | Verification stage (A1) | R3-A1-* | 6 h | NOT STARTED | |
-| R3 | Incremental update, archive, restore (A2) | R3-A2-*, R3-AB-2 | 7 h | NOT STARTED | |
-| R4 | Golden set, module level, component level, noise | R3-B-1 to R3-B-5 | 5 h | NOT STARTED | |
-| R5 | End-to-end level, judge, stochasticity, one command | R3-B-6 to R3-B-9 | 7 h | NOT STARTED | |
-| R6 | Trace, trace tool, metrics report, injection rail | R3-D1-* to R3-D5-1, R3-F4-1 | 6 h | NOT STARTED | |
-| R7 | Change experiment and release gate | R3-C1-*, R3-C2-* | 6 h | NOT STARTED | |
-| R8 | Kubernetes deployment of RAGOps | R3-F1-*, R3-F2-*, R3-F4-*, R3-F5-*, R3-LOG-11 | 8 h | NOT STARTED | |
+| R1 | Batch B and the manifest contract | R3-AB-1 | 3 h | DONE | #47 |
+| R2 | Verification stage (A1) | R3-A1-* | 6 h | CODE DONE, cluster run pending | #48 |
+| R3 | Incremental update, archive, restore (A2) | R3-A2-*, R3-AB-2 | 7 h | CODE DONE, cluster run pending | #48 |
+| R4 | Golden set, module level, component level, noise | R3-B-1 to R3-B-5 | 5 h | CODE DONE, baseline run in progress | #48 |
+| R5 | End-to-end level, stochasticity, one command (no judge, D-115) | R3-B-6 to R3-B-9 | 7 h | CODE DONE, runs in progress | #48 |
+| R6 | Trace, trace tool, metrics report, injection rail | R3-D1-* to R3-D5-1, R3-F4-1 | 6 h | CODE DONE, samples pending | #48 |
+| R7 | Change experiment and release gate | R3-C1-*, R3-C2-* | 6 h | CODE DONE, candidate runs pending | #48 |
+| R8 | Kubernetes deployment of RAGOps | R3-F1-*, R3-F2-*, R3-F4-*, R3-F5-*, R3-LOG-11 | 8 h | MANIFESTS DONE, cluster run pending | #48 |
 | R9 | Controlled release and rollback | R3-C3-1, R3-F3-* | 4 h | NOT STARTED | |
-| R10 | Drift and coverage | R3-E1-* to R3-E4-* | 4 h | NOT STARTED | |
+| R10 | Drift and coverage | R3-E1-* to R3-E4-* | 4 h | CODE DONE (coverage.py, live_queries.jsonl), runs pending | #48 |
 | R11 | Evidence, report, README, final verification | R3-G-*, R3-S-*, R3-LOG-8 to 10 | 8 h | NOT STARTED | |
 
 Build order note: R4 and R5 need the API and a real index running; R6 changes the API (re-run the A02 fixture eval); R7 needs R5 results; R9 needs R7 and R8; R10 needs R3, R5 and R8; R11 is last. R1 to R3 and R4 to R6 are independent chains and may be swapped if the cluster or Ollama is unavailable, but a phase is never started before the previous one is merged.
@@ -86,13 +86,13 @@ Hours spent so far: planned 64 h plus 2 h (R0), actual `____`.
 ## 2. Current focus
 
 ```
-Phase:        R1  Batch B and the manifest contract (R1 to R3 run as one indexer block)
-Stage:        IMPLEMENTING
-Branch:       feat/rag-r01-batch-b
-Spec:         this file, phase R1
-Next action:  write scripts/make_batch_b.py and the manifest fields
-Waiting on:   nothing
-Last updated: 2026-11-21 03:15
+Phase:        R4/R5 real runs, then R8 cluster run (code for R1 to R10 is written)
+Stage:        TESTING (real runs)
+Branch:       feat/rag-r04-eval-suite (PR #48 into dev)
+Spec:         this file
+Next action:  baseline suite on the local stack, then second run, candidates, then minikube: ingestion Job, eval Job, release, rollback, coverage, report
+Waiting on:   nothing (Ollama time: each answer takes 75 to 110 s)
+Last updated: 2026-11-21 03:25
 ```
 
 Update this block at the end of every work session, even if the phase is unfinished.
@@ -122,6 +122,15 @@ Append-only, newest at the bottom. Format: `YYYY-MM-DD  PNN  <stage or event>: <
 
 ```
 2026-11-21  R0   Planning set written: requirements-a3.md, architecture-a3.md, IMPLEMENTATION_PLAN_A3.md, decisions D-107 to D-125, pointers added to the A02 documents. Branch docs/a3-ragops-planning.
+2026-11-21  R0   MERGED: PR #46. Zain approved everything, deadline Sun 22 Nov (D-107), Ahmad unavailable (D-108), paper supplied (D-109), per-phase gate waived (D-124), no LLM judge (D-115), hand-work left for Zain (D-126). Plan compressed (section 7).
+2026-11-21  R1   MERGED: PR #47. scripts/make_batch_b.py writes 12 planted documents (idempotent), manifest loader, enrich script. 262 indexer tests.
+2026-11-21  R2   IMPLEMENTED: verification package (four checks, quarantine, report, text table). On Batch B: 6 documents pass, 6 quarantined with the planted reasons, injected document passes (by design). Near-duplicate threshold calibrated: nomic max distinct pair 0.9379, planted near-duplicate 0.9998, threshold 0.97 (eval/results/neardup-calibration-*.json).
+2026-11-21  R3   IMPLEMENTED: incremental update (copy-forward then swap), registry, restore. Real Chroma 1.0.12 spike: 26 of 26 untouched chunks identical after a changed-document run, same top 5 (A3-R1 holds). Unchanged re-run: 0 embedded, no swap, same index_id. 281 indexer tests.
+2026-11-21  R4   IMPLEMENTED: eval/golden.jsonl (34 questions: 18 human from A02, 16 synthetic), metrics (recall@3/5, MRR, nDCG@5, typo noise), module level, component level via POST /api/retrieve. 114 eval tests.
+2026-11-21  R5   IMPLEMENTED (code): end-to-end level (overlap faithfulness, abstention, citation validity, latency), one command (eval.suite.run_suite), stochasticity script, LLM_SEED and X-Cache-Bypass in the API. Real runs in progress (each question takes 75 to 110 s on this CPU).
+2026-11-21  R6   IMPLEMENTED: trace record per query (stdout and per-pod file), trace tool, trace report, injection rail (opt-in, scans the normalised text; a security review caught a delimiter bypass, fixed), 300 api tests.
+2026-11-21  R7   IMPLEMENTED (code): gate.py, compare.py, gate.yaml (limits to be fixed from baseline runs).
+2026-11-21  R8   IMPLEMENTED (manifests): PVCs, eval and trace-report Jobs, candidate Deployment and indexer Job, NetworkPolicies, make targets, k8s/README.md; make manifests validates all; cluster runs pending.
 ```
 
 ---
