@@ -130,6 +130,7 @@ Append-only, newest at the bottom. Format: `YYYY-MM-DD  PNN  <stage or event>: <
 2026-11-21  R5   IMPLEMENTED (code): end-to-end level (overlap faithfulness, abstention, citation validity, latency), one command (eval.suite.run_suite), stochasticity script, LLM_SEED and X-Cache-Bypass in the API. Real runs in progress (each question takes 75 to 110 s on this CPU).
 2026-11-21  R6   IMPLEMENTED: trace record per query (stdout and per-pod file), trace tool, trace report, injection rail (opt-in, scans the normalised text; a security review caught a delimiter bypass, fixed), 300 api tests.
 2026-11-21  R7   IMPLEMENTED (code): gate.py, compare.py, gate.yaml (limits to be fixed from baseline runs).
+2026-11-21  --   D-127: Zain instructed orchestrator mode. R1 to R8 code was written by the main session; subagents now write the retroactive specs and test reports and run the independent checks; later phases run one subagent each.
 2026-11-21  R8   IMPLEMENTED (manifests): PVCs, eval and trace-report Jobs, candidate Deployment and indexer Job, NetworkPolicies, make targets, k8s/README.md; make manifests validates all; cluster runs pending.
 ```
 

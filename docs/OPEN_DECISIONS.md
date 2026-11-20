@@ -1525,3 +1525,13 @@ Raised 2026-11-21 while writing the Assignment 03 planning set ([`requirements-a
 - Claude recommends: A.
 - Decision: C, chosen by Zain 2026-11-21. Consequence, stated honestly: every question Claude writes is labelled `synthetic`; the minimum "at least 8 written by hand by the group" (R3-B-2) and "at least 8 synthetic reviewed by hand" are **not met** unless Zain writes or reviews them later. The session prepares `eval/HUMAN_TODO.md` (a 10-minute worksheet: 8 questions to write, 8 to review) so Zain can close the gap before submission; the report lists it as a gap if he does not. The `origin` field is never set to `human` by Claude.
 - Decided on: 2026-11-21
+
+### D-127 Orchestrator mode: one subagent per phase, each following WORKFLOW.md
+- Status: DECIDED
+- Raised: 2026-11-21 by Zain (instruction in chat)
+- Area: process
+- Related: `docs/WORKFLOW.md`, D-124
+- Question: How are the remaining Assignment 03 phases built?
+- Decision: The main session is only the orchestrator. Every phase is done by its own subagent (fresh context) that follows `docs/WORKFLOW.md` end to end: spec and plan file `docs/specs/phase-rNN-<slug>.md`, implement, independent test (a different subagent), progress files, PR into `dev`. There is no approval gate; everything is approved as recommended and decisions are logged in the relevant documents. Honest note: phases R1 to R8 were coded by the main session before this instruction; their specs, test reports and independent checks are written retroactively by subagents and marked as such in the spec header.
+- Decided on: 2026-11-21
+
