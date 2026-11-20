@@ -11,7 +11,7 @@ metadata:
     app.kubernetes.io/part-of: rahbar
 spec:
   backoffLimit: 2
-  activeDeadlineSeconds: 1800
+  activeDeadlineSeconds: 3600
   template:
     metadata:
       labels:

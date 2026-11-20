@@ -17,7 +17,7 @@ CHROMA_IMAGE ?= chromadb/chroma:1.0.12
 REDIS_IMAGE ?= redis/redis-stack-server:7.4.0-v8
 
 .DEFAULT_GOAL := help
-.PHONY: eval-job eval-ctx eval-image gate-config suite suite-twice candidate release rollback ingest-batch lake-ls results-pull traces-pull baseline resources help install test lint dev dev-services dev-services-stop dev-services-reset cluster images corpus apply down secret index ask fetch eval eval-fixtures check manifests
+.PHONY: eval-job eval-ctx eval-image gate-config suite suite-twice candidate release rollback ingest-batch restore lake-ls results-pull traces-pull baseline resources help install test lint dev dev-services dev-services-stop dev-services-reset cluster images corpus apply down secret index ask fetch eval eval-fixtures check manifests
 
 help: ## list the targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  make %-14s %s\n", $$1, $$2}'
@@ -155,6 +155,13 @@ ingest-batch: ## ingest a batch of documents: make ingest-batch BATCH=corpus/bat
 	kubectl cp /tmp/rahbar-merged/. $(NS)/corpus-loader:/corpus
 	kubectl delete pod corpus-loader -n $(NS) --wait=false
 	kubectl create job --from=cronjob/reindex ingest-$$(date +%s) -n $(NS)
+
+restore: ## roll back: make restore SOURCE=<older file> SUPERSEDE=<newer file> (one-off Job, zero embeddings)
+	test -n "$(SOURCE)"
+	kubectl delete job restore -n $(NS) --ignore-not-found
+	sed 's/RESTORE_SOURCE/$(SOURCE)/; s/RESTORE_SUPERSEDE/$(SUPERSEDE)/' k8s/tools/restore-job.yaml | kubectl apply -f -
+	kubectl wait --for=condition=complete job/restore -n $(NS) --timeout=1800s
+	kubectl logs job/restore -n $(NS)
 
 lake-ls: ## list the lake volume (registry, quarantine, archive, reports) through a throw-away pod
 	kubectl delete pod lake-viewer -n $(NS) --ignore-not-found

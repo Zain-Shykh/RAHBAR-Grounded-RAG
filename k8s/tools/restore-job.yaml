@@ -1,0 +1,50 @@
+# One-off rollback (R3-A2-4): make an older version current again with zero embeddings.
+# `make restore SOURCE=<old file> SUPERSEDE=<newer file>` substitutes the two words; not in any kustomization.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: restore
+  namespace: rahbar
+  labels: {app.kubernetes.io/name: indexer, app.kubernetes.io/part-of: rahbar}
+spec:
+  backoffLimit: 0
+  activeDeadlineSeconds: 3600
+  template:
+    metadata:
+      labels: {app.kubernetes.io/name: indexer, app.kubernetes.io/part-of: rahbar}
+    spec:
+      serviceAccountName: indexer
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      restartPolicy: Never
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile: {type: RuntimeDefault}
+      containers:
+        - name: restore
+          image: rahbar-indexer:dev
+          imagePullPolicy: IfNotPresent
+          command: ["python", "-m", "pipeline.restore", "--source", "RESTORE_SOURCE", "--supersede", "RESTORE_SUPERSEDE"]
+          envFrom:
+            - configMapRef: {name: rahbar-config}
+          resources:
+            requests: {cpu: 250m, memory: 384Mi}
+            limits: {cpu: "1", memory: 1Gi}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: {drop: [ALL]}
+          volumeMounts:
+            - {name: corpus, mountPath: /corpus, readOnly: true}
+            - {name: lake, mountPath: /lake}
+            - {name: tmp, mountPath: /tmp}
+      volumes:
+        - name: lake
+          persistentVolumeClaim: {claimName: lake-data}
+        - name: corpus
+          persistentVolumeClaim: {claimName: corpus-data, readOnly: true}
+        - name: tmp
+          emptyDir: {}
