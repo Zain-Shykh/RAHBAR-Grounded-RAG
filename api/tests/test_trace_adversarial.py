@@ -176,8 +176,6 @@ def test_batch_b_injected_paragraph_is_dropped_traced_and_counted(caught) -> Non
     assert m.INJECTION_FLAGS.labels(rail="injection_scan")._value.get() == before + 1
 
 
-@pytest.mark.xfail(strict=True, reason="DEFECT T-4 (low): a cache-hit trace lists retrieved chunks without doc_version/superseded "
-                                       "(the cached response does not carry them); R3-D1-1 asks for document versions")
 def test_cache_hit_trace_retrieved_carries_doc_versions(caught) -> None:
     cache, r = MemoryCache(0.92), ret()
     answer_question(Q, r, Scripted(ans(1)), S, cache=cache)

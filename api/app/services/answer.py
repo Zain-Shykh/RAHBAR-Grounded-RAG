@@ -159,7 +159,8 @@ def _answer(
         m.record_lookup(hit is not None)
         if hit is not None:
             tr.r["retrieved"] = [{"rank": i + 1, "chunk_id": r.chunk_id, "doc_id": r.source, "section": r.section,
-                                  "page": r.page, "score": round(r.score, 4)} for i, r in enumerate(hit.retrieved)]
+                                  "page": r.page, "doc_version": None, "superseded": None,
+                                  "score": round(r.score, 4)} for i, r in enumerate(hit.retrieved)]  # not stored in the cache
             return _cached(hit, sc.key, ms_embed)
 
     passages: list[Passage] = []
