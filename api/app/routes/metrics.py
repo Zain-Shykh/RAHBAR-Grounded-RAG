@@ -31,6 +31,8 @@ TOKENS = Histogram("rahbar_tokens", "Model tokens per request", ["direction"],
                    buckets=(16, 64, 128, 256, 512, 1024, 2048, 4096, 8192))
 TOP_SCORE = Histogram("rahbar_top_score", "Best retrieved similarity per request",
                       buckets=(0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0))
+INJECTION_FLAGS = Counter("rahbar_injection_flags_total", "Retrieved passages dropped by the injection rail", ["rail"])
+TRACE_WRITE_ERRORS = Counter("rahbar_trace_write_errors_total", "Trace records that could not be written")
 INDEX_INFO = Gauge("rahbar_index_info", "The index this pod believes is live (=1)",
                    ["embed_model", "index_id", "chunks"])
 

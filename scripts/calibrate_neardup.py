@@ -50,8 +50,15 @@ def main() -> None:
     ap.add_argument("--batch", default="corpus/batch_b")
     ap.add_argument("--models", default="hashing-bow-768")
     ap.add_argument("--out", default="eval/results")
+    ap.add_argument("--cache", help="JSON file caching the extracted real-corpus texts (extraction takes minutes)")
     a = ap.parse_args()
-    real = texts_of(a.real, set())
+    cache = Path(a.cache) if a.cache else None
+    if cache and cache.exists():
+        real = {k: tuple(v) for k, v in json.loads(cache.read_text()).items()}
+    else:
+        real = texts_of(a.real, set())
+        if cache:
+            cache.write_text(json.dumps(real))
     batch = texts_of(a.batch, {"b07-transport-policy-2026-truncated.pdf", "b08-transport-notice-corrupt.pdf"})
     allt = {**real, **batch}
     result: dict = {"created": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), "real": sorted(real),

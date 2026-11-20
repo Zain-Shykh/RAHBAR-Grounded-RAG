@@ -1,0 +1,30 @@
+{"kind": "paraphrase", "a": "What is the minimum attendance needed to sit the final exam?", "b": "How much attendance must a student have to be allowed in the final examination?"}
+{"kind": "paraphrase", "a": "How many courses can I take in one semester?", "b": "What is the maximum course load per term?"}
+{"kind": "paraphrase", "a": "When is the last day to withdraw from a course?", "b": "What is the deadline for dropping a course?"}
+{"kind": "paraphrase", "a": "What happens if a summer course has too few students?", "b": "Is a summer course cancelled when only a few students register?"}
+{"kind": "paraphrase", "a": "Are mobile phones allowed in the examination hall?", "b": "Can students bring their phones into the exam room?"}
+{"kind": "paraphrase", "a": "How much tuition is refunded after withdrawal?", "b": "What share of the fee is returned to a student who leaves?"}
+{"kind": "paraphrase", "a": "What is the fee per credit hour?", "b": "How much does one credit hour cost?"}
+{"kind": "paraphrase", "a": "How do I apply for a transcript?", "b": "What is the procedure for requesting an official transcript?"}
+{"kind": "paraphrase", "a": "What is the penalty for plagiarism?", "b": "How are students punished for copying other people's work?"}
+{"kind": "paraphrase", "a": "What grade is a C for graduate students?", "b": "How is a C grade interpreted in postgraduate programs?"}
+{"kind": "paraphrase", "a": "Who approves a leave of absence?", "b": "Which office grants permission for a semester freeze?"}
+{"kind": "paraphrase", "a": "How are repeated courses counted in the CGPA?", "b": "What is the effect of retaking a course on the cumulative GPA?"}
+{"kind": "paraphrase", "a": "What are the library opening hours?", "b": "At what times is the library open on weekdays?"}
+{"kind": "paraphrase", "a": "How long can I keep a library book?", "b": "What is the loan period for borrowed books?"}
+{"kind": "paraphrase", "a": "Is the use of generative AI tools permitted in assignments?", "b": "May students use AI chatbots to complete their coursework?"}
+{"kind": "unrelated", "a": "What is the minimum attendance needed to sit the final exam?", "b": "The cricket ground has floodlights for evening matches."}
+{"kind": "unrelated", "a": "How many courses can I take in one semester?", "b": "Lab coats must be washed every week."}
+{"kind": "unrelated", "a": "When is the last day to withdraw from a course?", "b": "The campus bus leaves at half past four."}
+{"kind": "unrelated", "a": "What happens if a summer course has too few students?", "b": "Safety goggles are mandatory in the chemistry lab."}
+{"kind": "unrelated", "a": "Are mobile phones allowed in the examination hall?", "b": "The annual report lists the number of faculty members."}
+{"kind": "unrelated", "a": "How much tuition is refunded after withdrawal?", "b": "Football trials are announced every semester."}
+{"kind": "unrelated", "a": "What is the fee per credit hour?", "b": "Smoking is not allowed inside the buildings."}
+{"kind": "unrelated", "a": "How do I apply for a transcript?", "b": "The gymnasium opens at six in the morning."}
+{"kind": "unrelated", "a": "What is the penalty for plagiarism?", "b": "Route three serves Saddar and Chaklala."}
+{"kind": "unrelated", "a": "What grade is a C for graduate students?", "b": "A fire assembly point is behind the main block."}
+{"kind": "unrelated", "a": "Who approves a leave of absence?", "b": "Tennis courts are booked through the sports office."}
+{"kind": "unrelated", "a": "How are repeated courses counted in the CGPA?", "b": "The cafeteria closes after lunch on Fridays."}
+{"kind": "unrelated", "a": "What are the library opening hours?", "b": "Start-ups must submit a six-monthly progress report."}
+{"kind": "unrelated", "a": "How long can I keep a library book?", "b": "Admission processing fees are not refundable."}
+{"kind": "unrelated", "a": "Is the use of generative AI tools permitted in assignments?", "b": "The institute was founded in the eighties."}

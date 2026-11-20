@@ -37,6 +37,7 @@ class Settings:
     top_k: int = 5
     temperature: float = 0.2
     llm_model: str = "llama3.2:3b"
+    llm_seed: int | None = None      # LLM_SEED: Ollama options.seed, for reproducible evaluation runs (AD-38)
     ollama_url: str = "http://host.minikube.internal:11434"
     hosted_base_url: str = ""        # e.g. an OpenAI-compatible endpoint
     llm_api_key: str = field(default="", repr=False)   # from the Secret; never log it
@@ -54,6 +55,8 @@ class Settings:
     llm_timeout_seconds: int = 300
     llm_max_concurrency: int = 2
     index_refresh_seconds: int = 10
+    injection_rail: bool = False     # INJECTION_RAIL=true turns on the retrieval rail (AD-40); the ConfigMap sets it
+    trace_dir: str = ""              # TRACE_DIR: per-pod trace files go here; empty means stdout only (AD-39)
     app_version: str = "0.1.0"
 
 
@@ -68,6 +71,7 @@ def get_settings() -> Settings:
         top_k=_int("TOP_K", 5),
         temperature=_float("TEMPERATURE", 0.2),
         llm_model=os.environ.get("LLM_MODEL", "llama3.2:3b"),
+        llm_seed=int(os.environ["LLM_SEED"]) if os.environ.get("LLM_SEED") else None,
         ollama_url=os.environ.get("OLLAMA_URL", "http://host.minikube.internal:11434"),
         hosted_base_url=os.environ.get("HOSTED_BASE_URL", ""),
         llm_api_key=os.environ.get("LLM_API_KEY", ""),
@@ -82,5 +86,7 @@ def get_settings() -> Settings:
         llm_timeout_seconds=_int("LLM_TIMEOUT_SECONDS", 300),
         llm_max_concurrency=_int("LLM_MAX_CONCURRENCY", 2),
         index_refresh_seconds=_int("INDEX_REFRESH_SECONDS", 10),
+        injection_rail=os.environ.get("INJECTION_RAIL", "false").lower() == "true",
+        trace_dir=os.environ.get("TRACE_DIR", ""),
         app_version=os.environ.get("APP_VERSION", "0.1.0"),
     )

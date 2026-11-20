@@ -91,6 +91,8 @@ def run_incremental(settings: IndexerSettings, *, client: Any = None, lake: Lake
     docs = reg.docs
 
     entries = {e.file: e for e in load_manifest(settings.corpus_dir)}
+    if not entries:
+        raise SystemExit(f"no documents found in {settings.corpus_dir}")
     shas = {n: _sha256(Path(settings.corpus_dir) / n) for n in entries if (Path(settings.corpus_dir) / n).is_file()}
     new, changed, unchanged, qbefore, stale = [], [], [], [], []
     for name in sorted(entries):
