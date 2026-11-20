@@ -2,6 +2,8 @@
 
 Two people, two lanes, built so that neither waits for the other.
 
+> This plan is for Assignment 02 and is closed. **Assignment 03 (RAGOps) has its own plan: [`IMPLEMENTATION_PLAN_A3.md`](IMPLEMENTATION_PLAN_A3.md)**, with hand-offs H3-1 to H3-6 for Ahmad.
+
 | | |
 | --- | --- |
 | Start | Wednesday 4 November 2026 (evening) |

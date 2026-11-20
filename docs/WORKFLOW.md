@@ -6,7 +6,7 @@ It is written for the **developer session** (a Claude Code session that writes t
 
 | | |
 | --- | --- |
-| Applies to | Zain's RAG lane (phases 1 to 15). Ahmad may reuse it for his own tasks. |
+| Applies to | Zain's RAG lane (phases 1 to 15), the platform plan (K1 to K11) and **Assignment 03 (phases R1 to R11, [`IMPLEMENTATION_PLAN_A3.md`](IMPLEMENTATION_PLAN_A3.md))**. Ahmad may reuse it for his own tasks. For Assignment 03 the gate mode is decision D-124 (default: per-phase gate, waivable by Zain). |
 | One phase = | one spec-and-plan file, one branch, one pull request |
 | Spec files | `docs/specs/phase-NN-<slug>.md`, created from [`specs/TEMPLATE.md`](specs/TEMPLATE.md) |
 | Progress is logged in | [`IMPLEMENTATION_PLAN.md`](IMPLEMENTATION_PLAN.md) (the only tracker) and the spec file's own sign-off table |
