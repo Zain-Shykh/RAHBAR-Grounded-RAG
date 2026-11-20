@@ -5,6 +5,6 @@ rules:
   - {metric: component.clean.recall_at_5, op: not_below_baseline_by, value: 0.02, why: "assignment example: no more than 2 points lost"}
   - {metric: component.clean.mrr, op: not_below_baseline_by, value: 0.03, why: "ranking quality; set above the run-to-run difference"}
   - {metric: e2e.faithfulness_supported_rate, op: at_least, value: 0.70, why: "placeholder until R7 measures the baseline"}
-  - {metric: e2e.abstention_correctness, op: not_below_baseline, value: 0, why: "assignment: not lower than the baseline"}
+  - {metric: e2e.abstention_correctness, op: not_below_baseline, why: "assignment: not lower than the baseline"}
   - {metric: e2e.citation_validity, op: at_least, value: 0.95, why: "A02 gate value"}
   - {metric: e2e.latency_p95_s, op: at_most, value: 120, why: "placeholder until R7 measures the baseline"}

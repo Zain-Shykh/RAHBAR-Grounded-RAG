@@ -77,3 +77,8 @@ def test_compare_table_has_all_three_levels() -> None:
     full = {"meta": {"label": "x"}, "module": {"gap": 0.3}, "component": {"clean": {"recall_at_5": 0.9}}, "e2e": {"citation_validity": 1}}
     t = table(full, full)
     assert "| module |" in t and "| component |" in t and "| e2e |" in t
+
+
+def test_abstention_rule_has_no_ignored_value() -> None:   # T-8
+    rule = next(r for r in CFG["rules"] if r["metric"] == "e2e.abstention_correctness")
+    assert rule["op"] == "not_below_baseline" and "value" not in rule
