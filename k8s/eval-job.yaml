@@ -34,7 +34,7 @@ spec:
           image: rahbar-eval:dev
           imagePullPolicy: IfNotPresent
           env:
-            - {name: API_URL, value: "http://api"}
+            - {name: API_URL, value: "http://api:8000"}
             - {name: RUN_LABEL, value: "live"}
             - {name: SUBSET, value: "A"}
             - {name: SET_BASELINE, value: "false"}

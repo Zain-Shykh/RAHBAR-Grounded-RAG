@@ -30,8 +30,8 @@ whole procedure. Ollama runs on the host (`OLLAMA_HOST=0.0.0.0 ollama serve`; mo
 | F, metrics endpoint | `kubectl port-forward svc/api 8000:8000 -n rahbar`, then `curl localhost:8000/metrics` |
 | F, candidate and release | `make candidate CHUNK=300 OVERLAP=50`, eval Job with `API_URL=http://api-candidate:8000`, `make release COLLECTION=rahbar_cand`, `make rollback` |
 
-First baseline on the cluster: `sed 's/value: "false"}$/value: "true"}/' k8s/eval-job.yaml` is not needed; instead edit
-`SET_BASELINE` to `"true"` in a copy of the Job, apply it once, then use the file as is.
+First baseline on the cluster: `make eval-job SET_BASELINE=true LABEL=baseline` (the result becomes
+`/results/baseline.json`, no gate); afterwards `kubectl apply -f k8s/eval-job.yaml` (or `make eval-job`) gates against it.
 
 ## Volumes
 

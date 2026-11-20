@@ -17,7 +17,7 @@ CHROMA_IMAGE ?= chromadb/chroma:1.0.12
 REDIS_IMAGE ?= redis/redis-stack-server:7.4.0-v8
 
 .DEFAULT_GOAL := help
-.PHONY: eval-image gate-config suite suite-twice candidate release rollback ingest-batch lake-ls results-pull traces-pull baseline resources help install test lint dev dev-services dev-services-stop dev-services-reset cluster images corpus apply down secret index ask fetch eval eval-fixtures check manifests
+.PHONY: eval-job eval-ctx eval-image gate-config suite suite-twice candidate release rollback ingest-batch lake-ls results-pull traces-pull baseline resources help install test lint dev dev-services dev-services-stop dev-services-reset cluster images corpus apply down secret index ask fetch eval eval-fixtures check manifests
 
 help: ## list the targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  make %-14s %s\n", $$1, $$2}'
@@ -59,6 +59,8 @@ dev-services-reset: dev-services-stop ## also delete the dev data volumes
 
 manifests: ## build and kubeconform-validate the dev, ci and prod overlays
 	@set -e; for o in dev ci prod; do echo "== $$o"; kustomize build --load-restrictor LoadRestrictionsNone k8s/overlays/$$o > /tmp/rahbar-$$o.yaml; kubeconform -strict -summary < /tmp/rahbar-$$o.yaml; done
+	kubeconform -strict -summary k8s/eval-job.yaml k8s/trace-report-job.yaml k8s/candidate/indexer-job.yaml
+	kustomize build k8s/candidate | kubeconform -strict -summary
 
 cluster: ## start minikube with Calico, then enable metrics-server and ingress
 	minikube start --driver=docker --cni=calico --memory=6144 --cpus=4
@@ -121,11 +123,13 @@ check: ## run the submission checker
 	$(PY) scripts/check_submission.py
 
 # ---- Assignment 03 (RAGOps): see k8s/README.md for the order ---------------------------------------------------
-eval-image: ## build rahbar-eval from a small staging directory and load it into minikube
+eval-ctx: ## stage the small build context of rahbar-eval (eval/ plus scripts/)
 	rm -rf /tmp/rahbar-eval-ctx && mkdir -p /tmp/rahbar-eval-ctx/scripts
 	cp -r eval /tmp/rahbar-eval-ctx/eval && rm -rf /tmp/rahbar-eval-ctx/eval/results /tmp/rahbar-eval-ctx/eval/tests /tmp/rahbar-eval-ctx/eval/tuning /tmp/rahbar-eval-ctx/eval/__pycache__
 	cp scripts/trace_report.py scripts/trace_tool.py /tmp/rahbar-eval-ctx/scripts/
 	cp eval/Dockerfile /tmp/rahbar-eval-ctx/Dockerfile
+
+eval-image: eval-ctx ## build rahbar-eval from the staged context and load it into minikube
 	docker build -t rahbar-eval:$(TAG) /tmp/rahbar-eval-ctx
 	minikube image load rahbar-eval:$(TAG)
 
@@ -188,3 +192,7 @@ release: ## release the candidate collection to the live api by a rolling update
 rollback: ## reverse the last release
 	kubectl rollout undo deployment/api -n $(NS)
 	kubectl rollout status deployment/api -n $(NS) --timeout=600s
+
+eval-job: ## run the eval Job: make eval-job [API=http://api:8000] [LABEL=live] [SET_BASELINE=false]
+	kubectl delete job eval -n $(NS) --ignore-not-found
+	sed 's|{name: API_URL, value: "http://api:8000"}|{name: API_URL, value: "$(or $(API),http://api:8000)"}|; s|{name: RUN_LABEL, value: "live"}|{name: RUN_LABEL, value: "$(or $(LABEL),live)"}|; s|{name: SET_BASELINE, value: "false"}|{name: SET_BASELINE, value: "$(or $(SET_BASELINE),false)"}|' k8s/eval-job.yaml | kubectl apply -f -

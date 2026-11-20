@@ -21,7 +21,7 @@ def main() -> int:
     out = Path(os.environ.get("RESULTS_DIR", "/results"))
     label = os.environ.get("RUN_LABEL", "run")
     try:
-        result = run_suite(os.environ.get("API_URL", "http://api"), label, os.environ.get("SUBSET", "A"),
+        result = run_suite(os.environ.get("API_URL", "http://api:8000"), label, os.environ.get("SUBSET", "A"),
                            int(os.environ.get("SEED", "1234")), HERE / "golden.jsonl", None, out)
     except Exception as exc:
         print(f"SUITE FAILED: {exc!r}", file=sys.stderr)
