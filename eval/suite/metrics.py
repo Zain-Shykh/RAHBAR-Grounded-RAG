@@ -36,6 +36,7 @@ def ndcg_at_k(relevant: list[dict], retrieved: list[dict], k: int = 5) -> float 
     """Binary gain; a relevant pair gains once, at its first match. IDCG puts min(|R|, k) gains on top."""
     if not relevant:
         return None
+    relevant = list({(r["source"], r["section"]): r for r in relevant}.values())   # T-5: identical pairs count once
     seen: set[int] = set()
     dcg = 0.0
     for i, g in enumerate(retrieved[:k], 1):

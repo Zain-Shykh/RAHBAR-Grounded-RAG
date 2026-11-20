@@ -84,3 +84,8 @@ def test_stochasticity_compare() -> None:
                                                                                 "citations": [{"section": "1"}]}]}, "module": {}}
     out = compare(a, b)
     assert out["answers_differing_text"] == ["q"] and out["answers_differing_outcome_or_citations"] == []
+
+
+def test_ndcg_duplicate_relevant_pairs_count_once() -> None:   # T-5
+    r = {"source": "a", "section": "1"}
+    assert ndcg_at_k([r, dict(r)], [hit("a", "1")]) == 1.0
