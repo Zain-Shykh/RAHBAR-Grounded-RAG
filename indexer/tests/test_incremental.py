@@ -103,7 +103,8 @@ def test_deleted_document_leaves_no_orphans_and_is_archived(env):
     write(corpus, {"a.md": (doc("Alpha", 3), {})})
     (corpus / "b.md").unlink()
     s = run_incremental(settings(corpus, lake), client=client, lake=Lake(lake))
-    assert s["deleted"] == 1 and ids_of(client, "b.md") == []
+    assert s["deleted"] == 1 and ids_of(client, "b.md") == [] and s["deleted_chunks_remaining"] == {"b.md": 0}
+    assert set(s["chunks_by_source"]) == {"a.md"}
     assert client.cols["rahbar"].count() == Registry.load(lake, "rahbar").total_chunks()
     assert "b.md" not in Registry.load(lake, "rahbar").docs
     assert list((lake / "archive" / "b.md").glob("*/b.md"))            # last version kept

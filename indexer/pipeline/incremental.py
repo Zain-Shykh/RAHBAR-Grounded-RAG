@@ -158,6 +158,7 @@ def run_incremental(settings: IndexerSettings, *, client: Any = None, lake: Lake
         summary["seconds"] = round(time.perf_counter() - started, 1)
         lake.write_report(run_id, "summary.json", summary)
         log("ingest summary", **summary)
+        print(render_summary(summary), flush=True)
         return summary
 
     started_embed = time.perf_counter()
@@ -202,11 +203,31 @@ def run_incremental(settings: IndexerSettings, *, client: Any = None, lake: Lake
         raise RuntimeError(f"registry says {reg.total_chunks()} chunks, collection has {col.count()} (I-21)")
     reg.save(collection=settings.collection, embed_model=settings.embed_model, dimension=dim,
              chunk_size=settings.chunk_size, chunk_overlap=settings.chunk_overlap, index_id=index_id)
+    # the orphan proof (R3-A2-3): chunks still stored under the id of every deleted document, counted in the store
+    remaining = {s: len(col.get(where={"source": s}, include=[])["ids"]) for s in deleted}
+    summary.update(deleted_chunks_remaining=remaining,
+                   chunks_by_source={s: d["chunks"] for s, d in sorted(docs.items())})
     summary.update(chunks_embedded=len(new_chunks), chunks_copied=len(copied), chunks_total=col.count(),
                    index_swapped=True, index_id=index_id, seconds=round(time.perf_counter() - started, 1))
     lake.write_report(run_id, "summary.json", summary)
     log("ingest summary", **summary)
+    print(render_summary(summary), flush=True)
     return summary
+
+
+def render_summary(s: dict) -> str:
+    """The human-readable table printed after the JSON line (screenshot R3-S-A2)."""
+    rows = [("mode", s["mode"]), ("documents new / changed / unchanged / deleted",
+                                  f"{s['new']} / {s['changed']} / {s['unchanged']} / {s['deleted']}"),
+            ("quarantined now / quarantined before", f"{s['quarantined']} / {s['quarantined_before']}"),
+            ("superseded / flags flipped", f"{s['superseded']} / {s['flipped']}"),
+            ("chunks embedded", s["chunks_embedded"]), ("chunks copied forward", s["chunks_copied"]),
+            ("chunks in the index", s["chunks_total"]), ("index swapped", s["index_swapped"]),
+            ("index_id", s["index_id"])]
+    if s.get("deleted_chunks_remaining"):
+        rows.append(("chunks left under deleted documents", s["deleted_chunks_remaining"]))
+    w = max(len(k) for k, _ in rows)
+    return "\n".join(["ingest summary " + s["run_id"]] + [f"  {k:<{w}}  {v}" for k, v in rows])
 
 
 def _record_quarantine(reg: Registry, verdicts: list, by_src: dict, run_id: str) -> None:
