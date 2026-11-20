@@ -35,7 +35,7 @@ def main() -> int:
         base = json.loads(baseline.read_text())
         cand = json.loads(result.read_text())
         cfg = gate.yaml.safe_load(Path(os.environ.get("GATE_CONFIG", "/gate/gate.yaml")).read_text())
-    except (OSError, ValueError) as exc:
+    except (OSError, ValueError, gate.yaml.YAMLError) as exc:
         print(f"GATE ERROR: {exc!r}", file=sys.stderr)
         return 2
     code, lines = gate.run(base, cand, cfg)

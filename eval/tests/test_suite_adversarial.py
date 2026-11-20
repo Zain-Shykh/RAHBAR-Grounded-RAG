@@ -180,9 +180,6 @@ def test_gate_bad_config_exits_2(tmp_path, monkeypatch, cfg_text) -> None:
     assert gate.main() == 2
 
 
-@pytest.mark.xfail(strict=True, raises=yaml.YAMLError,
-                   reason="DEFECT T-2: gate.main() does not catch yaml.YAMLError; a malformed config dies with a traceback "
-                          "and Python exit code 1, which reads as 'gate FAILED' instead of 2")
 def test_gate_malformed_yaml_exits_2(tmp_path, monkeypatch) -> None:
     b, g = tmp_path / "b.json", tmp_path / "g.yaml"
     b.write_text(json.dumps(BASE))
@@ -340,3 +337,15 @@ def test_report_on_empty_dir_and_old_records_and_missing_retrieved(tmp_path) -> 
     assert s["top1_similarity"]["min"] is None and s["cache_hit_rate"] == 0.0
     with pytest.raises(SystemExit):
         report.parse_window("soon")
+
+
+def test_job_malformed_gate_yaml_exits_2(tmp_path, monkeypatch, capsys) -> None:
+    from suite import job
+    res = tmp_path / "r.json"
+    res.write_text(json.dumps(BASE))
+    (tmp_path / "g.yaml").write_text("rules: [unclosed")
+    monkeypatch.setattr(job, "run_suite", lambda *a, **k: res)
+    monkeypatch.setenv("RESULTS_DIR", str(tmp_path))
+    monkeypatch.setenv("BASELINE", str(res))
+    monkeypatch.setenv("GATE_CONFIG", str(tmp_path / "g.yaml"))
+    assert job.main() == 2 and "GATE ERROR" in capsys.readouterr().err

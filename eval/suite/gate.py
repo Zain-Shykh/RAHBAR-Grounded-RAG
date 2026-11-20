@@ -75,7 +75,7 @@ def main() -> int:
         cand = json.loads(Path(a.candidate).read_text())
         cfg = yaml.safe_load(Path(a.config).read_text())
         code, lines = run(base, cand, cfg)
-    except (OSError, ValueError, KeyError, TypeError) as exc:
+    except (OSError, ValueError, KeyError, TypeError, yaml.YAMLError) as exc:
         print(f"GATE ERROR: {exc!r}", file=sys.stderr)
         return 2
     print(f"gate config {a.config}\nbaseline  {a.baseline}\ncandidate {a.candidate}")
