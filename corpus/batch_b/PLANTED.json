@@ -1,0 +1,68 @@
+[
+  {
+    "file": "b01-library-policy-2026.md",
+    "problem": "control",
+    "expect": "pass"
+  },
+  {
+    "file": "b02-lab-safety-rules-2026.md",
+    "problem": "control",
+    "expect": "pass"
+  },
+  {
+    "file": "b03-library-policy-2026-copy.md",
+    "problem": "exact_duplicate",
+    "of": "b01-library-policy-2026.md",
+    "expect": "fail:uniqueness"
+  },
+  {
+    "file": "b04-lab-safety-rules-2026-copy.md",
+    "problem": "exact_duplicate",
+    "of": "b02-lab-safety-rules-2026.md",
+    "expect": "fail:uniqueness"
+  },
+  {
+    "file": "b05-library-policy-2026-reissue.md",
+    "problem": "near_duplicate",
+    "of": "b01-library-policy-2026.md",
+    "expect": "fail:uniqueness"
+  },
+  {
+    "file": "b06-transport-policy-2026.pdf",
+    "problem": "control",
+    "expect": "pass"
+  },
+  {
+    "file": "b07-transport-policy-2026-truncated.pdf",
+    "problem": "truncated",
+    "expect": "fail:completeness"
+  },
+  {
+    "file": "b08-transport-notice-corrupt.pdf",
+    "problem": "corrupt",
+    "expect": "fail:quality"
+  },
+  {
+    "file": "b09-merit-scholarship-notes.md",
+    "problem": "missing_metadata",
+    "expect": "fail:completeness"
+  },
+  {
+    "file": "b10-fee-structure-amendment-2027.md",
+    "problem": "newer_version",
+    "of": "fee-structure-page.html",
+    "expect": "pass",
+    "effect": "supersede fee-structure-page.html"
+  },
+  {
+    "file": "b11-examination-guidelines-2026.md",
+    "problem": "injected_instruction",
+    "expect": "pass",
+    "note": "not a verification problem; the retrieval rail catches it"
+  },
+  {
+    "file": "b12-sports-facilities-2026.md",
+    "problem": "control",
+    "expect": "pass"
+  }
+]
