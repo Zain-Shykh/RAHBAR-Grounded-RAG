@@ -97,6 +97,8 @@ Plan estimate 6 h, mostly the candidate runs.
 
 - Implemented by the orchestrator session before this spec (D-127). `job.py` imports `gate.yaml` through the gate module (works, but couples the two).
 
+**Fix round 1 (2026-11-21):** T-2 fixed: gate.main() and suite/job.py exit 2 with GATE ERROR on a YAML error; T-8 fixed: the ignored value removed from the abstention rule in eval/gate.yaml; T-4 fixed: cache-hit trace retrieved entries carry doc_version/superseded (null, not stored in the cache).
+
 ## 12. Test report
 
 Round 1, 2026-11-21, branch `feat/rag-r04-eval-suite`, base 64464d3.

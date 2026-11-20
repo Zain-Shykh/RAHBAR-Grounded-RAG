@@ -109,6 +109,8 @@ Plan estimate 5 h.
 - Module level calls Ollama directly (the API is not involved); component level only calls `/api/retrieve`.
 - Deviation: DEV-017 covers `POST /api/retrieve`. No other deviation.
 
+**Fix round 1 (2026-11-21):** T-1 fixed: golden.load()/problems() report null relevant, missing kind/origin and bad JSON lines as PROBLEM lines; T-5 fixed: nDCG dedupes identical relevant (source, section) pairs.
+
 ## 12. Test report
 
 Round 1, 2026-11-21, branch `feat/rag-r04-eval-suite`, base commit 64464d3 (independent tester, same machine; no Ollama, no docker, no network).

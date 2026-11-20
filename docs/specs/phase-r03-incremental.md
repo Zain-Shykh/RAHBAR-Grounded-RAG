@@ -113,6 +113,8 @@ See the plan table (R3); written retroactively, so no separate estimate.
 
 Copy-forward reads live rows including embeddings, writes through the unchanged `store()` swap. Registry saved after the swap; mismatch of counts raises before the save (I-21).
 
+**Fix round 1 (2026-11-21):** added scripts/check_registry.py (+ indexer/tests/test_check_registry.py, Makefile lint list) for R3-AC10; a live run against the collection is still to do.
+
 ## 12. Test report
 
 Independent tester (D-127), branch `feat/rag-r04-eval-suite`, hashing embedder and fake Chroma, no network.

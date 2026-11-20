@@ -98,6 +98,8 @@ See the plan table (R1); written retroactively, so no separate estimate.
 
 Generator is deterministic; `PLANTED.json` has 12 rows (4 controls). `discover()` untouched; the new `manifest.py` is the single loader for the verification stage. No deviation.
 
+**Fix round 1 (2026-11-21):** ran scripts/enrich_manifest.py corpus/raw; _index.a02.json now exists; json-equal to the pre-run manifest, and current _index.json minus family equals it, so R1-AC5 holds.
+
 ## 12. Test report
 
 Independent tester (D-127), branch `feat/rag-r04-eval-suite`, hashing embedder and fake Chroma, no network.

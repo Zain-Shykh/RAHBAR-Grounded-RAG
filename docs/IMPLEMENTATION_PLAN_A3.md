@@ -139,6 +139,7 @@ Append-only, newest at the bottom. Format: `YYYY-MM-DD  PNN  <stage or event>: <
 2026-11-21  R1   TESTED (independent, retroactive spec docs/specs/phase-r01-batch-b.md): AC1 to AC4 PASS; AC5 not proven (corpus/raw/_index.a02.json absent on this machine).
 2026-11-21  R2   TESTED (docs/specs/phase-r02-verification.md): AC1 to AC8 PASS. Real corpus 9 of 9 pass, Batch B 6 indexed and 6 quarantined as planted; verification coverage about 94%. Added strict-exit test.
 2026-11-21  R3   TESTED (docs/specs/phase-r03-incremental.md): AC2 to AC9 PASS, 13 edge tests added (unicode, empty corpus, registry or collection missing, embedder and registry-save failure, quarantine fixed, changed back, restore twice, superseded deleted). AC10 FAIL: scripts/check_registry.py does not exist. AC1 and AC11 (spike, make eval-fixtures) not re-run: need services.
+2026-11-21  R1-R7 FIX ROUND 1: T-1 T-2 T-4 T-5 T-8 fixed, scripts/check_registry.py added (R3-AC10), corpus/raw/_index.a02.json created (R1-AC5); tests green.
 ```
 
 ---
