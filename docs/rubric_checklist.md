@@ -1,6 +1,6 @@
 # RAHBAR rubric checklist
 
-Working checklist. Source of detail: `docs/requirements.md` (IDs in brackets). Tick a box only with evidence (file path, command output or screenshot in `docs/evidence/`). Re-run the whole list before submitting, plus `make check`.
+Working checklist for **Assignment 02** (closed). **Assignment 03 (RAGOps) has its own checklist in section F at the end of this file** and its requirements in `docs/requirements-a3.md`. Source of detail: `docs/requirements.md` (IDs in brackets). Tick a box only with evidence (file path, command output or screenshot in `docs/evidence/`). Re-run the whole list before submitting, plus `make check`.
 
 Legend: `[x]` done and evidenced, `[ ]` not done. Point weights for graded lines are not published in the assignment; deductions are.
 
@@ -286,3 +286,34 @@ Every ticked box in section B rests on one of these. Nothing is ticked on memory
 3. *readiness does not look like it checks for a NON-EMPTY collection*: **false positive.** `readyz` calls `IndexState.get()`, which raises `IndexUnavailable("collection")` when `col.count() == 0` (`api/app/services/index_state.py:72-79`), and `/readyz` turns that into 503 naming `collection`. Tested in `api/tests/test_index_state.py` and `test_health.py`. The checker only reads the `readyz` function body and ignores comments, so it cannot see the delegation. Not changed to satisfy a regex (D-104).
 4. *no never-cache rule found*: **false positive.** The rule is `cacheable()` (`api/app/services/cache.py:35`): only a validated, answered, from-context, non-follow-up response with valid citations is stored; tested in `api/tests/test_cache_answer.py`. The code names it `follow_up`/`cacheable`, not `is_followup`/`never_cache`, which is all the regex looks for (D-104).
 5. *time.sleep() in tests*: five deliberate delays, with some residual timing sensitivity. `test_health.py` (3) simulates slow dependencies for timeout/probe tests; `test_ollama_provider.py` (1) holds concurrent calls open to exercise the semaphore; `test_cache_redis_adversarial.py` waits 2.2 s for a real Redis TTL of 1 s to expire (the TTL is Redis's clock, not patchable from the test). Removing them would remove the behaviour under test.
+
+---
+
+## F. Assignment 03 (RAGOps): things to avoid and things to do
+
+Source of detail: `docs/requirements-a3.md` (ids `R3-*`). Plan: `docs/IMPLEMENTATION_PLAN_A3.md`. Tick only with a file pointer. The assignment publishes no point weights; the zero-mark conditions come from its own instructions.
+
+### F.1 Things to AVOID (zero or loss of credit)
+
+- [ ] The demo runs on Docker or Compose only: **0 for the demo** [R3-LOG-5]. Everything is shown on minikube.
+- [ ] Late submission: **zero** [R3-LOG-2]. Deadline unknown until D-107 is answered.
+- [ ] A requirement changed or renamed: **no credit** [R3-LOG-3]. Keep `eval/golden.jsonl`, `eval/results/`, `traces/`, `k8s/eval-job.yaml`, the 25-question and 40-query minimums.
+- [ ] A number in the report that is not from our own committed run [R3-LOG-4, I-25]. `scripts/check_numbers.py` covers it.
+- [ ] Commits from one member only [R3-LOG-6].
+- [ ] A member who cannot explain a part at the demo [R3-LOG-1].
+- [ ] Report over 8 pages (appendix excluded), or names and roll numbers missing on page 1 [R3-G].
+- [ ] A screenshot cropped, unlabelled, or from somewhere other than our cluster [R3-S-*].
+- [ ] A secret, `corpus/raw/`, a model or `.env*` in Git (A02 rule I-13 still applies).
+- [ ] Anything that breaks Assignment 02: I-1 to I-17, the A02 CI gate, `/readyz` pin check.
+
+### F.2 Things to DO
+
+| Part | Items | Evidence file (fill in) |
+| --- | --- | --- |
+| A | [ ] A1 four checks with reasons [R3-A1-2]; [ ] quarantine [R3-A1-3]; [ ] report per run [R3-A1-4]; [ ] unchanged run embeds 0 [R3-A2-1]; [ ] changed replaces only its chunks [R3-A2-2]; [ ] delete leaves no orphans, counted by id [R3-A2-3]; [ ] supersede, archive, restore [R3-A2-4]; [ ] Batch B of 10+ with the six planted problems [R3-AB-1] | |
+| B | [ ] 25+ golden questions with the composition, 8 human, 8 reviewed synthetic [R3-B-1, R3-B-2]; [ ] module level [R3-B-3]; [ ] recall@3, recall@5, MRR, nDCG@5 [R3-B-4]; [ ] noise test [R3-B-5]; [ ] e2e metrics [R3-B-6]; [ ] judge agreement on 8+ hand labels [R3-B-7]; [ ] two seeded runs and the difference [R3-B-8]; [ ] one command, timestamped result [R3-B-9] | |
+| C | [ ] one change, three levels compared [R3-C1]; [ ] thresholds in a config file, gate script exits [R3-C2-1, R3-C2-2]; [ ] one failing and one passing candidate [R3-C2-3]; [ ] release decision [R3-G-3] | |
+| D | [ ] trace fields complete [R3-D1-1]; [ ] trace tool [R3-D2-1]; [ ] metrics and window script [R3-D3-*]; [ ] guardrail in the trace, tested on Batch B [R3-D4-1]; [ ] root cause in 5 lines [R3-D5-1] | |
+| E | [ ] 40+ live queries [R3-E1-1]; [ ] coverage with justified threshold and topics [R3-E2-1]; [ ] data drift [R3-E3-1]; [ ] 6+ new golden questions, coverage rises [R3-E4-1]; [ ] non-zero exit below threshold [R3-E4-2] | |
+| F | [ ] Deployment, StatefulSet, Service, lake on a PVC [R3-F1-*]; [ ] ingestion Job and CronJob, only writer [R3-F2-1]; [ ] eval Job via `kubectl apply -f k8s/eval-job.yaml`, fails when the gate fails [R3-F2-2]; [ ] gate ConfigMap edit flips the outcome [R3-F2-3]; [ ] candidate Deployment and Service, own collection [R3-F3-1]; [ ] rolling update with `maxUnavailable: 0` [R3-F3-2]; [ ] blocked candidate and rollout undo [R3-F3-3]; [ ] trace after undo shows the previous collection and embedding [R3-F3-4]; [ ] traces on stdout and a volume, metrics by port-forward [R3-F4-*]; [ ] measured requests and limits [R3-F5-1]; [ ] fresh cluster from `k8s/README.md` [R3-F5-2] | |
+| G | [ ] Figure 3 table [R3-G-1]; [ ] Table 2 qualities table [R3-G-2]; [ ] results and release decision [R3-G-3]; [ ] short answers (a) to (f) [R3-G-4]; [ ] contribution table and AI statement [R3-G-5]; [ ] 14 screenshots [R3-S-*] | |
