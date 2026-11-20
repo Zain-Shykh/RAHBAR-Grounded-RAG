@@ -8,8 +8,8 @@ The phased build plan for Assignment 03, "RAGOps": add data management, three-le
 | Requirements | [`requirements-a3.md`](requirements-a3.md) (ids `R3-*`) |
 | Design | [`architecture/architecture-a3.md`](architecture/architecture-a3.md) (section numbers below refer to it; decisions AD-29 to AD-45, invariants I-18 to I-26) |
 | Procedure | [`WORKFLOW.md`](WORKFLOW.md): spec and plan in one document, one gate, implement, independent test, PR, merge on Zain's word |
-| Deadline | **not stated in the assignment text: open decision D-107.** The schedule below is in hours, not dates |
-| Estimate | about 64 hours of AI-assisted work across 11 phases, plus the R0 planning phase |
+| Deadline | **Sunday 22 November 2026** (D-107, from Zain; time not given, plan for 23:59 PKT, submit by 18:00). Started Saturday 21 Nov 02:57 PKT: about 45 hours. See section 7 |
+| Estimate | about 64 hours uncompressed; **compressed to about 34 hours by section 7** |
 | Builds on | RAHBAR at `main` `bd6468a` plus `dev` (PR #45) |
 
 ---
@@ -20,8 +20,8 @@ You are the agent building Assignment 03. Follow the plan in order and update it
 
 ### 0.1 Authorisation and gates
 
-- **Proposed, effective on Zain's approval of this planning set (open decision D-124):** sessions may edit `api/**`, `indexer/**`, `eval/**`, `scripts/**`, `corpus/batch_b/**`, `traces/**`, `docs/**`, `k8s/**`, `.github/**`, `Makefile`, `eval/Dockerfile`. `ui/index.html` and `ui/nginx.conf` stay untouched. The earlier rule that `k8s/` and `.github/` belong to Ahmad is lifted for this assignment for the same reason as the platform plan: it is Zain's session that builds them.
-- **Gate.** Each phase keeps the one gate of [`WORKFLOW.md`](WORKFLOW.md): the phase's spec and plan are presented together and wait for Zain's explicit approval before code. Zain may waive it for a block of phases by saying so ("pre-approve R4 to R6"); that is recorded in the log. Everything after the gate runs without waiting until the PR.
+- **Approved by Zain on 2026-11-21 (D-124 decided):** sessions may edit `api/**`, `indexer/**`, `eval/**`, `scripts/**`, `corpus/batch_b/**`, `traces/**`, `docs/**`, `k8s/**`, `.github/**`, `Makefile`, `eval/Dockerfile`. `ui/index.html` and `ui/nginx.conf` stay untouched. The earlier rule that `k8s/` and `.github/` belong to Ahmad is lifted for this assignment for the same reason as the platform plan: it is Zain's session that builds them.
+- **Gate waived.** Zain approved the whole plan on 2026-11-21 and told the session to keep working to the end. There is no per-phase approval wait. The phase section of this file is the spec; each phase still has a branch, tests, an independent check (see section 7), a PR into `dev` that the session merges when `make test && make lint` are green, and log lines. The PR to `main` comes at R11.
 - **Merge** only on Zain's word, into `dev`, never into `main` until R11.
 - **Hard stops (ask Zain, do not guess):** a conflict between the assignment and the design; a secret or credential in a diff; a failing tester after 3 rounds; a change to a GitHub repository setting; anything that deletes the Assignment 02 evidence; a number that does not come from a committed run.
 
@@ -41,8 +41,8 @@ You are the agent building Assignment 03. Follow the plan in order and update it
 - **Evidence rule (I-25).** Every number that will appear in the report is produced by a committed script, saved to a committed file (`eval/results/`, `traces/`, `docs/evidence/`) and recorded in the results register (section 5). A number typed from memory is a defect.
 - Tests need no network, no model and no cluster, except tests the spec marks as integration. Never weaken or skip a test.
 - Commits: Conventional Commits, small, ending with the `Co-Authored-By` trailer the tool gives. Never push to `main`. Docker needs `sg docker -c "docker ..."`. `pkill ollama` and `minikube stop` when idle.
-- Ahmad's lane: he has 6 commits already (R3-LOG-6). The plan gives him review, hand-labelling, screenshots and README checking (hand-offs H3-1 to H3-6). He has not been reachable; nothing blocks on him, but the demo requires both members (R3-LOG-1).
-- Update [`AI-USAGE.md`](AI-USAGE.md) at the end of each phase.
+- Ahmad is not available (D-108). Zain's session does all work; hand-offs H3-2 to H3-6 move to Zain's own checklist `eval/HUMAN_TODO.md`. He has 6 commits from A02 (R3-LOG-6). The demo requires both members to explain everything (R3-LOG-1): risk accepted by Zain.
+- Update [`AI-USAGE.md`](AI-USAGE.md) at the end of each phase. Push after every phase.
 
 ### 0.4 End of every phase
 
@@ -66,8 +66,8 @@ Anything that is not in `requirements-a3.md`. In particular: a reranker (the exp
 
 | # | Phase | Requirements | Est | Status | PR |
 | --- | --- | --- | --- | --- | --- |
-| R0 | Planning set: requirements, architecture, plan, decisions | all | 2 h | READY FOR GATE | (this PR) |
-| R1 | Batch B and the manifest contract | R3-AB-1 | 3 h | NOT STARTED | |
+| R0 | Planning set: requirements, architecture, plan, decisions | all | 2 h | DONE (approved by Zain 2026-11-21) | #46 |
+| R1 | Batch B and the manifest contract | R3-AB-1 | 3 h | IN PROGRESS | |
 | R2 | Verification stage (A1) | R3-A1-* | 6 h | NOT STARTED | |
 | R3 | Incremental update, archive, restore (A2) | R3-A2-*, R3-AB-2 | 7 h | NOT STARTED | |
 | R4 | Golden set, module level, component level, noise | R3-B-1 to R3-B-5 | 5 h | NOT STARTED | |
@@ -86,13 +86,13 @@ Hours spent so far: planned 64 h plus 2 h (R0), actual `____`.
 ## 2. Current focus
 
 ```
-Phase:        R0  Planning set for Assignment 03
-Stage:        READY FOR GATE (documents written and committed; waiting for Zain)
-Branch:       docs/a3-ragops-planning
-Spec:         docs/requirements-a3.md, docs/architecture/architecture-a3.md, this file
-Next action:  Zain answers D-107 (deadline), D-108 (Ahmad), D-109 (paper), D-120 (change experiment), D-124 (gates) and approves or changes the plan; then R1
-Waiting on:   Zain
-Last updated: 2026-11-21
+Phase:        R1  Batch B and the manifest contract (R1 to R3 run as one indexer block)
+Stage:        IMPLEMENTING
+Branch:       feat/rag-r01-batch-b
+Spec:         this file, phase R1
+Next action:  write scripts/make_batch_b.py and the manifest fields
+Waiting on:   nothing
+Last updated: 2026-11-21 03:15
 ```
 
 Update this block at the end of every work session, even if the phase is unfinished.
@@ -104,15 +104,15 @@ Update this block at the end of every work session, even if the phase is unfinis
 | ID | Direction | Item | Phase | Done |
 | --- | --- | --- | --- | :---: |
 | H3-1 | Zain to Ahmad | Tell Ahmad Assignment 03 exists, share `Assignment_03.md`, this plan, and the demo rule that both must explain every part | R0 | [ ] |
-| H3-2 | Ahmad | Write at least 8 golden questions by hand (R3-B-2) on his own branch, with his own commits | R4 | [ ] |
-| H3-3 | Ahmad | Hand-label at least 12 answers for the judge agreement (R3-B-7) | R5 | [ ] |
-| H3-4 | Ahmad | Review the 8 or more synthetic questions (R3-B-2) and mark `reviewed` | R4 | [ ] |
+| H3-2 | Zain (was Ahmad) | Write at least 8 golden questions by hand (R3-B-2). Not done by the session (D-126): worksheet `eval/HUMAN_TODO.md` | R4 | [ ] |
+| H3-3 | n/a | Hand labels for the judge (R3-B-7): not needed, no LLM judge (D-115) | R5 | [x] |
+| H3-4 | Zain (was Ahmad) | Review 8 or more synthetic questions and mark `reviewed` (R3-B-2), in `eval/HUMAN_TODO.md` | R4 | [ ] |
 | H3-5 | Ahmad | Write the 40 live-style queries' phrasing review (R3-E1-1) and the contribution table entries | R10, R11 | [ ] |
 | H3-6 | Ahmad | Run the README commands on a clean clone and report anything that fails | R11 | [ ] |
-| H3-7 | Zain (human) | Put the RAGOps paper PDF where `docs/reference/` can read it (not committed), if available (D-109) | R0 | [ ] |
+| H3-7 | Zain (human) | Paper supplied at `docs/reference/RAGOPS_paper.pdf` (gitignored) | R0 | [x] |
 | H3-8 | Zain (human) | Docker Hub token: the A02 token expires 30 days after creation; refresh if the CD run is needed for `rahbar-eval` (A3-R6) | R8 | [ ] |
 
-If Ahmad cannot take H3-2 to H3-6, say so at the gate: the plan then has Zain write and review them, and the report's contribution table must say exactly that (honesty over a placeholder).
+Ahmad cannot take H3-2 to H3-6 (D-108). The contribution table must say exactly what the session did and what Zain did.
 
 ---
 
@@ -167,6 +167,28 @@ Tick only with a pointer to the file.
 - [ ] `docs/rubric_checklist.md` section F ticked with evidence; `python3 scripts/check_submission.py` still passes for the A02 parts
 - [ ] AI statement (2 to 3 lines) and the contribution table written truthfully
 - [ ] No secret in Git; `git log` clean of `.env*`, tokens, models, `corpus/raw/`
+
+---
+
+## 7. Compressed schedule (deadline Sun 22 Nov, decided 2026-11-21)
+
+About 45 hours remain. Real runs are slow (a full re-index is about 10 minutes, a 25-question suite with the 3B model several minutes, run twice plus a noisy run), so code and runs overlap.
+
+| Block | Phases | Budget | Cuts made |
+| --- | --- | --- | --- |
+| 1 | R1 + R2 + R3 as one indexer block, one branch per phase, small specs | 8 h | per-phase spec files replaced by the phase sections here; tests focus on the pure functions and the copy-forward path |
+| 2 | R4 + R5 (eval suite) | 6 h | **no LLM judge** (D-115): faithfulness = overlap score only, no hand labels needed; typo noise only (D-116) |
+| 3 | R6 traces and rail | 3 h | sample traces from the real stack |
+| 4 | R7 experiment and gate | 3 h | two candidates only (one expected to fail, one to pass), picked from at most three measured |
+| 5 | R8 cluster | 5 h | measure resources once; rehearse once |
+| 6 | R9 release, R10 coverage and drift | 4 h | the drift run reuses the R8 Batch B ingestion |
+| 7 | R11 report, screenshots, README, main PR | 5 h | |
+
+**Cut line if time runs out (cut last first):** the rollback of a bad release is kept (required) while the optional `--chunks` check of the trace tool, Table 1 extras (precision@5, memory per embedding) and the second candidate rehearsal are dropped first. Never cut: A1, A2, the three levels, the gate, traces, the Kubernetes Jobs, the rollout and undo, coverage, the report and screenshots. Anything cut is listed as an honest gap in the report.
+
+**Human-only items (cannot be done by the session, D-126):** write 8 questions and review 8 synthetic ones (`eval/HUMAN_TODO.md`), supply both roll numbers, take or approve the screenshots if the session cannot capture terminals, Docker Hub token if CD is wanted.
+
+**Paper alignment (read 2026-11-21).** Table 1 lists per level a traditional metric and a RAG metric; our suite also reports embedding time, retrieval latency, index update speed (from the R3 summary) and full-pipeline latency next to the RAG metrics. Table 2's operational considerations (data structure and granularity configuration; degradation and source-change detection; injection detection and context adherence; versioning, retrieval routing and grounded source; resource usage) are the rows of the report's Table G-2. The paper's verification has a fifth check, Consistency (contradictory information); the assignment asks for four; not built, stated in R3-G-4(e).
 
 ---
 

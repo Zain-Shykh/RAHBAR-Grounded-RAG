@@ -88,15 +88,15 @@ Entry template:
 | D-054 | What store validates before touching Chroma | indexer | DECIDED | store |
 | D-055 | How the live indexer run is proven | indexer, process | DECIDED | phase 7 test plan |
 | D-056 | Wait timeouts and batch size as config | indexer | DECIDED | config.py |
-| D-107 | Assignment 03 deadline and schedule | process | OPEN | schedule of R1 to R11 |
-| D-108 | Ahmad's part in Assignment 03 and both-member commits | process | OPEN | R4, R5, R10, R11 hand-offs |
-| D-109 | The RAGOps paper is not in the repository | docs | OPEN | report tables G-1 and G-2 |
+| D-107 | Assignment 03 deadline and schedule | process | DECIDED | schedule of R1 to R11 |
+| D-108 | Ahmad's part in Assignment 03 and both-member commits | process | DECIDED | R4, R5, R10, R11 hand-offs |
+| D-109 | The RAGOps paper is not in the repository | docs | DECIDED | report tables G-1 and G-2 |
 | D-110 | Where the data lake lives (new PVC or the corpus PVC) | k8s, indexer | PROVISIONAL | R2, R3, R8 |
 | D-111 | How incremental update writes the index | indexer | PROVISIONAL | R3 |
 | D-112 | Document id, family and the manifest fields | indexer, corpus | PROVISIONAL | R1, R2 |
 | D-113 | Near-duplicate method and threshold | indexer | PROVISIONAL | R2 |
 | D-114 | Golden set format and its relation to golden.yaml | eval | PROVISIONAL | R4 |
-| D-115 | Faithfulness judge and its hand labels | eval | PROVISIONAL | R5 |
+| D-115 | Faithfulness judge and its hand labels | eval | DECIDED | R5 |
 | D-116 | Noise test: typos, not added documents | eval | PROVISIONAL | R4 |
 | D-117 | Seeds and cache bypass for reproducible runs | api, eval | PROVISIONAL | R5 |
 | D-118 | Trace storage, prompt storage and trace id | api, k8s | PROVISIONAL | R6, R8 |
@@ -105,8 +105,9 @@ Entry template:
 | D-121 | Eval image, Job path and CD matrix | k8s, ci-cd | PROVISIONAL | R8 |
 | D-122 | Release mechanism: edit the live Deployment's env | k8s | PROVISIONAL | R9 |
 | D-123 | Coverage threshold, target and topic grouping | eval | PROVISIONAL | R10 |
-| D-124 | Authorisation scope and gate mode for Assignment 03 | process | OPEN | start of R1 |
-| D-125 | Report tooling (no PDF engine installed) and roll numbers | docs | OPEN | R11 |
+| D-124 | Authorisation scope and gate mode for Assignment 03 | process | DECIDED | start of R1 |
+| D-125 | Report tooling (no PDF engine installed) and roll numbers | docs | PROVISIONAL | R11 |
+| D-126 | Who writes the hand-written questions and labels | process | DECIDED | R4 |
 
 ---
 
@@ -1287,7 +1288,7 @@ Entry template:
 Raised 2026-11-21 while writing the Assignment 03 planning set ([`requirements-a3.md`](requirements-a3.md), [`architecture/architecture-a3.md`](architecture/architecture-a3.md), [`IMPLEMENTATION_PLAN_A3.md`](IMPLEMENTATION_PLAN_A3.md)). `OPEN` entries need Zain's answer before the phase they block. `PROVISIONAL` entries are the recommended option; the plan is built on them and they change only if Zain vetoes.
 
 ### D-107 Assignment 03 deadline and schedule
-- Status: OPEN
+- Status: DECIDED
 - Raised: 2026-11-21 by Claude
 - Area: process
 - Related: `Assignment_03.md` (no date in the text), R3-LOG-2
@@ -1295,11 +1296,11 @@ Raised 2026-11-21 while writing the Assignment 03 planning set ([`requirements-a
 - Options: A. Zain supplies the date and time (and whether the demo is oral or live). B. Plan by hours only until a date is known.
 - Claude recommends: A. Late work scores zero; the plan estimates about 64 hours and the order of phases should be cut to fit (cut line: R10 data-drift run and R9 bad-release demo last, never R1 to R8).
 - Blocks: the schedule only. Phase order and content do not depend on it.
-- Decision:
-- Decided on:
+- Decision: Deadline **Sunday 22 November 2026** (time not given; plan for 23:59 PKT, target submit by 18:00). Today is Saturday 21 Nov 02:57 PKT: about 45 hours. Decided by Zain. The plan is compressed (IMPLEMENTATION_PLAN_A3.md section 7).
+- Decided on: 2026-11-21
 
 ### D-108 Ahmad's part in Assignment 03 and both-member commits
-- Status: OPEN
+- Status: DECIDED
 - Raised: 2026-11-21 by Claude
 - Area: process
 - Related: R3-LOG-1, R3-LOG-6, plan hand-offs H3-1 to H3-6
@@ -1307,11 +1308,11 @@ Raised 2026-11-21 while writing the Assignment 03 planning set ([`requirements-a
 - Options: A. Yes, he takes H3-2 to H3-6 on his own branch with his own commits. B. He is available for review only; Zain writes everything and the contribution table says so. C. He is not available; Zain writes everything, and the demo rule (both explain everything) is a risk Zain accepts.
 - Claude recommends: A if he is reachable, else B. The history already has 6 commits by Ahmad (A02), so R3-LOG-6 is met either way, but the report's contribution table must be true.
 - Blocks: R4 (hand-written questions, review), R5 (hand labels), R10, R11 (review).
-- Decision:
-- Decided on:
+- Decision: C: Ahmad is not available. Zain's session does everything; the contribution table says so. History already has 6 Ahmad commits (A02). Demo rule risk accepted by Zain.
+- Decided on: 2026-11-21
 
 ### D-109 The RAGOps paper is not in the repository
-- Status: OPEN
+- Status: DECIDED
 - Raised: 2026-11-21 by Claude
 - Area: docs
 - Related: R3-LOG-7, R3-G-1, R3-G-2, A3-R8
@@ -1319,8 +1320,8 @@ Raised 2026-11-21 while writing the Assignment 03 planning set ([`requirements-a
 - Options: A. Zain drops the PDF (or its text) into `docs/reference/` (gitignored); Claude reads it and aligns the tables. B. Work from the assignment's wording only, and state the assumption in the report.
 - Claude recommends: A. The report tables G-1 and G-2 are graded against the paper's own stages and qualities; the plan's Figure 3 map (architecture-a3 section 2) is built from the assignment text only.
 - Blocks: the final form of tables G-1 and G-2 (R11). Nothing earlier.
-- Decision:
-- Decided on:
+- Decision: A: paper supplied as `docs/reference/RAGOPS_paper.pdf` (gitignored, 21 pages). Read 2026-11-21: Figure 3, Table 1, Table 2, sections 4.2.1 to 4.2.7. Verification in the paper has five checks (also Consistency); the assignment asks four; the report says so (R3-G-4(e)).
+- Decided on: 2026-11-21
 
 ### D-110 Where the data lake lives (new PVC or the corpus PVC)
 - Status: PROVISIONAL
@@ -1383,7 +1384,7 @@ Raised 2026-11-21 while writing the Assignment 03 planning set ([`requirements-a
 - Decided on:
 
 ### D-115 Faithfulness judge and its hand labels
-- Status: PROVISIONAL
+- Status: DECIDED
 - Raised: 2026-11-21 by Claude
 - Area: eval
 - Related: AD-36, R3-B-6, R3-B-7, A3-R3
@@ -1391,8 +1392,8 @@ Raised 2026-11-21 while writing the Assignment 03 planning set ([`requirements-a
 - Options: A. `llama3.2:3b` through Ollama (temperature 0, fixed seed) plus a deterministic support-overlap score; at least 12 hand labels (the assignment asks 8); report agreement percent and kappa. B. A hosted model as judge (needs a key and sends corpus text out: not available, ADR 0004). C. Deterministic score only (no LLM judge; the assignment's judge clauses then do not apply).
 - Claude recommends: A. Only local models are available; reporting two measures and naming the weaker one answers R3-G-4(d) honestly.
 - Blocks: R5.
-- Decision: A (provisional).
-- Decided on:
+- Decision: Changed by time and by Zain's D-126 answer: **no LLM judge**. Faithfulness is the deterministic support-overlap score, calibrated on the answers. R3-B-7 applies only "if you use an LLM as the judge", so it does not apply; the report states that and names the overlap score as the metric we trust least. The judge code is not built.
+- Decided on: 2026-11-21
 
 ### D-116 Noise test: typos, not added documents
 - Status: PROVISIONAL
@@ -1491,7 +1492,7 @@ Raised 2026-11-21 while writing the Assignment 03 planning set ([`requirements-a
 - Decided on:
 
 ### D-124 Authorisation scope and gate mode for Assignment 03
-- Status: OPEN
+- Status: DECIDED
 - Raised: 2026-11-21 by Claude
 - Area: process
 - Related: `docs/WORKFLOW.md`, `docs/IMPLEMENTATION_PLAN_A3.md` 0.1
@@ -1499,17 +1500,28 @@ Raised 2026-11-21 while writing the Assignment 03 planning set ([`requirements-a
 - Options: A. Yes to the edits; per-phase gate kept as in the RAG lane (spec and plan approved together, then implement to PR without waiting). B. Yes to the edits; pre-approve all phases R1 to R11 now and run without gates (the platform plan did this). C. Gate only the phases that change existing behaviour (R3, R6, R8, R9); pre-approve the others.
 - Claude recommends: C. R1, R2, R4, R5, R7, R10, R11 mostly add new modules and documents; R3, R6, R8, R9 touch the indexer, the API and the cluster, where a wrong design costs hours.
 - Blocks: the start of R1.
-- Decision:
-- Decided on:
+- Decision: B: Zain approved everything and said to keep working to the end: edits to `k8s/`, `.github/`, Makefile, `eval/Dockerfile` are allowed and the per-phase gate is waived for R1 to R11. Merge into `dev` by the session; the release PR to `main` is opened at R11 and merged only when CI is green. Decided by Zain 2026-11-21.
+- Decided on: 2026-11-21
 
 ### D-125 Report tooling (no PDF engine installed) and roll numbers
-- Status: OPEN
+- Status: PROVISIONAL
 - Raised: 2026-11-21 by Claude
 - Area: docs
 - Related: R3-G-*, R3-LOG-8
 - Question: `pandoc` is installed but no LaTeX or HTML-to-PDF engine was found (`xelatex`, `pdflatex`, `weasyprint` all absent). Also: the report's first page needs both members' names and roll numbers.
 - Options: A. Pandoc to standalone HTML with a print stylesheet, then headless Chrome or Chromium `--print-to-pdf` (Chrome is on this machine because the browser tooling uses it; verify in R11). B. Install a LaTeX engine (large download). C. Write the report in a word processor and keep only the data in the repository.
-- Claude recommends: A, with the page count checked by the PDF itself. Zain supplies both roll numbers (Claude does not guess them).
+- Claude recommends: A, with the page count checked by the PDF itself. `google-chrome` exists at `/usr/bin/google-chrome` (checked 2026-11-21), so A is possible. Zain supplies both roll numbers at R11 (Claude does not guess them).
 - Blocks: R11 only.
 - Decision:
 - Decided on:
+
+### D-126 Who writes the hand-written questions and labels
+- Status: DECIDED
+- Raised: 2026-11-21 by Claude
+- Area: process
+- Related: R3-B-2, R3-B-7, D-108, D-115
+- Question: With Ahmad out, who writes the 8 hand-written golden questions and the hand labels?
+- Options: A. Claude drafts, Zain edits. B. Zain writes all. C. Claude writes all, labelled `synthetic`.
+- Claude recommends: A.
+- Decision: C, chosen by Zain 2026-11-21. Consequence, stated honestly: every question Claude writes is labelled `synthetic`; the minimum "at least 8 written by hand by the group" (R3-B-2) and "at least 8 synthetic reviewed by hand" are **not met** unless Zain writes or reviews them later. The session prepares `eval/HUMAN_TODO.md` (a 10-minute worksheet: 8 questions to write, 8 to review) so Zain can close the gap before submission; the report lists it as a gap if he does not. The `origin` field is never set to `human` by Claude.
+- Decided on: 2026-11-21
