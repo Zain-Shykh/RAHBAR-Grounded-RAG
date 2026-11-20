@@ -352,3 +352,20 @@ def test_bad_json_line_is_a_problem(tmp_path) -> None:
     f = tmp_path / "g.jsonl"
     f.write_text('{"id": "a", "kind": "unanswerable", "origin": "human"}\n{oops\n')
     assert any("not valid JSON" in m for m in golden.problems(golden.load(f)))
+
+
+def test_job_gate_only_skips_suite_and_follows_config(tmp_path, monkeypatch) -> None:
+    from suite import job
+    res = tmp_path / "r.json"
+    res.write_text(json.dumps(BASE))
+    cfg = tmp_path / "g.yaml"
+    monkeypatch.setattr(job, "run_suite", lambda *a, **k: pytest.fail("suite must not run"))
+    monkeypatch.setenv("RESULTS_DIR", str(tmp_path))
+    monkeypatch.setenv("BASELINE", str(res))
+    monkeypatch.setenv("GATE_ONLY", str(res))
+    monkeypatch.setenv("GATE_CONFIG", str(cfg))
+    monkeypatch.setenv("RUN_LABEL", "g")
+    cfg.write_text("rules:\n- {metric: e2e.latency_p95_s, op: at_most, value: 1000, why: x}\n")
+    assert job.main() == 0
+    cfg.write_text("rules:\n- {metric: e2e.latency_p95_s, op: at_most, value: 0.001, why: x}\n")
+    assert job.main() == 1

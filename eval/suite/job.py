@@ -1,7 +1,8 @@
 """The eval Job's entry point (R3-F2-2): run the suite, then the gate, and exit with the gate's status.
 
 Environment: API_URL, RUN_LABEL, SUBSET, RESULTS_DIR (volume), BASELINE (a result file), GATE_CONFIG (the mounted
-ConfigMap), SET_BASELINE=true (first run: the result becomes the baseline and no gate is applied).
+ConfigMap), SET_BASELINE=true (first run: the result becomes the baseline and no gate is applied),
+GATE_ONLY=<result file> (skip the suite: apply the current gate config to an existing result file).
 Exit 0 gate passed, 1 gate failed, 2 the suite or the files could not be used.
 """
 
@@ -20,14 +21,16 @@ from .run_suite import HERE, run_suite
 def main() -> int:
     out = Path(os.environ.get("RESULTS_DIR", "/results"))
     label = os.environ.get("RUN_LABEL", "run")
+    gate_only = os.environ.get("GATE_ONLY", "")
     try:
-        result = run_suite(os.environ.get("API_URL", "http://api:8000"), label, os.environ.get("SUBSET", "A"),
-                           int(os.environ.get("SEED", "1234")), HERE / "golden.jsonl", None, out)
+        result = Path(gate_only) if gate_only else run_suite(
+            os.environ.get("API_URL", "http://api:8000"), label, os.environ.get("SUBSET", "A"),
+            int(os.environ.get("SEED", "1234")), HERE / "golden.jsonl", None, out)
     except Exception as exc:
         print(f"SUITE FAILED: {exc!r}", file=sys.stderr)
         return 2
     baseline = Path(os.environ.get("BASELINE", out / "baseline.json"))
-    if os.environ.get("SET_BASELINE", "false").lower() == "true":
+    if os.environ.get("SET_BASELINE", "false").lower() == "true" and not gate_only:
         shutil.copyfile(result, baseline)
         print(f"baseline written: {baseline}")
         return 0

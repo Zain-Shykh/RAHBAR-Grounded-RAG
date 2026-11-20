@@ -193,6 +193,6 @@ rollback: ## reverse the last release
 	kubectl rollout undo deployment/api -n $(NS)
 	kubectl rollout status deployment/api -n $(NS) --timeout=600s
 
-eval-job: ## run the eval Job: make eval-job [API=http://api:8000] [LABEL=live] [SET_BASELINE=false]
+eval-job: ## run the eval Job: make eval-job [API=http://api:8000] [LABEL=live] [SET_BASELINE=false] [GATE_ONLY=/results/<file>.json]
 	kubectl delete job eval -n $(NS) --ignore-not-found
-	sed 's|{name: API_URL, value: "http://api:8000"}|{name: API_URL, value: "$(or $(API),http://api:8000)"}|; s|{name: RUN_LABEL, value: "live"}|{name: RUN_LABEL, value: "$(or $(LABEL),live)"}|; s|{name: SET_BASELINE, value: "false"}|{name: SET_BASELINE, value: "$(or $(SET_BASELINE),false)"}|' k8s/eval-job.yaml | kubectl apply -f -
+	sed 's|{name: API_URL, value: "http://api:8000"}|{name: API_URL, value: "$(or $(API),http://api:8000)"}|; s|{name: RUN_LABEL, value: "live"}|{name: RUN_LABEL, value: "$(or $(LABEL),live)"}|; s|{name: SET_BASELINE, value: "false"}|{name: SET_BASELINE, value: "$(or $(SET_BASELINE),false)"}|; s|{name: GATE_ONLY, value: ""}|{name: GATE_ONLY, value: "$(GATE_ONLY)"}|' k8s/eval-job.yaml | kubectl apply -f -
