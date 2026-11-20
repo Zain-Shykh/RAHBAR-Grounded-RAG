@@ -33,7 +33,7 @@ test: ## run the api, indexer and eval tests (stubs only: no cluster, no model, 
 	cd eval && $(BIN)/pytest -q
 
 lint: ## ruff and mypy over everything in Python
-	$(BIN)/ruff check api indexer eval corpus scripts/verify_services.py scripts/verify_ollama.py scripts/check_golden_extract.py scripts/chunk_report.py scripts/check_index.py scripts/live_check_phase10.py scripts/live_check_phase11.py scripts/calibrate_cache.py scripts/make_batch_b.py scripts/enrich_manifest.py scripts/calibrate_neardup.py scripts/build_golden_jsonl.py scripts/trace_tool.py scripts/trace_report.py scripts/add_batch.py
+	$(BIN)/ruff check api indexer eval corpus scripts/verify_services.py scripts/verify_ollama.py scripts/check_golden_extract.py scripts/chunk_report.py scripts/check_index.py scripts/live_check_phase10.py scripts/live_check_phase11.py scripts/calibrate_cache.py scripts/make_batch_b.py scripts/enrich_manifest.py scripts/calibrate_neardup.py scripts/build_golden_jsonl.py scripts/trace_tool.py scripts/trace_report.py scripts/add_batch.py scripts/check_registry.py
 	cd api && $(BIN)/mypy app
 	cd indexer && $(BIN)/mypy pipeline
 
