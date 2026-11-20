@@ -13,7 +13,13 @@ MINIMUMS = {"questions": 25, "answerable": 15, "unanswerable": 5, "hard": 5, "hu
 
 def load(path: Path | str = HERE / "golden.jsonl", subset: str = "all") -> list[dict]:
     """subset: `all`, `A` (the corpus before Batch B) or `B`."""
-    rows = [json.loads(ln) for ln in Path(path).read_text(encoding="utf-8").splitlines() if ln.strip()]
+    rows = []
+    for n, ln in enumerate(Path(path).read_text(encoding="utf-8").splitlines(), 1):
+        if ln.strip():
+            try:
+                rows.append(json.loads(ln))
+            except json.JSONDecodeError:
+                rows.append({"id": f"line{n}", "_bad_json": True})  # reported by problems(), never a crash
     if subset != "all":
         rows = [r for r in rows if r.get("batch", "A") == subset]
     return rows
@@ -22,28 +28,33 @@ def load(path: Path | str = HERE / "golden.jsonl", subset: str = "all") -> list[
 def counts(rows: list[dict]) -> dict[str, int]:
     return {
         "questions": len(rows),
-        "answerable": sum(r["kind"] == "answerable" for r in rows),
-        "unanswerable": sum(r["kind"] == "unanswerable" for r in rows),
+        "answerable": sum(r.get("kind") == "answerable" for r in rows),
+        "unanswerable": sum(r.get("kind") == "unanswerable" for r in rows),
         "hard": sum(bool(r.get("hard")) for r in rows),
-        "human": sum(r["origin"] == "human" for r in rows),
-        "synthetic": sum(r["origin"] == "synthetic" for r in rows),
-        "synthetic_reviewed": sum(r["origin"] == "synthetic" and bool(r.get("reviewed")) for r in rows),
+        "human": sum(r.get("origin") == "human" for r in rows),
+        "synthetic": sum(r.get("origin") == "synthetic" for r in rows),
+        "synthetic_reviewed": sum(r.get("origin") == "synthetic" and bool(r.get("reviewed")) for r in rows),
         "batch_b": sum(r.get("batch") == "B" for r in rows),
     }
 
 
 def problems(rows: list[dict]) -> list[str]:
     out = []
-    ids = [r["id"] for r in rows]
+    ids = [r.get("id") for r in rows]
     if len(set(ids)) != len(ids):
         out.append("duplicate ids")
     for r in rows:
+        if r.get("_bad_json"):
+            out.append(f"{r['id']}: not valid JSON")
+            continue
         if r.get("origin") not in ("human", "synthetic"):
-            out.append(f"{r['id']}: origin must be human or synthetic")
-        if r["kind"] == "answerable":
+            out.append(f"{r.get('id')}: origin must be human or synthetic")
+        if r.get("kind") not in ("answerable", "unanswerable"):
+            out.append(f"{r.get('id')}: kind must be answerable or unanswerable")
+        elif r["kind"] == "answerable":
             if not r.get("relevant"):
                 out.append(f"{r['id']}: answerable without a ground-truth document")
-            for rel in r.get("relevant", []):
+            for rel in r.get("relevant") or []:
                 if not (rel.get("source") and rel.get("section") and isinstance(rel.get("page"), int)):
                     out.append(f"{r['id']}: relevant needs source, section and page")
         elif r.get("relevant"):

@@ -113,19 +113,16 @@ def test_loader_skips_blank_lines_and_subset_filters(tmp_path) -> None:
     assert [r["id"] for r in golden.load(p, "A")] == ["a", "c"] and [r["id"] for r in golden.load(p, "B")] == ["b"]
 
 
-def test_loader_raises_on_a_malformed_line(tmp_path) -> None:
+def test_loader_reports_a_malformed_line_instead_of_raising(tmp_path) -> None:   # T-1: was "raises"
     p = tmp_path / "g.jsonl"
     p.write_text('{"id":"a"}\n{not json\n')
-    with pytest.raises(json.JSONDecodeError):
-        golden.load(p)
+    assert golden.load(p)[1]["_bad_json"] is True
 
 
-@pytest.mark.xfail(strict=True, reason="DEFECT T-1: problems() crashes on `relevant: null` instead of reporting a problem")
 def test_null_relevant_is_reported_not_a_crash() -> None:
     golden.problems([{"id": "a", "kind": "answerable", "origin": "human", "relevant": None}])
 
 
-@pytest.mark.xfail(strict=True, reason="DEFECT T-1: counts()/problems() raise KeyError on a row without `kind` or `origin`")
 def test_missing_keys_are_reported_not_a_crash() -> None:
     golden.problems([{"id": "a"}])
 
@@ -349,3 +346,9 @@ def test_job_malformed_gate_yaml_exits_2(tmp_path, monkeypatch, capsys) -> None:
     monkeypatch.setenv("BASELINE", str(res))
     monkeypatch.setenv("GATE_CONFIG", str(tmp_path / "g.yaml"))
     assert job.main() == 2 and "GATE ERROR" in capsys.readouterr().err
+
+
+def test_bad_json_line_is_a_problem(tmp_path) -> None:
+    f = tmp_path / "g.jsonl"
+    f.write_text('{"id": "a", "kind": "unanswerable", "origin": "human"}\n{oops\n')
+    assert any("not valid JSON" in m for m in golden.problems(golden.load(f)))
