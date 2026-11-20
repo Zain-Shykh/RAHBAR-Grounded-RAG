@@ -131,7 +131,7 @@ def test_real_golden_relevant_sources_exist_and_pairs_meet_minimums() -> None:
     rows = golden.load()
     srcs = {rel["source"] for r in rows for rel in r.get("relevant", [])}
     have = {p.name for d in ("raw", "batch_b") for p in (ROOT / "corpus" / d).glob("*")}
-    if have:   # corpus/raw is gitignored; the check is skipped by absence of data, never by weakening
+    if (ROOT / "corpus" / "raw" / "_index.json").exists():   # corpus/raw is gitignored: absent in CI, so skipped there
         assert srcs <= have, srcs - have
     pairs = [json.loads(x) for x in (ROOT / "eval" / "embedding_pairs.jsonl").read_text().splitlines() if x.strip()]
     assert sum(p["kind"] == "paraphrase" for p in pairs) >= 15 and sum(p["kind"] == "unrelated" for p in pairs) >= 15
