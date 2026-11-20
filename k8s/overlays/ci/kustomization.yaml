@@ -38,6 +38,7 @@ patches:
       data:
         EMBED_MODEL: "hashing-bow-768"
         LLM_PROVIDER: "extractive"
+        INDEX_MODE: "full"   # fixtures have no titles; incremental verification would quarantine them
         # H-8: hashing embedder scores run 0.00 to 0.43; 0.70 would abstain on everything.
         RELEVANCE_FLOOR: "0.20"
         CORPUS_DIR: "/corpus"

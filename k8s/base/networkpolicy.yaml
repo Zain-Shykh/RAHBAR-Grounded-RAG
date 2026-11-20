@@ -63,6 +63,9 @@ spec:
         - podSelector:
             matchLabels:
               app.kubernetes.io/name: ui
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: eval
       ports:
         - {protocol: TCP, port: 8000}
 ---
@@ -111,6 +114,9 @@ spec:
         - podSelector:
             matchLabels:
               app.kubernetes.io/name: indexer
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: api-candidate
       ports:
         - {protocol: TCP, port: 8000}
 ---
@@ -147,6 +153,78 @@ spec:
               app.kubernetes.io/name: chroma
       ports:
         - {protocol: TCP, port: 8000}
+    - to:
+        - ipBlock:
+            cidr: 203.0.113.1/32  # PLACEHOLDER, patched per overlay
+      ports:
+        - {protocol: TCP, port: 11434}
+---
+# Assignment 03: the eval Job reaches the api Service(s) and the Ollama host (embedding level), nothing else.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: eval-egress
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: eval
+  policyTypes: [Egress]
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: api
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: api-candidate
+      ports:
+        - {protocol: TCP, port: 8000}
+    - to:
+        - ipBlock:
+            cidr: 203.0.113.1/32  # PLACEHOLDER, patched per overlay
+      ports:
+        - {protocol: TCP, port: 11434}
+---
+# The candidate api (k8s/candidate) has the same edges as the live api: Chroma, Redis, Ollama, and ingress from eval.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: api-candidate-ingress
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: api-candidate
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: eval
+      ports:
+        - {protocol: TCP, port: 8000}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: api-candidate-egress
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: api-candidate
+  policyTypes: [Egress]
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: chroma
+      ports:
+        - {protocol: TCP, port: 8000}
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: redis
+      ports:
+        - {protocol: TCP, port: 6379}
     - to:
         - ipBlock:
             cidr: 203.0.113.1/32  # PLACEHOLDER, patched per overlay

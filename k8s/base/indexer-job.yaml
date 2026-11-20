@@ -26,6 +26,7 @@ spec:
         runAsNonRoot: true
         runAsUser: 10001
         runAsGroup: 10001
+        fsGroup: 10001
         seccompProfile:
           type: RuntimeDefault
       containers:
@@ -52,9 +53,14 @@ spec:
             - name: corpus
               mountPath: /corpus
               readOnly: true
+            - name: lake
+              mountPath: /lake
             - name: tmp
               mountPath: /tmp
       volumes:
+        - name: lake
+          persistentVolumeClaim:
+            claimName: lake-data
         - name: corpus
           persistentVolumeClaim:
             claimName: corpus-data

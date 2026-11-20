@@ -17,7 +17,7 @@ CHROMA_IMAGE ?= chromadb/chroma:1.0.12
 REDIS_IMAGE ?= redis/redis-stack-server:7.4.0-v8
 
 .DEFAULT_GOAL := help
-.PHONY: help install test lint dev dev-services dev-services-stop dev-services-reset cluster images corpus apply down secret index ask fetch eval eval-fixtures check manifests
+.PHONY: eval-image gate-config suite suite-twice candidate release rollback ingest-batch lake-ls results-pull traces-pull baseline resources help install test lint dev dev-services dev-services-stop dev-services-reset cluster images corpus apply down secret index ask fetch eval eval-fixtures check manifests
 
 help: ## list the targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  make %-14s %s\n", $$1, $$2}'
@@ -33,7 +33,7 @@ test: ## run the api, indexer and eval tests (stubs only: no cluster, no model, 
 	cd eval && $(BIN)/pytest -q
 
 lint: ## ruff and mypy over everything in Python
-	$(BIN)/ruff check api indexer eval corpus scripts/verify_services.py scripts/verify_ollama.py scripts/check_golden_extract.py scripts/chunk_report.py scripts/check_index.py scripts/live_check_phase10.py scripts/live_check_phase11.py scripts/calibrate_cache.py
+	$(BIN)/ruff check api indexer eval corpus scripts/verify_services.py scripts/verify_ollama.py scripts/check_golden_extract.py scripts/chunk_report.py scripts/check_index.py scripts/live_check_phase10.py scripts/live_check_phase11.py scripts/calibrate_cache.py scripts/make_batch_b.py scripts/enrich_manifest.py scripts/calibrate_neardup.py scripts/build_golden_jsonl.py scripts/trace_tool.py scripts/trace_report.py scripts/add_batch.py
 	cd api && $(BIN)/mypy app
 	cd indexer && $(BIN)/mypy pipeline
 
@@ -72,6 +72,7 @@ images: ## build the three images and load them into minikube (needs yours: Dock
 	minikube image load rahbar-api:$(TAG)
 	minikube image load rahbar-indexer:$(TAG)
 	minikube image load rahbar-ui:$(TAG)
+	$(MAKE) eval-image TAG=$(TAG)
 
 corpus: ## copy $(CORPUS_SRC) (default corpus/raw) into the corpus-data PVC (namespace, PVC, helper pod, kubectl cp)
 	kubectl apply -f k8s/base/namespace.yaml -f k8s/base/corpus-pvc.yaml
@@ -118,3 +119,72 @@ eval-fixtures: ## score the CI fixture golden set against a local `make dev`
 
 check: ## run the submission checker
 	$(PY) scripts/check_submission.py
+
+# ---- Assignment 03 (RAGOps): see k8s/README.md for the order ---------------------------------------------------
+eval-image: ## build rahbar-eval from a small staging directory and load it into minikube
+	rm -rf /tmp/rahbar-eval-ctx && mkdir -p /tmp/rahbar-eval-ctx/scripts
+	cp -r eval /tmp/rahbar-eval-ctx/eval && rm -rf /tmp/rahbar-eval-ctx/eval/results /tmp/rahbar-eval-ctx/eval/tests /tmp/rahbar-eval-ctx/eval/tuning /tmp/rahbar-eval-ctx/eval/__pycache__
+	cp scripts/trace_report.py scripts/trace_tool.py /tmp/rahbar-eval-ctx/scripts/
+	cp eval/Dockerfile /tmp/rahbar-eval-ctx/Dockerfile
+	docker build -t rahbar-eval:$(TAG) /tmp/rahbar-eval-ctx
+	minikube image load rahbar-eval:$(TAG)
+
+gate-config: ## create or update ConfigMap rahbar-gate from eval/gate.yaml (edit a threshold, run this, re-run the eval Job)
+	kubectl create configmap rahbar-gate -n $(NS) --from-file=gate.yaml=eval/gate.yaml --dry-run=client -o yaml | kubectl apply -f -
+
+suite: ## the whole Part B suite against API_URL (default: local make dev), one timestamped result in eval/results/
+	PYTHONPATH=. $(BIN)/python -m eval.suite.run_suite --api $${API_URL:-http://localhost:8000} --label $${LABEL:-run} --subset $${SUBSET:-A}
+
+suite-twice: ## run the suite twice and write the per-metric difference (R3-B-8)
+	PYTHONPATH=. $(BIN)/python -m eval.suite.run_suite --api $${API_URL:-http://localhost:8000} --label $${LABEL:-run}-1 --subset $${SUBSET:-A}
+	PYTHONPATH=. $(BIN)/python -m eval.suite.run_suite --api $${API_URL:-http://localhost:8000} --label $${LABEL:-run}-2 --subset $${SUBSET:-A}
+	PYTHONPATH=. $(BIN)/python -m eval.suite.stochasticity $$(ls -t eval/results/suite-*-$${LABEL:-run}-1.json | head -1) $$(ls -t eval/results/suite-*-$${LABEL:-run}-2.json | head -1)
+
+ingest-batch: ## ingest a batch of documents: make ingest-batch BATCH=corpus/batch_b  (copies to corpus-data, runs the reindex Job)
+	test -n "$(BATCH)"
+	kubectl apply -f k8s/base/namespace.yaml -f k8s/base/corpus-pvc.yaml
+	kubectl delete pod corpus-loader -n $(NS) --ignore-not-found
+	kubectl apply -f k8s/tools/corpus-loader.yaml
+	kubectl wait --for=condition=Ready pod/corpus-loader -n $(NS) --timeout=120s
+	kubectl exec -n $(NS) corpus-loader -- sh -c 'cat /corpus/_index.json 2>/dev/null || true' > /tmp/rahbar-existing-index.json
+	rm -rf /tmp/rahbar-merged && $(BIN)/python scripts/add_batch.py $(BATCH) /tmp/rahbar-existing-index.json /tmp/rahbar-merged
+	kubectl cp /tmp/rahbar-merged/. $(NS)/corpus-loader:/corpus
+	kubectl delete pod corpus-loader -n $(NS) --wait=false
+	kubectl create job --from=cronjob/reindex ingest-$$(date +%s) -n $(NS)
+
+lake-ls: ## list the lake volume (registry, quarantine, archive, reports) through a throw-away pod
+	kubectl delete pod lake-viewer -n $(NS) --ignore-not-found
+	sed 's/CLAIM/lake-data/' k8s/tools/volume-viewer.yaml | sed 's/NAME/lake-viewer/' | kubectl apply -f -
+	kubectl wait --for=condition=Ready pod/lake-viewer -n $(NS) --timeout=120s
+	kubectl exec -n $(NS) lake-viewer -- find /data -type f
+	kubectl delete pod lake-viewer -n $(NS) --wait=false
+
+results-pull: ## copy the eval Job's result files from the eval-results volume into eval/results/
+	kubectl delete pod results-viewer -n $(NS) --ignore-not-found
+	sed 's/CLAIM/eval-results/' k8s/tools/volume-viewer.yaml | sed 's/NAME/results-viewer/' | kubectl apply -f -
+	kubectl wait --for=condition=Ready pod/results-viewer -n $(NS) --timeout=120s
+	kubectl cp $(NS)/results-viewer:/data eval/results/cluster
+	kubectl delete pod results-viewer -n $(NS) --wait=false
+
+traces-pull: ## copy the trace files from the traces-data volume into traces/cluster/
+	kubectl delete pod traces-viewer -n $(NS) --ignore-not-found
+	sed 's/CLAIM/traces-data/' k8s/tools/volume-viewer.yaml | sed 's/NAME/traces-viewer/' | kubectl apply -f -
+	kubectl wait --for=condition=Ready pod/traces-viewer -n $(NS) --timeout=120s
+	kubectl cp $(NS)/traces-viewer:/data traces/cluster
+	kubectl delete pod traces-viewer -n $(NS) --wait=false
+
+candidate: ## build the candidate collection and run api-candidate: make candidate CHUNK=300 OVERLAP=50
+	kubectl delete job indexer-candidate -n $(NS) --ignore-not-found
+	sed 's/CANDIDATE_CHUNK_SIZE/$(CHUNK)/; s/CANDIDATE_CHUNK_OVERLAP/$(OVERLAP)/' k8s/candidate/indexer-job.yaml | kubectl apply -f -
+	kubectl wait --for=condition=complete job/indexer-candidate -n $(NS) --timeout=3000s
+	kubectl apply -k k8s/candidate
+	kubectl rollout restart deployment/api-candidate -n $(NS)
+	kubectl rollout status deployment/api-candidate -n $(NS) --timeout=300s
+
+release: ## release the candidate collection to the live api by a rolling update (only after the gate passed)
+	kubectl set env deployment/api -n $(NS) CHROMA_COLLECTION=$(COLLECTION)
+	kubectl rollout status deployment/api -n $(NS) --timeout=600s
+
+rollback: ## reverse the last release
+	kubectl rollout undo deployment/api -n $(NS)
+	kubectl rollout status deployment/api -n $(NS) --timeout=600s
