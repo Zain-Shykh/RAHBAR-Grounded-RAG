@@ -7,6 +7,7 @@ the system prompt, citation validation) still apply. Every action is written int
 from __future__ import annotations
 
 import re
+import unicodedata
 from typing import Any
 
 from ..schemas import Passage
@@ -25,8 +26,19 @@ PATTERNS: list[tuple[str, re.Pattern[str]]] = [
 ]
 
 
+_ZERO_WIDTH = dict.fromkeys(map(ord, "\u200b\u200c\u200d\u2060\ufeff\u00ad"))
+
+
+def normalise(text: str) -> str:
+    """The text as the model will read it: NFKC, no zero-width characters, delimiter runs removed (as
+    `prompt.strip_delimiters` does), whitespace collapsed. Scanning the raw text would let `ign<<<ore` pass."""
+    text = unicodedata.normalize("NFKC", text).translate(_ZERO_WIDTH)
+    return " ".join(re.sub(r"[<>]{2,}", "", text).split())
+
+
 def scan_text(text: str) -> list[str]:
-    return [name for name, rx in PATTERNS if rx.search(text)]
+    seen = normalise(text)
+    return [name for name, rx in PATTERNS if rx.search(seen)]
 
 
 def scan_passages(passages: list[Passage]) -> tuple[list[Passage], list[dict[str, Any]]]:

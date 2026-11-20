@@ -28,6 +28,9 @@ from pipeline.manifest import load_manifest  # noqa: E402
 from pipeline.verification import checks as C  # noqa: E402
 
 PLANTED_NEAR = [("b01-library-policy-2026.md", "b05-library-policy-2026-reissue.md")]
+# documents planted as copies of one another are one cluster: pairs inside it are not "distinct" pairs
+CLUSTERS = [{"b01-library-policy-2026.md", "b03-library-policy-2026-copy.md", "b05-library-policy-2026-reissue.md"},
+            {"b02-lab-safety-rules-2026.md", "b04-lab-safety-rules-2026-copy.md"}]
 
 
 def texts_of(directory: str, skip: set[str]) -> dict[str, tuple[str, str, str]]:
@@ -74,9 +77,7 @@ def main() -> None:
             row = {"a": x, "b": y, "cosine": round(c, 4), "same_family_other_version": same_fam_other_ver}
             if (x, y) in PLANTED_NEAR:
                 planted.append(row)
-            elif not same_fam_other_ver and not (x in batch and y in batch and
-                     {x, y} in [{"b01-library-policy-2026.md", "b03-library-policy-2026-copy.md"},
-                                {"b02-lab-safety-rules-2026.md", "b04-lab-safety-rules-2026-copy.md"}]):
+            elif not same_fam_other_ver and not any({x, y} <= c for c in CLUSTERS):
                 distinct.append(row)
         top = max(distinct, key=lambda r: r["cosine"])
         low = min(planted, key=lambda r: r["cosine"])

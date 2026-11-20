@@ -1,0 +1,5 @@
+# Coverage check (R3-E2-1, paper 4.2.7). threshold: cosine between a live query and its nearest golden question
+# at or above which the query counts as covered; target: the share of live queries that must be covered.
+# Both are justified in the report from eval/results (module-level means) and fixed in phase R10.
+threshold: 0.75
+target: 0.85

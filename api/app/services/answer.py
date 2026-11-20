@@ -206,7 +206,7 @@ def _answer(
                 answer, outcome, abstain_reason = abstention(reason="guardrail"), "abstained", "guardrail"
             else:
                 messages = build_messages(question, shown)
-                tr.r["prompt"], tr.r["prompt_sha256"] = messages, prompt_hash(messages)
+                tr.r["prompt"], tr.r["prompt_sha256"] = (messages if settings.trace_prompt else None), prompt_hash(messages)
                 attempts = [0]
                 t = time.perf_counter()
                 got, reason, tin, tout = _generate(question, shown, provider, attempts)

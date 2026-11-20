@@ -56,6 +56,7 @@ class Settings:
     llm_max_concurrency: int = 2
     index_refresh_seconds: int = 10
     injection_rail: bool = False     # INJECTION_RAIL=true turns on the retrieval rail (AD-40); the ConfigMap sets it
+    trace_prompt: bool = True        # TRACE_PROMPT=false stores the prompt hash only, not the prompt text
     trace_dir: str = ""              # TRACE_DIR: per-pod trace files go here; empty means stdout only (AD-39)
     app_version: str = "0.1.0"
 
@@ -87,6 +88,7 @@ def get_settings() -> Settings:
         llm_max_concurrency=_int("LLM_MAX_CONCURRENCY", 2),
         index_refresh_seconds=_int("INDEX_REFRESH_SECONDS", 10),
         injection_rail=os.environ.get("INJECTION_RAIL", "false").lower() == "true",
+        trace_prompt=os.environ.get("TRACE_PROMPT", "true").lower() != "false",
         trace_dir=os.environ.get("TRACE_DIR", ""),
         app_version=os.environ.get("APP_VERSION", "0.1.0"),
     )
