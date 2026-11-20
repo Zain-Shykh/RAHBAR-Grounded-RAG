@@ -132,6 +132,10 @@ Append-only, newest at the bottom. Format: `YYYY-MM-DD  PNN  <stage or event>: <
 2026-11-21  R7   IMPLEMENTED (code): gate.py, compare.py, gate.yaml (limits to be fixed from baseline runs).
 2026-11-21  --   D-127: Zain instructed orchestrator mode. R1 to R8 code was written by the main session; subagents now write the retroactive specs and test reports and run the independent checks; later phases run one subagent each.
 2026-11-21  R8   IMPLEMENTED (manifests): PVCs, eval and trace-report Jobs, candidate Deployment and indexer Job, NetworkPolicies, make targets, k8s/README.md; make manifests validates all; cluster runs pending.
+2026-11-21  R4   TESTED round 1 (independent): metrics, noise, loader PASS; golden --check exit 1 only for the 8 reviews (D-126); live ACs (page match, A02 anchor, baseline run) pending. Spec docs/specs/phase-r04-golden-retrieval.md. Defect T-1 (loader crashes on null/missing keys, low).
+2026-11-21  R5   TESTED round 1: seed, bypass, exit-on-failure PASS; whole suite proven offline with a fake API; judge N/A (D-115); real runs, calibration, suite-twice pending. Spec docs/specs/phase-r05-e2e-suite.md.
+2026-11-21  R6   TESTED round 1: all outcomes traced (answered, abstained, fallback, cached), writer failure swallowed, tool and report PASS, rail catches 17 evasions, 0 false positives on 250 real pages. Pending: live batch B retrieval, traces/samples, eval-fixtures. Defects T-3 (rail gaps, low), T-4 (cache-hit trace lacks doc_version, low). Spec docs/specs/phase-r06-traces.md.
+2026-11-21  R7   TESTED round 1: gate and compare PASS; defect T-2 (malformed YAML exits 1 instead of 2, medium, gate.py and job.py). Candidates, limits, decision pending. Spec docs/specs/phase-r07-gate.md. Tester added eval/tests/test_suite_adversarial.py and api/tests/test_trace_adversarial.py (8 strict xfails pin T-1 to T-4).
 2026-11-21  R1   TESTED (independent, retroactive spec docs/specs/phase-r01-batch-b.md): AC1 to AC4 PASS; AC5 not proven (corpus/raw/_index.a02.json absent on this machine).
 2026-11-21  R2   TESTED (docs/specs/phase-r02-verification.md): AC1 to AC8 PASS. Real corpus 9 of 9 pass, Batch B 6 indexed and 6 quarantined as planted; verification coverage about 94%. Added strict-exit test.
 2026-11-21  R3   TESTED (docs/specs/phase-r03-incremental.md): AC2 to AC9 PASS, 13 edge tests added (unicode, empty corpus, registry or collection missing, embedder and registry-save failure, quarantine fixed, changed back, restore twice, superseded deleted). AC10 FAIL: scripts/check_registry.py does not exist. AC1 and AC11 (spike, make eval-fixtures) not re-run: need services.
@@ -357,9 +361,9 @@ Answer-level metrics and the judge (R5). The one command (R5).
 - [ ] R4-AC1 `python -m eval.suite.golden --check` exits 0 and reports at least 25 questions, 15 answerable each with source, section and page, 5 unanswerable, 5 hard, 8 `human`, every question labelled, 8 synthetic marked `reviewed`; it exits non-zero when any minimum is short (test with a trimmed file).
 - [ ] R4-AC2 Every `relevant` entry resolves: the (source, section) exists in the indexed corpus (checked by `scripts/chunk_report.py`-style lookup against the live collection or the fixtures), and the page matches the chunk's page.
 - [ ] R4-AC3 The 18 carried-over questions give the same recall@5 as `eval/results.json` of A02 for the same index (regression anchor; difference explained if any).
-- [ ] R4-AC4 Metric functions pass hand-computed tests: recall@3 and @5, MRR (rank 1, rank 4, miss), nDCG@5 (two relevant pairs, one retrieved late, none).
+- [x] R4-AC4 Metric functions pass hand-computed tests: recall@3 and @5, MRR (rank 1, rank 4, miss), nDCG@5 (two relevant pairs, one retrieved late, none).
 - [ ] R4-AC5 Module level output has paraphrase mean, unrelated mean, gap, median and p95 ms per chunk over at least 100 chunks, and determinism max difference, from at least 15 plus 15 pairs.
-- [ ] R4-AC6 The noise test uses a seeded typo generator (same seed, same output; test) and reports each metric clean, noisy, absolute and relative change.
+- [x] R4-AC6 The noise test uses a seeded typo generator (same seed, same output; test) and reports each metric clean, noisy, absolute and relative change.
 - [ ] R4-AC7 A results file `eval/results/suite-<ts>-baseline-partial.json` exists with module and component sections and the committed numbers are in the register.
 - [ ] R4-AC8 `make test && make lint` green; `golden.yaml` and A02 tests untouched.
 
@@ -393,13 +397,13 @@ The whole Part B suite behind one command, with answer-level metrics, a judged f
 Gate (R7). Cluster Job (R8).
 
 ### Acceptance criteria
-- [ ] R5-AC1 With `LLM_SEED` set and the same inputs, `options.seed` is in the Ollama request (test with a mock transport); unset means no `seed` key (A02 behaviour).
-- [ ] R5-AC2 A request with `X-Cache-Bypass: 1` never reads or writes Redis and returns `X-Cache: SKIP`; a request without it behaves as in A02 (tests, plus the A02 cache tests unchanged).
+- [x] R5-AC1 With `LLM_SEED` set and the same inputs, `options.seed` is in the Ollama request (test with a mock transport); unset means no `seed` key (A02 behaviour).
+- [x] R5-AC2 A request with `X-Cache-Bypass: 1` never reads or writes Redis and returns `X-Cache: SKIP`; a request without it behaves as in A02 (tests, plus the A02 cache tests unchanged).
 - [ ] R5-AC3 `make suite` runs module, component (clean and noisy) and end-to-end levels in one command and writes the timestamped JSON and the `.md` summary table with all three levels.
 - [ ] R5-AC4 The e2e section reports faithfulness (judge and overlap), abstention correctness, false abstention rate, citation validity, p50 and p95, each with the numerator and denominator.
 - [ ] R5-AC5 `eval/judge_labels.jsonl` has at least 12 hand labels (at least 8 required by R3-B-7); the result reports agreement percent and kappa; labels were made by people, not by the judge (the file records who).
 - [ ] R5-AC6 `make suite-twice` produces two result files and `stochasticity-<ts>.json` with the per-metric absolute difference and the list of questions whose answers differed; the explanation text is committed in the spec's test report.
-- [ ] R5-AC7 The suite exits non-zero when the API is unreachable or a level fails to run, with a clear message (no partial file presented as a full result).
+- [x] R5-AC7 The suite exits non-zero when the API is unreachable or a level fails to run, with a clear message (no partial file presented as a full result).
 - [ ] R5-AC8 `make test && make lint` green; `make eval-fixtures` gate green.
 
 ### Verify
@@ -433,13 +437,13 @@ Every query writes one trace line with everything needed to reconstruct the answ
 Cluster volume (R8). The root-cause write-up (R10/R11 use it; R6 only proves the tool shows the cause).
 
 ### Acceptance criteria
-- [ ] R6-AC1 A test asserts every field of the R3-D1-1 list is present (value or explicit `null`) in the trace for an answered, an abstained, a fallback and a cached request; `trace_id == request_id`.
-- [ ] R6-AC2 The trace goes to stdout as one JSON line with `"type": "trace"` and, when `TRACE_DIR` is set, to a per-pod file; with `TRACE_DIR` unwritable the request still succeeds and `rahbar_trace_write_errors_total` increments.
-- [ ] R6-AC3 `trace_tool show <id>` prints the query, filter, retrieved chunks with scores and versions, the exact prompt, the parameters and the response, and prints `hash OK` for an untouched trace and `hash MISMATCH` for an edited one.
-- [ ] R6-AC4 `trace_report --since` prints top-1 similarity distribution, abstention rate, cache hit rate, p50 and p95 per stage and injection count, and its numbers equal an independent recomputation in the test.
+- [x] R6-AC1 A test asserts every field of the R3-D1-1 list is present (value or explicit `null`) in the trace for an answered, an abstained, a fallback and a cached request; `trace_id == request_id`.
+- [x] R6-AC2 The trace goes to stdout as one JSON line with `"type": "trace"` and, when `TRACE_DIR` is set, to a per-pod file; with `TRACE_DIR` unwritable the request still succeeds and `rahbar_trace_write_errors_total` increments.
+- [x] R6-AC3 `trace_tool show <id>` prints the query, filter, retrieved chunks with scores and versions, the exact prompt, the parameters and the response, and prints `hash OK` for an untouched trace and `hash MISMATCH` for an edited one.
+- [x] R6-AC4 `trace_report --since` prints top-1 similarity distribution, abstention rate, cache hit rate, p50 and p95 per stage and injection count, and its numbers equal an independent recomputation in the test.
 - [ ] R6-AC5 **Rail:** the Batch B injected document, once indexed (CI embedder with a fixture index or the real index), is retrieved by its planted question, dropped from the evidence, the trace holds `{rail: injection_scan, action: dropped_passage, chunk_id, pattern}`, and the metric counter is 1.
 - [ ] R6-AC6 The A02 injection golden question still abstains or answers safely (`make eval-fixtures` gate green) and every A02 API test is unchanged and green.
-- [ ] R6-AC7 No trace contains the Ollama URL, an environment variable or a header (test scanning for `OLLAMA_URL` and `Authorization`).
+- [x] R6-AC7 No trace contains the Ollama URL, an environment variable or a header (test scanning for `OLLAMA_URL` and `Authorization`).
 - [ ] R6-AC8 One real question end to end on the local stack is saved as `traces/samples/answered.jsonl`, and `trace_tool` reproduces its prompt hash.
 
 ### Verify
@@ -476,8 +480,8 @@ Doing it on the cluster (R8, R9).
 - [ ] R7-AC3 `compare.py` output covers module, component and end-to-end metrics for baseline and candidate, committed for every candidate run.
 - [ ] R7-AC4 At least three candidates were measured; one fails the gate and one passes; both gate outputs are committed (`eval/results/gate-*.txt`) with exit codes.
 - [ ] R7-AC5 The release decision names the candidate, the metric deltas, and a reason either way; it also states which metric would have made us reject.
-- [ ] R7-AC6 Re-running the gate on the same two files twice gives identical output (determinism).
-- [ ] R7-AC7 `make test && make lint` green.
+- [x] R7-AC6 Re-running the gate on the same two files twice gives identical output (determinism).
+- [x] R7-AC7 `make test && make lint` green.
 
 ### Verify
 `python -m eval.suite.gate --baseline <b> --candidate <c>; echo $?` for each candidate; `make test`.
