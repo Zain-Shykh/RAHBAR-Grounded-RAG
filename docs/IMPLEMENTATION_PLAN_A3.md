@@ -132,6 +132,9 @@ Append-only, newest at the bottom. Format: `YYYY-MM-DD  PNN  <stage or event>: <
 2026-11-21  R7   IMPLEMENTED (code): gate.py, compare.py, gate.yaml (limits to be fixed from baseline runs).
 2026-11-21  --   D-127: Zain instructed orchestrator mode. R1 to R8 code was written by the main session; subagents now write the retroactive specs and test reports and run the independent checks; later phases run one subagent each.
 2026-11-21  R8   IMPLEMENTED (manifests): PVCs, eval and trace-report Jobs, candidate Deployment and indexer Job, NetworkPolicies, make targets, k8s/README.md; make manifests validates all; cluster runs pending.
+2026-11-21  R1   TESTED (independent, retroactive spec docs/specs/phase-r01-batch-b.md): AC1 to AC4 PASS; AC5 not proven (corpus/raw/_index.a02.json absent on this machine).
+2026-11-21  R2   TESTED (docs/specs/phase-r02-verification.md): AC1 to AC8 PASS. Real corpus 9 of 9 pass, Batch B 6 indexed and 6 quarantined as planted; verification coverage about 94%. Added strict-exit test.
+2026-11-21  R3   TESTED (docs/specs/phase-r03-incremental.md): AC2 to AC9 PASS, 13 edge tests added (unicode, empty corpus, registry or collection missing, embedder and registry-save failure, quarantine fixed, changed back, restore twice, superseded deleted). AC10 FAIL: scripts/check_registry.py does not exist. AC1 and AC11 (spike, make eval-fixtures) not re-run: need services.
 ```
 
 ---
@@ -233,10 +236,10 @@ A committed, deterministic Batch B of at least 10 documents with planted problem
 Verification logic (R2). Putting Batch B into the cluster (R8).
 
 ### Acceptance criteria
-- [ ] R1-AC1 `python scripts/make_batch_b.py --out corpus/batch_b` is idempotent: a second run changes no byte (`git diff --exit-code`).
-- [ ] R1-AC2 `PLANTED.json` lists at least 10 files with problem labels covering every row of architecture 5.6, and a test asserts the counts (2 exact duplicates, 1 near-duplicate, 1 truncated, 1 corrupt, 1 missing metadata, 1 newer version, 1 injected, at least 2 controls).
-- [ ] R1-AC3 The exact duplicates have identical bytes (sha256 equal); the near-duplicate differs from its original in under 5 percent of words; the truncated file is a strict prefix of a complete one; the corrupt file's sha256 differs from the manifest entry.
-- [ ] R1-AC4 `discover()` on an old A02 manifest returns the same list as before (regression test) and on the new manifest returns the new fields.
+- [x] R1-AC1 `python scripts/make_batch_b.py --out corpus/batch_b` is idempotent: a second run changes no byte (`git diff --exit-code`).
+- [x] R1-AC2 `PLANTED.json` lists at least 10 files with problem labels covering every row of architecture 5.6, and a test asserts the counts (2 exact duplicates, 1 near-duplicate, 1 truncated, 1 corrupt, 1 missing metadata, 1 newer version, 1 injected, at least 2 controls).
+- [x] R1-AC3 The exact duplicates have identical bytes (sha256 equal); the near-duplicate differs from its original in under 5 percent of words; the truncated file is a strict prefix of a complete one; the corrupt file's sha256 differs from the manifest entry.
+- [x] R1-AC4 `discover()` on an old A02 manifest returns the same list as before (regression test) and on the new manifest returns the new fields.
 - [ ] R1-AC5 `make test && make lint` green; no change to `corpus/raw/` content; `_index.a02.json` equals the original byte for byte.
 
 ### Verify
@@ -269,14 +272,14 @@ After extraction and before chunking, every new or changed document gets a pass 
 Registry and incremental swap (R3). Kubernetes (R8). The injection rail (R6): Batch B problem 7 is expected to **pass** verification.
 
 ### Acceptance criteria
-- [ ] R2-AC1 Each check is a pure function with tests for pass, fail and edge cases (empty text, one page, Unicode, a 1-page PDF, unreadable bytes).
-- [ ] R2-AC2 On Batch B the report contains an entry for every file, with four verdicts and reasons, and matches `PLANTED.json`: all planted problems except the injected instruction fail the expected check; both exact duplicates and the near-duplicate fail uniqueness (exact and near respectively); the truncated file fails completeness; the corrupt file fails quality; the missing-metadata file fails completeness; the older version is flagged by recency and given the action `supersede`; the controls pass.
-- [ ] R2-AC3 The 9 real documents all pass (no false positives), including the A02 version pair, which is recency (not uniqueness) and not quarantined.
-- [ ] R2-AC4 A failed document is copied to `quarantine/<run_id>/` with a `.reason.json`, and the chunk list handed to embed contains none of its chunks (test with a fake embedder: the embed call sees zero chunks from the quarantined file).
-- [ ] R2-AC5 `verification.json` exists per run, validates against its schema in the tests, and the text table prints one line per document.
-- [ ] R2-AC6 One bad document no longer aborts the run (exit code 0) unless `VERIFY_STRICT=true` (exit code 1). The A02 behaviour on a corrupt `_index.json` or missing file is unchanged.
-- [ ] R2-AC7 The near-duplicate threshold is within the calibration gap: the calibration file shows every planted near-duplicate above it and every distinct real pair below it, and states the margin.
-- [ ] R2-AC8 `make test && make lint` green; coverage of the new package at least 85 percent.
+- [x] R2-AC1 Each check is a pure function with tests for pass, fail and edge cases (empty text, one page, Unicode, a 1-page PDF, unreadable bytes).
+- [x] R2-AC2 On Batch B the report contains an entry for every file, with four verdicts and reasons, and matches `PLANTED.json`: all planted problems except the injected instruction fail the expected check; both exact duplicates and the near-duplicate fail uniqueness (exact and near respectively); the truncated file fails completeness; the corrupt file fails quality; the missing-metadata file fails completeness; the older version is flagged by recency and given the action `supersede`; the controls pass.
+- [x] R2-AC3 The 9 real documents all pass (no false positives), including the A02 version pair, which is recency (not uniqueness) and not quarantined.
+- [x] R2-AC4 A failed document is copied to `quarantine/<run_id>/` with a `.reason.json`, and the chunk list handed to embed contains none of its chunks (test with a fake embedder: the embed call sees zero chunks from the quarantined file).
+- [x] R2-AC5 `verification.json` exists per run, validates against its schema in the tests, and the text table prints one line per document.
+- [x] R2-AC6 One bad document no longer aborts the run (exit code 0) unless `VERIFY_STRICT=true` (exit code 1). The A02 behaviour on a corrupt `_index.json` or missing file is unchanged.
+- [x] R2-AC7 The near-duplicate threshold is within the calibration gap: the calibration file shows every planted near-duplicate above it and every distinct real pair below it, and states the margin.
+- [x] R2-AC8 `make test && make lint` green; coverage of the new package at least 85 percent.
 
 ### Verify
 `cd indexer && ../.venv/bin/pytest -q --cov=pipeline/verification`; `python -m pipeline.run --dry-run` against `corpus/batch_b` with `EMBED_MODEL=hashing-bow-768` (CI mode) and once with real Ollama; `python scripts/calibrate_neardup.py`.
@@ -311,14 +314,14 @@ Cluster Jobs (R8). Candidate collections (R9).
 
 ### Acceptance criteria
 - [ ] R3-AC1 Spike result recorded; top-5 of the copied collection equals the original for every question (or the phase stops).
-- [ ] R3-AC2 First run on an empty lake builds everything and writes a registry whose chunk counts sum to the collection count.
-- [ ] R3-AC3 **Unchanged re-run:** `chunks_embedded: 0`, `index_swapped: false`, `index_id` unchanged, exit 0. The embedder is spied in the test and called zero times.
-- [ ] R3-AC4 **Changed document:** edit one document; `chunks_embedded` equals that document's new chunk count; the chunk ids and vectors of every other source are identical before and after; the old chunks of the changed document are gone.
-- [ ] R3-AC5 **Deleted document:** remove a file; after the run `count(where source=X)` is 0, total count equals the registry sum, and the file's last version is in `archive/`.
-- [ ] R3-AC6 **Superseded version:** ingesting the Batch B newer version marks the old document's chunks `superseded=true` with no re-embedding of the old document, the old file is archived, and a default query no longer returns it (integration test, or the CI embedder).
-- [ ] R3-AC7 **Restore:** `restore --source <old>` makes the old document retrievable again by default and supersedes the newer one; the A02 version-scope test (`scope.py`) still passes.
-- [ ] R3-AC8 A registry or collection mismatch (different `embed_model` or chunk settings) refuses incremental mode with a message naming the difference; `--full` works.
-- [ ] R3-AC9 A failure at any point before the swap leaves the live collection and the registry untouched (fault-injection test at three points).
+- [x] R3-AC2 First run on an empty lake builds everything and writes a registry whose chunk counts sum to the collection count.
+- [x] R3-AC3 **Unchanged re-run:** `chunks_embedded: 0`, `index_swapped: false`, `index_id` unchanged, exit 0. The embedder is spied in the test and called zero times.
+- [x] R3-AC4 **Changed document:** edit one document; `chunks_embedded` equals that document's new chunk count; the chunk ids and vectors of every other source are identical before and after; the old chunks of the changed document are gone.
+- [x] R3-AC5 **Deleted document:** remove a file; after the run `count(where source=X)` is 0, total count equals the registry sum, and the file's last version is in `archive/`.
+- [x] R3-AC6 **Superseded version:** ingesting the Batch B newer version marks the old document's chunks `superseded=true` with no re-embedding of the old document, the old file is archived, and a default query no longer returns it (integration test, or the CI embedder).
+- [x] R3-AC7 **Restore:** `restore --source <old>` makes the old document retrievable again by default and supersedes the newer one; the A02 version-scope test (`scope.py`) still passes.
+- [x] R3-AC8 A registry or collection mismatch (different `embed_model` or chunk settings) refuses incremental mode with a message naming the difference; `--full` works.
+- [x] R3-AC9 A failure at any point before the swap leaves the live collection and the registry untouched (fault-injection test at three points).
 - [ ] R3-AC10 Both batches pass through A1 and A2: the run on `corpus/raw` plus `corpus/batch_b` produces the verification report and a collection equal to the registry (I-21), proven by a script `scripts/check_registry.py`.
 - [ ] R3-AC11 `make test && make lint` green; `make eval-fixtures` gate still green; coverage of new modules at least 85 percent.
 
