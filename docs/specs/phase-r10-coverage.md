@@ -34,7 +34,7 @@ Out: report text (R11); running the suite end to end (done by the R7/R9 session;
 - [ ] **R10-AC2** coverage.py reports share, threshold, uncovered with topics, exit code 1 below target (`test_coverage_share_topics_and_threshold`, `test_main_exit_code_below_and_above_target`).
 - [ ] **R10-AC3** before below target (finding, not forced) and after higher; both outputs saved.
 - [ ] **R10-AC4** at least 6 new golden questions, labelled, real sources and pages; `golden --check` reports only the reviewed-count problem.
-- [x] **R10-AC5** (done in R11: `docs/evidence/a3/e3-data-drift.md`, `eval/results/drift-20261121T074956Z.json`; the injected document's live handling in `e3-injection-rail-live.txt`) drift file and note: moved metrics, changed questions, version question, injected document, each with cause and a number from a committed file.
+- [x] **R10-AC5** (done in R11: `docs/evidence/a3/e3-data-drift.md`, `eval/results/drift-20261121T083232Z.json`; the injected document's live handling in `e3-injection-rail-live.txt`) drift file and note: moved metrics, changed questions, version question, injected document, each with cause and a number from a committed file.
 - [ ] **R10-AC6** `d5-root-cause.md`, five lines, trace fields only.
 - [ ] **R10-AC7** `make test && make lint` green.
 

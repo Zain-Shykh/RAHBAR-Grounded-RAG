@@ -99,8 +99,9 @@ def main() -> int:
             "g32": "b12-sports-facilities-2026.md (the gymnasium hours) was deleted from the inbox by the A2 delete test before this "
                    "index was built (docs/evidence/a3/a2-delete-no-orphans.txt: chunks left under b12 = 0, index 1006 chunks, 14 documents); "
                    "its abstention is the correct answer for an index without the document, not a drift effect of adding Batch B.",
-            "injected_document": "not shown by the files for g31 and g34 beyond: b11 is retrieved for g31 (recall@5 1.0) and the answer abstains. "
-                                  "The live trace evidence is in docs/evidence/a3/e3-injection-rail-live.txt when present.",
+            "injected_document": "g31: b11 is retrieved (recall@5 1.0, top-1 0.8616) and the answer abstains; the rail dropped the chunk "
+                                 "b11-examination-guidelines-2026-p001-c002 (live trace, docs/evidence/a3/e3-injection-rail-live.txt), which also holds "
+                                 "the legitimate rule. g34: b11 not in the top 5 (recall@5 0.0), rail not shown to be involved.",
         },
     }
     out = Path(a.out) / f"drift-{time.strftime('%Y%m%dT%H%M%SZ', time.gmtime())}.json"

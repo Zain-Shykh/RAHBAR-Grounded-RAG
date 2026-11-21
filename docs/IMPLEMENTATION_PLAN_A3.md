@@ -86,13 +86,13 @@ Hours spent so far: planned 64 h plus 2 h (R0), actual `____`.
 ## 2. Current focus
 
 ```
-Phase:        R7 and R9 done on the cluster, independent test running; next R10 drift write-up, R11
-Stage:        TESTING (R7/R9 independent test)
-Branch:       feat/rag-r04-eval-suite (PR #48 into dev)
-Spec:         this file
-Next action:  R10 E3 drift write-up from suite-20261121T021833Z-drift-after-batch-b.json, R11 report; Zain decides the production release of 600/100 (make release COLLECTION=rahbar_c600)
-Waiting on:   nothing (Ollama time: each answer takes 75 to 110 s)
-Last updated: 2026-11-21 03:25
+Phase:        R0 to R11 complete; waiting on Zain for the human items
+Stage:        READY FOR PR (R11 independent test: see docs/specs/phase-r11-report.md section 12)
+Branch:       feat/rag-r04-eval-suite (PR #48 into dev), then the release PR dev to main
+Spec:         docs/specs/phase-r11-report.md
+Next action:  Zain: (1) 8 synthetic reviews in eval/HUMAN_TODO.md, (2) roll numbers on report page 1 (then scripts/build_report.sh), (3) check the contribution table and AI statement, (4) decide the production release of 600/100 (make release COLLECTION=rahbar_c600), (5) merge the release PR if not done
+Waiting on:   Zain (human items above)
+Last updated: 2026-11-21
 ```
 
 Update this block at the end of every work session, even if the phase is unfinished.
@@ -169,7 +169,7 @@ Numbers the report will quote. Fill each with the value, the committed file it c
 | Release decision (release or reject, reasons) | reject 100/0; release 600/100 (production step left to Zain); rule changed after seeing 100/0, stated | `docs/evidence/r7-decision.md` | R7 |
 | Resource peaks and chosen requests and limits | api 71 Mi peak (128Mi limit), chroma 104 Mi (384Mi), indexer 469 Mi (768Mi), eval 24 Mi (64Mi) | `docs/evidence/f5-resources.txt` | R8 |
 | Coverage before and after (share, threshold, uncovered topics) | 0.300 to 0.675 (target 0.85, threshold 0.72); in-domain 0.429 to 0.857 | `eval/results/coverage-*.json`, `docs/evidence/a3/e2-uncovered-topics.md` | R10 |
-| Data drift (metric changes after Batch B) | like for like on 27 questions: recall@5 0.8095 to 0.7143, false abstention 0.1905 to 0.3333; 3 outcome changes | `eval/results/drift-20261121T074956Z.json`, `docs/evidence/a3/e3-data-drift.md` | R10 |
+| Data drift (metric changes after Batch B) | like for like on 27 questions: recall@5 0.8095 to 0.7143, false abstention 0.1905 to 0.3333; 3 outcome changes | `eval/results/drift-20261121T083232Z.json`, `docs/evidence/a3/e3-data-drift.md` | R10 |
 | Trace summary over a window | 61 queries, abstention rate 0.311, top-1 median 0.798 | `docs/evidence/a3/d2-trace-report-job.txt` | R6, R8 |
 
 ---
@@ -178,16 +178,16 @@ Numbers the report will quote. Fill each with the value, the committed file it c
 
 Tick only with a pointer to the file.
 
-- [ ] Repository URL ready; commits from both members (R3-LOG-6)
-- [ ] `README.md` has the exact command for each of A to F (R3-LOG-10)
-- [ ] `k8s/README.md` lets a fresh cluster reach a working pipeline (R3-F5-2); rehearsed on a deleted cluster
-- [ ] `eval/results/` and `traces/` committed with the files the report quotes (R3-LOG-9)
-- [ ] Report PDF at most 8 pages, names and roll numbers on page 1, appendix of screenshots (R3-G-*)
-- [ ] Screenshots S-A1, S-A2, S-B, S-C1, S-C2, S-D1, S-D2, S-E1, S-E2, S-F1 to S-F5, uncropped, labelled (R3-S-*)
-- [ ] Demo rehearsal: eval as a Job, a trace opened, an unseen batch ingested (R3-LOG-11)
-- [ ] `docs/rubric_checklist.md` section F ticked with evidence; `python3 scripts/check_submission.py` still passes for the A02 parts
-- [ ] AI statement (2 to 3 lines) and the contribution table written truthfully
-- [ ] No secret in Git; `git log` clean of `.env*`, tokens, models, `corpus/raw/`
+- [ ] Repository URL ready; commits from both members (R3-LOG-6): GAP, 2 non-merge commits by Ahmad (A02), none for A3 (D-108); stated in the report
+- [x] `README.md` has the exact command for each of A to F (R3-LOG-10): README section "Assignment 03"
+- [x] `k8s/README.md` lets a fresh cluster reach a working pipeline (R3-F5-2); rehearsed on a deleted cluster: `docs/evidence/a3/r11-fresh-cluster-rehearsal.txt`
+- [x] `eval/results/` and `traces/` committed with the files the report quotes (R3-LOG-9): checked by `scripts/check_numbers_a3.py`
+- [ ] Report PDF at most 8 pages, names and roll numbers on page 1, appendix of screenshots (R3-G-*): `docs/report/report.pdf`; roll numbers are a placeholder for Zain
+- [x] Screenshots S-A1, S-A2, S-B, S-C1, S-C2, S-D1, S-D2, S-E1, S-E2, S-F1 to S-F5, uncropped, labelled (R3-S-*): `docs/evidence/a3/screenshots/`, index `docs/evidence/a3/README.md` (renderings of saved terminal output, D-139)
+- [x] Demo rehearsal: eval as a Job, a trace opened, an unseen batch ingested (R3-LOG-11): `docs/evidence/a3/r11-fresh-cluster-rehearsal.txt`
+- [x] `docs/rubric_checklist.md` section F ticked with evidence; `python3 scripts/check_submission.py` still passes for the A02 parts (164 passed, 0 failures)
+- [ ] AI statement (2 to 3 lines) and the contribution table written truthfully: written; Zain must confirm
+- [x] No secret in Git; `git log` clean of `.env*`, tokens, models, `corpus/raw/`: `docs/evidence/a3/r11-history-scan.txt`
 
 ---
 
@@ -445,7 +445,7 @@ Cluster volume (R8). The root-cause write-up (R10/R11 use it; R6 only proves the
 - [x] R6-AC2 The trace goes to stdout as one JSON line with `"type": "trace"` and, when `TRACE_DIR` is set, to a per-pod file; with `TRACE_DIR` unwritable the request still succeeds and `rahbar_trace_write_errors_total` increments.
 - [x] R6-AC3 `trace_tool show <id>` prints the query, filter, retrieved chunks with scores and versions, the exact prompt, the parameters and the response, and prints `hash OK` for an untouched trace and `hash MISMATCH` for an edited one.
 - [x] R6-AC4 `trace_report --since` prints top-1 similarity distribution, abstention rate, cache hit rate, p50 and p95 per stage and injection count, and its numbers equal an independent recomputation in the test.
-- [ ] R6-AC5 **Rail:** the Batch B injected document, once indexed (CI embedder with a fixture index or the real index), is retrieved by its planted question, dropped from the evidence, the trace holds `{rail: injection_scan, action: dropped_passage, chunk_id, pattern}`, and the metric counter is 1.
+- [x] R6-AC5 (live proof in R11: docs/evidence/a3/e3-injection-rail-live.txt) **Rail:** the Batch B injected document, once indexed (CI embedder with a fixture index or the real index), is retrieved by its planted question, dropped from the evidence, the trace holds `{rail: injection_scan, action: dropped_passage, chunk_id, pattern}`, and the metric counter is 1.
 - [ ] R6-AC6 The A02 injection golden question still abstains or answers safely (`make eval-fixtures` gate green) and every A02 API test is unchanged and green.
 - [x] R6-AC7 No trace contains the Ollama URL, an environment variable or a header (test scanning for `OLLAMA_URL` and `Authorization`).
 - [ ] R6-AC8 One real question end to end on the local stack is saved as `traces/samples/answered.jsonl`, and `trace_tool` reproduces its prompt hash.
@@ -601,7 +601,7 @@ Report text (R11).
 - [ ] R10-AC2 `coverage.py` reports the share above the threshold, the threshold with its calibration source, the uncovered queries with topic groups, and exits non-zero when the share is below the target (tests with a trimmed golden set).
 - [ ] R10-AC3 Before run: the coverage is below the target on purpose or by finding (state which); after adding at least 6 golden questions the share rises; both outputs saved (R3-S-E1, R3-S-E2).
 - [ ] R10-AC4 The new golden questions are in `eval/golden.jsonl`, labelled, with relevant sources and pages, and `golden --check` still passes.
-- [x] R10-AC5 (done in R11, `docs/evidence/a3/e3-data-drift.md`, `eval/results/drift-20261121T074956Z.json`) The drift run records what changed after Batch B: at least the metrics that moved, the questions that changed outcome, the retrieved-document change for the version question and the injected document's handling, each with its cause.
+- [x] R10-AC5 (done in R11, `docs/evidence/a3/e3-data-drift.md`, `eval/results/drift-20261121T083232Z.json`) The drift run records what changed after Batch B: at least the metrics that moved, the questions that changed outcome, the retrieved-document change for the version question and the injected document's handling, each with its cause.
 - [ ] R10-AC6 `d5-root-cause.md` uses only fields from a trace and names the cause (chunk, document version or filter) in five lines.
 - [ ] R10-AC7 `make test && make lint` green.
 

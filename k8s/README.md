@@ -31,6 +31,12 @@ whole procedure. Ollama runs on the host (`OLLAMA_HOST=0.0.0.0 ollama serve`; mo
 | F, metrics endpoint | `kubectl port-forward svc/api 8000:8000 -n rahbar`, then `curl localhost:8000/metrics` |
 | F, candidate and release | `make candidate CHUNK=300 OVERLAP=50`, eval Job with `API_URL=http://api-candidate:8000`, `make release COLLECTION=rahbar_cand`, `make rollback` |
 
+### Notes from the fresh-cluster rehearsal (`docs/evidence/a3/r11-fresh-cluster-rehearsal.txt`)
+
+- On a new cluster the first `make corpus` can wait several minutes for the `busybox` image and for Chroma to be pulled; the helper pods wait up to 600 s.
+- Step 3 also creates the Job `indexer`; it starts while the inbox is still empty and ends `Failed`. Ignore it: step 6 (`make index`) is the real run, and `make apply` deletes the old Job before re-applying.
+- The demo after step 8: `make eval-job SET_BASELINE=true LABEL=smoke LIMIT=5` then `make eval-job LABEL=smoke-gate LIMIT=5` (a 5-question smoke run: one unanswerable plus four answerable questions; the full run is `SUBSET=all`, about 60 minutes); `make ingest-batch BATCH=corpus/batch_b` (verification report: `make lake-ls`); `make ingest-batch BATCH=corpus/demo_batch` (3 unseen documents, then `make ask Q="What is the hostel fee per semester?"`); a trace: `kubectl logs deploy/api -n rahbar | grep '"type": "trace"'`.
+
 The indexer Job takes about 23 minutes on a full corpus with OCR (`activeDeadlineSeconds: 3600`); the suite takes 20 to 35 minutes with the 3B model (one answer 40 to 100 s), so never start two LLM Jobs at once. Requests and limits come from `docs/evidence/f5-resources.txt`.
 
 First baseline on the cluster: `make eval-job SET_BASELINE=true LABEL=baseline` (the result becomes
