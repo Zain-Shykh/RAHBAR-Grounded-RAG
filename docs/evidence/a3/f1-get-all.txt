@@ -1,0 +1,54 @@
+$ kubectl get all,pvc,configmap,cronjob,job -n rahbar
+NAME                         READY   STATUS        RESTARTS      AGE
+pod/api-7966bb7df4-6cz5v     1/1     Running       0             2m38s
+pod/api-7966bb7df4-bc5x9     1/1     Running       0             3m12s
+pod/api-7966bb7df4-l7k72     1/1     Running       0             3m23s
+pod/api-7966bb7df4-lxl2f     1/1     Running       0             3m
+pod/api-7966bb7df4-rh7jb     1/1     Running       0             2m49s
+pod/chroma-0                 1/1     Running       5 (10m ago)   14d
+pod/corpus-loader            1/1     Terminating   0             10s
+pod/redis-6f989b5dd-zflgv    1/1     Running       4 (10m ago)   14d
+pod/reindex-29911860-w7pnl   0/1     Completed     0             4d15h
+pod/ui-666d88fd49-cvcqt      1/1     Running       4 (10m ago)   14d
+
+NAME             TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)    AGE
+service/api      ClusterIP   10.100.203.93   <none>        8000/TCP   14d
+service/chroma   ClusterIP   10.97.196.211   <none>        8000/TCP   14d
+service/redis    ClusterIP   10.111.60.15    <none>        6379/TCP   14d
+service/ui       ClusterIP   10.100.0.147    <none>        80/TCP     14d
+
+NAME                    READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/api     5/5     5            5           14d
+deployment.apps/redis   1/1     1            1           14d
+deployment.apps/ui      1/1     1            1           14d
+
+NAME                              DESIRED   CURRENT   READY   AGE
+replicaset.apps/api-6486b9b855    0         0         0       14d
+replicaset.apps/api-7966bb7df4    5         5         5       3m23s
+replicaset.apps/redis-6f989b5dd   1         1         1       14d
+replicaset.apps/ui-666d88fd49     1         1         1       14d
+
+NAME                      READY   AGE
+statefulset.apps/chroma   1/1     14d
+
+NAME                                      REFERENCE        TARGETS       MINPODS   MAXPODS   REPLICAS   AGE
+horizontalpodautoscaler.autoscaling/api   Deployment/api   cpu: 5%/70%   3         8         5          14d
+
+NAME                    SCHEDULE    TIMEZONE   SUSPEND   ACTIVE   LAST SCHEDULE   AGE
+cronjob.batch/reindex   0 3 * * 0   <none>     False     0        5d19h           14d
+
+NAME                         STATUS     COMPLETIONS   DURATION   AGE
+job.batch/reindex-29911860   Complete   1/1           10m        4d15h
+
+NAME                                         STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE
+persistentvolumeclaim/cache-data             Bound    pvc-8b20cfcb-3a04-4d36-bfba-f91352fc9ab8   1Gi        RWO            standard       <unset>                 14d
+persistentvolumeclaim/chroma-data-chroma-0   Bound    pvc-6e9a2c11-6ef9-4e71-915e-6c5a14fb9fbf   2Gi        RWO            standard       <unset>                 14d
+persistentvolumeclaim/corpus-data            Bound    pvc-c5e6cdf5-ba65-4cf9-8b51-003c585d45f7   1Gi        RWO            standard       <unset>                 14d
+persistentvolumeclaim/eval-results           Bound    pvc-e152e7ac-c42d-4fe4-a707-2839168c285d   200Mi      RWO            standard       <unset>                 3m23s
+persistentvolumeclaim/lake-data              Bound    pvc-263b9515-ca53-4c6c-80dc-73ecc766e6a5   1Gi        RWO            standard       <unset>                 3m23s
+persistentvolumeclaim/traces-data            Bound    pvc-344bc491-69a8-4448-87e3-742c0557575e   500Mi      RWO            standard       <unset>                 3m23s
+
+NAME                         DATA   AGE
+configmap/kube-root-ca.crt   1      14d
+configmap/rahbar-config      31     14d
+configmap/rahbar-gate        1      1s

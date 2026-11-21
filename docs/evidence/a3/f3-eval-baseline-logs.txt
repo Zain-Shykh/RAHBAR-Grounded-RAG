@@ -1,0 +1,45 @@
+$ make eval-job SET_BASELINE=true LABEL=baseline
+$ kubectl get job eval -n rahbar
+NAME   STATUS     COMPLETIONS   DURATION   AGE
+eval   Complete   1/1           35m        35m
+$ kubectl logs job/eval -n rahbar
+# Suite result baseline (20261121T001033Z)
+
+index `20261120T232205Z-182148`, embed `nomic-embed-text@0a109f422b47`, questions 27, subset `A`, git `unknown`
+
+## Module level (embedding)
+
+| metric | value |
+| --- | --- |
+| paraphrase mean cosine (15 pairs) | 0.791 |
+| unrelated mean cosine (15 pairs) | 0.525 |
+| gap | 0.266 |
+| embed time per chunk, median / p95 ms (91 chunks) | 581.6 / 3197.9 |
+| memory per embedding (float32 bytes) | 3072 |
+| determinism, largest abs difference | 0.00e+00 |
+
+## Component level (retrieval, answerable questions)
+
+| metric | clean | with typos | change |
+| --- | --- | --- | --- |
+| recall@3 (n=21) | 0.810 | 0.762 | -0.048 |
+| recall@5 (n=21) | 0.810 | 0.810 | +0.000 |
+| MRR (n=21) | 0.786 | 0.637 | -0.149 |
+| nDCG@5 (n=21) | 0.792 | 0.680 | -0.112 |
+| retrieval latency median / p95 ms | 362.2 / 800.4 | | |
+
+## End-to-end level (answers)
+
+| metric | value |
+| --- | --- |
+| faithfulness, support overlap mean (answered n=18) | 0.813 |
+| faithfulness, share supported at 0.6 | 0.833 |
+| abstention correctness (n=6) | 0.833 |
+| false abstention rate (answerable) | 0.190 |
+| citation validity (22 citations) | 1.000 |
+| expected-text hit rate | 0.600 |
+| fallback rate | 0.000 |
+| latency p50 / p95 seconds | 61.2 / 184.5 |
+
+wrote /results/suite-20261121T001033Z-baseline.json
+baseline written: /results/baseline.json

@@ -1,0 +1,125 @@
+{
+  "metrics": {
+    "component.clean.recall_at_3": {
+      "run1": 0.8095238095238095,
+      "run2": 0.8095238095238095,
+      "abs_diff": 0.0
+    },
+    "component.clean.recall_at_5": {
+      "run1": 0.8095238095238095,
+      "run2": 0.8095238095238095,
+      "abs_diff": 0.0
+    },
+    "component.clean.mrr": {
+      "run1": 0.7857142857142857,
+      "run2": 0.7857142857142857,
+      "abs_diff": 0.0
+    },
+    "component.clean.ndcg_at_5": {
+      "run1": 0.7919490358843552,
+      "run2": 0.7919490358843552,
+      "abs_diff": 0.0
+    },
+    "component.noisy.recall_at_3": {
+      "run1": 0.7619047619047619,
+      "run2": 0.7619047619047619,
+      "abs_diff": 0.0
+    },
+    "component.noisy.recall_at_5": {
+      "run1": 0.8095238095238095,
+      "run2": 0.8095238095238095,
+      "abs_diff": 0.0
+    },
+    "component.noisy.mrr": {
+      "run1": 0.6365079365079366,
+      "run2": 0.6365079365079366,
+      "abs_diff": 0.0
+    },
+    "component.noisy.ndcg_at_5": {
+      "run1": 0.679982955616615,
+      "run2": 0.679982955616615,
+      "abs_diff": 0.0
+    },
+    "e2e.abstention_correctness": {
+      "run1": 0.8333333333333334,
+      "run2": 0.8333333333333334,
+      "abs_diff": 0.0
+    },
+    "e2e.false_abstention_rate": {
+      "run1": 0.19047619047619047,
+      "run2": 0.19047619047619047,
+      "abs_diff": 0.0
+    },
+    "e2e.citation_validity": {
+      "run1": 1.0,
+      "run2": 1.0,
+      "abs_diff": 0.0
+    },
+    "e2e.faithfulness_overlap_mean": {
+      "run1": 0.8129629629629629,
+      "run2": 0.8129629629629629,
+      "abs_diff": 0.0
+    },
+    "e2e.faithfulness_supported_rate": {
+      "run1": 0.8333333333333334,
+      "run2": 0.8333333333333334,
+      "abs_diff": 0.0
+    },
+    "e2e.expect_hit_rate": {
+      "run1": 0.6,
+      "run2": 0.6,
+      "abs_diff": 0.0
+    },
+    "e2e.fallback_rate": {
+      "run1": 0.0,
+      "run2": 0.0,
+      "abs_diff": 0.0
+    },
+    "e2e.latency_p50_s": {
+      "run1": 61.21,
+      "run2": 40.1,
+      "abs_diff": 21.11
+    },
+    "e2e.latency_p95_s": {
+      "run1": 184.46,
+      "run2": 113.14,
+      "abs_diff": 71.32000000000001
+    },
+    "module.paraphrase_mean": {
+      "run1": 0.7912564102732789,
+      "run2": 0.7912564102732789,
+      "abs_diff": 0.0
+    },
+    "module.unrelated_mean": {
+      "run1": 0.5249525577065651,
+      "run2": 0.5249525577065651,
+      "abs_diff": 0.0
+    },
+    "module.gap": {
+      "run1": 0.26630385256671374,
+      "run2": 0.26630385256671374,
+      "abs_diff": 0.0
+    },
+    "module.determinism_max_abs_diff": {
+      "run1": 0.0,
+      "run2": 0.0,
+      "abs_diff": 0.0
+    },
+    "module.ms_per_chunk_median": {
+      "run1": 581.5608499979135,
+      "run2": 503.8770570026827,
+      "abs_diff": 77.68379299523076
+    }
+  },
+  "answers_differing_text": [
+    "g19"
+  ],
+  "answers_differing_outcome_or_citations": [
+    "q06"
+  ],
+  "questions": 27,
+  "runs": [
+    "eval/results/suite-20261121T001033Z-baseline.json",
+    "eval/results/suite-20261121T003229Z-live2.json"
+  ]
+}

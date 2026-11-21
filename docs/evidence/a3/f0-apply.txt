@@ -1,0 +1,49 @@
+$ make manifests
+== dev
+Summary: 36 resources found parsing stdin - Valid: 36, Invalid: 0, Errors: 0, Skipped: 0
+== ci
+Summary: 37 resources found parsing stdin - Valid: 37, Invalid: 0, Errors: 0, Skipped: 0
+== prod
+Summary: 36 resources found parsing stdin - Valid: 36, Invalid: 0, Errors: 0, Skipped: 0
+kubeconform -strict -summary k8s/eval-job.yaml k8s/trace-report-job.yaml k8s/candidate/indexer-job.yaml
+Summary: 3 resources found in 3 files - Valid: 3, Invalid: 0, Errors: 0, Skipped: 0
+kustomize build k8s/candidate | kubeconform -strict -summary
+Summary: 2 resources found parsing stdin - Valid: 2, Invalid: 0, Errors: 0, Skipped: 0
+$ kubectl apply -k k8s/overlays/dev
+job.batch "indexer" deleted from rahbar namespace
+namespace/rahbar unchanged
+serviceaccount/api unchanged
+serviceaccount/chroma unchanged
+serviceaccount/indexer unchanged
+serviceaccount/redis unchanged
+serviceaccount/ui unchanged
+configmap/rahbar-config configured
+service/api unchanged
+service/chroma unchanged
+service/redis unchanged
+service/ui unchanged
+persistentvolumeclaim/cache-data unchanged
+persistentvolumeclaim/corpus-data unchanged
+persistentvolumeclaim/eval-results created
+persistentvolumeclaim/lake-data created
+persistentvolumeclaim/traces-data created
+deployment.apps/api configured
+deployment.apps/redis unchanged
+deployment.apps/ui unchanged
+statefulset.apps/chroma configured
+cronjob.batch/reindex configured
+poddisruptionbudget.policy/api configured
+horizontalpodautoscaler.autoscaling/api unchanged
+job.batch/indexer created
+ingress.networking.k8s.io/rahbar unchanged
+networkpolicy.networking.k8s.io/allow-dns-egress unchanged
+networkpolicy.networking.k8s.io/api-candidate-egress created
+networkpolicy.networking.k8s.io/api-candidate-ingress created
+networkpolicy.networking.k8s.io/api-egress unchanged
+networkpolicy.networking.k8s.io/api-ingress configured
+networkpolicy.networking.k8s.io/chroma-ingress configured
+networkpolicy.networking.k8s.io/default-deny-all unchanged
+networkpolicy.networking.k8s.io/eval-egress created
+networkpolicy.networking.k8s.io/indexer-egress unchanged
+networkpolicy.networking.k8s.io/redis-ingress unchanged
+networkpolicy.networking.k8s.io/ui-ingress unchanged

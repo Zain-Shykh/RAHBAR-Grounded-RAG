@@ -47,8 +47,8 @@ spec:
             httpGet: {path: /readyz, port: 8000}
             periodSeconds: 10
           resources:
-            requests: {cpu: 100m, memory: 128Mi}
-            limits: {cpu: 500m, memory: 256Mi}
+            requests: {cpu: 100m, memory: 80Mi}
+            limits: {cpu: 500m, memory: 128Mi}
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true

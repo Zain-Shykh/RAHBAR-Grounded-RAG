@@ -1,0 +1,25 @@
+$ python -m eval.suite.stochasticity eval/results/suite-20261121T001033Z-baseline.json eval/results/suite-20261121T003229Z-live2.json
+component.clean.recall_at_3                      0.8095238095238095     0.8095238095238095     diff 0.0
+component.clean.recall_at_5                      0.8095238095238095     0.8095238095238095     diff 0.0
+component.clean.mrr                              0.7857142857142857     0.7857142857142857     diff 0.0
+component.clean.ndcg_at_5                        0.7919490358843552     0.7919490358843552     diff 0.0
+component.noisy.recall_at_3                      0.7619047619047619     0.7619047619047619     diff 0.0
+component.noisy.recall_at_5                      0.8095238095238095     0.8095238095238095     diff 0.0
+component.noisy.mrr                              0.6365079365079366     0.6365079365079366     diff 0.0
+component.noisy.ndcg_at_5                        0.679982955616615      0.679982955616615      diff 0.0
+e2e.abstention_correctness                       0.8333333333333334     0.8333333333333334     diff 0.0
+e2e.false_abstention_rate                        0.19047619047619047    0.19047619047619047    diff 0.0
+e2e.citation_validity                            1.0                    1.0                    diff 0.0
+e2e.faithfulness_overlap_mean                    0.8129629629629629     0.8129629629629629     diff 0.0
+e2e.faithfulness_supported_rate                  0.8333333333333334     0.8333333333333334     diff 0.0
+e2e.expect_hit_rate                              0.6                    0.6                    diff 0.0
+e2e.fallback_rate                                0.0                    0.0                    diff 0.0
+e2e.latency_p50_s                                61.21                  40.1                   diff 21.11
+e2e.latency_p95_s                                184.46                 113.14                 diff 71.32000000000001
+module.paraphrase_mean                           0.7912564102732789     0.7912564102732789     diff 0.0
+module.unrelated_mean                            0.5249525577065651     0.5249525577065651     diff 0.0
+module.gap                                       0.26630385256671374    0.26630385256671374    diff 0.0
+module.determinism_max_abs_diff                  0.0                    0.0                    diff 0.0
+module.ms_per_chunk_median                       581.5608499979135      503.8770570026827      diff 77.68379299523076
+answers with different text: 1 of 27; different outcome or citations: 1
+wrote eval/results/stochasticity-20261121T003255Z.json

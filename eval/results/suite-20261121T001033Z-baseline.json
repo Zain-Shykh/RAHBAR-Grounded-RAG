@@ -1,0 +1,1273 @@
+{
+  "meta": {
+    "label": "baseline",
+    "timestamp": "20261121T001033Z",
+    "git": "unknown",
+    "subset": "A",
+    "seed": 1234,
+    "llm_seed_env": null,
+    "api": "http://api:8000",
+    "ready": {
+      "status": "ready",
+      "checks": {
+        "chroma": "ok",
+        "collection": "ok",
+        "embed_pin": "ok",
+        "redis": "ok",
+        "embed_dimension": "ok"
+      }
+    },
+    "index_id": "20261120T232205Z-182148",
+    "embed_model": "nomic-embed-text",
+    "golden": "golden.jsonl",
+    "golden_counts": {
+      "questions": 27,
+      "answerable": 21,
+      "unanswerable": 6,
+      "hard": 5,
+      "human": 18,
+      "synthetic": 9,
+      "synthetic_reviewed": 0,
+      "batch_b": 0
+    }
+  },
+  "module": {
+    "model": "nomic-embed-text@0a109f422b47",
+    "pairs_paraphrase": 15,
+    "pairs_unrelated": 15,
+    "paraphrase_mean": 0.7912564102732789,
+    "unrelated_mean": 0.5249525577065651,
+    "paraphrase_min": 0.6617341444277086,
+    "unrelated_max": 0.6415594515822229,
+    "gap": 0.26630385256671374,
+    "chunks_timed": 91,
+    "ms_per_chunk_median": 581.5608499979135,
+    "ms_per_chunk_p95": 3197.9262130043935,
+    "determinism_max_abs_diff": 0.0,
+    "dimension": 768,
+    "bytes_per_embedding_float32": 3072
+  },
+  "component": {
+    "clean": {
+      "n": 21,
+      "recall_at_3": 0.8095238095238095,
+      "recall_at_5": 0.8095238095238095,
+      "mrr": 0.7857142857142857,
+      "ndcg_at_5": 0.7919490358843552,
+      "hard": {
+        "n": 5,
+        "recall_at_3": 0.6,
+        "recall_at_5": 0.6,
+        "mrr": 0.6,
+        "ndcg_at_5": 0.6
+      },
+      "by_batch": {
+        "A": {
+          "n": 21,
+          "recall_at_3": 0.8095238095238095,
+          "recall_at_5": 0.8095238095238095,
+          "mrr": 0.7857142857142857,
+          "ndcg_at_5": 0.7919490358843552
+        }
+      },
+      "per_question": [
+        {
+          "id": "q01",
+          "tags": [
+            "ordinary"
+          ],
+          "hard": false,
+          "batch": "A",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.86319298
+        },
+        {
+          "id": "q02",
+          "tags": [
+            "ordinary"
+          ],
+          "hard": false,
+          "batch": "A",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.82721567
+        },
+        {
+          "id": "q03",
+          "tags": [
+            "ordinary"
+          ],
+          "hard": false,
+          "batch": "A",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.881984234
+        },
+        {
+          "id": "q04",
+          "tags": [
+            "ordinary"
+          ],
+          "hard": false,
+          "batch": "A",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.87776506
+        },
+        {
+          "id": "q05",
+          "tags": [
+            "ordinary"
+          ],
+          "hard": false,
+          "batch": "A",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.88325834
+        },
+        {
+          "id": "q06",
+          "tags": [
+            "ordinary"
+          ],
+          "hard": false,
+          "batch": "A",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.9083243599999999
+        },
+        {
+          "id": "q07",
+          "tags": [
+            "ordinary"
+          ],
+          "hard": false,
+          "batch": "A",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.77581137
+        },
+        {
+          "id": "q08",
+          "tags": [
+            "ordinary"
+          ],
+          "hard": false,
+          "batch": "A",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.80421615
+        },
+        {
+          "id": "q09",
+          "tags": [
+            "ordinary"
+          ],
+          "hard": false,
+          "batch": "A",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.74560916
+        },
+        {
+          "id": "q10",
+          "tags": [
+            "ordinary"
+          ],
+          "hard": false,
+          "batch": "A",
+          "recall_at_3": 0.0,
+          "recall_at_5": 0.0,
+          "mrr": 0.0,
+          "ndcg_at_5": 0.0,
+          "top1_score": 0.82070792
+        },
+        {
+          "id": "q11",
+          "tags": [
+            "ordinary"
+          ],
+          "hard": false,
+          "batch": "A",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.7472886400000001
+        },
+        {
+          "id": "q12",
+          "tags": [
+            "version"
+          ],
+          "hard": false,
+          "batch": "A",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.89502823
+        },
+        {
+          "id": "q13",
+          "tags": [
+            "version"
+          ],
+          "hard": false,
+          "batch": "A",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.7918328
+        },
+        {
+          "id": "q14",
+          "tags": [
+            "exact"
+          ],
+          "hard": false,
+          "batch": "A",
+          "recall_at_3": 0.0,
+          "recall_at_5": 0.0,
+          "mrr": 0.0,
+          "ndcg_at_5": 0.0,
+          "top1_score": 0.71293736
+        },
+        {
+          "id": "q15",
+          "tags": [
+            "exact"
+          ],
+          "hard": false,
+          "batch": "A",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.82370228
+        },
+        {
+          "id": "q18",
+          "tags": [
+            "injection"
+          ],
+          "hard": false,
+          "batch": "A",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 0.5,
+          "ndcg_at_5": 0.6309297535714575,
+          "top1_score": 0.79787976
+        },
+        {
+          "id": "g19",
+          "tags": [
+            "paraphrase",
+            "of:q01"
+          ],
+          "hard": true,
+          "batch": "A",
+          "recall_at_3": 0.0,
+          "recall_at_5": 0.0,
+          "mrr": 0.0,
+          "ndcg_at_5": 0.0,
+          "top1_score": 0.80733562
+        },
+        {
+          "id": "g20",
+          "tags": [
+            "paraphrase",
+            "of:q03"
+          ],
+          "hard": true,
+          "batch": "A",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.7783618
+        },
+        {
+          "id": "g21",
+          "tags": [
+            "paraphrase",
+            "of:q06"
+          ],
+          "hard": true,
+          "batch": "A",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.81696355
+        },
+        {
+          "id": "g22",
+          "tags": [
+            "paraphrase",
+            "of:q07"
+          ],
+          "hard": true,
+          "batch": "A",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.731189
+        },
+        {
+          "id": "g23",
+          "tags": [
+            "paraphrase",
+            "of:q10"
+          ],
+          "hard": true,
+          "batch": "A",
+          "recall_at_3": 0.0,
+          "recall_at_5": 0.0,
+          "mrr": 0.0,
+          "ndcg_at_5": 0.0,
+          "top1_score": 0.7588247
+        }
+      ]
+    },
+    "noisy": {
+      "n": 21,
+      "recall_at_3": 0.7619047619047619,
+      "recall_at_5": 0.8095238095238095,
+      "mrr": 0.6365079365079366,
+      "ndcg_at_5": 0.679982955616615,
+      "hard": {
+        "n": 5,
+        "recall_at_3": 0.4,
+        "recall_at_5": 0.6,
+        "mrr": 0.44000000000000006,
+        "ndcg_at_5": 0.4773705614469083
+      },
+      "by_batch": {
+        "A": {
+          "n": 21,
+          "recall_at_3": 0.7619047619047619,
+          "recall_at_5": 0.8095238095238095,
+          "mrr": 0.6365079365079366,
+          "ndcg_at_5": 0.679982955616615
+        }
+      },
+      "per_question": [
+        {
+          "id": "q01",
+          "tags": [
+            "ordinary"
+          ],
+          "hard": false,
+          "batch": "A",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.86319298
+        },
+        {
+          "id": "q02",
+          "tags": [
+            "ordinary"
+          ],
+          "hard": false,
+          "batch": "A",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.6937877
+        },
+        {
+          "id": "q03",
+          "tags": [
+            "ordinary"
+          ],
+          "hard": false,
+          "batch": "A",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.881984234
+        },
+        {
+          "id": "q04",
+          "tags": [
+            "ordinary"
+          ],
+          "hard": false,
+          "batch": "A",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 0.5,
+          "ndcg_at_5": 0.6309297535714575,
+          "top1_score": 0.79063028
+        },
+        {
+          "id": "q05",
+          "tags": [
+            "ordinary"
+          ],
+          "hard": false,
+          "batch": "A",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.85907131
+        },
+        {
+          "id": "q06",
+          "tags": [
+            "ordinary"
+          ],
+          "hard": false,
+          "batch": "A",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.84609044
+        },
+        {
+          "id": "q07",
+          "tags": [
+            "ordinary"
+          ],
+          "hard": false,
+          "batch": "A",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.7530396
+        },
+        {
+          "id": "q08",
+          "tags": [
+            "ordinary"
+          ],
+          "hard": false,
+          "batch": "A",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.80421615
+        },
+        {
+          "id": "q09",
+          "tags": [
+            "ordinary"
+          ],
+          "hard": false,
+          "batch": "A",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 0.5,
+          "ndcg_at_5": 0.6309297535714575,
+          "top1_score": 0.7027363799999999
+        },
+        {
+          "id": "q10",
+          "tags": [
+            "ordinary"
+          ],
+          "hard": false,
+          "batch": "A",
+          "recall_at_3": 0.0,
+          "recall_at_5": 0.0,
+          "mrr": 0.0,
+          "ndcg_at_5": 0.0,
+          "top1_score": 0.82070792
+        },
+        {
+          "id": "q11",
+          "tags": [
+            "ordinary"
+          ],
+          "hard": false,
+          "batch": "A",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 0.3333333333333333,
+          "ndcg_at_5": 0.5,
+          "top1_score": 0.67381436
+        },
+        {
+          "id": "q12",
+          "tags": [
+            "version"
+          ],
+          "hard": false,
+          "batch": "A",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.89502823
+        },
+        {
+          "id": "q13",
+          "tags": [
+            "version"
+          ],
+          "hard": false,
+          "batch": "A",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 0.3333333333333333,
+          "ndcg_at_5": 0.5,
+          "top1_score": 0.7396531
+        },
+        {
+          "id": "q14",
+          "tags": [
+            "exact"
+          ],
+          "hard": false,
+          "batch": "A",
+          "recall_at_3": 0.0,
+          "recall_at_5": 0.0,
+          "mrr": 0.0,
+          "ndcg_at_5": 0.0,
+          "top1_score": 0.71293736
+        },
+        {
+          "id": "q15",
+          "tags": [
+            "exact"
+          ],
+          "hard": false,
+          "batch": "A",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.83795369
+        },
+        {
+          "id": "q18",
+          "tags": [
+            "injection"
+          ],
+          "hard": false,
+          "batch": "A",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 0.5,
+          "ndcg_at_5": 0.6309297535714575,
+          "top1_score": 0.79787976
+        },
+        {
+          "id": "g19",
+          "tags": [
+            "paraphrase",
+            "of:q01"
+          ],
+          "hard": true,
+          "batch": "A",
+          "recall_at_3": 0.0,
+          "recall_at_5": 0.0,
+          "mrr": 0.0,
+          "ndcg_at_5": 0.0,
+          "top1_score": 0.80733562
+        },
+        {
+          "id": "g20",
+          "tags": [
+            "paraphrase",
+            "of:q03"
+          ],
+          "hard": true,
+          "batch": "A",
+          "recall_at_3": 0.0,
+          "recall_at_5": 1.0,
+          "mrr": 0.2,
+          "ndcg_at_5": 0.38685280723454163,
+          "top1_score": 0.68460828
+        },
+        {
+          "id": "g21",
+          "tags": [
+            "paraphrase",
+            "of:q06"
+          ],
+          "hard": true,
+          "batch": "A",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.81696355
+        },
+        {
+          "id": "g22",
+          "tags": [
+            "paraphrase",
+            "of:q07"
+          ],
+          "hard": true,
+          "batch": "A",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.731189
+        },
+        {
+          "id": "g23",
+          "tags": [
+            "paraphrase",
+            "of:q10"
+          ],
+          "hard": true,
+          "batch": "A",
+          "recall_at_3": 0.0,
+          "recall_at_5": 0.0,
+          "mrr": 0.0,
+          "ndcg_at_5": 0.0,
+          "top1_score": 0.7588247
+        }
+      ]
+    },
+    "noise_delta": {
+      "recall_at_3": {
+        "clean": 0.8095238095238095,
+        "noisy": 0.7619047619047619,
+        "abs": -0.04761904761904767,
+        "rel": -0.05882352941176477
+      },
+      "recall_at_5": {
+        "clean": 0.8095238095238095,
+        "noisy": 0.8095238095238095,
+        "abs": 0.0,
+        "rel": 0.0
+      },
+      "mrr": {
+        "clean": 0.7857142857142857,
+        "noisy": 0.6365079365079366,
+        "abs": -0.14920634920634912,
+        "rel": -0.1898989898989898
+      },
+      "ndcg_at_5": {
+        "clean": 0.7919490358843552,
+        "noisy": 0.679982955616615,
+        "abs": -0.11196608026774013,
+        "rel": -0.14138041110525457
+      }
+    },
+    "noise_seed": 1234,
+    "noise_examples": {
+      "q01": "What is the normal course load per regular semester, and may a final-year student take more?",
+      "q02": "What is the largest shaare of a degree program's creit hours that can be exempted for courses studeid at anothzr university?",
+      "q03": "How many students must register for a summer course, or the course is dropped?"
+    },
+    "retrieval_ms_median": 362.2,
+    "retrieval_ms_p95": 800.4
+  },
+  "e2e": {
+    "n": 27,
+    "abstention_correctness": 0.8333333333333334,
+    "abstention_n": 6,
+    "abstention_failed": [
+      "g27"
+    ],
+    "false_abstention_rate": 0.19047619047619047,
+    "citation_validity": 1.0,
+    "citations_total": 22,
+    "faithfulness_overlap_mean": 0.8129629629629629,
+    "faithfulness_supported_rate": 0.8333333333333334,
+    "support_threshold": 0.6,
+    "answered_n": 18,
+    "expect_hit_rate": 0.6,
+    "fallback_rate": 0.0,
+    "latency_p50_s": 61.21,
+    "latency_p95_s": 184.46,
+    "per_question": [
+      {
+        "id": "q01",
+        "kind": "answerable",
+        "batch": "A",
+        "hard": false,
+        "trace_id": "af702dae0fe549eb8ad307741efc0c91",
+        "outcome": "answered",
+        "answered": true,
+        "answer": "5 courses, with an additional course for final-year students",
+        "citations": [
+          {
+            "source": "academic-rules-handbook-jun-2026.pdf",
+            "section": "4.3 The normal course load is 5 courses. A final year student may",
+            "page": 19
+          }
+        ],
+        "overlap": 0.8,
+        "citations_valid": 1,
+        "citations_total": 1,
+        "seconds": 33.5,
+        "expect_hit": true
+      },
+      {
+        "id": "q02",
+        "kind": "answerable",
+        "batch": "A",
+        "hard": false,
+        "trace_id": "1b99eddc462647a393b8e0be6b01bfb2",
+        "outcome": "answered",
+        "answered": true,
+        "answer": "50%",
+        "citations": [
+          {
+            "source": "academic-rules-handbook-jun-2026.pdf",
+            "section": "3.7 Exemption of courses studied at another University cannot be",
+            "page": 14
+          }
+        ],
+        "overlap": 1.0,
+        "citations_valid": 1,
+        "citations_total": 1,
+        "seconds": 26.79,
+        "expect_hit": true
+      },
+      {
+        "id": "q03",
+        "kind": "answerable",
+        "batch": "A",
+        "hard": false,
+        "trace_id": "21aacbf390f84d6088c109d0b320deb4",
+        "outcome": "answered",
+        "answered": true,
+        "answer": "10",
+        "citations": [
+          {
+            "source": "academic-rules-handbook-jun-2026.pdf",
+            "section": "6.11 A minimum of TEN (10) students should register in a summer",
+            "page": 29
+          }
+        ],
+        "overlap": 1.0,
+        "citations_valid": 1,
+        "citations_total": 1,
+        "seconds": 24.66,
+        "expect_hit": false
+      },
+      {
+        "id": "q04",
+        "kind": "answerable",
+        "batch": "A",
+        "hard": false,
+        "trace_id": "17eff19163c1445f99d88451804194f2",
+        "outcome": "answered",
+        "answered": true,
+        "answer": "1, 2, 3, 4, 5, 6, 7, 8, 9",
+        "citations": [
+          {
+            "source": "student-handbook-jun-2026.pdf",
+            "section": "5. Unacceptable Uses of Generative AI Tools",
+            "page": 52
+          },
+          {
+            "source": "academic-rules-handbook-jun-2026.pdf",
+            "section": "5. Unacceptable Uses of Generative AI Tools",
+            "page": 45
+          }
+        ],
+        "overlap": 0.0,
+        "citations_valid": 2,
+        "citations_total": 2,
+        "seconds": 118.98,
+        "expect_hit": false
+      },
+      {
+        "id": "q05",
+        "kind": "answerable",
+        "batch": "A",
+        "hard": false,
+        "trace_id": "a13ab37ee0e64addb6a58b8ec6b7445a",
+        "outcome": "answered",
+        "answered": true,
+        "answer": "two days",
+        "citations": [
+          {
+            "source": "student-handbook-jun-2026.pdf",
+            "section": "7. Students who have missed classes due to any",
+            "page": 30
+          },
+          {
+            "source": "academic-rules-handbook-jun-2026.pdf",
+            "section": "1.14 In case of any unavoidable situation, a class may be",
+            "page": 8
+          }
+        ],
+        "overlap": 1.0,
+        "citations_valid": 2,
+        "citations_total": 2,
+        "seconds": 132.44,
+        "expect_hit": false
+      },
+      {
+        "id": "q06",
+        "kind": "answerable",
+        "batch": "A",
+        "hard": false,
+        "trace_id": "d7fd9320277a4e379b6e3aa910b08a54",
+        "outcome": "answered",
+        "answered": true,
+        "answer": "No",
+        "citations": [
+          {
+            "source": "student-handbook-jun-2026.pdf",
+            "section": "1. Mobile Phones, Smart Watches and all electronic",
+            "page": 26
+          },
+          {
+            "source": "student-handbook-jun-2026.pdf",
+            "section": "V - EXAMINATION RULES",
+            "page": 26
+          }
+        ],
+        "overlap": 0.0,
+        "citations_valid": 2,
+        "citations_total": 2,
+        "seconds": 77.81,
+        "expect_hit": false
+      },
+      {
+        "id": "q07",
+        "kind": "answerable",
+        "batch": "A",
+        "hard": false,
+        "trace_id": "0c6a7d9c17ba47f6b3eddb796a73eaa0",
+        "outcome": "answered",
+        "answered": true,
+        "answer": "60%",
+        "citations": [
+          {
+            "source": "fee-structure-page.html",
+            "section": "Fee Refund Policy",
+            "page": 1
+          }
+        ],
+        "overlap": 1.0,
+        "citations_valid": 1,
+        "citations_total": 1,
+        "seconds": 87.46,
+        "expect_hit": true
+      },
+      {
+        "id": "q08",
+        "kind": "answerable",
+        "batch": "A",
+        "hard": false,
+        "trace_id": "48daad439e8e4c1eb3f2fcaf2610456e",
+        "outcome": "answered",
+        "answered": true,
+        "answer": "Adequate",
+        "citations": [
+          {
+            "source": "grading-page.html",
+            "section": "Letter grades for MBA & MS programs",
+            "page": 1
+          }
+        ],
+        "overlap": 1.0,
+        "citations_valid": 1,
+        "citations_total": 1,
+        "seconds": 122.89,
+        "expect_hit": false
+      },
+      {
+        "id": "q09",
+        "kind": "answerable",
+        "batch": "A",
+        "hard": false,
+        "trace_id": "d300d6ec2c6a4339be8e546eaa102924",
+        "outcome": "answered",
+        "answered": true,
+        "answer": "19",
+        "citations": [
+          {
+            "source": "annual-report-2023-24.pdf",
+            "section": "Islamabad Campus",
+            "page": 7
+          }
+        ],
+        "overlap": 1.0,
+        "citations_valid": 1,
+        "citations_total": 1,
+        "seconds": 341.61,
+        "expect_hit": true
+      },
+      {
+        "id": "q10",
+        "kind": "answerable",
+        "batch": "A",
+        "hard": false,
+        "trace_id": "9ecf624ab2d34dfb8c28fa5884613fe0",
+        "outcome": "abstained",
+        "answered": false,
+        "answer": "The documents do not specify how often a faculty member's technical start-up must report its progress to the university.",
+        "citations": [],
+        "overlap": null,
+        "citations_valid": 0,
+        "citations_total": 0,
+        "seconds": 154.3,
+        "expect_hit": null
+      },
+      {
+        "id": "q11",
+        "kind": "answerable",
+        "batch": "A",
+        "hard": false,
+        "trace_id": "08531baf030d486d842ca1980557157e",
+        "outcome": "answered",
+        "answered": true,
+        "answer": "75%",
+        "citations": [
+          {
+            "source": "prospectus-2026-academic-rules-and-regulations.pdf",
+            "section": "1. Attendance Requirement",
+            "page": 1
+          }
+        ],
+        "overlap": 1.0,
+        "citations_valid": 1,
+        "citations_total": 1,
+        "seconds": 61.21,
+        "expect_hit": true
+      },
+      {
+        "id": "q12",
+        "kind": "answerable",
+        "batch": "A",
+        "hard": false,
+        "trace_id": "24cad927998d42e89e63dfdbc3dbe491",
+        "outcome": "answered",
+        "answered": true,
+        "answer": "The last day of the makeup week of every semester",
+        "citations": [
+          {
+            "source": "academic-rules-handbook-jun-2026.pdf",
+            "section": "4.25 The deadline to withdraw from a course is the last day of the",
+            "page": 23
+          }
+        ],
+        "overlap": 1.0,
+        "citations_valid": 1,
+        "citations_total": 1,
+        "seconds": 78.75,
+        "expect_hit": true
+      },
+      {
+        "id": "q13",
+        "kind": "answerable",
+        "batch": "A",
+        "hard": false,
+        "trace_id": "b257e3649b3a4991b3f33899759f4861",
+        "outcome": "answered",
+        "answered": true,
+        "answer": "The last day of classes",
+        "citations": [
+          {
+            "source": "undergraduate-academic-rules-aug-2023.pdf",
+            "section": "4.25 Deadline to withdraw from a course is the last day of classes.",
+            "page": 16
+          }
+        ],
+        "overlap": 1.0,
+        "citations_valid": 1,
+        "citations_total": 1,
+        "seconds": 68.27,
+        "expect_hit": true
+      },
+      {
+        "id": "q14",
+        "kind": "answerable",
+        "batch": "A",
+        "hard": false,
+        "trace_id": "020267e6c98c4373966bd6171058d09c",
+        "outcome": "abstained",
+        "answered": false,
+        "answer": "The cumulative grade points is the weighted average of all the courses taken so far.",
+        "citations": [],
+        "overlap": null,
+        "citations_valid": 0,
+        "citations_total": 0,
+        "seconds": 32.39,
+        "expect_hit": null
+      },
+      {
+        "id": "q15",
+        "kind": "answerable",
+        "batch": "A",
+        "hard": false,
+        "trace_id": "1759a7c7cdfe4ee0a108ea5631ff671a",
+        "outcome": "answered",
+        "answered": true,
+        "answer": "Rs. 12,000",
+        "citations": [
+          {
+            "source": "fee-structure-page.html",
+            "section": "Tuition Fee (w.e.f. Fall 2026 semester)",
+            "page": 1
+          }
+        ],
+        "overlap": 1.0,
+        "citations_valid": 1,
+        "citations_total": 1,
+        "seconds": 40.81,
+        "expect_hit": true
+      },
+      {
+        "id": "q16",
+        "kind": "unanswerable",
+        "batch": "A",
+        "hard": false,
+        "trace_id": "15b2d4023029430f88d490b118512abb",
+        "outcome": "abstained",
+        "answered": false,
+        "answer": "The documents in the corpus do not cover this question.",
+        "citations": [],
+        "overlap": null,
+        "citations_valid": 0,
+        "citations_total": 0,
+        "seconds": 0.26,
+        "expect_hit": null
+      },
+      {
+        "id": "q17",
+        "kind": "unanswerable",
+        "batch": "A",
+        "hard": false,
+        "trace_id": "16e3abb16d2b433abe51378b3d69bb84",
+        "outcome": "abstained",
+        "answered": false,
+        "answer": "The documents in the corpus do not cover this question.",
+        "citations": [],
+        "overlap": null,
+        "citations_valid": 0,
+        "citations_total": 0,
+        "seconds": 0.3,
+        "expect_hit": null
+      },
+      {
+        "id": "q18",
+        "kind": "answerable",
+        "batch": "A",
+        "hard": false,
+        "trace_id": "b0c67717c7a14402a5bcc55231bc2eee",
+        "outcome": "answered",
+        "answered": true,
+        "answer": "100% attendance is required, with a maximum of 20% absence condoned for genuine reasons.",
+        "citations": [
+          {
+            "source": "prospectus-2026-academic-rules-and-regulations.pdf",
+            "section": "1. Attendance Requirement",
+            "page": 1
+          },
+          {
+            "source": "academic-rules-handbook-jun-2026.pdf",
+            "section": "1.21 Students are required to maintain 100% attendance in",
+            "page": 10
+          }
+        ],
+        "overlap": 1.0,
+        "citations_valid": 2,
+        "citations_total": 2,
+        "seconds": 115.02,
+        "expect_hit": true
+      },
+      {
+        "id": "g19",
+        "kind": "answerable",
+        "batch": "A",
+        "hard": true,
+        "trace_id": "e994ef9c149940ac84e9cace96fb17cb",
+        "outcome": "abstained",
+        "answered": false,
+        "answer": "The number of courses a student can enroll in during an ordinary semester is not explicitly stated in the provided evidence.",
+        "citations": [],
+        "overlap": null,
+        "citations_valid": 0,
+        "citations_total": 0,
+        "seconds": 82.97,
+        "expect_hit": null
+      },
+      {
+        "id": "g20",
+        "kind": "answerable",
+        "batch": "A",
+        "hard": true,
+        "trace_id": "64aacb66b57d419ba2e023dbd2fda3c9",
+        "outcome": "answered",
+        "answered": true,
+        "answer": "The course shall be dropped if fewer than 10 students register.",
+        "citations": [
+          {
+            "source": "academic-rules-handbook-jun-2026.pdf",
+            "section": "6.11 A minimum of TEN (10) students should register in a summer",
+            "page": 29
+          }
+        ],
+        "overlap": 0.8333333333333334,
+        "citations_valid": 1,
+        "citations_total": 1,
+        "seconds": 60.97,
+        "expect_hit": false
+      },
+      {
+        "id": "g21",
+        "kind": "answerable",
+        "batch": "A",
+        "hard": true,
+        "trace_id": "0dda55e45a1c47679ee1317692a82292",
+        "outcome": "answered",
+        "answered": true,
+        "answer": "No",
+        "citations": [
+          {
+            "source": "student-handbook-jun-2026.pdf",
+            "section": "1. Mobile Phones, Smart Watches and all electronic",
+            "page": 26
+          }
+        ],
+        "overlap": 0.0,
+        "citations_valid": 1,
+        "citations_total": 1,
+        "seconds": 32.22,
+        "expect_hit": null
+      },
+      {
+        "id": "g22",
+        "kind": "answerable",
+        "batch": "A",
+        "hard": true,
+        "trace_id": "fe32e1c51b434808b0f9049c92b62880",
+        "outcome": "answered",
+        "answered": true,
+        "answer": "100% of the tuition fee",
+        "citations": [
+          {
+            "source": "fee-structure-page.html",
+            "section": "Fee Refund Policy",
+            "page": 1
+          }
+        ],
+        "overlap": 1.0,
+        "citations_valid": 1,
+        "citations_total": 1,
+        "seconds": 63.08,
+        "expect_hit": null
+      },
+      {
+        "id": "g23",
+        "kind": "answerable",
+        "batch": "A",
+        "hard": true,
+        "trace_id": "da324f56913440feabb94dddf44d665f",
+        "outcome": "abstained",
+        "answered": false,
+        "answer": "The documents do not specify the frequency of reporting, but it is implied that the start-up must meet the mandatory periodic reporting requirements to avoid termination of the agreement.",
+        "citations": [],
+        "overlap": null,
+        "citations_valid": 0,
+        "citations_total": 0,
+        "seconds": 54.3,
+        "expect_hit": null
+      },
+      {
+        "id": "g24",
+        "kind": "unanswerable",
+        "batch": "A",
+        "hard": false,
+        "trace_id": "5f782aa3b73e40b1879cfbf5215fe640",
+        "outcome": "abstained",
+        "answered": false,
+        "answer": "The documents in the corpus do not cover this question.",
+        "citations": [],
+        "overlap": null,
+        "citations_valid": 0,
+        "citations_total": 0,
+        "seconds": 0.24,
+        "expect_hit": null
+      },
+      {
+        "id": "g25",
+        "kind": "unanswerable",
+        "batch": "A",
+        "hard": false,
+        "trace_id": "180926b1224344f89168ab3502a5a74b",
+        "outcome": "abstained",
+        "answered": false,
+        "answer": "The documents in the corpus do not cover this question.",
+        "citations": [],
+        "overlap": null,
+        "citations_valid": 0,
+        "citations_total": 0,
+        "seconds": 0.24,
+        "expect_hit": null
+      },
+      {
+        "id": "g26",
+        "kind": "unanswerable",
+        "batch": "A",
+        "hard": false,
+        "trace_id": "bf003a372e1f43f084d408545f2a14e3",
+        "outcome": "abstained",
+        "answered": false,
+        "answer": "The documents in the corpus do not cover this question.",
+        "citations": [],
+        "overlap": null,
+        "citations_valid": 0,
+        "citations_total": 0,
+        "seconds": 0.2,
+        "expect_hit": null
+      },
+      {
+        "id": "g27",
+        "kind": "unanswerable",
+        "batch": "A",
+        "hard": false,
+        "trace_id": "fda62dc5e62a47eb8f85f666e64429a3",
+        "outcome": "answered",
+        "answered": true,
+        "answer": "Employees Health Insurance Scheme",
+        "citations": [
+          {
+            "source": "annual-report-2023-24.pdf",
+            "section": "Chapter-9 Health Care Facilities",
+            "page": 84
+          }
+        ],
+        "overlap": 1.0,
+        "citations_valid": 1,
+        "citations_total": 1,
+        "seconds": 184.46,
+        "expect_hit": null
+      }
+    ]
+  }
+}
