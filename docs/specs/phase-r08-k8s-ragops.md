@@ -5,7 +5,7 @@
 | Phase | R8, from `docs/IMPLEMENTATION_PLAN_A3.md` |
 | Work plan task | A3 R-08 (Ahmad out, D-108) |
 | Branch | `feat/rag-r04-eval-suite` (PR #48; planned name `feat/k8s-r08-ragops`) |
-| Stage | IMPLEMENTING (manifests written before this spec, retroactive, D-127; cluster runs now) |
+| Stage | TESTING (cluster runs done 2026-11-21; independent tester next) |
 | Started | 2026-11-21 |
 | Approved (spec and plan) | gate waived (D-124) |
 | Depends on | R1 to R7 |
@@ -82,7 +82,13 @@ Rollback: `make down` and re-apply. Estimate 5 h (compressed schedule).
 
 ## 11. Implementation notes
 
-(filled during the run)
+Evidence is in `docs/evidence/a3/` (one text file per command, screenshot sources) and `docs/evidence/f5-resources.txt`.
+
+- The cluster was a stopped minikube with the A02 deployment (not deleted): `make cluster` restarted it, `make images` rebuilt four images (tag `dev`, as in A02; commit-SHA tags are set by CI), `kubectl apply -k k8s/overlays/dev` created the three new PVCs. R8-AC1's delete-and-recreate rehearsal is left to R11-AC5.
+- Ingestion of the real corpus: 9 of 9 pass verification (8 indexed, 1 superseded, 0 quarantined), 980 chunks, 1396 s; unchanged re-run 0 embedded, no swap, same index id; `check_registry` PASS. Batch B: 44 s, 6 indexed, 6 quarantined with the planted reasons, fee page superseded by the amendment; file deleted: `deleted_chunks_remaining 0`; restore Job rolls the fee page back and forward with zero embeddings; the end state is Batch A plus Batch B.
+- Defects found and fixed: (1) eval client `ReadTimeout` equal to the API's own 300 s model timeout, the first baseline Job failed (client 420 s, D-128); (2) indexer Job deadline 1800 s was too close to the 1396 s run (3600 s); (3) gate placeholders did not fit the measured baseline (D-129); (4) CI overlay patched volume index 0, which is the lake volume since R8, so the CI e2e job could not apply (patch index 1); (5) a file removed from the inbox without its manifest entry is quarantined, not deleted: documented, `make inbox-delete` added (D-130).
+- Open: CI `scan` fails on nginx CVEs in the ui base image (fixed in nginx 1.30.7; `apk upgrade` in `ui/Dockerfile` picks them up when the Alpine mirror has them, re-run CI).
+- Resource values: `f5-resources.txt`, DEV-018, D-131.
 
 ## 12. Test report
 

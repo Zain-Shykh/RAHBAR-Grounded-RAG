@@ -108,6 +108,11 @@ Entry template:
 | D-124 | Authorisation scope and gate mode for Assignment 03 | process | DECIDED | start of R1 |
 | D-125 | Report tooling (no PDF engine installed) and roll numbers | docs | PROVISIONAL | R11 |
 | D-126 | Who writes the hand-written questions and labels | process | DECIDED | R4 |
+| D-127 | Orchestrator mode: one subagent per phase | process | DECIDED | all |
+| D-128 | Indexer Job deadline 3600 s; eval client waits 420 s | k8s, eval | DECIDED | R8 |
+| D-129 | Gate limits fixed from the cluster baseline | eval | DECIDED | R7, R8 |
+| D-130 | GATE_ONLY, restore Job, inbox-delete targets | k8s | DECIDED | R8 |
+| D-131 | Requests and limits from the first measured run, with floors | k8s | DECIDED | R8 |
 
 ---
 
@@ -1535,3 +1540,34 @@ Raised 2026-11-21 while writing the Assignment 03 planning set ([`requirements-a
 - Decision: The main session is only the orchestrator. Every phase is done by its own subagent (fresh context) that follows `docs/WORKFLOW.md` end to end: spec and plan file `docs/specs/phase-rNN-<slug>.md`, implement, independent test (a different subagent), progress files, PR into `dev`. There is no approval gate; everything is approved as recommended and decisions are logged in the relevant documents. Honest note: phases R1 to R8 were coded by the main session before this instruction; their specs, test reports and independent checks are written retroactively by subagents and marked as such in the spec header.
 - Decided on: 2026-11-21
 
+
+### D-128 Indexer Job deadline 3600 s; eval client waits 420 s
+- Status: DECIDED
+- Raised: 2026-11-21 by Claude (phase R8)
+- Area: k8s, eval
+- Question: The real ingestion (OCR plus 980 embeddings) took 1396 s against `activeDeadlineSeconds: 1800`; the first baseline eval Job died with `ReadTimeout` because the client timeout (300 s) equalled the API's model timeout (300 s).
+- Decision: Indexer Job and CronJob deadline 3600 s. Eval client timeout 420 s (longer than `LLM_TIMEOUT_SECONDS`, so the API answers with a fallback first and the suite records it).
+- Decided on: 2026-11-21
+
+### D-129 Gate limits fixed from the cluster baseline
+- Status: DECIDED
+- Raised: 2026-11-21 by Claude (phase R8)
+- Area: eval
+- Question: The two placeholders in `eval/gate.yaml` (p95 120 s, faithfulness 0.70) did not fit the measured baseline (p95 184.5 s on a busy CPU, 113 s on a quiet one).
+- Decision: p95 at most 300 s (the API model timeout; slower means fallbacks); faithfulness stays 0.70 with the reason citing the cluster baseline 0.833. R7 may refine these with the candidate runs.
+- Decided on: 2026-11-21
+
+### D-130 GATE_ONLY, restore Job, inbox-delete targets
+- Status: DECIDED
+- Raised: 2026-11-21 by Claude (phase R8)
+- Area: k8s
+- Question: How to show the ConfigMap-edit effect (R8-AC7) without a third 30-minute LLM run, and how to run restore and deletion on the cluster.
+- Decision: `GATE_ONLY=<result file>` in `eval/suite/job.py` (gate an existing result, no suite); `k8s/tools/restore-job.yaml` with `make restore`; `make inbox-delete FILE=` (file and manifest entry: a file removed alone is treated as a changed, unreadable document and quarantined, because the manifest is the inbox listing).
+- Decided on: 2026-11-21
+
+### D-131 Requests and limits from the first measured run, with floors
+- Status: DECIDED
+- Raised: 2026-11-21 by Claude (phase R8)
+- Area: k8s
+- Decision: rule and exceptions in `docs/evidence/f5-resources.txt` (request about the median, limit about 1.5 x peak; CPU requests stay for HPA and OCR; CPU limit floor 250m, memory limit floor 64Mi; Chroma limit 3 x peak for the swap).
+- Decided on: 2026-11-21

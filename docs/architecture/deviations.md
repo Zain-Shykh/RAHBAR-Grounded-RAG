@@ -479,5 +479,7 @@ Places where the architecture has flagged a real chance of deviation (architectu
 
 **What was built:** PVCs `lake-data`, `traces-data`, `eval-results`; the api mounts `traces-data` (read-write, one file per pod) and has `fsGroup: 10001`; the Job mounts `lake-data`; Job `eval` and Job `trace-report`; Deployment and Service `api-candidate`; NetworkPolicies for `eval` and `api-candidate`; image `rahbar-eval`.
 
+**Measured resources (R8, `docs/evidence/f5-resources.txt`):** replaces the K10 values: api 100m/80Mi request, 500m/128Mi limit (was 256Mi); chroma 50m/128Mi, 250m/384Mi (was 512Mi); indexer 250m/416Mi, 1/768Mi (was 1Gi); eval 50m/32Mi, 250m/64Mi. Also: indexer `activeDeadlineSeconds` 3600, eval client timeout 420 s, gate limits from the cluster baseline (D-128, D-129), CI overlay patches the corpus volume at index 1 (the lake volume is index 0).
+
 **Impact:** every added container has requests and limits (I-15); NetworkPolicies keep default deny. The `ReadWriteOnce` traces volume is shared by pods on one node (minikube); a multi-node cluster needs RWX or a log collector.
 
