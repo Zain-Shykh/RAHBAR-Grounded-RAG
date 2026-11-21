@@ -86,11 +86,11 @@ Hours spent so far: planned 64 h plus 2 h (R0), actual `____`.
 ## 2. Current focus
 
 ```
-Phase:        R0 to R11 complete; waiting on Zain for the human items
-Stage:        READY FOR PR (R11 independent test: see docs/specs/phase-r11-report.md section 12)
-Branch:       feat/rag-r04-eval-suite (PR #48 into dev), then the release PR dev to main
-Spec:         docs/specs/phase-r11-report.md
-Next action:  Zain: (1) 8 synthetic reviews in eval/HUMAN_TODO.md, (2) roll numbers on report page 1 (then scripts/build_report.sh), (3) check the contribution table and AI statement, (4) decide the production release of 600/100 (make release COLLECTION=rahbar_c600), (5) merge the release PR if not done
+Phase:        R0 to R12 complete; waiting on Zain for the human items
+Stage:        DONE (R12 close-out, independent test: docs/specs/phase-r12-closeout.md section 12); main contains PR #48 and #49
+Branch:       feat/rag-r12-closeout (PR into dev, then a release PR dev to main if main lacks the commits)
+Spec:         docs/specs/phase-r12-closeout.md
+Next action:  Zain: (1) reply to eval/REVIEW_SHEET.md (8 synthetic reviews; the session then runs scripts/mark_reviewed.py), (2) read the contribution table and AI statement, (3) decide the production release of 600/100 (make release COLLECTION=rahbar_c600)
 Waiting on:   Zain (human items above)
 Last updated: 2026-11-21
 ```
@@ -162,7 +162,7 @@ Numbers the report will quote. Fill each with the value, the committed file it c
 | Unchanged re-run: chunks embedded, swapped | 0, false | `docs/evidence/a3/a2-unchanged-run.txt` | R3 |
 | Changed-document run: chunks embedded, other docs' ids identical | 26 of 26 untouched chunks identical (spike); see R3 spec | `docs/specs/phase-r03-incremental.md` | R3 |
 | Deleted document: chunks by doc id before and after | b12: 4 chunks to 0 (0 orphans), index 1010 to 1006 chunks | `docs/evidence/a3/a2-delete-no-orphans.txt` | R3 |
-| Golden set counts (answerable, unanswerable, hard, human, synthetic, reviewed) | 50 questions: 39, 11, 23, 18, 32, 0 reviewed (needs 8, human) | `eval/results/suite-20261121T021833Z-baseline-ab.json` (meta), `golden-check-20261121.json` | R4 |
+| Golden set counts (answerable, unanswerable, hard, human, synthetic, reviewed) | (measured runs; the file has 52 since R12) 50 questions: 39, 11, 23, 18, 32, 0 reviewed (needs 8, human) | `eval/results/suite-20261121T021833Z-baseline-ab.json` (meta), `golden-check-20261121.json` | R4 |
 | Embedding: paraphrase mean, unrelated mean, gap, ms per chunk, determinism | 0.791, 0.525, 0.266, 285.3 median, 0 | `eval/results/suite-20261121T021833Z-baseline-ab.json` | R4 |
 | Retrieval: recall@3, recall@5, MRR, nDCG@5, clean and noisy | clean 0.795, 0.795, 0.756, 0.766; noisy 0.769, 0.795, 0.676, 0.706 | same | R4 |
 | E2E: faithfulness (overlap), abstention, citation validity, p50, p95 | 0.879 (supported 0.900), 0.909, 1.000, 54.4 s, 181.7 s | same | R5 |
@@ -185,7 +185,7 @@ Tick only with a pointer to the file.
 - [x] `README.md` has the exact command for each of A to F (R3-LOG-10): README section "Assignment 03"
 - [x] `k8s/README.md` lets a fresh cluster reach a working pipeline (R3-F5-2); rehearsed on a deleted cluster: `docs/evidence/a3/r11-fresh-cluster-rehearsal.txt`
 - [x] `eval/results/` and `traces/` committed with the files the report quotes (R3-LOG-9): checked by `scripts/check_numbers_a3.py`
-- [ ] Report PDF at most 8 pages, names and roll numbers on page 1, appendix of screenshots (R3-G-*): `docs/report/report.pdf`; roll numbers are a placeholder for Zain
+- [x] Report PDF at most 8 pages, names and roll numbers on page 1, appendix of screenshots (R3-G-*): `docs/report/report.pdf` (5 body pages; roll numbers 24i-3126 and 24i-3006 filled in R12)
 - [x] Screenshots S-A1, S-A2, S-B, S-C1, S-C2, S-D1, S-D2, S-E1, S-E2, S-F1 to S-F5, uncropped, labelled (R3-S-*): `docs/evidence/a3/screenshots/`, index `docs/evidence/a3/README.md` (renderings of saved terminal output, D-139)
 - [x] Demo rehearsal: eval as a Job, a trace opened, an unseen batch ingested (R3-LOG-11): `docs/evidence/a3/r11-fresh-cluster-rehearsal.txt`
 - [x] `docs/rubric_checklist.md` section F ticked with evidence; `python3 scripts/check_submission.py` still passes for the A02 parts (164 passed, 0 failures)
@@ -647,3 +647,4 @@ The report, the screenshots, the README and a clean-clone rehearsal, so the repo
 
 ### Verify
 the report build command from D-125 and the PDF page count; `python scripts/check_numbers.py`; the rehearsal transcript.
+2026-11-21  R12  CLOSE-OUT: roll numbers on report page 1 (5 body pages, number check exit 0); golden g51 and g52 (version-aware refund pair, live index rank 1 and 2, not in the measured runs); eval/REVIEW_SHEET.md and scripts/mark_reviewed.py; final audit docs/evidence/a3/final-requirements-audit.md (56 MET, 21 with caveat, 1 NOT MET: R3-B-2 second half, 1 n/a). Spec docs/specs/phase-r12-closeout.md.

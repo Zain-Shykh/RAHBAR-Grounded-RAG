@@ -303,7 +303,7 @@ State at final verification, 2026-11-21 (R11). `[x]` = clear of the violation, w
 - [x] A number in the report that is not from our own committed run [R3-LOG-4, I-25]. `python scripts/check_numbers_a3.py` exits 0 (`docs/specs/phase-r11-report.md` section 12).
 - [ ] Commits from one member only [R3-LOG-6]. **Not clear in substance:** `git log` has 2 non-merge commits by Ahmad Jamal against 283 by Muhammad Zain, all Assignment 02; Ahmad did no work on Assignment 03 (D-108). The report says so.
 - [ ] A member who cannot explain a part at the demo [R3-LOG-1]. Risk accepted by Zain (D-108); Ahmad has not seen Assignment 03.
-- [x] Report over 8 pages (appendix excluded), or names and roll numbers missing on page 1 [R3-G]. `docs/report/report.pdf`: body pages as printed by `scripts/build_report.sh`; **roll numbers are a placeholder** that Zain fills (human item).
+- [x] Report over 8 pages (appendix excluded), or names and roll numbers missing on page 1 [R3-G]. `docs/report/report.pdf`: body pages as printed by `scripts/build_report.sh`; roll numbers 24i-3126 and 24i-3006 are on page 1.
 - [x] A screenshot cropped, unlabelled, or from somewhere other than our cluster [R3-S-*]. 14 PNGs in `docs/evidence/a3/screenshots/`, each ends with an end marker; they are renderings of the terminal output saved from the cluster runs (D-139), index in `docs/evidence/a3/README.md`.
 - [x] A secret, `corpus/raw/`, a model or `.env*` in Git (A02 rule I-13 still applies). `docs/evidence/a3/r11-history-scan.txt`.
 - [x] Anything that breaks Assignment 02: I-1 to I-17, the A02 CI gate, `/readyz` pin check. `make test && make lint` green, `python3 scripts/check_submission.py` 164 passed, 0 failures (5 pre-existing warnings), CI on PR #48.
