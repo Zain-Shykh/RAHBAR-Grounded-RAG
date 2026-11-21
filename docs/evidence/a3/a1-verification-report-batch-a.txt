@@ -1,0 +1,34 @@
+$ make lake-ls   (viewer pod listing)
+/data/reports/20261120T232222Z-e262cb/summary.json
+/data/reports/20261120T225854Z-520b6e/verification.json
+/data/reports/20261120T225854Z-520b6e/summary.json
+/data/archive/fee-structure-page.html/ec8872ae77ca/fee-structure-page.html
+/data/archive/annual-report-2019-20.pdf/4d1961e340b1/annual-report-2019-20.pdf
+/data/archive/student-handbook-jun-2026.pdf/717eb4b8d37e/student-handbook-jun-2026.pdf
+/data/archive/prospectus-2026-academic-rules-and-regulations.pdf/a7e7f6896a59/prospectus-2026-academic-rules-and-regulations.pdf
+/data/archive/academic-rules-handbook-jun-2026.pdf/4cfee3e191b8/academic-rules-handbook-jun-2026.pdf
+/data/archive/annual-report-2023-24.pdf/3c9d89e84af2/annual-report-2023-24.pdf
+/data/archive/faculty-entrepreneurship-and-technical-start-ups-policy.pdf/c2d5c7648d15/faculty-entrepreneurship-and-technical-start-ups-policy.pdf
+/data/archive/undergraduate-academic-rules-aug-2023.pdf/cddfe1f5e977/undergraduate-academic-rules-aug-2023.pdf
+/data/archive/grading-page.html/66a995b4d847/grading-page.html
+/data/registry/rahbar.json
+
+$ render verification report of run 20261120T225854Z-520b6e (Batch A, real corpus)
+verification report 20261120T225854Z-520b6e  (embed model nomic-embed-text, near-duplicate threshold 0.97)
+
+document                                   action       quality      completeness recency      uniqueness  
+-----------------------------------------------------------------------------------------------------------
+academic-rules-handbook-jun-2026.pdf       index        PASS         PASS         PASS         PASS        
+annual-report-2019-20.pdf                  supersede    PASS         PASS         FAIL         PASS        
+annual-report-2023-24.pdf                  index        PASS         PASS         PASS         PASS        
+faculty-entrepreneurship-and-technical-st  index        PASS         PASS         PASS         PASS        
+fee-structure-page.html                    index        PASS         PASS         PASS         PASS        
+grading-page.html                          index        PASS         PASS         PASS         PASS        
+prospectus-2026-academic-rules-and-regula  index        PASS         PASS         PASS         PASS        
+student-handbook-jun-2026.pdf              index        PASS         PASS         PASS         PASS        
+undergraduate-academic-rules-aug-2023.pdf  index        PASS         PASS         PASS         PASS        
+
+reasons for failures:
+  annual-report-2019-20.pdf: recency: superseded by annual-report-2023-24.pdf (2023-24 > 2019-20)
+
+totals: checked 9, indexed 8, quarantined 0, superseded 1

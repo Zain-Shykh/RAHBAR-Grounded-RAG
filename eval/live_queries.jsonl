@@ -1,0 +1,40 @@
+{"id": "l01", "query": "how many classes can i skip before i am not allowed to sit the final exam", "expected_topic": "attendance", "in_domain": true}
+{"id": "l02", "query": "can someone take more than the usual number of courses in a semester", "expected_topic": "course load", "in_domain": true}
+{"id": "l03", "query": "till when can i drop a subject and still get a refund of fee", "expected_topic": "withdrawal and refund", "in_domain": true}
+{"id": "l04", "query": "do i need ten students for a summer class to run", "expected_topic": "summer courses", "in_domain": true}
+{"id": "l05", "query": "is it ok to wear a smart watch during paper", "expected_topic": "exam conduct", "in_domain": true}
+{"id": "l06", "query": "what is the fee for one credit hour this year", "expected_topic": "tuition", "in_domain": true}
+{"id": "l07", "query": "what do the grades like C mean for masters students", "expected_topic": "grading", "in_domain": true}
+{"id": "l08", "query": "can i use chatgpt to write my assignment", "expected_topic": "generative AI policy", "in_domain": true}
+{"id": "l09", "query": "how often do faculty start ups need to submit reports", "expected_topic": "start-up policy", "in_domain": true}
+{"id": "l10", "query": "how many professors work at the university according to the annual report", "expected_topic": "annual report", "in_domain": true}
+{"id": "l11", "query": "how many books can i issue from the library", "expected_topic": "library borrowing", "in_domain": true}
+{"id": "l12", "query": "how many students can be in a lab at once", "expected_topic": "lab sessions", "in_domain": true}
+{"id": "l13", "query": "when will my exam result come out", "expected_topic": "exam results", "in_domain": true}
+{"id": "l14", "query": "what time does the gym open in the morning", "expected_topic": "sports", "in_domain": true}
+{"id": "l15", "query": "what happens to my cgpa if i repeat a course", "expected_topic": "repeating courses", "in_domain": true}
+{"id": "l16", "query": "what is an academic warning and when does it happen", "expected_topic": "academic warning", "in_domain": true}
+{"id": "l17", "query": "what is the punishment if i am caught copying in an assignment", "expected_topic": "plagiarism", "in_domain": true}
+{"id": "l18", "query": "how do i freeze my semester", "expected_topic": "leave of absence", "in_domain": true}
+{"id": "l19", "query": "how much is the fine if i return a library book late", "expected_topic": "library fines", "in_domain": true}
+{"id": "l20", "query": "what should i do if there is a fire in the lab", "expected_topic": "lab emergency", "in_domain": true}
+{"id": "l21", "query": "can i pay my semester fee in two parts", "expected_topic": "fee instalments", "in_domain": true}
+{"id": "l22", "query": "what happens if i pay the fee late", "expected_topic": "late fee", "in_domain": true}
+{"id": "l23", "query": "how do i get my official transcript", "expected_topic": "transcripts", "in_domain": true}
+{"id": "l24", "query": "how can i join the university cricket team", "expected_topic": "sports teams", "in_domain": true}
+{"id": "l25", "query": "what are the rules for the transport card", "expected_topic": "transport", "in_domain": true}
+{"id": "l26", "query": "what is the cgpa needed to get a merit scholarship", "expected_topic": "scholarships", "in_domain": true}
+{"id": "l27", "query": "how many credit hours are needed to graduate", "expected_topic": "degree requirements", "in_domain": true}
+{"id": "l28", "query": "who can apply for rechecking of a paper and by when", "expected_topic": "rechecking", "in_domain": true}
+{"id": "l29", "query": "what is the weather going to be like in islamabad tomorrow", "expected_topic": "weather", "in_domain": false}
+{"id": "l30", "query": "who won the cricket match yesterday", "expected_topic": "cricket", "in_domain": false}
+{"id": "l31", "query": "what is the bitcoin price today", "expected_topic": "finance", "in_domain": false}
+{"id": "l32", "query": "give me a recipe for biryani", "expected_topic": "food", "in_domain": false}
+{"id": "l33", "query": "recommend a good movie for the weekend", "expected_topic": "entertainment", "in_domain": false}
+{"id": "l34", "query": "how do i prepare for a job interview at a software company", "expected_topic": "careers", "in_domain": false}
+{"id": "l35", "query": "write a python function to sort a list", "expected_topic": "programming help", "in_domain": false}
+{"id": "l36", "query": "what is the wifi password in the library", "expected_topic": "campus wifi", "in_domain": false}
+{"id": "l37", "query": "how do i get a parking permit for my motorbike", "expected_topic": "parking", "in_domain": false}
+{"id": "l38", "query": "how does the internship placement office help students", "expected_topic": "internships", "in_domain": false}
+{"id": "l39", "query": "when are the student society elections held", "expected_topic": "student societies", "in_domain": false}
+{"id": "l40", "query": "what is the capital of australia", "expected_topic": "general knowledge", "in_domain": false}

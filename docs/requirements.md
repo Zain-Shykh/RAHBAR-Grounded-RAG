@@ -1,6 +1,6 @@
 # RAHBAR requirements (single source of truth)
 
-Extracted from `Assignment 02, RAHBAR Grounded RAG on Kubernetes.md` and `STARTER.md`. If this file and the assignment disagree, the assignment wins: fix this file.
+Extracted from `Assignment 02, RAHBAR Grounded RAG on Kubernetes.md` and `STARTER.md`. **Assignment 03 (RAGOps) requirements are in [`requirements-a3.md`](requirements-a3.md)** (ids `R3-*`); they extend this file and do not replace it. If this file and the assignment disagree, the assignment wins: fix this file.
 
 Each requirement has an ID (`R-<area>-<n>`) so code, ADRs and the checklist in `docs/rubric_checklist.md` can point at it. Words like "must", "never" and "required" are the assignment's own. Section numbers (`§3.4`) refer to the assignment.
 

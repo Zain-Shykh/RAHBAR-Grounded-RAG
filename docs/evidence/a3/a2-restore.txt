@@ -1,0 +1,36 @@
+$ make restore SOURCE=fee-structure-page.html SUPERSEDE=b10-fee-structure-amendment-2027.md
+job.batch/restore created
+job.batch/restore condition met
+{"ts": "2026-11-21T00:50:43Z", "logger": "rahbar.indexer", "msg": "embedded", "vectors": 0, "model": "nomic-embed-text", "seconds": 0.0}
+{"ts": "2026-11-21T00:50:52Z", "logger": "rahbar.indexer", "msg": "stored", "chunks": 1006, "index_id": "20261121T005043Z-e6ba45", "collection": "rahbar", "replaced": true, "seconds": 9.3}
+{"ts": "2026-11-21T00:50:52Z", "logger": "rahbar.indexer", "msg": "ingest summary", "run_id": "20261121T005039Z-affb42", "mode": "incremental", "note": "", "dry_run": false, "new": 0, "changed": 0, "unchanged": 14, "deleted": 0, "quarantined": 0, "quarantined_
+ingest summary 20261121T005039Z-affb42
+  mode                                           incremental
+  documents new / changed / unchanged / deleted  0 / 0 / 14 / 0
+  quarantined now / quarantined before           0 / 6
+  superseded / flags flipped                     0 / 2
+  chunks embedded                                0
+  chunks copied forward                          1006
+  chunks in the index                            1006
+  index swapped                                  True
+  index_id                                       20261121T005043Z-e6ba45
+{'run_id': '20261121T005039Z-affb42', 'mode': 'incremental', 'note': '', 'dry_run': False, 'new': 0, 'changed': 0, 'unchanged': 14, 'deleted': 0, 'quarantined': 0, 'quarantined_before': 6, 'superseded': 0, 'flipped': 2, 'chunks_embedded': 0, 'chunks_copied': 1
+$ chroma flags after the restore (rolled back to the old fee page)
+  fee-structure-page.html 7 chunks superseded= [False]
+  b10-fee-structure-amendment-2027.md 5 chunks superseded= [True]
+
+$ roll forward again (end state: Batch A plus Batch B, amendment current)
+$ make restore SOURCE=b10-fee-structure-amendment-2027.md SUPERSEDE=fee-structure-page.html
+{"ts": "2026-11-21T00:51:21Z", "logger": "rahbar.indexer", "msg": "stored", "chunks": 1006, "index_id": "20261121T005113Z-a45667", "collection": "rahbar", "replaced": true, "seconds": 7.9}
+{"ts": "2026-11-21T00:51:21Z", "logger": "rahbar.indexer", "msg": "ingest summary", "run_id": "20261121T005109Z-746dac", "mode": "incremental", "note": "", "dry_run": false, "new": 0, "changed": 0, "unchanged": 14, "deleted": 0, "quarantined": 0, "quarantined_before": 6, "superseded": 0, "flipped": 2, "chunks_embedded": 0, "chunks_copied": 1006, "chunks_total": 1006, "index_swapped": true, "index_id": "20261121T005113Z-a45667", "deleted_chunks_remaining": {}, "chunks_by_source": {"academic-rules-handbook-jun-2026.pdf": 238, "annual-report-2019-20.pdf": 65, "annual-report-2023-24.pdf": 182, "b01-library-policy-2026.md": 6, "b02-lab-safety-rules-2026.md": 6, "b06-transport-policy-2026.pdf": 6, "b10-fee-structure-amendment-2027.md": 5, "b11-examination-guidelines-2026.md": 3, "faculty-entrepreneurship-and-technical-start-ups-policy.pdf": 39, "fee-structure-page.html": 7, "grading-page.html": 8, "prospectus-2026-academic-rules-and-regulations.pdf": 44, "student-handbook-jun-2026.pdf": 245, "undergraduate-academic-rules-aug-2023.pdf": 152}, "seconds": 11.7}
+ingest summary 20261121T005109Z-746dac
+  documents new / changed / unchanged / deleted  0 / 0 / 14 / 0
+  superseded / flags flipped                     0 / 2
+  chunks embedded                                0
+  chunks copied forward                          1006
+  chunks in the index                            1006
+  index swapped                                  True
+{'run_id': '20261121T005109Z-746dac', 'mode': 'incremental', 'note': '', 'dry_run': False, 'new': 0, 'changed': 0, 'unchanged': 14, 'deleted': 0, 'quarantined': 0, 'quarantined_before': 6, 'superseded': 0, 'flipped': 2, 'chunks_embedded': 0, 'chunks_copied': 1006, 'chunks_total': 1006, 'index_swapped': True, 'index_id': '20261121T005113Z-a45667', 'deleted_chunks_remaining': {}, 'chunks_by_source': {'academic-rules-handbook-jun-2026.pdf': 238, 'annual-report-2019-20.pdf': 65, 'annual-report-2023-24.pdf': 182, 'b01-library-policy-2026.md': 6, 'b02-lab-safety-rules-2026.md': 6, 'b06-transport-policy-2026.pdf': 6, 'b10-fee-structure-amendment-2027.md': 5, 'b11-examination-guidelines-2026.md': 3, 'faculty-entrepreneurship-and-technical-start-ups-policy.pdf': 39, 'fee-structure-page.html': 7, 'grading-page.html': 8, 'prospectus-2026-academic-rules-and-regulations.pdf': 44, 'student-handbook-jun-2026.pdf': 245, 'undergraduate-academic-rules-aug-2023.pdf': 152}, 'seconds': 11.7}
+$ chroma flags
+  fee-structure-page.html 7 chunks superseded= [True]
+  b10-fee-structure-amendment-2027.md 5 chunks superseded= [False]

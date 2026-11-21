@@ -1,0 +1,930 @@
+# R11-AC5 / R3-F5-2: fresh-cluster rehearsal (minikube deleted and recreated, then k8s/README.md followed)
+# Date 2026-11-21, started 07:35:04Z, ended about 08:43Z (UTC). Host: 4 CPU, Ollama on the host (llama3.2:3b, nomic-embed-text), Docker via `sg docker -c`.
+# Procedure: `minikube delete`; then only the steps of k8s/README.md in order: make cluster, make images, kubectl apply -k k8s/overlays/dev,
+# make corpus, make gate-config, make index (wait), make lake-ls, readiness, second `make index`, eval Job baseline and gate (smoke),
+# `make ingest-batch BATCH=corpus/batch_b`, a live injection check, `make ingest-batch BATCH=corpus/demo_batch`, a question about the new documents.
+#
+# RESULT: a working pipeline from an empty cluster. Index of the real corpus: 9 documents, 980 chunks, Job 1399.7 s (1405 s with the wait), same count as the
+# first cluster (docs/evidence/a3/f2-ingest-job-logs.txt). api 3/3 Ready, /readyz 200, live collection `rahbar` (now with Batch B and the demo batch).
+#
+# Step timings (label, exit code, seconds) as measured by /tmp wrapper; exit 2 on 4-corpus is finding 1:
+#   0-delete 0 28
+#   1-cluster 0 259
+#   2-images 0 59
+#   3-apply 0 1
+#   4-corpus 2 123
+#   5-gate-config 0 0
+#   4b-corpus-retry 0 41
+#   6-index 0 1
+#   6b-index-wait 0 1405
+#   7-lake-ls 0 4
+#   8-api-ready 0 1
+#   9-ask 0 123
+#   10-index-again 0 10
+#   11-eval-baseline 0 4
+#   11b-eval-baseline-logs 0 0
+#   12-eval-gate 0 3
+#   12b-eval-gate-logs 0 0
+#   13-batch-b 0 11
+#   13b-batch-b-logs 0 0
+#   14-injection-live 0 51
+#   14b-injection-trace 0 0
+#   15-demo-batch 0 11
+#   15b-demo-logs 0 0
+#   16-demo-ask 0 58
+#   17-final-state 0 2
+#   18-eval-baseline-v2 0 3
+#   18b-logs 0 0
+#   19-eval-gate-v2 0 3
+#   19b-logs 0 0
+#   20-final 0 2
+#
+# Findings (all fixed in the same commit series, D-141, D-140):
+#  1. `make corpus` failed (exit 2, 123 s): `kubectl wait --timeout=120s` for the helper pod, which has to pull the busybox image on a new cluster.
+#     Fix: the Makefile waits up to 600 s for helper pods. The retry (4b) took 41 s and succeeded.
+#  2. The Job `indexer` created by `kubectl apply -k k8s/overlays/dev` starts on an empty inbox and ends Failed (see 20-final). Expected; `make index` is the real run.
+#     Documented in k8s/README.md (notes section).
+#  3. The first smoke eval (LIMIT=5 = the first five questions) had no unanswerable question, so the gate rule `abstention_correctness` failed with
+#     "missing in the candidate result" (steps 11 and 12, Job Failed): the gate fails closed. Fix: the smoke run now takes one unanswerable question plus four
+#     answerable ones (eval/suite/run_suite.py, test in eval/tests/test_suite_adversarial.py); the second pair of runs (18, 19) passed 6 of 6 rules.
+#     The smoke result says nothing about quality: 5 questions, and its baseline shows abstention correctness 0.000 (its one unanswerable question was answered).
+#  4. Not a defect: the first eval Job took 12 min for 5 questions (the model loads on the first call).
+# Demo timing: ingest an unseen batch (3 documents, 12 chunks embedded) 24 s Job, then the answer "Rs 45,000" cited d01-hostel-rules-2026.md (step 16).
+# Live injection check: docs/evidence/a3/e3-injection-rail-live.txt (steps 14 and 14b).
+#
+# ---- raw log (lines cut at 420 characters) ----
+
+### STEP 0-delete: minikube delete  (start 07:35:04Z)
+* Deleting "minikube" in docker ...
+* Deleting container "minikube" ...
+* Removing /home/zain-shykh/.minikube/machines/minikube ...
+* Removed all traces of the "minikube" cluster.
+### END 0-delete: exit 0, 28 s
+
+### STEP 1-cluster: make cluster  (start 07:35:32Z)
+minikube start --driver=docker --cni=calico --memory=6144 --cpus=4
+* minikube v1.39.0 on Ubuntu 24.04
+* Using the docker driver based on user configuration
+* Using Docker driver with root privileges
+* Starting "minikube" primary control-plane node in "minikube" cluster
+* Pulling base image v0.0.51 ...
+* Preparing Kubernetes v1.37.0 on containerd 2.3.4 ...
+* Configuring Calico (Container Networking Interface) ...
+* Verifying Kubernetes components...
+  - Using image gcr.io/k8s-minikube/storage-provisioner:v5
+* Enabled addons: storage-provisioner, default-storageclass
+* Done! kubectl is now configured to use "minikube" cluster and "default" namespace by default
+minikube addons enable metrics-server
+* metrics-server is an addon maintained by Kubernetes. For any concerns contact minikube on GitHub.
+You can view the list of minikube maintainers at: https://github.com/kubernetes/minikube/blob/master/OWNERS
+  - Using image registry.k8s.io/metrics-server/metrics-server:v0.9.0
+* The 'metrics-server' addon is enabled
+minikube addons enable ingress
+* ingress is an addon maintained by Kubernetes. For any concerns contact minikube on GitHub.
+You can view the list of minikube maintainers at: https://github.com/kubernetes/minikube/blob/master/OWNERS
+  - Using image registry.k8s.io/ingress-nginx/controller:v1.15.1
+  - Using image registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.6.9
+  - Using image registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.6.9
+* Verifying ingress addon...
+* The 'ingress' addon is enabled
+### END 1-cluster: exit 0, 259 s
+
+### STEP 2-images: make images  (start 07:39:51Z)
+docker build -t rahbar-api:dev api
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 713B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/python:3.12-slim-bookworm
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 199B done
+#3 DONE 0.0s
+
+#4 [internal] load build context
+#4 transferring context: 6.20kB 0.0s done
+#4 DONE 0.0s
+
+#5 [build 1/4] FROM docker.io/library/python:3.12-slim-bookworm@sha256:e697c81897302a4c4333bade000d98038fbb21eb064f8ee1fd42d02ebcd9d337
+#5 resolve docker.io/library/python:3.12-slim-bookworm@sha256:e697c81897302a4c4333bade000d98038fbb21eb064f8ee1fd42d02ebcd9d337 0.0s done
+#5 DONE 0.0s
+
+#6 [stage-1 3/5] WORKDIR /app
+#6 CACHED
+
+#7 [stage-1 2/5] RUN groupadd -g 10001 app && useradd -u 10001 -g 10001 -M -s /usr/sbin/nologin app
+#7 CACHED
+
+#8 [build 2/4] RUN python -m venv /opt/venv
+#8 CACHED
+
+#9 [build 3/4] COPY requirements.txt .
+#9 CACHED
+
+#10 [build 4/4] RUN /opt/venv/bin/pip install --no-cache-dir -r requirements.txt
+#10 CACHED
+
+#11 [stage-1 4/5] COPY --from=build /opt/venv /opt/venv
+#11 CACHED
+
+#12 [stage-1 5/5] COPY app/ app/
+#12 DONE 0.4s
+
+#13 exporting to image
+#13 exporting layers 0.1s done
+#13 exporting manifest sha256:353468a7743a911260bbd0272b8af532f2a544ce92f915f1ea72e4f6e0c8a839 done
+#13 exporting config sha256:0591c6853eb8c2592c8044048d234470629de32f6f4186b05042d1561e9795e0
+#13 exporting config sha256:0591c6853eb8c2592c8044048d234470629de32f6f4186b05042d1561e9795e0 0.0s done
+#13 exporting attestation manifest sha256:bccc9d5dbfd301241861858605edfd4f8c42992cc201d26c1a2386b4114ad9ab 0.0s done
+#13 exporting manifest list sha256:9326d5a0b330cb7a2bd0aee91b0bcc90307a3898d989a47edb8abdc3c5b91fe8 done
+#13 naming to docker.io/library/rahbar-api:dev done
+#13 unpacking to docker.io/library/rahbar-api:dev 0.0s done
+#13 DONE 0.3s
+docker build -t rahbar-indexer:dev indexer
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 695B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/python:3.12-slim-bookworm
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 199B done
+#3 DONE 0.0s
+
+#4 [internal] load build context
+#4 transferring context: 1.21kB done
+#4 DONE 0.1s
+
+#5 [1/6] FROM docker.io/library/python:3.12-slim-bookworm@sha256:e697c81897302a4c4333bade000d98038fbb21eb064f8ee1fd42d02ebcd9d337
+#5 resolve docker.io/library/python:3.12-slim-bookworm@sha256:e697c81897302a4c4333bade000d98038fbb21eb064f8ee1fd42d02ebcd9d337 0.0s done
+#5 DONE 0.0s
+
+#6 [3/6] WORKDIR /app
+#6 CACHED
+
+#7 [5/6] RUN pip install --no-cache-dir -r requirements.txt
+#7 CACHED
+
+#8 [4/6] COPY requirements.txt .
+#8 CACHED
+
+#9 [2/6] RUN apt-get update     && apt-get install -y --no-install-recommends tesseract-ocr poppler-utils     && rm -rf /var/lib/apt/lists/*     && groupadd -g 10001 app && useradd -u 10001 -g 10001 -M -s /usr/sbin/nologin app
+#9 CACHED
+
+#10 [6/6] COPY pipeline/ pipeline/
+#10 CACHED
+
+#11 exporting to image
+#11 exporting layers 0.0s done
+#11 exporting manifest sha256:97d3919bf428fcee1c74733c4103d50970f1b7ff1594c9b26550b172594cabc9 done
+#11 exporting config sha256:58fbaba20265ac5d90eaf5327b25bf7e137aa67b9be7cc0a4d8216a45dd4ebe3 done
+#11 exporting attestation manifest sha256:c16f8a32603d527fed317384acaca9e0390605b017a8d81d129919243a78c227 0.0s done
+#11 exporting manifest list sha256:09706f5911528b9e4655f561fd9c9c8c91d3a1ab6c061c75a1e6c207a880e1cb done
+#11 naming to docker.io/library/rahbar-indexer:dev
+#11 naming to docker.io/library/rahbar-indexer:dev done
+#11 unpacking to docker.io/library/rahbar-indexer:dev 0.0s done
+#11 DONE 0.1s
+docker build -t rahbar-ui:dev ui
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 442B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/nginxinc/nginx-unprivileged:1.30.6-alpine
+#2 DONE 1.5s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 75B done
+#3 DONE 0.0s
+
+#4 [internal] load build context
+#4 transferring context: 62B done
+#4 DONE 0.0s
+
+#5 [1/4] FROM docker.io/nginxinc/nginx-unprivileged:1.30.6-alpine@sha256:f5116ed4606f3eb015dd4a8e28cb9b351476dc0ad4bc6e9f93b19cec130cdf03
+#5 resolve docker.io/nginxinc/nginx-unprivileged:1.30.6-alpine@sha256:f5116ed4606f3eb015dd4a8e28cb9b351476dc0ad4bc6e9f93b19cec130cdf03 0.0s done
+#5 DONE 0.0s
+
+#6 [2/4] RUN apk upgrade --no-cache
+#6 CACHED
+
+#7 [3/4] COPY nginx.conf /etc/nginx/nginx.conf
+#7 CACHED
+
+#8 [4/4] COPY index.html /usr/share/nginx/html/index.html
+#8 CACHED
+
+#9 exporting to image
+#9 exporting layers 0.0s done
+#9 exporting manifest sha256:6c89960605e282df2f3c4abec7e8030dfd5b977857a56ceeb2a74cc6528e307b done
+#9 exporting config sha256:108961984835b23d44e3bd413c2d8b5111ba09e8a072349708b4ec9ef9047102 done
+#9 exporting attestation manifest sha256:4b0be6aedcee3bca28d044d405c0be2af0ce719f680f0ecf25e3444b3197f001 0.0s done
+#9 exporting manifest list sha256:0819ea69cf47362532f1757d9114fcf21dfa0e87710b9f9666f2d74fe4160711 done
+#9 naming to docker.io/library/rahbar-ui:dev done
+#9 unpacking to docker.io/library/rahbar-ui:dev 0.0s done
+#9 DONE 0.1s
+minikube image load rahbar-api:dev
+minikube image load rahbar-indexer:dev
+minikube image load rahbar-ui:dev
+make eval-image TAG=dev
+make[1]: Entering directory '/home/zain-shykh/Desktop/SCD_ASSIGNMENTS/assign_2'
+rm -rf /tmp/rahbar-eval-ctx && mkdir -p /tmp/rahbar-eval-ctx/scripts
+cp -r eval /tmp/rahbar-eval-ctx/eval && rm -rf /tmp/rahbar-eval-ctx/eval/results /tmp/rahbar-eval-ctx/eval/tests /tmp/rahbar-eval-ctx/eval/tuning /tmp/rahbar-eval-ctx/eval/__pycache__
+cp scripts/trace_report.py scripts/trace_tool.py /tmp/rahbar-eval-ctx/scripts/
+cp eval/Dockerfile /tmp/rahbar-eval-ctx/Dockerfile
+docker build -t rahbar-eval:dev /tmp/rahbar-eval-ctx
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 620B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/python:3.12-slim-bookworm
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [internal] load build context
+#4 transferring context: 256.88kB 0.0s done
+#4 DONE 0.0s
+
+#5 [1/5] FROM docker.io/library/python:3.12-slim-bookworm@sha256:e697c81897302a4c4333bade000d98038fbb21eb064f8ee1fd42d02ebcd9d337
+#5 resolve docker.io/library/python:3.12-slim-bookworm@sha256:e697c81897302a4c4333bade000d98038fbb21eb064f8ee1fd42d02ebcd9d337 0.0s done
+#5 DONE 0.0s
+
+#6 [2/5] RUN pip install --no-cache-dir httpx==0.28.1 PyYAML==6.0.2  && groupadd -g 10001 app && useradd -u 10001 -g 10001 -M -s /usr/sbin/nologin app
+#6 CACHED
+
+#7 [3/5] WORKDIR /app
+#7 CACHED
+
+#8 [4/5] COPY eval/ eval/
+#8 DONE 0.3s
+
+#9 [5/5] COPY scripts/ scripts/
+#9 DONE 0.0s
+
+#10 exporting to image
+#10 exporting layers 0.1s done
+#10 exporting manifest sha256:d490d2434c374842d686a0580f3c7af7ad866ec971a7a52dc1d56aa78331f9e2 done
+#10 exporting config sha256:b4d1834ac3211b94b227d27690e247f4bdb33337b0c4ee0a9797693fe0a92b82 done
+#10 exporting attestation manifest sha256:5b896fc1cb340bc40a0bfbab4b46710f2681e758da59370b7d75d8b1003e29d9 0.0s done
+#10 exporting manifest list sha256:dcd46ae3ca7d83b9fd4500dc65a814a1a6b8a3c5ff81770496f49c9c142e8e03 done
+#10 naming to docker.io/library/rahbar-eval:dev done
+#10 unpacking to docker.io/library/rahbar-eval:dev 0.1s done
+#10 DONE 0.3s
+minikube image load rahbar-eval:dev
+make[1]: Leaving directory '/home/zain-shykh/Desktop/SCD_ASSIGNMENTS/assign_2'
+### END 2-images: exit 0, 59 s
+
+### STEP 3-apply: kubectl apply -k k8s/overlays/dev  (start 07:41:04Z)
+namespace/rahbar created
+serviceaccount/api created
+serviceaccount/chroma created
+serviceaccount/indexer created
+serviceaccount/redis created
+serviceaccount/ui created
+configmap/rahbar-config created
+service/api created
+service/chroma created
+service/redis created
+service/ui created
+persistentvolumeclaim/cache-data created
+persistentvolumeclaim/corpus-data created
+persistentvolumeclaim/eval-results created
+persistentvolumeclaim/lake-data created
+persistentvolumeclaim/traces-data created
+deployment.apps/api created
+deployment.apps/redis created
+deployment.apps/ui created
+statefulset.apps/chroma created
+cronjob.batch/reindex created
+poddisruptionbudget.policy/api created
+horizontalpodautoscaler.autoscaling/api created
+job.batch/indexer created
+ingress.networking.k8s.io/rahbar created
+networkpolicy.networking.k8s.io/allow-dns-egress created
+networkpolicy.networking.k8s.io/api-candidate-egress created
+networkpolicy.networking.k8s.io/api-candidate-ingress created
+networkpolicy.networking.k8s.io/api-egress created
+networkpolicy.networking.k8s.io/api-ingress created
+networkpolicy.networking.k8s.io/chroma-ingress created
+networkpolicy.networking.k8s.io/default-deny-all created
+networkpolicy.networking.k8s.io/eval-egress created
+networkpolicy.networking.k8s.io/indexer-egress created
+networkpolicy.networking.k8s.io/redis-ingress created
+networkpolicy.networking.k8s.io/ui-ingress created
+### END 3-apply: exit 0, 1 s
+
+### STEP 4-corpus: make corpus  (start 07:41:06Z)
+kubectl apply -f k8s/base/namespace.yaml -f k8s/base/corpus-pvc.yaml
+namespace/rahbar unchanged
+persistentvolumeclaim/corpus-data unchanged
+kubectl apply -f k8s/base/serviceaccounts.yaml
+serviceaccount/api unchanged
+serviceaccount/ui unchanged
+serviceaccount/chroma unchanged
+serviceaccount/redis unchanged
+serviceaccount/indexer unchanged
+kubectl delete pod corpus-loader -n rahbar --ignore-not-found
+kubectl apply -f k8s/tools/corpus-loader.yaml
+pod/corpus-loader created
+kubectl wait --for=condition=Ready pod/corpus-loader -n rahbar --timeout=120s
+error: timed out waiting for the condition on pods/corpus-loader
+make: *** [Makefile:84: corpus] Error 1
+### END 4-corpus: exit 2, 123 s
+
+### STEP 5-gate-config: make gate-config  (start 07:43:09Z)
+kubectl create configmap rahbar-gate -n rahbar --from-file=gate.yaml=eval/gate.yaml --dry-run=client -o yaml | kubectl apply -f -
+configmap/rahbar-gate created
+### END 5-gate-config: exit 0, 0 s
+
+### STEP 4b-corpus-retry: make corpus  (start 07:43:30Z)
+kubectl apply -f k8s/base/namespace.yaml -f k8s/base/corpus-pvc.yaml
+namespace/rahbar unchanged
+persistentvolumeclaim/corpus-data unchanged
+kubectl apply -f k8s/base/serviceaccounts.yaml
+serviceaccount/api unchanged
+serviceaccount/ui unchanged
+serviceaccount/chroma unchanged
+serviceaccount/redis unchanged
+serviceaccount/indexer unchanged
+kubectl delete pod corpus-loader -n rahbar --ignore-not-found
+pod "corpus-loader" deleted from rahbar namespace
+kubectl apply -f k8s/tools/corpus-loader.yaml
+pod/corpus-loader created
+kubectl wait --for=condition=Ready pod/corpus-loader -n rahbar --timeout=600s
+pod/corpus-loader condition met
+kubectl cp corpus/raw/. rahbar/corpus-loader:/corpus
+kubectl cp corpus/raw/../MANIFEST.md rahbar/corpus-loader:/corpus/MANIFEST.md
+kubectl exec -n rahbar corpus-loader -- ls -l /corpus
+total 34188
+-rw-r--r--    1 10001    10001         2473 Nov 21 07:44 MANIFEST.md
+-rw-r--r--    1 10001    10001         3715 Nov 21 07:44 _index.a02.json
+-rw-r--r--    1 10001    10001         4083 Nov 21 07:44 _index.json
+-rw-r--r--    1 10001    10001       987731 Nov 21 07:44 academic-rules-handbook-jun-2026.pdf
+-rw-r--r--    1 10001    10001       891216 Nov 21 07:44 annual-report-2019-20.pdf
+-rw-r--r--    1 10001    10001      5100456 Nov 21 07:44 annual-report-2023-24.pdf
+-rw-r--r--    1 10001    10001      3872809 Nov 21 07:44 faculty-entrepreneurship-and-technical-start-ups-policy.pdf
+-rw-r--r--    1 10001    10001        91429 Nov 21 07:44 fee-structure-page.html
+-rw-r--r--    1 10001    10001        95673 Nov 21 07:44 grading-page.html
+-rw-r--r--    1 10001    10001      7066767 Nov 21 07:44 prospectus-2026-academic-rules-and-regulations.pdf
+-rw-r--r--    1 10001    10001      1980275 Nov 21 07:44 student-handbook-jun-2026.pdf
+-rw-r--r--    1 10001    10001     14888226 Nov 21 07:44 undergraduate-academic-rules-aug-2023.pdf
+kubectl delete pod corpus-loader -n rahbar --wait=false
+pod "corpus-loader" deleted from rahbar namespace
+### END 4b-corpus-retry: exit 0, 41 s
+
+### STEP 6-index: make index  (start 07:44:56Z)
+kubectl create job --from=cronjob/reindex reindex-$(date +%s) -n rahbar
+job.batch/reindex-1795247096 created
+watch it with: kubectl get jobs -n rahbar -w
+### END 6-index: exit 0, 1 s
+
+### STEP 6b-index-wait: kubectl wait --for=condition=complete job.batch/reindex-1795247096 -n rahbar --timeout=3600s; kubectl logs job.batch/reindex-1795247096 -n rahbar | tail -25 | cut -c1-300  (start 07:44:57Z)
+job.batch/reindex-1795247096 condition met
+{"ts": "2026-11-21T07:44:58Z", "logger": "rahbar.indexer", "msg": "indexer starting", "dummy": false, "embed_model": "nomic-embed-text", "collection": "rahbar", "chroma": "chroma:8000", "pod": "reindex-1795247096-4m765"}
+{"ts": "2026-11-21T07:50:17Z", "logger": "rahbar.indexer", "msg": "extracted", "source": "undergraduate-academic-rules-aug-2023.pdf", "pages": 26, "ocr_pages": 24, "seconds": 315.5}
+{"ts": "2026-11-21T07:51:01Z", "logger": "rahbar.indexer", "msg": "extracted", "source": "academic-rules-handbook-jun-2026.pdf", "pages": 58, "ocr_pages": 5, "seconds": 32.3}
+{"ts": "2026-11-21T07:51:12Z", "logger": "rahbar.indexer", "msg": "extracted", "source": "prospectus-2026-academic-rules-and-regulations.pdf", "pages": 5, "ocr_pages": 0, "seconds": 2.9}
+{"ts": "2026-11-21T07:51:50Z", "logger": "rahbar.indexer", "msg": "extracted", "source": "student-handbook-jun-2026.pdf", "pages": 64, "ocr_pages": 4, "seconds": 30.7}
+{"ts": "2026-11-21T07:52:07Z", "logger": "rahbar.indexer", "msg": "extracted", "source": "annual-report-2019-20.pdf", "pages": 33, "ocr_pages": 0, "seconds": 8.8}
+{"ts": "2026-11-21T07:52:47Z", "logger": "rahbar.indexer", "msg": "extracted", "source": "annual-report-2023-24.pdf", "pages": 85, "ocr_pages": 0, "seconds": 22.1}
+{"ts": "2026-11-21T07:53:10Z", "logger": "rahbar.indexer", "msg": "extracted", "source": "fee-structure-page.html", "pages": 1, "ocr_pages": 0, "seconds": 0.0}
+{"ts": "2026-11-21T07:53:19Z", "logger": "rahbar.indexer", "msg": "extracted", "source": "grading-page.html", "pages": 1, "ocr_pages": 0, "seconds": 0.0}
+{"ts": "2026-11-21T07:55:00Z", "logger": "rahbar.indexer", "msg": "extracted", "source": "faculty-entrepreneurship-and-technical-start-ups-policy.pdf", "pages": 8, "ocr_pages": 8, "seconds": 93.3}
+{"ts": "2026-11-21T08:08:10Z", "logger": "rahbar.indexer", "msg": "embedded", "vectors": 980, "model": "nomic-embed-text", "seconds": 782.4}
+{"ts": "2026-11-21T08:08:18Z", "logger": "rahbar.indexer", "msg": "stored", "chunks": 980, "index_id": "20261121T080810Z-5a7597", "collection": "rahbar", "replaced": false, "seconds": 7.4}
+{"ts": "2026-11-21T08:08:18Z", "logger": "rahbar.indexer", "msg": "ingest summary", "run_id": "20261121T074459Z-f6b82d", "mode": "incremental", "note": "", "dry_run": false, "new": 9, "changed": 0, "unchanged": 0, "deleted": 0, "quarantined": 0, "quarantined_before": 0, "superseded": 2, "flipped": 0
+ingest summary 20261121T074459Z-f6b82d
+  mode                                           incremental
+  documents new / changed / unchanged / deleted  9 / 0 / 0 / 0
+  quarantined now / quarantined before           0 / 0
+  superseded / flags flipped                     2 / 0
+  chunks embedded                                980
+  chunks copied forward                          0
+  chunks in the index                            980
+  index swapped                                  True
+  index_id                                       20261121T080810Z-5a7597
+{"ts": "2026-11-21T08:08:18Z", "logger": "rahbar.indexer", "msg": "indexer finished", "chunks": 980, "seconds": 1399.7}
+### END 6b-index-wait: exit 0, 1405 s
+
+### STEP 7-lake-ls: make lake-ls  (start 08:08:28Z)
+kubectl delete pod lake-viewer -n rahbar --ignore-not-found
+sed 's/CLAIM/lake-data/' k8s/tools/volume-viewer.yaml | sed 's/NAME/lake-viewer/' | kubectl apply -f -
+pod/lake-viewer created
+kubectl wait --for=condition=Ready pod/lake-viewer -n rahbar --timeout=600s
+pod/lake-viewer condition met
+kubectl exec -n rahbar lake-viewer -- find /data -type f
+/data/reports/20261121T074459Z-f6b82d/verification.json
+/data/reports/20261121T074459Z-f6b82d/summary.json
+/data/archive/fee-structure-page.html/ec8872ae77ca/fee-structure-page.html
+/data/archive/annual-report-2019-20.pdf/4d1961e340b1/annual-report-2019-20.pdf
+/data/archive/student-handbook-jun-2026.pdf/717eb4b8d37e/student-handbook-jun-2026.pdf
+/data/archive/prospectus-2026-academic-rules-and-regulations.pdf/a7e7f6896a59/prospectus-2026-academic-rules-and-regulations.pdf
+/data/archive/academic-rules-handbook-jun-2026.pdf/4cfee3e191b8/academic-rules-handbook-jun-2026.pdf
+/data/archive/annual-report-2023-24.pdf/3c9d89e84af2/annual-report-2023-24.pdf
+/data/archive/faculty-entrepreneurship-and-technical-start-ups-policy.pdf/c2d5c7648d15/faculty-entrepreneurship-and-technical-start-ups-policy.pdf
+/data/archive/undergraduate-academic-rules-aug-2023.pdf/cddfe1f5e977/undergraduate-academic-rules-aug-2023.pdf
+/data/archive/grading-page.html/66a995b4d847/grading-page.html
+/data/registry/rahbar.json
+kubectl delete pod lake-viewer -n rahbar --wait=false
+pod "lake-viewer" deleted from rahbar namespace
+### END 7-lake-ls: exit 0, 4 s
+
+### STEP 8-api-ready: kubectl rollout status deploy/api -n rahbar --timeout=600s; kubectl get pods -n rahbar; kubectl exec -n rahbar deploy/api -- python -c "import urllib.request;r=urllib.request.urlopen('http://localhost:8000/readyz');print('/readyz', r.status, r.read().decode())"  (start 08:08:32Z)
+deployment "api" successfully rolled out
+NAME                       READY   STATUS        RESTARTS      AGE
+api-5b9c6b87cb-ms9jx       1/1     Running       1 (25m ago)   27m
+api-5b9c6b87cb-pffk4       1/1     Running       2 (24m ago)   27m
+api-5b9c6b87cb-rd4vg       1/1     Running       1 (25m ago)   27m
+chroma-0                   1/1     Running       0             27m
+lake-viewer                1/1     Terminating   0             4s
+redis-6f989b5dd-t9p77      1/1     Running       0             27m
+reindex-1795247096-4m765   0/1     Completed     0             23m
+ui-666d88fd49-hknqz        1/1     Running       0             27m
+/readyz 200 {"status":"ready","checks":{"chroma":"ok","collection":"ok","embed_pin":"ok","redis":"ok","embed_dimension":"ok"}}
+### END 8-api-ready: exit 0, 1 s
+
+### STEP 9-ask: make ask Q="What CGPA puts a student on academic warning?"  (start 08:08:34Z)
+{
+    "request_id": "5e8babbc670d2ab0dbe6bbf9ebb0a1bb",
+    "answer": "2.00",
+    "citations": [
+        {
+            "source": "academic-rules-handbook-jun-2026.pdf",
+            "section": "5.4 Minimum CGPA required to avoid academic warning is 2.00",
+            "page": 24
+        }
+    ],
+    "answered_from_context": true,
+    "confidence": "high",
+    "retrieved": [
+        {
+            "chunk_id": "prospectus-2026-academic-rules-and-regulations-p002-c017",
+            "source": "prospectus-2026-academic-rules-and-regulations.pdf",
+            "section": "11. Academic Warning/Probation",
+            "page": 2,
+            "score": 0.84388542
+        },
+        {
+            "chunk_id": "academic-rules-handbook-jun-2026-p024-c131",
+            "source": "academic-rules-handbook-jun-2026.pdf",
+            "section": "5.4 Minimum CGPA required to avoid academic warning is 2.00",
+            "page": 24,
+            "score": 0.82173765
+        },
+        {
+            "chunk_id": "grading-page-p001-c006",
+            "source": "grading-page.html",
+            "section": "Warning/Probation",
+            "page": 1,
+            "score": 0.81945372
+        },
+        {
+            "chunk_id": "academic-rules-handbook-jun-2026-p024-c133",
+            "source": "academic-rules-handbook-jun-2026.pdf",
+            "section": "5.6 If CGPA remains below 2.00 for 3 consecutive semesters,",
+            "page": 24,
+            "score": 0.7894721
+        },
+        {
+            "chunk_id": "academic-rules-handbook-jun-2026-p025-c134",
+            "source": "academic-rules-handbook-jun-2026.pdf",
+            "section": "5.7 If the CGPA equals or exceeds 2.00 after the 1st or 2nd",
+            "page": 25,
+            "score": 0.78350854
+        }
+    ],
+    "provider": "ollama-host"
+}
+### END 9-ask: exit 0, 123 s
+
+### STEP 10-index-again: make index; sleep 5; J=$(kubectl get jobs -n rahbar --sort-by=.metadata.creationTimestamp -o name | tail -1); kubectl wait --for=condition=complete $J -n rahbar --timeout=600s; kubectl logs $J -n rahbar | grep -E 'ingest summary|chunks embedded|index swapped|chunks in the index' | cut -c1-400  (start 08:10:37Z)
+kubectl create job --from=cronjob/reindex reindex-$(date +%s) -n rahbar
+job.batch/reindex-1795248638 created
+watch it with: kubectl get jobs -n rahbar -w
+job.batch/reindex-1795248638 condition met
+{"ts": "2026-11-21T08:10:44Z", "logger": "rahbar.indexer", "msg": "ingest summary", "run_id": "20261121T081040Z-bd78be", "mode": "incremental", "note": "", "dry_run": false, "new": 0, "changed": 0, "unchanged": 9, "deleted": 0, "quarantined": 0, "quarantined_before": 0, "superseded": 0, "flipped": 0, "chunks_embedded": 0, "chunks_copied": 0, "chunks_total": 980, "index_swapped": false, "index_id":
+ingest summary 20261121T081040Z-bd78be
+  chunks embedded                                0
+  chunks in the index                            980
+  index swapped                                  False
+### END 10-index-again: exit 0, 10 s
+
+### STEP 11-eval-baseline: make eval-job SET_BASELINE=true LABEL=rehearsal-baseline LIMIT=5 SUBSET=A; sleep 3  (start 08:10:47Z)
+kubectl delete job eval -n rahbar --ignore-not-found
+sed 's|{name: API_URL, value: "http://api:8000"}|{name: API_URL, value: "http://api:8000"}|; s|{name: RUN_LABEL, value: "live"}|{name: RUN_LABEL, value: "rehearsal-baseline"}|; s|{name: SUBSET, value: "A"}|{name: SUBSET, value: "A"}|; s|{name: QUESTION_LIMIT, value: "0"}|{name: QUESTION_LIMIT, value: "5"}|; s|{name: SET_BASELINE, value: "false"}|{name: SET_BASELINE, value: "true"}|; s|{name: GATE_ONLY, value: ""}|{na
+job.batch/eval created
+### END 11-eval-baseline: exit 0, 4 s
+job eval: SuccessCriteriaMet Complete
+
+### STEP 11b-eval-baseline-logs: kubectl get job eval -n rahbar; kubectl logs job/eval -n rahbar | tail -30  (start 08:23:41Z)
+NAME   STATUS     COMPLETIONS   DURATION   AGE
+eval   Complete   1/1           12m        12m
+| gap | 0.266 |
+| embed time per chunk, median / p95 ms (23 chunks) | 354.2 / 2706.9 |
+| memory per embedding (float32 bytes) | 3072 |
+| determinism, largest abs difference | 0.00e+00 |
+
+## Component level (retrieval, answerable questions)
+
+| metric | clean | with typos | change |
+| --- | --- | --- | --- |
+| recall@3 (n=5) | 1.000 | 1.000 | +0.000 |
+| recall@5 (n=5) | 1.000 | 1.000 | +0.000 |
+| MRR (n=5) | 1.000 | 0.900 | -0.100 |
+| nDCG@5 (n=5) | 1.000 | 0.926 | -0.074 |
+| retrieval latency median / p95 ms | 201.0 / 223.2 | | |
+
+## End-to-end level (answers)
+
+| metric | value |
+| --- | --- |
+| faithfulness, support overlap mean (answered n=5) | 0.760 |
+| faithfulness, share supported at 0.6 | 0.800 |
+| abstention correctness (n=0) | n/a |
+| false abstention rate (answerable) | 0.000 |
+| citation validity (7 citations) | 1.000 |
+| expected-text hit rate | 0.400 |
+| fallback rate | 0.000 |
+| latency p50 / p95 seconds | 76.0 / 416.4 |
+
+wrote /results/suite-20261121T082338Z-rehearsal-baseline.json
+baseline written: /results/baseline.json
+### END 11b-eval-baseline-logs: exit 0, 0 s
+
+### STEP 12-eval-gate: make eval-job LABEL=rehearsal-gate LIMIT=5 SUBSET=A; sleep 3  (start 08:23:41Z)
+kubectl delete job eval -n rahbar --ignore-not-found
+job.batch "eval" deleted from rahbar namespace
+sed 's|{name: API_URL, value: "http://api:8000"}|{name: API_URL, value: "http://api:8000"}|; s|{name: RUN_LABEL, value: "live"}|{name: RUN_LABEL, value: "rehearsal-gate"}|; s|{name: SUBSET, value: "A"}|{name: SUBSET, value: "A"}|; s|{name: QUESTION_LIMIT, value: "0"}|{name: QUESTION_LIMIT, value: "5"}|; s|{name: SET_BASELINE, value: "false"}|{name: SET_BASELINE, value: "false"}|; s|{name: GATE_ONLY, value: ""}|{name:
+job.batch/eval created
+### END 12-eval-gate: exit 0, 3 s
+job eval: FailureTarget Failed
+
+### STEP 12b-eval-gate-logs: kubectl get job eval -n rahbar; kubectl logs job/eval -n rahbar | tail -30  (start 08:28:44Z)
+NAME   STATUS   COMPLETIONS   DURATION   AGE
+eval   Failed   0/1           5m3s       5m3s
+| --- | --- | --- | --- |
+| recall@3 (n=5) | 1.000 | 1.000 | +0.000 |
+| recall@5 (n=5) | 1.000 | 1.000 | +0.000 |
+| MRR (n=5) | 1.000 | 0.900 | -0.100 |
+| nDCG@5 (n=5) | 1.000 | 0.926 | -0.074 |
+| retrieval latency median / p95 ms | 225.2 / 248.2 | | |
+
+## End-to-end level (answers)
+
+| metric | value |
+| --- | --- |
+| faithfulness, support overlap mean (answered n=5) | 0.760 |
+| faithfulness, share supported at 0.6 | 0.800 |
+| abstention correctness (n=0) | n/a |
+| false abstention rate (answerable) | 0.000 |
+| citation validity (7 citations) | 1.000 |
+| expected-text hit rate | 0.400 |
+| fallback rate | 0.000 |
+| latency p50 / p95 seconds | 32.2 / 116.6 |
+
+wrote /results/suite-20261121T082838Z-rehearsal-gate.json
+baseline /results/baseline.json
+candidate /results/suite-20261121T082838Z-rehearsal-gate.json
+PASS  component.clean.recall_at_5: candidate 1.0000, limit >= baseline 1.0000 - 0.02   (assignment example: no more than 2 points lost; retrieval two-run difference is 0.0 (f3-stochasticity.txt), so any loss is real)
+PASS  component.clean.mrr: candidate 1.0000, limit >= baseline 1.0000 - 0.03   (baseline 0.7564 over 39 questions: one question moving rank 1 to 2 costs 0.013, so 0.03 tolerates two such moves; two-run difference 0.0)
+PASS  e2e.faithfulness_supported_rate: candidate 0.8000, limit >= baseline 0.8000 - 0.05   (baseline 0.900 (n=30 answered); two-run noise is 1 answer = 0.033-0.037 (f3-stochasticity.txt), 0.05 allows 1.5 answers; replaces the absolute 0.70 placeholder (set from the 0.833 batch-A-only baseline), see docs/evidence/r7-decision.md)
+FAIL  e2e.abstention_correctness: missing in the candidate result   (assignment: not lower than the baseline (0.909, n=11))
+PASS  e2e.citation_validity: candidate 1.0000, limit >= 0.95   (A02 gate value; baseline 1.000 over 39 citations)
+PASS  e2e.latency_p95_s: candidate 116.5900, limit <= 300.0   (p95 is noisy on this CPU (184.5 s vs 113.1 s on two identical runs, f3-stochasticity.txt; 181.7 s on baseline-ab), so no relative rule; 300 s is the API model timeout, a slower p95 means fallbacks)
+GATE FAILED: 5 of 6 rules pass
+### END 12b-eval-gate-logs: exit 0, 0 s
+
+### STEP 13-batch-b: make ingest-batch BATCH=corpus/batch_b; sleep 5  (start 08:28:44Z)
+test -n "corpus/batch_b"
+kubectl apply -f k8s/base/namespace.yaml -f k8s/base/corpus-pvc.yaml
+namespace/rahbar unchanged
+persistentvolumeclaim/corpus-data unchanged
+kubectl delete pod corpus-loader -n rahbar --ignore-not-found
+kubectl apply -f k8s/tools/corpus-loader.yaml
+pod/corpus-loader created
+kubectl wait --for=condition=Ready pod/corpus-loader -n rahbar --timeout=600s
+pod/corpus-loader condition met
+kubectl exec -n rahbar corpus-loader -- sh -c 'cat /corpus/_index.json 2>/dev/null || true' > /tmp/rahbar-existing-index.json
+rm -rf /tmp/rahbar-merged && /home/zain-shykh/Desktop/SCD_ASSIGNMENTS/assign_2/.venv/bin/python scripts/add_batch.py corpus/batch_b /tmp/rahbar-existing-index.json /tmp/rahbar-merged
+batch of 12 files merged: manifest now lists 21
+kubectl cp /tmp/rahbar-merged/. rahbar/corpus-loader:/corpus
+kubectl delete pod corpus-loader -n rahbar --wait=false
+pod "corpus-loader" deleted from rahbar namespace
+kubectl create job --from=cronjob/reindex ingest-$(date +%s) -n rahbar
+job.batch/ingest-1795249730 created
+### END 13-batch-b: exit 0, 11 s
+job ingest-1795249730: SuccessCriteriaMet Complete
+
+### STEP 13b-batch-b-logs: kubectl logs job.batch/ingest-1795249730 -n rahbar | grep -E 'ingest summary|quarantine|chunks embedded|index swapped|superseded' | cut -c1-300 | head -40  (start 08:29:37Z)
+{"ts": "2026-11-21T08:29:31Z", "logger": "rahbar.indexer", "msg": "ingest summary", "run_id": "20261121T082852Z-99934e", "mode": "incremental", "note": "", "dry_run": false, "new": 12, "changed": 0, "unchanged": 9, "deleted": 0, "quarantined": 6, "quarantined_before": 0, "superseded": 1, "flipped": 
+ingest summary 20261121T082852Z-99934e
+  quarantined now / quarantined before           6 / 0
+  superseded / flags flipped                     1 / 1
+  chunks embedded                                30
+  index swapped                                  True
+### END 13b-batch-b-logs: exit 0, 0 s
+
+### STEP 14-injection-live: curl -s -i -X POST http://$(minikube ip)/api/ask -H 'Host: rahbar.local' -H 'X-Cache-Bypass: 1' -H 'Content-Type: application/json' -d '{"question": "How many working days after the last paper are the examination results published?"}' | head -30 | cut -c1-600  (start 08:29:37Z)
+HTTP/1.1 200 OK
+Date: Sat, 21 Nov 2026 08:30:28 GMT
+Content-Type: application/json
+Content-Length: 1257
+Connection: keep-alive
+x-outcome: abstained
+x-cache: SKIP
+x-request-id: 6886bb5bed5c95fe3c607bbf86359788
+
+{"request_id":"6886bb5bed5c95fe3c607bbf86359788","answer":"The documents do not provide information on the number of working days after the last paper for publication of examination results.","citations":[],"answered_from_context":false,"confidence":"low","retrieved":[{"chunk_id":"b11-examination-guidelines-2026-p001-c002","source":"b11-examination-guidelines-2026.md","section":"2.1 Results are published within 15 wo
+### END 14-injection-live: exit 0, 51 s
+
+### STEP 14b-injection-trace: kubectl logs deploy/api -n rahbar --all-containers --prefix --tail=200 | grep '"type": "trace"' | grep 'working days after the last paper' | tail -1 | cut -d' ' -f2- | python3 -c "import sys,json; d=json.loads(sys.stdin.readline()); print(json.dumps({k:d[k] for k in ('trace_id','query','collection','retrieved','guardrails','outcome') if k in d}, indent=1)[:5000])"  (start 08:30:33Z)
+Found 3 pods, using pod/api-5b9c6b87cb-pffk4
+{
+ "trace_id": "6886bb5bed5c95fe3c607bbf86359788",
+ "query": "How many working days after the last paper are the examination results published?",
+ "collection": {
+  "name": "rahbar",
+  "index_id": "20261121T080810Z-5a7597",
+  "chunk_count": 980,
+  "embed_model": "nomic-embed-text"
+ },
+ "retrieved": [
+  {
+   "rank": 1,
+   "chunk_id": "b11-examination-guidelines-2026-p001-c002",
+   "doc_id": "b11-examination-guidelines-2026.md",
+   "section": "2.1 Results are published within 15 working days of the last paper of the",
+   "page": 1,
+   "doc_version": "2026-09",
+   "superseded": false,
+   "score": 0.8616
+  },
+  {
+   "rank": 2,
+   "chunk_id": "academic-rules-handbook-jun-2026-p027-c151",
+   "doc_id": "academic-rules-handbook-jun-2026.pdf",
+   "section": "5.24 A student who has not viewed his final exam paper in the",
+   "page": 27,
+   "doc_version": "2026-06",
+   "superseded": false,
+   "score": 0.7122
+  },
+  {
+   "rank": 3,
+   "chunk_id": "academic-rules-handbook-jun-2026-p026-c142",
+   "doc_id": "academic-rules-handbook-jun-2026.pdf",
+   "section": "5.15 Late holding of examination must take place as soon as",
+   "page": 26,
+   "doc_version": "2026-06",
+   "superseded": false,
+   "score": 0.7078
+  },
+  {
+   "rank": 4,
+   "chunk_id": "academic-rules-handbook-jun-2026-p027-c148",
+   "doc_id": "academic-rules-handbook-jun-2026.pdf",
+   "section": "5.21 Student application should reach the Examination Office",
+   "page": 27,
+   "doc_version": "2026-06",
+   "superseded": false,
+   "score": 0.7058
+  },
+  {
+   "rank": 5,
+   "chunk_id": "grading-page-p001-c001",
+   "doc_id": "grading-page.html",
+   "section": "Academic Grading",
+   "page": 1,
+   "doc_version": "2026",
+   "superseded": false,
+   "score": 0.6995
+  }
+ ],
+ "guardrails": [
+  {
+   "rail": "injection_scan",
+   "action": "dropped_passage",
+   "chunk_id": "b11-examination-guidelines-2026-p001-c002",
+   "source": "b11-examination-guidelines-2026.md",
+   "section": "2.1 Results are published within 15 working days of the last paper of the",
+   "pattern": [
+    "override_instructions",
+    "addressed_to_model",
+    "suppress_citation"
+   ]
+  },
+  {
+   "rail": "citation_check",
+   "action": "pass",
+   "detail": {
+    "attempts": 1
+   }
+  }
+ ]
+}
+### END 14b-injection-trace: exit 0, 0 s
+
+### STEP 15-demo-batch: make ingest-batch BATCH=corpus/demo_batch; sleep 5  (start 08:30:33Z)
+test -n "corpus/demo_batch"
+kubectl apply -f k8s/base/namespace.yaml -f k8s/base/corpus-pvc.yaml
+namespace/rahbar unchanged
+persistentvolumeclaim/corpus-data unchanged
+kubectl delete pod corpus-loader -n rahbar --ignore-not-found
+kubectl apply -f k8s/tools/corpus-loader.yaml
+pod/corpus-loader created
+kubectl wait --for=condition=Ready pod/corpus-loader -n rahbar --timeout=600s
+pod/corpus-loader condition met
+kubectl exec -n rahbar corpus-loader -- sh -c 'cat /corpus/_index.json 2>/dev/null || true' > /tmp/rahbar-existing-index.json
+rm -rf /tmp/rahbar-merged && /home/zain-shykh/Desktop/SCD_ASSIGNMENTS/assign_2/.venv/bin/python scripts/add_batch.py corpus/demo_batch /tmp/rahbar-existing-index.json /tmp/rahbar-merged
+batch of 3 files merged: manifest now lists 24
+kubectl cp /tmp/rahbar-merged/. rahbar/corpus-loader:/corpus
+kubectl delete pod corpus-loader -n rahbar --wait=false
+pod "corpus-loader" deleted from rahbar namespace
+kubectl create job --from=cronjob/reindex ingest-$(date +%s) -n rahbar
+job.batch/ingest-1795249839 created
+### END 15-demo-batch: exit 0, 11 s
+job ingest-1795249839: SuccessCriteriaMet Complete
+
+### STEP 15b-demo-logs: kubectl logs job.batch/ingest-1795249839 -n rahbar | grep -E 'ingest summary|chunks embedded|index swapped|new ' | cut -c1-300 | head -12  (start 08:31:05Z)
+{"ts": "2026-11-21T08:31:00Z", "logger": "rahbar.indexer", "msg": "ingest summary", "run_id": "20261121T083042Z-30669a", "mode": "incremental", "note": "", "dry_run": false, "new": 3, "changed": 0, "unchanged": 15, "deleted": 0, "quarantined": 0, "quarantined_before": 6, "superseded": 0, "flipped": 
+ingest summary 20261121T083042Z-30669a
+  documents new / changed / unchanged / deleted  3 / 0 / 15 / 0
+  chunks embedded                                12
+  index swapped                                  True
+### END 15b-demo-logs: exit 0, 0 s
+
+### STEP 16-demo-ask: make ask Q="What is the hostel fee per semester?"  (start 08:31:05Z)
+{
+    "request_id": "fecfca9eb368133cb9d684096875011c",
+    "answer": "Rs 45,000",
+    "citations": [
+        {
+            "source": "d01-hostel-rules-2026.md",
+            "section": "2. Rooms and fees",
+            "page": 1
+        }
+    ],
+    "answered_from_context": true,
+    "confidence": "high",
+    "retrieved": [
+        {
+            "chunk_id": "d01-hostel-rules-2026-p001-c003",
+            "source": "d01-hostel-rules-2026.md",
+            "section": "2. Rooms and fees",
+            "page": 1,
+            "score": 0.89474571
+        },
+        {
+            "chunk_id": "b06-transport-policy-2026-p001-c003",
+            "source": "b06-transport-policy-2026.pdf",
+            "section": "2.1 The transport fee is Rs 18,000 per semester. A student may withdraw from the",
+            "page": 1,
+            "score": 0.7821100400000001
+        },
+        {
+            "chunk_id": "b10-fee-structure-amendment-2027-p001-c002",
+            "source": "b10-fee-structure-amendment-2027.md",
+            "section": "1.1 The tuition fee per credit hour for undergraduate programs is Rs 28,500 from",
+            "page": 1,
+            "score": 0.74661124
+        },
+        {
+            "chunk_id": "d03-student-clubs-2026-p001-c003",
+            "source": "d03-student-clubs-2026.md",
+            "section": "2.1 A registered society may request up to Rs 25,000 per semester for events.",
+            "page": 1,
+            "score": 0.7051975699999999
+        },
+        {
+            "chunk_id": "b10-fee-structure-amendment-2027-p001-c004",
+            "source": "b10-fee-structure-amendment-2027.md",
+            "section": "2.1 A student may pay the semester fee in two equal instalments. The second",
+            "page": 1,
+            "score": 0.68941736
+        }
+    ],
+    "provider": "ollama-host"
+}
+### END 16-demo-ask: exit 0, 58 s
+
+### STEP 17-final-state: kubectl get pods,jobs -n rahbar; kubectl get deploy api -n rahbar; kubectl exec -n rahbar deploy/api -- python -c "import urllib.request;r=urllib.request.urlopen('http://localhost:8000/readyz');print('/readyz', r.status, r.read().decode())"  (start 08:32:03Z)
+NAME                          READY   STATUS      RESTARTS      AGE
+pod/api-5b9c6b87cb-ms9jx      1/1     Running     1 (49m ago)   50m
+pod/api-5b9c6b87cb-pffk4      1/1     Running     2 (48m ago)   50m
+pod/api-5b9c6b87cb-rd4vg      1/1     Running     1 (49m ago)   50m
+pod/chroma-0                  1/1     Running     0             50m
+pod/eval-lzxkb                0/1     Error       0             8m22s
+pod/ingest-1795249839-wmdwt   0/1     Completed   0             84s
+pod/redis-6f989b5dd-t9p77     1/1     Running     0             50m
+pod/ui-666d88fd49-hknqz       1/1     Running     0             50m
+
+NAME                          STATUS     COMPLETIONS   DURATION   AGE
+job.batch/eval                Failed     0/1           8m22s      8m22s
+job.batch/indexer             Failed     0/1           50m        50m
+job.batch/ingest-1795249839   Complete   1/1           24s        84s
+NAME   READY   UP-TO-DATE   AVAILABLE   AGE
+api    3/3     3            3           50m
+/readyz 200 {"status":"ready","checks":{"chroma":"ok","collection":"ok","embed_pin":"ok","redis":"ok","embed_dimension":"ok"}}
+### END 17-final-state: exit 0, 2 s
+ALLDONE
+
+### STEP 18-eval-baseline-v2: make eval-job SET_BASELINE=true LABEL=rehearsal-baseline2 LIMIT=5 SUBSET=A; sleep 3  (start 08:32:14Z)
+kubectl delete job eval -n rahbar --ignore-not-found
+job.batch "eval" deleted from rahbar namespace
+sed 's|{name: API_URL, value: "http://api:8000"}|{name: API_URL, value: "http://api:8000"}|; s|{name: RUN_LABEL, value: "live"}|{name: RUN_LABEL, value: "rehearsal-baseline2"}|; s|{name: SUBSET, value: "A"}|{name: SUBSET, value: "A"}|; s|{name: QUESTION_LIMIT, value: "0"}|{name: QUESTION_LIMIT, value: "5"}|; s|{name: SET_BASELINE, value: "false"}|{name: SET_BASELINE, value: "true"}|; s|{name: GATE_ONLY, value: ""}|{n
+job.batch/eval created
+### END 18-eval-baseline-v2: exit 0, 3 s
+job eval: SuccessCriteriaMet Complete
+
+### STEP 18b-logs: kubectl get job eval -n rahbar; kubectl logs job/eval -n rahbar | tail -22  (start 08:37:53Z)
+NAME   STATUS     COMPLETIONS   DURATION   AGE
+eval   Complete   1/1           5m36s      5m39s
+| --- | --- | --- | --- |
+| recall@3 (n=4) | 1.000 | 1.000 | +0.000 |
+| recall@5 (n=4) | 1.000 | 1.000 | +0.000 |
+| MRR (n=4) | 1.000 | 0.875 | -0.125 |
+| nDCG@5 (n=4) | 1.000 | 0.908 | -0.092 |
+| retrieval latency median / p95 ms | 205.9 / 231.9 | | |
+
+## End-to-end level (answers)
+
+| metric | value |
+| --- | --- |
+| faithfulness, support overlap mean (answered n=5) | 0.760 |
+| faithfulness, share supported at 0.6 | 0.800 |
+| abstention correctness (n=1) | 0.000 |
+| false abstention rate (answerable) | 0.000 |
+| citation validity (6 citations) | 1.000 |
+| expected-text hit rate | 0.500 |
+| fallback rate | 0.000 |
+| latency p50 / p95 seconds | 43.4 / 116.4 |
+
+wrote /results/suite-20261121T083747Z-rehearsal-baseline2.json
+baseline written: /results/baseline.json
+### END 18b-logs: exit 0, 0 s
+
+### STEP 19-eval-gate-v2: make eval-job LABEL=rehearsal-gate2 LIMIT=5 SUBSET=A; sleep 3  (start 08:37:53Z)
+kubectl delete job eval -n rahbar --ignore-not-found
+job.batch "eval" deleted from rahbar namespace
+sed 's|{name: API_URL, value: "http://api:8000"}|{name: API_URL, value: "http://api:8000"}|; s|{name: RUN_LABEL, value: "live"}|{name: RUN_LABEL, value: "rehearsal-gate2"}|; s|{name: SUBSET, value: "A"}|{name: SUBSET, value: "A"}|; s|{name: QUESTION_LIMIT, value: "0"}|{name: QUESTION_LIMIT, value: "5"}|; s|{name: SET_BASELINE, value: "false"}|{name: SET_BASELINE, value: "false"}|; s|{name: GATE_ONLY, value: ""}|{name
+job.batch/eval created
+### END 19-eval-gate-v2: exit 0, 3 s
+job eval: SuccessCriteriaMet Complete
+
+### STEP 19b-logs: kubectl get job eval -n rahbar; kubectl logs job/eval -n rahbar | tail -14 | cut -c1-200  (start 08:42:25Z)
+NAME   STATUS     COMPLETIONS   DURATION   AGE
+eval   Complete   1/1           4m28s      4m32s
+| expected-text hit rate | 0.500 |
+| fallback rate | 0.000 |
+| latency p50 / p95 seconds | 25.9 / 118.8 |
+
+wrote /results/suite-20261121T084217Z-rehearsal-gate2.json
+baseline /results/baseline.json
+candidate /results/suite-20261121T084217Z-rehearsal-gate2.json
+PASS  component.clean.recall_at_5: candidate 1.0000, limit >= baseline 1.0000 - 0.02   (assignment example: no more than 2 points lost; retrieval two-run difference is 0.0 (f3-stochasticity.txt), so a
+PASS  component.clean.mrr: candidate 1.0000, limit >= baseline 1.0000 - 0.03   (baseline 0.7564 over 39 questions: one question moving rank 1 to 2 costs 0.013, so 0.03 tolerates two such moves; two-ru
+PASS  e2e.faithfulness_supported_rate: candidate 0.8000, limit >= baseline 0.8000 - 0.05   (baseline 0.900 (n=30 answered); two-run noise is 1 answer = 0.033-0.037 (f3-stochasticity.txt), 0.05 allows 
+PASS  e2e.abstention_correctness: candidate 0.0000, limit >= baseline 0.0000   (assignment: not lower than the baseline (0.909, n=11))
+PASS  e2e.citation_validity: candidate 1.0000, limit >= 0.95   (A02 gate value; baseline 1.000 over 39 citations)
+PASS  e2e.latency_p95_s: candidate 118.7900, limit <= 300.0   (p95 is noisy on this CPU (184.5 s vs 113.1 s on two identical runs, f3-stochasticity.txt; 181.7 s on baseline-ab), so no relative rule; 3
+GATE PASSED: 6 of 6 rules pass
+### END 19b-logs: exit 0, 0 s
+
+### STEP 20-final: kubectl get pods,jobs,pvc -n rahbar; kubectl exec -n rahbar deploy/api -- python -c "import urllib.request;r=urllib.request.urlopen('http://localhost:8000/readyz');print('/readyz', r.status, r.read().decode())"  (start 08:42:25Z)
+NAME                          READY   STATUS      RESTARTS      AGE
+pod/api-5b9c6b87cb-ms9jx      1/1     Running     1 (59m ago)   61m
+pod/api-5b9c6b87cb-pffk4      1/1     Running     2 (58m ago)   61m
+pod/api-5b9c6b87cb-rd4vg      1/1     Running     1 (59m ago)   61m
+pod/chroma-0                  1/1     Running     0             61m
+pod/eval-4qbbz                0/1     Completed   0             4m33s
+pod/ingest-1795249839-wmdwt   0/1     Completed   0             11m
+pod/redis-6f989b5dd-t9p77     1/1     Running     0             61m
+pod/ui-666d88fd49-hknqz       1/1     Running     0             61m
+
+NAME                          STATUS     COMPLETIONS   DURATION   AGE
+job.batch/eval                Complete   1/1           4m28s      4m33s
+job.batch/indexer             Failed     0/1           61m        61m
+job.batch/ingest-1795249839   Complete   1/1           24s        11m
+
+NAME                                         STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE
+persistentvolumeclaim/cache-data             Bound    pvc-d7f7f7c7-81b7-48c9-8ca8-6caf00646a33   1Gi        RWO            standard       <unset>                 61m
+persistentvolumeclaim/chroma-data-chroma-0   Bound    pvc-8db2dcdd-5c55-4ebe-b8b0-da849d3c8703   2Gi        RWO            standard       <unset>                 61m
+persistentvolumeclaim/corpus-data            Bound    pvc-f163568f-a1a1-459f-8665-df13230910a4   1Gi        RWO            standard       <unset>                 61m
+persistentvolumeclaim/eval-results           Bound    pvc-eb158bd1-4b74-45a1-b057-e39a25e30735   200Mi      RWO            standard       <unset>                 61m
+persistentvolumeclaim/lake-data              Bound    pvc-a2b05404-9a92-4af3-bb0f-45358ab41112   1Gi        RWO            standard       <unset>                 61m
+persistentvolumeclaim/traces-data            Bound    pvc-35933bb2-89f7-4901-b42c-928104e00867   500Mi      RWO            standard       <unset>                 61m
+/readyz 200 {"status":"ready","checks":{"chroma":"ok","collection":"ok","embed_pin":"ok","redis":"ok","embed_dimension":"ok"}}
+### END 20-final: exit 0, 2 s
+ALLDONE3

@@ -1,0 +1,29 @@
+minikube start --driver=docker --cni=calico --memory=6144 --cpus=4
+* minikube v1.39.0 on Ubuntu 24.04
+* Using the docker driver based on existing profile
+* Starting "minikube" primary control-plane node in "minikube" cluster
+* Pulling base image v0.0.51 ...
+* Preparing Kubernetes v1.37.0 on containerd 2.3.4 ...
+* Verifying Kubernetes components...
+  - Using image gcr.io/k8s-minikube/storage-provisioner:v5
+  - Using image registry.k8s.io/metrics-server/metrics-server:v0.9.0
+  - Using image registry.k8s.io/ingress-nginx/controller:v1.15.1
+  - Using image registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.6.9
+  - Using image registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.6.9
+* Verifying ingress addon...
+* Enabled addons: storage-provisioner, metrics-server, ingress, default-storageclass
+* Done! kubectl is now configured to use "minikube" cluster and "default" namespace by default
+minikube addons enable metrics-server
+* metrics-server is an addon maintained by Kubernetes. For any concerns contact minikube on GitHub.
+You can view the list of minikube maintainers at: https://github.com/kubernetes/minikube/blob/master/OWNERS
+  - Using image registry.k8s.io/metrics-server/metrics-server:v0.9.0
+* The 'metrics-server' addon is enabled
+minikube addons enable ingress
+* ingress is an addon maintained by Kubernetes. For any concerns contact minikube on GitHub.
+You can view the list of minikube maintainers at: https://github.com/kubernetes/minikube/blob/master/OWNERS
+  - Using image registry.k8s.io/ingress-nginx/controller:v1.15.1
+  - Using image registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.6.9
+  - Using image registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.6.9
+* Verifying ingress addon...
+* The 'ingress' addon is enabled
+exit 0

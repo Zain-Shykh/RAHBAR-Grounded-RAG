@@ -1,0 +1,54 @@
+$ make lake-ls
+/data/reports/20261121T004514Z-3effae/verification.json
+/data/reports/20261121T004514Z-3effae/summary.json
+/data/reports/20261120T232222Z-e262cb/summary.json
+/data/reports/20261120T225854Z-520b6e/verification.json
+/data/reports/20261120T225854Z-520b6e/summary.json
+/data/reports/20261121T003334Z-611c42/summary.json
+/data/quarantine/20261121T004514Z-3effae/b04-lab-safety-rules-2026-copy.md.reason.json
+/data/quarantine/20261121T004514Z-3effae/b03-library-policy-2026-copy.md
+/data/quarantine/20261121T004514Z-3effae/b08-transport-notice-corrupt.pdf.reason.json
+/data/quarantine/20261121T004514Z-3effae/b04-lab-safety-rules-2026-copy.md
+/data/quarantine/20261121T004514Z-3effae/b09-merit-scholarship-notes.md.reason.json
+/data/quarantine/20261121T004514Z-3effae/b05-library-policy-2026-reissue.md.reason.json
+/data/quarantine/20261121T004514Z-3effae/b05-library-policy-2026-reissue.md
+/data/quarantine/20261121T004514Z-3effae/b03-library-policy-2026-copy.md.reason.json
+/data/quarantine/20261121T004514Z-3effae/b08-transport-notice-corrupt.pdf
+/data/quarantine/20261121T004514Z-3effae/b07-transport-policy-2026-truncated.pdf.reason.json
+/data/quarantine/20261121T004514Z-3effae/b09-merit-scholarship-notes.md
+/data/quarantine/20261121T004514Z-3effae/b07-transport-policy-2026-truncated.pdf
+/data/registry/rahbar.json
+(archive: 9 Batch A plus indexed Batch B documents)
+15
+
+$ verification report of run 20261121T004514Z-3effae (Batch B, on the cluster)
+verification report 20261121T004514Z-3effae  (embed model nomic-embed-text, near-duplicate threshold 0.97)
+
+document                                   action       quality      completeness recency      uniqueness  
+-----------------------------------------------------------------------------------------------------------
+b01-library-policy-2026.md                 index        PASS         PASS         PASS         PASS        
+b02-lab-safety-rules-2026.md               index        PASS         PASS         PASS         PASS        
+b03-library-policy-2026-copy.md            quarantine   PASS         PASS         PASS         FAIL        
+b04-lab-safety-rules-2026-copy.md          quarantine   PASS         PASS         PASS         FAIL        
+b05-library-policy-2026-reissue.md         quarantine   PASS         PASS         PASS         FAIL        
+b06-transport-policy-2026.pdf              index        PASS         PASS         PASS         PASS        
+b07-transport-policy-2026-truncated.pdf    quarantine   FAIL         FAIL         PASS         PASS        
+b08-transport-notice-corrupt.pdf           quarantine   FAIL         FAIL         PASS         PASS        
+b09-merit-scholarship-notes.md             quarantine   PASS         FAIL         PASS         PASS        
+b10-fee-structure-amendment-2027.md        index        PASS         PASS         PASS         PASS        
+b11-examination-guidelines-2026.md         index        PASS         PASS         PASS         PASS        
+b12-sports-facilities-2026.md              index        PASS         PASS         PASS         PASS        
+fee-structure-page.html                    supersede_registry PASS         PASS         FAIL         PASS        
+
+reasons for failures:
+  b03-library-policy-2026-copy.md: uniqueness: exact duplicate of b01-library-policy-2026.md
+  b04-lab-safety-rules-2026-copy.md: uniqueness: exact duplicate of b02-lab-safety-rules-2026.md
+  b05-library-policy-2026-reissue.md: uniqueness: near duplicate of b01-library-policy-2026.md (cosine 1.000 >= 0.97)
+  b07-transport-policy-2026-truncated.pdf: quality: extraction failed: PdfminerException
+  b07-transport-policy-2026-truncated.pdf: completeness: truncated: no %%EOF at the end of the PDF
+  b08-transport-notice-corrupt.pdf: quality: integrity: sha256 mismatch (manifest d73b221d336f, file 7e10fbdcd823)
+  b08-transport-notice-corrupt.pdf: completeness: page count is zero
+  b09-merit-scholarship-notes.md: completeness: missing title, date or doc_version
+  fee-structure-page.html: recency: superseded by b10-fee-structure-amendment-2027.md (2026-27 older)
+
+totals: checked 13, indexed 6, quarantined 6, superseded 1

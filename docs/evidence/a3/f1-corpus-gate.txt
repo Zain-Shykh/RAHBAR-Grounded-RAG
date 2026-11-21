@@ -1,0 +1,38 @@
+$ python scripts/enrich_manifest.py corpus/raw
+enriched 9 entries
+$ make corpus
+kubectl apply -f k8s/base/namespace.yaml -f k8s/base/corpus-pvc.yaml
+namespace/rahbar unchanged
+persistentvolumeclaim/corpus-data unchanged
+kubectl apply -f k8s/base/serviceaccounts.yaml
+serviceaccount/api unchanged
+serviceaccount/ui unchanged
+serviceaccount/chroma unchanged
+serviceaccount/redis unchanged
+serviceaccount/indexer unchanged
+kubectl delete pod corpus-loader -n rahbar --ignore-not-found
+kubectl apply -f k8s/tools/corpus-loader.yaml
+pod/corpus-loader created
+kubectl wait --for=condition=Ready pod/corpus-loader -n rahbar --timeout=120s
+pod/corpus-loader condition met
+kubectl cp corpus/raw/. rahbar/corpus-loader:/corpus
+kubectl cp corpus/raw/../MANIFEST.md rahbar/corpus-loader:/corpus/MANIFEST.md
+kubectl exec -n rahbar corpus-loader -- ls -l /corpus
+total 34188
+-rw-r--r--    1 10001    10001         2473 Nov 20 22:58 MANIFEST.md
+-rw-r--r--    1 10001    10001         3715 Nov 20 22:58 _index.a02.json
+-rw-r--r--    1 10001    10001         4083 Nov 20 22:58 _index.json
+-rw-r--r--    1 10001    10001       987731 Nov 20 22:58 academic-rules-handbook-jun-2026.pdf
+-rw-r--r--    1 10001    10001       891216 Nov 20 22:58 annual-report-2019-20.pdf
+-rw-r--r--    1 10001    10001      5100456 Nov 20 22:58 annual-report-2023-24.pdf
+-rw-r--r--    1 10001    10001      3872809 Nov 20 22:58 faculty-entrepreneurship-and-technical-start-ups-policy.pdf
+-rw-r--r--    1 10001    10001        91429 Nov 20 22:58 fee-structure-page.html
+-rw-r--r--    1 10001    10001        95673 Nov 20 22:58 grading-page.html
+-rw-r--r--    1 10001    10001      7066767 Nov 20 22:58 prospectus-2026-academic-rules-and-regulations.pdf
+-rw-r--r--    1 10001    10001      1980275 Nov 20 22:58 student-handbook-jun-2026.pdf
+-rw-r--r--    1 10001    10001     14888226 Nov 20 22:58 undergraduate-academic-rules-aug-2023.pdf
+kubectl delete pod corpus-loader -n rahbar --wait=false
+pod "corpus-loader" deleted from rahbar namespace
+$ make gate-config
+kubectl create configmap rahbar-gate -n rahbar --from-file=gate.yaml=eval/gate.yaml --dry-run=client -o yaml | kubectl apply -f -
+configmap/rahbar-gate created

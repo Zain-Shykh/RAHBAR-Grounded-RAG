@@ -73,6 +73,10 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      - name: build rahbar-eval (Assignment 03; built to prove the Dockerfile, not deployed by CI)
+        run: |
+          make eval-ctx
+          docker build -t rahbar-eval:${{ github.sha }} /tmp/rahbar-eval-ctx
       - name: build api, indexer, ui (load only, never push)
         run: |
           for i in api indexer ui; do
@@ -89,6 +93,7 @@ jobs:
     needs: build
     runs-on: ubuntu-24.04
     steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1   # only for .trivyignore (D-142)
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: images
@@ -113,6 +118,7 @@ jobs:
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           image-ref: rahbar-ui:${{ github.sha }}
+          trivyignores: .trivyignore
           severity: HIGH,CRITICAL
           ignore-unfixed: true
           exit-code: "1"

@@ -1,0 +1,10 @@
+Coverage threshold calibration (R3-E2-1, D-123)
+source: eval/results/suite-20261121T001033Z-baseline.json, section "module" (nomic-embed-text@0a109f422b47, 15 paraphrase + 15 unrelated pairs)
+  paraphrase_mean = 0.7913   paraphrase_min = 0.6617
+  unrelated_mean  = 0.5250   unrelated_max  = 0.6416
+  gap             = 0.2663
+rule: T between unrelated_mean and paraphrase_mean, nearer the paraphrase side
+  T = unrelated_mean + 0.75 * gap = 0.5250 + 0.1997 = 0.7247 -> 0.72 (rounded down)
+  distance to paraphrase_mean 0.07, to unrelated_mean 0.20, above unrelated_max by 0.08
+target P = 0.85 (the paper's example gap limit; unchanged)
+previous provisional T = 0.75 (replaced; it sat 0.04 below the paraphrase mean, above the paraphrase_min of 0.66 pairs)

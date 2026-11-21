@@ -1,0 +1,12 @@
+# Release gate (R3-C2-1). One file, no limit hard-coded anywhere else (I-24). On the cluster this file is the
+# ConfigMap `rahbar-gate` (generated from it by Kustomize), so a threshold can change without an image rebuild.
+# Final limits (phase R7/R9, D-135). Baseline = eval/results/suite-20261121T021833Z-baseline-ab.json (Batch A+B, 50 questions).
+# Noise: retrieval is deterministic (two-run difference 0.0 for every component metric, docs/evidence/a3/f3-stochasticity.txt);
+# answers are not: 1 of 27 answers changed between two runs, so one answer is about 0.033-0.037 of the faithfulness rate.
+rules:
+  - {metric: component.clean.recall_at_5, op: not_below_baseline_by, value: 0.02, why: "assignment example: no more than 2 points lost; retrieval two-run difference is 0.0 (f3-stochasticity.txt), so any loss is real"}
+  - {metric: component.clean.mrr, op: not_below_baseline_by, value: 0.03, why: "baseline 0.7564 over 39 questions: one question moving rank 1 to 2 costs 0.013, so 0.03 tolerates two such moves; two-run difference 0.0"}
+  - {metric: e2e.faithfulness_supported_rate, op: not_below_baseline_by, value: 0.05, why: "baseline 0.900 (n=30 answered); two-run noise is 1 answer = 0.033-0.037 (f3-stochasticity.txt), 0.05 allows 1.5 answers; replaces the absolute 0.70 placeholder (set from the 0.833 batch-A-only baseline), see docs/evidence/r7-decision.md"}
+  - {metric: e2e.abstention_correctness, op: not_below_baseline, why: "assignment: not lower than the baseline (0.909, n=11)"}
+  - {metric: e2e.citation_validity, op: at_least, value: 0.95, why: "A02 gate value; baseline 1.000 over 39 citations"}
+  - {metric: e2e.latency_p95_s, op: at_most, value: 300, why: "p95 is noisy on this CPU (184.5 s vs 113.1 s on two identical runs, f3-stochasticity.txt; 181.7 s on baseline-ab), so no relative rule; 300 s is the API model timeout, a slower p95 means fallbacks"}

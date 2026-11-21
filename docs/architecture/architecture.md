@@ -5,6 +5,7 @@
 | Version | 1.0 (2026-11-04) |
 | Status | Baseline. Single source of truth for how RAHBAR is built. |
 | Owners | Zain-Shykh, Ahmad |
+| Assignment 03 | The RAGOps layer (verification, incremental update, traces, gate, release) is in [`architecture-a3.md`](architecture-a3.md): invariants I-18 to I-26, decisions AD-29 to AD-45. This file stays the source of truth for everything else. |
 | Companion files | [`deviations.md`](deviations.md) (every drift from this document), [`../requirements.md`](../requirements.md) (what the assignment demands), [`../rubric_checklist.md`](../rubric_checklist.md), [`../OPEN_DECISIONS.md`](../OPEN_DECISIONS.md) |
 | Assignment figure | Page 6 of `Assignment 02, RAHBAR Grounded RAG on Kubernetes.pdf` ("The indexer is the only writer; the API only reads"). This document redraws it in section 4.1 and extends it. |
 
@@ -1208,6 +1209,7 @@ Do not:
 | Version | Date | Change |
 | --- | --- | --- |
 | 1.0 | 2026-11-04 | First baseline. |
+| 1.0 + A3 | 2026-11-21 | Companion [`architecture-a3.md`](architecture-a3.md) added for Assignment 03 (RAGOps). No change to this document's text; deviations for A3 are logged in `deviations.md` from DEV-015. |
 
 Amendments go in this table with a pointer to the `deviations.md` entry (or the open decision) that caused them.
 

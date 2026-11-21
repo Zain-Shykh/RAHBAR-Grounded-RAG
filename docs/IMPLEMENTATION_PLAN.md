@@ -2,6 +2,8 @@
 
 The phased build plan for everything Zain builds in RAHBAR: the API, the indexing pipeline, the evaluation harness, tuning, and the RAG documents. It is also the **only progress tracker for Zain's lane**: phase status, acceptance ticks and the progress log all live in this file.
 
+> **Assignment 03 (RAGOps) is tracked in [`IMPLEMENTATION_PLAN_A3.md`](IMPLEMENTATION_PLAN_A3.md)** (phases R1 to R11). This file and the platform plan are closed and frozen: the Assignment 02 submission is done.
+
 Ahmad's lane (Kubernetes, UI, CI/CD, evidence) is in [`WORKPLAN.md`](WORKPLAN.md) sections 5 and following. This file implements WORKPLAN tasks Z-01 to Z-15. Ahmad is unavailable, so the Kubernetes, Docker, CI/CD, evidence and platform-document tasks (A-01 to A-11, A-13, A-14) are built from [`IMPLEMENTATION_PLAN_PLATFORM.md`](IMPLEMENTATION_PLAN_PLATFORM.md) (phases K1 to K11). **Phase 15 below is deliberately last: it runs after K11.**
 
 | | |

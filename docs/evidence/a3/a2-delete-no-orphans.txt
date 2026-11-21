@@ -1,0 +1,18 @@
+$ make inbox-delete FILE=b12-sports-facilities-2026.md   (file and manifest entry)
+$ make index   (Job reindex-1795222203)
+{"ts": "2026-11-21T00:50:05Z", "logger": "rahbar.indexer", "msg": "indexer starting", "dummy": false, "embed_model": "nomic-embed-text", "collection": "rahbar", "chroma": "chroma:8000", "pod": "reindex-1795222203-xqsrt"}
+{"ts": "2026-11-21T00:50:09Z", "logger": "rahbar.indexer", "msg": "embedded", "vectors": 0, "model": "nomic-embed-text", "seconds": 0.0}
+{"ts": "2026-11-21T00:50:17Z", "logger": "rahbar.indexer", "msg": "stored", "chunks": 1006, "index_id": "20261121T005009Z-8a453e", "collection": "rahbar", "replaced": true, "seconds": 7.8}
+{"ts": "2026-11-21T00:50:17Z", "logger": "rahbar.indexer", "msg": "ingest summary", "run_id": "20261121T005006Z-a18ec0", "mode": "incremental", "note": "", "dry_run": false, "new": 0, "changed": 0, "unchanged": 14, "deleted": 1, "quarantined": 0, "quarantined_before": 6, "superseded": 0, "flipped": 0, "chunks_embedded": 0, "chunks_copied": 1006, "chunks_total": 1006, "index_swapped": true, "index_id": "20261121T005009Z-8a453e", "deleted_chunks_remaining": {"b12-sports-facilities-2026.md": 0}, "chunks_by_source": {"academic-rules-handbook-jun-2026.pdf": 238, "annual-report-2019-20.pdf": 65, "annual-report-2023-24.pdf": 182, "b01-library-policy-2026.md": 6, "b02-lab-safety-rules-2026.md": 6, "b06-transport-policy-2026.pdf": 6, "b10-fee-structure-amendment-2027.md": 5, "b11-examination-guidelines-2026.md": 3, "faculty-entrepreneurship-and-technical-start-ups-policy.pdf": 39, "fee-structure-page.html": 7, "grading-page.html": 8, "prospectus-2026-academic-rules-and-regulations.pdf": 44, "student-handbook-jun-2026.pdf": 245, "undergraduate-academic-rules-aug-2023.pdf": 152}, "seconds": 11.7}
+ingest summary 20261121T005006Z-a18ec0
+  mode                                           incremental
+  documents new / changed / unchanged / deleted  0 / 0 / 14 / 1
+  quarantined now / quarantined before           0 / 6
+  superseded / flags flipped                     0 / 0
+  chunks embedded                                0
+  chunks copied forward                          1006
+  chunks in the index                            1006
+  index swapped                                  True
+  index_id                                       20261121T005009Z-8a453e
+  chunks left under deleted documents            {'b12-sports-facilities-2026.md': 0}
+{"ts": "2026-11-21T00:50:17Z", "logger": "rahbar.indexer", "msg": "indexer finished", "chunks": 1006, "seconds": 12.3}

@@ -1,0 +1,31 @@
+live queries 40, golden questions 50, threshold 0.72, target 0.85
+covered 27 of 40: share 0.675  (in-domain share 0.857)
+uncovered queries by topic:
+  campus wifi: l36
+  careers: l34
+  cricket: l30
+  degree requirements: l27
+  entertainment: l33
+  finance: l31
+  food: l32
+  general knowledge: l40
+  internships: l38
+  late fee: l22
+  scholarships: l26
+  student societies: l39
+  withdrawal and refund: l03
+    l03 0.707 (nearest q07)  till when can i drop a subject and still get a refund of fee
+    l22 0.682 (nearest g41)  what happens if i pay the fee late
+    l26 0.719 (nearest g36)  what is the cgpa needed to get a merit scholarship
+    l27 0.707 (nearest g33)  how many credit hours are needed to graduate
+    l30 0.623 (nearest g47)  who won the cricket match yesterday
+    l31 0.553 (nearest q15)  what is the bitcoin price today
+    l32 0.533 (nearest g39)  give me a recipe for biryani
+    l33 0.615 (nearest g49)  recommend a good movie for the weekend
+    l34 0.587 (nearest g48)  how do i prepare for a job interview at a software company
+    l36 0.570 (nearest g28)  what is the wifi password in the library
+    l38 0.594 (nearest g47)  how does the internship placement office help students
+    l39 0.628 (nearest g47)  when are the student society elections held
+    l40 0.494 (nearest g47)  what is the capital of australia
+COVERAGE BELOW TARGET
+exit code 1

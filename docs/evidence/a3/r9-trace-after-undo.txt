@@ -1,0 +1,30 @@
+$ [R9-AC5] after make rollback: POST /api/ask on the live api, then the trace (collection.name = previous collection rahbar_cand, embedding.version filled)
+$ POST /api/ask "What is the capital of Germany?"
+HTTP/1.1 200 OK
+x-outcome: abstained
+x-cache: MISS
+{"request_id":"1fd534b8f5a44e9e4339094e9ad6ebf0","answer":"The documents in the corpus do not cover this question.","citations":[],"answered_from_context":false,"confidence":"high","retrieved":[{"chun
+$ POST /api/ask "What CGPA puts a student on academic warning?"   # MISS: entries of an index are dropped when the live index changes (see the redis keys below), so no answer of the bad index can come back
+HTTP/1.1 200 OK
+x-outcome: answered
+x-cache: MISS
+{"request_id":"fffcbdda938ea490069905e0f1be5bd8","answer":"2.00","citations":[{"source":"academic-rules-handbook-jun-2026.pdf","section":"5.4 Minimum CGPA required to avoid academic warning is 2.00","
+$ kubectl logs <api pods> | grep "type\": \"trace\"   (fields: collection, embedding, cache, outcome)
+{"ts": "2026-11-21T05:51:20Z", "query": "What is the capital of Germany?", "collection": {"name": "rahbar_cand", "index_id": "20261121T043602Z-c5b48e", "chunk_count": 1041, "embed_model": "nomic-embed-text"}, "embedding": {"model": "nomic-embed-text", "version": "nomic-embed-text@0a109f422b47", "dimension": 768}, "cache": "miss", "outcome": "abstained", "abstain_reason": "below_floor", "top_scores": [0.564, 0.553, 0.553], "latency_ms_total": 563.8}
+{"ts": "2026-11-21T05:51:20Z", "query": "What CGPA puts a student on academic warning?", "collection": {"name": "rahbar_cand", "index_id": "20261121T043602Z-c5b48e", "chunk_count": 1041, "embed_model": "nomic-embed-text"}, "embedding": {"model": "nomic-embed-text", "version": "nomic-embed-text@0a109f422b47", "dimension": 768}, "cache": "miss", "outcome": "answered", "abstain_reason": null, "top_scores": [0.844, 0.822, 0.82], "latency_ms_total": 29075.2}
+$ full embedding and collection objects of the first trace
+{
+ "embedding": {
+  "model": "nomic-embed-text",
+  "version": "nomic-embed-text@0a109f422b47",
+  "dimension": 768
+ },
+ "collection": {
+  "name": "rahbar_cand",
+  "index_id": "20261121T043602Z-c5b48e",
+  "chunk_count": 1041,
+  "embed_model": "nomic-embed-text"
+ }
+}
+$ kubectl exec deploy/redis -- redis-cli --scan --pattern "cache:*"   # cache keys carry the index_id (R9-AC6)
+cache:20261121T043602Z-c5b48e:377de5b8ef1c4baf9b75960357c2b39c

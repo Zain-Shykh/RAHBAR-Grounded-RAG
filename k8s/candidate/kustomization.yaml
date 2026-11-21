@@ -1,0 +1,8 @@
+# The candidate pipeline (architecture-a3 9.3, R3-F3-1): its own Deployment, Service and collection.
+# Not part of the dev overlay: `kubectl apply -k k8s/candidate` (make candidate). The indexer Job for the
+# candidate collection is candidate/indexer-job.yaml, applied separately with its CHUNK_* values.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: rahbar
+resources:
+  - api-candidate.yaml

@@ -1,0 +1,65 @@
+# Part B suite plus release gate as a Kubernetes Job (R3-F2-2): kubectl apply -f k8s/eval-job.yaml
+# The pod exits 0 when the gate passes and 1 when it fails (backoffLimit 0: a failed gate is not retried).
+# Thresholds: ConfigMap rahbar-gate (generated from eval/gate.yaml), mounted at /gate. Result files: PVC eval-results.
+# Delete the finished Job before applying again: kubectl delete job eval -n rahbar --ignore-not-found
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: eval
+  namespace: rahbar
+  labels:
+    app.kubernetes.io/name: eval
+    app.kubernetes.io/part-of: rahbar
+spec:
+  backoffLimit: 0
+  activeDeadlineSeconds: 7200
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: eval
+        app.kubernetes.io/part-of: rahbar
+    spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      restartPolicy: Never
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: eval
+          image: rahbar-eval:dev
+          imagePullPolicy: IfNotPresent
+          env:
+            - {name: API_URL, value: "http://api:8000"}
+            - {name: RUN_LABEL, value: "live"}
+            - {name: SUBSET, value: "A"}
+            - {name: QUESTION_LIMIT, value: "0"}
+            - {name: SET_BASELINE, value: "false"}
+            - {name: GATE_ONLY, value: ""}
+            - {name: BASELINE, value: "/results/baseline.json"}
+            - {name: GATE_CONFIG, value: "/gate/gate.yaml"}
+            - {name: RESULTS_DIR, value: "/results"}
+            - {name: OLLAMA_URL, value: "http://host.minikube.internal:11434"}
+            - {name: EMBED_MODEL, value: "nomic-embed-text"}
+          resources:
+            requests: {cpu: 50m, memory: 32Mi}
+            limits: {cpu: 250m, memory: 64Mi}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: {drop: [ALL]}
+          volumeMounts:
+            - {name: results, mountPath: /results}
+            - {name: gate, mountPath: /gate, readOnly: true}
+            - {name: tmp, mountPath: /tmp}
+      volumes:
+        - name: results
+          persistentVolumeClaim: {claimName: eval-results}
+        - name: gate
+          configMap: {name: rahbar-gate}
+        - name: tmp
+          emptyDir: {}

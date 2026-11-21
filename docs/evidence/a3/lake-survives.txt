@@ -1,0 +1,22 @@
+$ kubectl exec lake-viewer -- find /data -type f | wc -l   (before)
+40
+$ kubectl delete pod chroma-0 -n rahbar; kubectl delete pod -l batch.kubernetes.io/job-name  (finished Job pods)
+pod "chroma-0" deleted from rahbar namespace
+pod "indexer-hfc4k" deleted from rahbar namespace
+pod "reindex-1795222203-xqsrt" deleted from rahbar namespace
+pod "restore-khw57" deleted from rahbar namespace
+pod/chroma-0 condition met
+$ kubectl exec lake-viewer -- find /data -type f | wc -l   (after)
+40
+/data:
+archive
+quarantine
+registry
+reports
+
+/data/quarantine:
+20261121T004514Z-3effae
+20261121T004652Z-bd1d25
+
+/data/registry:
+rahbar.json

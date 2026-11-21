@@ -1,0 +1,15 @@
+$ kubectl exec corpus-loader -- rm /corpus/b12-sports-facilities-2026.md
+$ make index   (Job reindex-1795222010)
+{"ts": "2026-11-21T00:46:51Z", "logger": "rahbar.indexer", "msg": "indexer starting", "dummy": false, "embed_model": "nomic-embed-text", "collection": "rahbar", "chroma": "chroma:8000", "pod": "reindex-1795222010-2f7mr"}
+{"ts": "2026-11-21T00:46:56Z", "logger": "rahbar.indexer", "msg": "ingest summary", "run_id": "20261121T004652Z-bd1d25", "mode": "incremental", "note": "", "dry_run": false, "new": 0, "changed": 1, "unchanged": 14, "deleted": 0, "quarantined": 1, "quarantined_before": 6, "superseded": 0, "flipped": 0, "chunks_embedded": 0, "chunks_copied": 0, "chunks_total": 1010, "index_swapped": false, "index_id": "20261121T004544Z-f0e17e", "seconds": 4.0}
+ingest summary 20261121T004652Z-bd1d25
+  mode                                           incremental
+  documents new / changed / unchanged / deleted  0 / 1 / 14 / 0
+  quarantined now / quarantined before           1 / 6
+  superseded / flags flipped                     0 / 0
+  chunks embedded                                0
+  chunks copied forward                          0
+  chunks in the index                            1010
+  index swapped                                  False
+  index_id                                       20261121T004544Z-f0e17e
+{"ts": "2026-11-21T00:46:56Z", "logger": "rahbar.indexer", "msg": "indexer finished", "chunks": 1010, "seconds": 4.5}
