@@ -68,11 +68,16 @@ The drift result file may arrive late (another session). Coverage is capped by o
 Estimate 4 h.
 
 ## 11. Implementation notes
-(filled below)
+- T = 0.72 (D-132). Live queries unchanged: before share 0.300 (finding, not forced).
+- 16 golden questions g35 to g50; golden writes were checked with /api/retrieve. Coverage 0.300 -> 0.675 (in-domain 0.429 -> 0.857); target 0.85 not reached, because 9 uncovered queries are off-domain or have no corpus support.
+- Tester round 1 fixes: g41 reworded (gold chunk was not in top 5 for the first wording), g45 expect `zero` (line break in chunk), coverage.py prints a missing in-domain share, d5 names one cause.
+- Open: coverage.py crashes with a traceback (exit 1) on an empty live file or missing config key; accepted, input is repo-controlled.
+- E3 drift (AC5): the post-Batch-B suite result from the R7/R9 session did not exist when this session ended; `e3-data-drift.md` and `drift-<ts>.json` are PENDING.
 
 ## 12. Test report
 | Round | Date | Command | Result | Notes |
 | --- | --- | --- | --- | --- |
+| 1 | 2026-11-21 | fresh tester subagent, AC1-7 | AC1-4, 6, 7 PASS, AC5 PENDING | defects D1 to D4, D2 to D4 fixed in 4acd7b2, D1 accepted |
 
 ## 13. Sign-offs
 | Gate | Date | Approved by | Notes |

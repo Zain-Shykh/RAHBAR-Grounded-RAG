@@ -46,3 +46,6 @@ On `docs/final-evidence-screenshots`, Codex visually inspected the four supplied
 ## Assignment 03, phase R8 (2026-11-21)
 
 Claude Code (Sonnet 5.5) ran the RAGOps ingestion, evaluation, trace and release-gate steps on the minikube cluster, fixed the defects the real runs exposed (eval client timeout, indexer deadline, gate placeholders, CI overlay volume index), added `GATE_ONLY`, `make restore`, `make inbox-delete` and the resource sampling scripts, and saved every command output under `docs/evidence/a3/`. A separate tester agent re-checked the criteria. The numbers in the evidence files come from the cluster runs; none were typed by hand.
+
+## Phase R10 (coverage, drift): 2026-11-21
+Claude calibrated the coverage threshold from module-level means (0.72), ran coverage before and after, wrote golden questions g35 to g50 (checked against /api/retrieve), the uncovered-topic analysis, the D5 trace root cause, and one exit-code test. An independent subagent found a bad gold chunk (g41), a line-break expect (g45) and a None crash; these were fixed. The drift note is pending the post-Batch-B suite result.
