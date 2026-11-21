@@ -86,6 +86,13 @@ NEW = [
      ["no-evidence", "coverage", "topic:off-domain"], "B", False),
     ("g50", "unanswerable", "Can you write a Python program that sorts a list of names?", [], None,
      ["no-evidence", "coverage", "topic:off-domain"], "B", False),
+    # R12 (D-143): version-aware pair for q07/g22. The 2027 amendment supersedes fee-structure-page.html, so the unversioned
+    # questions now abstain; naming the 2026-27 fee structure selects the old doc version (scope rule). Checked on the live index
+    # (rank 1 and rank 2 of /api/retrieve). Added after the final suite result files: not in them.
+    ("g51", "answerable", "Under the 2026-27 fee structure, what percentage of the tuition fee is refunded if a student withdraws up to the 20th day after classes begin?",
+     [("fee-structure-page.html", "Fee Refund Policy", 1)], "60%", ["version", "of:q07"], "B", True),
+    ("g52", "answerable", "According to the 2026-27 fee structure page, how much of my tuition fee do I get back if I leave the university?",
+     [("fee-structure-page.html", "Fee Refund Policy", 1)], None, ["version", "of:g22"], "B", True),
 ]
 
 

@@ -71,7 +71,6 @@ def main() -> int:
                             "recall_at_5_before": retr[0], "recall_at_5_after": retr[1]})
     same_outcome_other_text = [i for i in sorted(ids) if qa[i]["outcome"] == qb[i]["outcome"] and qa[i]["answer"] != qb[i]["answer"]]
     new = [q for q in B["e2e"]["per_question"] if q["id"] not in ids]
-    newc = [q for q in B["component"]["clean"]["per_question"] if q["id"] not in ids]
     by_b = B["component"]["clean"]["by_batch"].get("B")
     drift = {
         "baseline": a.a, "after": a.b, "index_before": A["meta"]["index_id"], "index_after": B["meta"]["index_id"],
