@@ -67,8 +67,9 @@ def run_suite(api_url: str, label: str, subset: str, seed: int, golden_path: Pat
     random.seed(seed)
     api = Api(api_url, host)
     rows = golden.load(golden_path, subset)
-    if limit > 0:   # smoke run (fresh-cluster rehearsal): the first `limit` questions only; never used for a gate decision
-        rows = rows[:limit]
+    if limit > 0:   # smoke run (fresh-cluster rehearsal), never used for a gate decision: one unanswerable question plus the
+        un = [r for r in rows if r["kind"] == "unanswerable"][:1]   # first answerable ones, so every gate metric exists
+        rows = [r for r in rows if r["kind"] != "unanswerable"][:max(0, limit - len(un))] + un
     problems = golden.problems(golden.load(golden_path))
     if problems and subset == "all":
         print("golden set problems (continuing):", problems, file=sys.stderr)

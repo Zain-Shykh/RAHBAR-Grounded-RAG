@@ -371,12 +371,13 @@ def test_job_gate_only_skips_suite_and_follows_config(tmp_path, monkeypatch) -> 
     assert job.main() == 1
 
 
-def test_limit_runs_only_the_first_n_questions(tmp_path, monkeypatch) -> None:
+def test_limit_keeps_one_unanswerable_question_so_the_gate_metrics_exist(tmp_path, monkeypatch) -> None:
     monkeypatch.setattr(module_level, "Embedder", FakeEmbedder)
     monkeypatch.setattr(run_suite, "Api", FakeApi)
     g = tmp_path / "g.jsonl"
     rows = [{"id": f"q{i}", "question": f"What is attendance {i}?", "kind": "answerable", "origin": "human", "relevant":
              [{"source": "a.pdf", "section": "1.1", "page": 1}], "batch": "A", "expect": "80 percent"} for i in range(4)]
+    rows.append({"id": "u1", "question": "unans question here", "kind": "unanswerable", "origin": "human", "relevant": [], "batch": "A"})
     g.write_text("\n".join(json.dumps(r) for r in rows))
-    res = json.loads(run_suite.run_suite("http://x", "t", "A", 1, g, None, tmp_path / "out", False, 2).read_text())
-    assert res["e2e"]["n"] == 2 and res["meta"]["golden_counts"]["questions"] == 2
+    res = json.loads(run_suite.run_suite("http://x", "t", "A", 1, g, None, tmp_path / "out", False, 3).read_text())
+    assert res["e2e"]["n"] == 3 and res["e2e"]["abstention_n"] == 1 and res["meta"]["golden_counts"]["questions"] == 3

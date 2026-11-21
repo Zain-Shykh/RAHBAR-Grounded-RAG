@@ -19,3 +19,4 @@ ol { margin: 0.5mm 0 1mm; padding-left: 5mm; } li { margin: 0; }
 .shot { page-break-before: always; text-align: center; }
 .shot h3 { margin: 0 0 1mm; text-align: left; }
 .shot img { max-width: 184mm; max-height: 252mm; width: auto; height: auto; border: 1px solid #999; }
+.shot.first { page-break-before: auto; }

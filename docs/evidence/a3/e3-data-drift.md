@@ -1,6 +1,6 @@
 # E3 data drift: Batch A index versus Batch A+B index (R3-E3-1, R10-AC5)
 
-Inputs: `eval/results/suite-20261121T001033Z-baseline.json` (index `20261120T232205Z-182148`, Batch A only, 27 questions, subset A) and `eval/results/suite-20261121T021833Z-baseline-ab.json` (index `20261121T005113Z-a45667`, Batch A plus the 6 indexed Batch B documents, 50 questions). Script: `python scripts/drift_report.py <first> <second>`; output `eval/results/drift-20261121T073547Z.json` (full numbers, per-question changes, cause strings). The ingestion that changed the index is `docs/evidence/a3/a2-batch-b-ingest.txt` (12 new documents, 6 indexed, 6 quarantined, 1 superseded, 1 flipped).
+Inputs: `eval/results/suite-20261121T001033Z-baseline.json` (index `20261120T232205Z-182148`, Batch A only, 27 questions, subset A) and `eval/results/suite-20261121T021833Z-baseline-ab.json` (index `20261121T005113Z-a45667`, Batch A plus 5 of the 6 indexed Batch B documents, 50 questions; `b12-sports-facilities-2026.md` had been deleted by the A2 delete test, see section 3). Script: `python scripts/drift_report.py <first> <second>`; output `eval/results/drift-20261121T074956Z.json` (full numbers, per-question changes, cause strings). The ingestion that changed the index is `docs/evidence/a3/a2-batch-b-ingest.txt` (12 new documents, 6 indexed, 6 quarantined, 1 superseded, 1 flipped).
 
 The second file also holds 23 questions the first never saw (7 written for Batch B documents, 16 added at R10 for coverage; they carry the tag `batch: B`). So the table of `eval.suite.compare` mixes two effects (new questions, changed index). The like-for-like view below uses only the 27 baseline question ids; the script first checks that its recomputation reproduces the first file's own recall@5, MRR, abstention and faithfulness.
 
@@ -47,10 +47,11 @@ Consequence for the golden set: the golden sources of q07 and g22 now point at a
 
 ## 3. What the new documents changed
 
-- Retrieval on the 18 answerable Batch B questions: recall@5 0.8889, MRR 0.8333 (drift file, `batch_b.retrieval`). The new documents are retrievable.
+- Retrieval on the 18 answerable Batch B questions: recall@5 0.8889 (16 of 18), MRR 0.8333 (drift file, `batch_b.retrieval`). The new documents are retrievable.
 - The version question g33 ("tuition fee per credit hour from Spring 2027"): answered "Rs 28,500", cited `b10-fee-structure-amendment-2027.md`, recall@5 1.0. The newer version is served, as the version rule intends.
 - Instalment (g40) and late-fee (g41) questions are answered from the amendment with valid citations.
 - Of the 23 new questions, 15 were answered and 8 abstained (5 are unanswerable by design: g46 to g50, all abstained; the other 3 are g31, g32, g34).
+- **A caveat on the index:** the A2 delete test removed `b12-sports-facilities-2026.md` (4 chunks) from the inbox and the index before this baseline was built (`a2-delete-no-orphans.txt`: 14 documents, 1006 chunks; the restore test only rolled the fee page back). So g32 (gymnasium hours, source b12) abstains correctly because its document is not in the index; it is not an effect of adding Batch B, and it is one of the two misses in the 16 of 18 Batch B retrieval result (the other is g34).
 
 ## 4. The injected document (`b11-examination-guidelines-2026.md`)
 

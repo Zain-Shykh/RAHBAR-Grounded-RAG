@@ -34,7 +34,7 @@ Out: report text (R11); running the suite end to end (done by the R7/R9 session;
 - [ ] **R10-AC2** coverage.py reports share, threshold, uncovered with topics, exit code 1 below target (`test_coverage_share_topics_and_threshold`, `test_main_exit_code_below_and_above_target`).
 - [ ] **R10-AC3** before below target (finding, not forced) and after higher; both outputs saved.
 - [ ] **R10-AC4** at least 6 new golden questions, labelled, real sources and pages; `golden --check` reports only the reviewed-count problem.
-- [ ] **R10-AC5** drift file and note: moved metrics, changed questions, version question, injected document, each with cause and a number from a committed file.
+- [x] **R10-AC5** (done in R11: `docs/evidence/a3/e3-data-drift.md`, `eval/results/drift-20261121T074956Z.json`; the injected document's live handling in `e3-injection-rail-live.txt`) drift file and note: moved metrics, changed questions, version question, injected document, each with cause and a number from a committed file.
 - [ ] **R10-AC6** `d5-root-cause.md`, five lines, trace fields only.
 - [ ] **R10-AC7** `make test && make lint` green.
 
@@ -72,7 +72,7 @@ Estimate 4 h.
 - 16 golden questions g35 to g50; golden writes were checked with /api/retrieve. Coverage 0.300 -> 0.675 (in-domain 0.429 -> 0.857); target 0.85 not reached, because 9 uncovered queries are off-domain or have no corpus support.
 - Tester round 1 fixes: g41 reworded (gold chunk was not in top 5 for the first wording), g45 expect `zero` (line break in chunk), coverage.py prints a missing in-domain share, d5 names one cause.
 - Open: coverage.py crashes with a traceback (exit 1) on an empty live file or missing config key; accepted, input is repo-controlled.
-- E3 drift (AC5): the post-Batch-B suite result from the R7/R9 session did not exist when this session ended; `e3-data-drift.md` and `drift-<ts>.json` are PENDING.
+- E3 drift (AC5): the post-Batch-B suite result from the R7/R9 session did not exist when this session ended; `e3-data-drift.md` and `drift-<ts>.json` were written in R11 (scripts/drift_report.py).
 
 ## 12. Test report
 | Round | Date | Command | Result | Notes |

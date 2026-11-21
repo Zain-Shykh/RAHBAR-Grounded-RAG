@@ -18,8 +18,8 @@ order = list(labels)
 files = {p.name.split("-")[0]: p for p in S.glob("*.png")}
 h = (R / "body.html").read_text()
 app = '<div class="appendix"><h2>Appendix: screenshots</h2><p>Renderings of the terminal output saved from the real cluster runs (command first, output uncropped). Source files and commands: <code>docs/evidence/a3/README.md</code>. Full-resolution PNGs are in <code>docs/evidence/a3/screenshots/</code>.</p></div>'
-for k in order:
-    app += f'<div class="shot"><h3>{labels[k]}</h3><img src="../evidence/a3/screenshots/{files[k].name}"></div>'
+for n, k in enumerate(order):
+    app += f'<div class="shot{" first" if n == 0 else ""}"><h3>{labels[k]}</h3><img src="../evidence/a3/screenshots/{files[k].name}"></div>'
 h = h.replace("</body>", app + "</body>")
 (R / "full.html").write_text(h)
 PY

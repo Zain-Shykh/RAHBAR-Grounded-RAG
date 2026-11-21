@@ -96,6 +96,9 @@ def main() -> int:
                    "citation check). Not caused by Batch B: generation variance. The seeded two-run test changed 1 of 27 answer texts "
                    "(eval/results/stochasticity-20261121T003255Z.json).",
             "g21": "Retrieval and outcome identical; the answer was No in both runs, the citation list differs: generation variance.",
+            "g32": "b12-sports-facilities-2026.md (the gymnasium hours) was deleted from the inbox by the A2 delete test before this "
+                   "index was built (docs/evidence/a3/a2-delete-no-orphans.txt: chunks left under b12 = 0, index 1006 chunks, 14 documents); "
+                   "its abstention is the correct answer for an index without the document, not a drift effect of adding Batch B.",
             "injected_document": "not shown by the files for g31 and g34 beyond: b11 is retrieved for g31 (recall@5 1.0) and the answer abstains. "
                                   "The live trace evidence is in docs/evidence/a3/e3-injection-rail-live.txt when present.",
         },

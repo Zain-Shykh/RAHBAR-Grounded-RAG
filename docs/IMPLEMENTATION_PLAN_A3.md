@@ -68,16 +68,16 @@ Anything that is not in `requirements-a3.md`. In particular: a reranker (the exp
 | --- | --- | --- | --- | --- | --- |
 | R0 | Planning set: requirements, architecture, plan, decisions | all | 2 h | DONE (approved by Zain 2026-11-21) | #46 |
 | R1 | Batch B and the manifest contract | R3-AB-1 | 3 h | DONE | #47 |
-| R2 | Verification stage (A1) | R3-A1-* | 6 h | CODE DONE, cluster run pending | #48 |
-| R3 | Incremental update, archive, restore (A2) | R3-A2-*, R3-AB-2 | 7 h | CODE DONE, cluster run pending | #48 |
-| R4 | Golden set, module level, component level, noise | R3-B-1 to R3-B-5 | 5 h | CODE DONE, baseline run in progress | #48 |
-| R5 | End-to-end level, stochasticity, one command (no judge, D-115) | R3-B-6 to R3-B-9 | 7 h | CODE DONE, runs in progress | #48 |
-| R6 | Trace, trace tool, metrics report, injection rail | R3-D1-* to R3-D5-1, R3-F4-1 | 6 h | CODE DONE, samples pending | #48 |
-| R7 | Change experiment and release gate | R3-C1-*, R3-C2-* | 6 h | TESTING (candidates, gate, decision done) | #48 |
-| R8 | Kubernetes deployment of RAGOps | R3-F1-*, R3-F2-*, R3-F4-*, R3-F5-*, R3-LOG-11 | 8 h | CLUSTER RUN DONE, independent test in progress | #48 |
-| R9 | Controlled release and rollback | R3-C3-1, R3-F3-* | 4 h | TESTING (rehearsal done on the cluster) | #48 |
-| R10 | Drift and coverage | R3-E1-* to R3-E4-* | 4 h | CODE DONE (coverage.py, live_queries.jsonl), runs pending | #48 |
-| R11 | Evidence, report, README, final verification | R3-G-*, R3-S-*, R3-LOG-8 to 10 | 8 h | NOT STARTED | |
+| R2 | Verification stage (A1) | R3-A1-* | 6 h | DONE (tested PASS, cluster run done) | #48 |
+| R3 | Incremental update, archive, restore (A2) | R3-A2-*, R3-AB-2 | 7 h | DONE (cluster run done; check_registry added) | #48 |
+| R4 | Golden set, module level, component level, noise | R3-B-1 to R3-B-5 | 5 h | DONE except the 8 synthetic reviews (human, eval/HUMAN_TODO.md) | #48 |
+| R5 | End-to-end level, stochasticity, one command (no judge, D-115) | R3-B-6 to R3-B-9 | 7 h | DONE (R3-B-7 not applicable, D-115) | #48 |
+| R6 | Trace, trace tool, metrics report, injection rail | R3-D1-* to R3-D5-1, R3-F4-1 | 6 h | DONE (live rail proof: see e3-injection-rail-live.txt) | #48 |
+| R7 | Change experiment and release gate | R3-C1-*, R3-C2-* | 6 h | DONE (decision docs/evidence/r7-decision.md) | #48 |
+| R8 | Kubernetes deployment of RAGOps | R3-F1-*, R3-F2-*, R3-F4-*, R3-F5-*, R3-LOG-11 | 8 h | DONE (fresh-cluster rehearsal R11-AC5) | #48 |
+| R9 | Controlled release and rollback | R3-C3-1, R3-F3-* | 4 h | DONE | #48 |
+| R10 | Drift and coverage | R3-E1-* to R3-E4-* | 4 h | DONE (E3 write-up docs/evidence/a3/e3-data-drift.md); coverage 0.675 below the 0.85 target, stated as a gap | #48 |
+| R11 | Evidence, report, README, final verification | R3-G-*, R3-S-*, R3-LOG-8 to 10 | 8 h | DONE except human items (roll numbers, 8 reviews, contribution check) | #48, release PR |
 
 Build order note: R4 and R5 need the API and a real index running; R6 changes the API (re-run the A02 fixture eval); R7 needs R5 results; R9 needs R7 and R8; R10 needs R3, R5 and R8; R11 is last. R1 to R3 and R4 to R6 are independent chains and may be swapped if the cluster or Ollama is unavailable, but a phase is never started before the previous one is merged.
 
@@ -153,24 +153,24 @@ Numbers the report will quote. Fill each with the value, the committed file it c
 
 | Quantity | Value | Source file | Phase |
 | --- | --- | --- | --- |
-| Batch B files and planted problems (counts) | | `corpus/batch_b/PLANTED.json` | R1 |
-| Verification: failures per check on Batch B | | `reports/<run>/verification.json` copy in `docs/evidence/` | R2 |
-| Near-duplicate threshold and the distribution it came from | | `eval/results/neardup-calibration-*.json` | R2 |
-| Unchanged re-run: chunks embedded, swapped | 0, false (target) | `docs/evidence/a2-unchanged-run.txt` | R3 |
-| Changed-document run: chunks embedded, other docs' ids identical | | `docs/evidence/a2-changed-run.txt` | R3 |
-| Deleted document: chunks by doc id before and after | | `docs/evidence/a2-delete-run.txt` | R3 |
-| Golden set counts (answerable, unanswerable, hard, human, synthetic, reviewed) | | `eval/results/golden-check-*.json` | R4 |
-| Embedding: paraphrase mean, unrelated mean, gap, ms per chunk, determinism | | `eval/results/suite-*.json` | R4 |
-| Retrieval: recall@3, recall@5, MRR, nDCG@5, clean and noisy | | `eval/results/suite-*.json` | R4 |
-| E2E: faithfulness (judge and overlap), abstention, citation validity, p50, p95 | | `eval/results/suite-*.json` | R5 |
-| Judge agreement and kappa on hand labels | | `eval/judge_labels.jsonl`, suite result | R5 |
-| Two-run difference per metric | | `eval/results/stochasticity-*.json` | R5 |
-| Gate: failing candidate and passing candidate results | | `eval/results/gate-*.txt` | R7 |
-| Release decision (release or reject, reasons) | | `docs/evidence/r7-decision.md` | R7 |
-| Resource peaks and chosen requests and limits | | `docs/evidence/f5-resources.txt` | R8 |
-| Coverage before and after (share, threshold, uncovered topics) | | `eval/results/coverage-*.json` | R10 |
-| Data drift (metric changes after Batch B) | | `eval/results/drift-*.json` | R10 |
-| Trace summary over a window | | `traces/report-*.txt` | R6, R8 |
+| Batch B files and planted problems (counts) | 12 files: 4 controls, 2 exact duplicates, 1 near duplicate, 1 truncated PDF, 1 corrupt PDF, 1 missing metadata, 1 newer version, 1 injected instruction | `corpus/batch_b/PLANTED.json` | R1 |
+| Verification: failures per check on Batch B | uniqueness 3, completeness 3, quality 2, recency 1; checked 13, indexed 6, quarantined 6, superseded 1 | `docs/evidence/a3/a1-verification-report.txt` | R2 |
+| Near-duplicate threshold and the distribution it came from | 0.97; largest distinct pair 0.9379, planted near-duplicate 0.9998 | `eval/results/neardup-calibration-20261120T221945Z.json` | R2 |
+| Unchanged re-run: chunks embedded, swapped | 0, false | `docs/evidence/a3/a2-unchanged-run.txt` | R3 |
+| Changed-document run: chunks embedded, other docs' ids identical | 26 of 26 untouched chunks identical (spike); see R3 spec | `docs/specs/phase-r03-incremental.md` | R3 |
+| Deleted document: chunks by doc id before and after | b12: 4 chunks to 0 (0 orphans), index 1010 to 1006 chunks | `docs/evidence/a3/a2-delete-no-orphans.txt` | R3 |
+| Golden set counts (answerable, unanswerable, hard, human, synthetic, reviewed) | 50 questions: 39, 11, 23, 18, 32, 0 reviewed (needs 8, human) | `eval/results/suite-20261121T021833Z-baseline-ab.json` (meta), `golden-check-20261121.json` | R4 |
+| Embedding: paraphrase mean, unrelated mean, gap, ms per chunk, determinism | 0.791, 0.525, 0.266, 285.3 median, 0 | `eval/results/suite-20261121T021833Z-baseline-ab.json` | R4 |
+| Retrieval: recall@3, recall@5, MRR, nDCG@5, clean and noisy | clean 0.795, 0.795, 0.756, 0.766; noisy 0.769, 0.795, 0.676, 0.706 | same | R4 |
+| E2E: faithfulness (overlap), abstention, citation validity, p50, p95 | 0.879 (supported 0.900), 0.909, 1.000, 54.4 s, 181.7 s | same | R5 |
+| Judge agreement and kappa on hand labels | not applicable (no LLM judge, D-115) | | R5 |
+| Two-run difference per metric | 0.0 for retrieval and answer-quality metrics; 1 of 27 answer texts differs; p95 184.46 s vs 113.14 s | `eval/results/stochasticity-20261121T003255Z.json` | R5 |
+| Gate: failing candidate and passing candidate results | 100/0 FAIL (faithfulness 0.8214 < 0.85), 300/50 PASS, 600/100 PASS | `eval/results/gate-cand-*.txt` | R7 |
+| Release decision (release or reject, reasons) | reject 100/0; release 600/100 (production step left to Zain); rule changed after seeing 100/0, stated | `docs/evidence/r7-decision.md` | R7 |
+| Resource peaks and chosen requests and limits | api 71 Mi peak (128Mi limit), chroma 104 Mi (384Mi), indexer 469 Mi (768Mi), eval 24 Mi (64Mi) | `docs/evidence/f5-resources.txt` | R8 |
+| Coverage before and after (share, threshold, uncovered topics) | 0.300 to 0.675 (target 0.85, threshold 0.72); in-domain 0.429 to 0.857 | `eval/results/coverage-*.json`, `docs/evidence/a3/e2-uncovered-topics.md` | R10 |
+| Data drift (metric changes after Batch B) | like for like on 27 questions: recall@5 0.8095 to 0.7143, false abstention 0.1905 to 0.3333; 3 outcome changes | `eval/results/drift-20261121T074956Z.json`, `docs/evidence/a3/e3-data-drift.md` | R10 |
+| Trace summary over a window | 61 queries, abstention rate 0.311, top-1 median 0.798 | `docs/evidence/a3/d2-trace-report-job.txt` | R6, R8 |
 
 ---
 
@@ -601,7 +601,7 @@ Report text (R11).
 - [ ] R10-AC2 `coverage.py` reports the share above the threshold, the threshold with its calibration source, the uncovered queries with topic groups, and exits non-zero when the share is below the target (tests with a trimmed golden set).
 - [ ] R10-AC3 Before run: the coverage is below the target on purpose or by finding (state which); after adding at least 6 golden questions the share rises; both outputs saved (R3-S-E1, R3-S-E2).
 - [ ] R10-AC4 The new golden questions are in `eval/golden.jsonl`, labelled, with relevant sources and pages, and `golden --check` still passes.
-- [ ] R10-AC5 The drift run records what changed after Batch B: at least the metrics that moved, the questions that changed outcome, the retrieved-document change for the version question and the injected document's handling, each with its cause.
+- [x] R10-AC5 (done in R11, `docs/evidence/a3/e3-data-drift.md`, `eval/results/drift-20261121T074956Z.json`) The drift run records what changed after Batch B: at least the metrics that moved, the questions that changed outcome, the retrieved-document change for the version question and the injected document's handling, each with its cause.
 - [ ] R10-AC6 `d5-root-cause.md` uses only fields from a trace and names the cause (chunk, document version or filter) in five lines.
 - [ ] R10-AC7 `make test && make lint` green.
 
