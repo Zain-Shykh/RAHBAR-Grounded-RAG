@@ -5,7 +5,7 @@
 | Phase | R11 (and the pending Part E3 of R10), from `docs/IMPLEMENTATION_PLAN_A3.md` |
 | Work plan task | none (A3 plan; Ahmad out, D-108) |
 | Branch | `feat/rag-r04-eval-suite` (PR 48 into `dev`); release PR `dev` to `main` |
-| Stage | IMPLEMENTING |
+| Stage | TESTING |
 | Started | 2026-11-21 |
 | Approved (spec and plan) | gate waived (D-124) |
 | Depends on | R2 to R10 evidence files |
@@ -87,7 +87,13 @@ Rollback: every step is a separate commit; the cluster rehearsal changes nothing
 
 ## 11. Implementation notes
 
-(filled below as the work proceeds)
+- E3: the like-for-like view (27 ids) showed a larger drop than the compare table (-0.0952 recall@5 against -0.0147) because the second suite's 23 new questions raise the averages. Two corrections found while writing: the baseline-ab index had no `b12` (A2 delete test), and the live rail check showed the rail drops the whole chunk (D-137).
+- Screenshots: Chrome headless crops its viewport below the window height, so the renderer pads the measured height by 110 px and ends each image with `[end of captured output]`.
+- Report: 5 body pages at 10 pt (limit 8); appendix = 14 screenshots (19 pages in all). Roll numbers are the placeholder text.
+- Number check: permissive for 1-decimal numbers (rounding rule), see D-138; the tester reads tables against sources.
+- Rehearsal: findings and fixes in `docs/evidence/a3/r11-fresh-cluster-rehearsal.txt` (helper-pod wait, empty-inbox first Job, smoke run without an unanswerable question). Cluster left running with the live collection `rahbar`.
+- CI: `scan` failed on six nginx CVEs of the ui base image, not on this work: `.trivyignore`, D-142.
+- Not done and why: README commands were not run by a second person (R11-AC4 gap); the 8 synthetic reviews, roll numbers and contribution check are human items.
 
 ## 12. Test report
 
