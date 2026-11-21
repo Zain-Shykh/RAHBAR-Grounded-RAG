@@ -1607,3 +1607,18 @@ Raised 2026-11-21 while writing the Assignment 03 planning set ([`requirements-a
 - Question: Candidate 100/0 passed all six rules with the placeholder limits (faithfulness at least 0.70 absolute, set when the baseline was 0.833 on Batch A only). Baseline-ab faithfulness is 0.900, candidate 0.821.
 - Decision: replace the absolute floor by `not_below_baseline_by 0.05`, justified by measured noise (one answer is 0.033 to 0.037 of the rate; `f3-stochasticity.txt`), not by the candidate's number alone. Both outputs are kept: `eval/results/gate-cand-100-0-initial-limits.txt` (exit 0, placeholders) and `gate-cand-100-0.txt` (exit 1, final limits). This is disclosed in `docs/evidence/r7-decision.md`: the limit was finalised after seeing the candidate, so it is a decision, not a blind test. The other rules were not changed (only the justification text).
 - Decided on: 2026-11-21
+
+### D-135 Release evidence: request loop through the Ingress, bad release and undo order
+- Status: DECIDED
+- Raised: 2026-11-21 by Claude (phase R9)
+- Area: k8s
+- Decision: the zero-downtime loop runs on the host through the Ingress (`POST /api/retrieve`, no model, two requests per second, status code and `index_id` per line), because the ui pod has no egress to `api` under the NetworkPolicies. During the rolling update 64 requests returned 200 and the `index_id` flipped from the old to the new collection once all new pods were Ready. The sequence was: release `rahbar_cand`, bad release `rahbar_bad` without the gate, `make rollback` (returns to `rahbar_cand`, because `rollout undo` goes to the previous revision), then `rollout undo --to-revision=7` to return to the original `rahbar`. `kubectl rollout undo` renumbers revisions (a rollback copies the old template to a new number), so history shows 9, 10, 11.
+- Decided on: 2026-11-21
+
+### D-136 `embed_version` is not cached while `unknown`
+- Status: DECIDED
+- Raised: 2026-11-21 by Claude (phase R9)
+- Area: api
+- Decision: `trace.embed_version` cached its first answer for the process lifetime, so an Ollama outage at the first request would have fixed `embedding.version = <model>@unknown` for the pod (R3-F3-4 requires the field filled). It now caches only resolved digests. A test covers it. The cluster pods run the earlier image and already resolve the digest (`nomic-embed-text@0a109f422b47` in every trace); the image was not rebuilt during the experiments.
+- Decided on: 2026-11-21
+

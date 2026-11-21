@@ -73,9 +73,9 @@ Anything that is not in `requirements-a3.md`. In particular: a reranker (the exp
 | R4 | Golden set, module level, component level, noise | R3-B-1 to R3-B-5 | 5 h | CODE DONE, baseline run in progress | #48 |
 | R5 | End-to-end level, stochasticity, one command (no judge, D-115) | R3-B-6 to R3-B-9 | 7 h | CODE DONE, runs in progress | #48 |
 | R6 | Trace, trace tool, metrics report, injection rail | R3-D1-* to R3-D5-1, R3-F4-1 | 6 h | CODE DONE, samples pending | #48 |
-| R7 | Change experiment and release gate | R3-C1-*, R3-C2-* | 6 h | CODE DONE, candidate runs pending | #48 |
+| R7 | Change experiment and release gate | R3-C1-*, R3-C2-* | 6 h | TESTING (candidates, gate, decision done) | #48 |
 | R8 | Kubernetes deployment of RAGOps | R3-F1-*, R3-F2-*, R3-F4-*, R3-F5-*, R3-LOG-11 | 8 h | CLUSTER RUN DONE, independent test in progress | #48 |
-| R9 | Controlled release and rollback | R3-C3-1, R3-F3-* | 4 h | NOT STARTED | |
+| R9 | Controlled release and rollback | R3-C3-1, R3-F3-* | 4 h | TESTING (rehearsal done on the cluster) | #48 |
 | R10 | Drift and coverage | R3-E1-* to R3-E4-* | 4 h | CODE DONE (coverage.py, live_queries.jsonl), runs pending | #48 |
 | R11 | Evidence, report, README, final verification | R3-G-*, R3-S-*, R3-LOG-8 to 10 | 8 h | NOT STARTED | |
 
@@ -86,11 +86,11 @@ Hours spent so far: planned 64 h plus 2 h (R0), actual `____`.
 ## 2. Current focus
 
 ```
-Phase:        R8 tested on the cluster; next R7 candidates, R9 release, R10 runs, R11
-Stage:        TESTING (R8 independent test)
+Phase:        R7 and R9 done on the cluster, independent test running; next R10 drift write-up, R11
+Stage:        TESTING (R7/R9 independent test)
 Branch:       feat/rag-r04-eval-suite (PR #48 into dev)
 Spec:         this file
-Next action:  R7 candidate runs (cluster: make candidate, eval Job against api-candidate), R9 release and rollback, R10 coverage and drift, R11 report
+Next action:  R10 E3 drift write-up from suite-20261121T021833Z-drift-after-batch-b.json, R11 report; Zain decides the production release of 600/100 (make release COLLECTION=rahbar_c600)
 Waiting on:   nothing (Ollama time: each answer takes 75 to 110 s)
 Last updated: 2026-11-21 03:25
 ```
@@ -142,6 +142,7 @@ Append-only, newest at the bottom. Format: `YYYY-MM-DD  PNN  <stage or event>: <
 2026-11-21  R3   TESTED (docs/specs/phase-r03-incremental.md): AC2 to AC9 PASS, 13 edge tests added (unicode, empty corpus, registry or collection missing, embedder and registry-save failure, quarantine fixed, changed back, restore twice, superseded deleted). AC10 FAIL: scripts/check_registry.py does not exist. AC1 and AC11 (spike, make eval-fixtures) not re-run: need services.
 2026-11-21  R1-R7 FIX ROUND 1: T-1 T-2 T-4 T-5 T-8 fixed, scripts/check_registry.py added (R3-AC10), corpus/raw/_index.a02.json created (R1-AC5); tests green.
 2026-11-21  R7/R9 BASELINE-AB done: eval/results/suite-20261121T021833Z-baseline-ab.json (50 questions, subset all, live index Batch A+B, index 20261121T005113Z-a45667); copy suite-20261121T021833Z-drift-after-batch-b.json is the E3 data-drift run (compare against suite-20261121T001033Z-baseline.json = Batch A only). Eval client timeout raised to 900 s (a 424 s answer killed the first attempt).
+2026-11-21  R7/R9 DONE ON CLUSTER: candidates 100/0 (rahbar_bad) FAIL exit 1, 300/50 (rahbar_cand) PASS, 600/100 (rahbar_c600) PASS; final gate limits (faithfulness baseline-relative 0.05, D-134); release rahbar_cand with 64/64 HTTP 200 during the rolling update, bad release rahbar_bad, make rollback, final undo to rahbar. Evidence docs/evidence/a3/r9-*.txt, docs/evidence/r7-decision.md. Spec docs/specs/phase-r09-release.md. Live api on rahbar; api-candidate left running on rahbar_c600.
 ```
 
 ---

@@ -49,3 +49,6 @@ Claude Code (Sonnet 5.5) ran the RAGOps ingestion, evaluation, trace and release
 
 ## Phase R10 (coverage, drift): 2026-11-21
 Claude calibrated the coverage threshold from module-level means (0.72), ran coverage before and after, wrote golden questions g35 to g50 (checked against /api/retrieve), the uncovered-topic analysis, the D5 trace root cause, and one exit-code test. An independent subagent found a bad gold chunk (g41), a line-break expect (g45) and a None crash; these were fixed. The drift note is pending the post-Batch-B suite result.
+
+## Phase R7 and R9 (candidates, gate, release, rollback): 2026-11-21
+Claude Code (Sonnet 5.5) ran the baseline on Batch A and B, three candidate builds (100/0, 300/50, 600/100) and their eval Jobs on the cluster, found and fixed a NetworkPolicy gap (Redis edge for api-candidate), the candidate Job's strict full mode, and the eval client timeout, finalised the gate limits with written reasons (and disclosed that the faithfulness limit was set after the 100/0 result), performed the rolling release with a request loop, a forced bad release and the undo, and wrote the evidence and the decision. An independent subagent tested the phase. The people check the decision and the limits.

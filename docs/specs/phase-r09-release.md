@@ -5,7 +5,7 @@
 | Phase | R9 (and the pending half of R7), from `docs/IMPLEMENTATION_PLAN_A3.md` |
 | Work plan task | none (A3 plan; Ahmad out, D-108) |
 | Branch | `feat/rag-r04-eval-suite` (PR 48; planned name `feat/k8s-r09-release`) |
-| Stage | IMPLEMENTING |
+| Stage | TESTING |
 | Started | 2026-11-21 |
 | Approved (spec and plan) | gate waived (D-124); decisions D-132 onward |
 | Depends on | R7 (gate, compare), R8 (cluster Jobs, `k8s/candidate/`) |
@@ -88,7 +88,12 @@ Rollback: `make rollback`; delete `rahbar_bad` and `rahbar_cand` via the indexer
 
 ## 11. Implementation notes
 
-(filled at the end)
+- Cluster run order: baseline-ab (61 min), candidate 100/0 build (24 min) and eval (52 min), re-gate with final limits (`GATE_ONLY`, Job Failed), candidate 300/50 build and eval, release rehearsal, candidate 600/100 build and eval.
+- Defects found by running it: candidate Job in `INDEX_MODE=full` rejects the planted corrupt file (D-132, now incremental path on an empty registry); `redis-ingress` lacked `api-candidate` (fixed, D-133); eval client timeout 420 s killed a run (D-132); `kubectl apply -f k8s/base/networkpolicy.yaml` writes the placeholder Ollama CIDR, so use the overlay; `kubectl wait --timeout=3000s` inside `make candidate` returned "timed out" after about 15 min once (the Job continued, `make candidate-serve` was run by hand).
+- Honest result: with the placeholder limits 100/0 passed the gate; the faithfulness limit was changed to baseline-relative with written reasons (D-134) and then 100/0 fails. Disclosed in `docs/evidence/r7-decision.md`.
+- Bad release degradation is modest: one probe abstained instead of answering, one answered 41 instead of 19; suite level faithfulness 0.900 to 0.821.
+- `make rollback` returns to the previous revision (rahbar_cand), not to the original; the final `rollout undo --to-revision=7` restored `rahbar`.
+- Files: `Makefile`, `k8s/candidate/*`, `k8s/base/networkpolicy.yaml`, `eval/gate.yaml`, `eval/suite/client.py`, `api/app/services/trace.py`, `scripts/release_demo.sh`, `docs/evidence/a3/r9-*.txt`, `docs/evidence/r7-decision.md`, `eval/results/{suite,gate,compare}-*cand-*`.
 
 ## 12. Test report
 
