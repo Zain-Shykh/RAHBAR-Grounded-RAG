@@ -1639,7 +1639,7 @@ Raised 2026-11-21 while writing the Assignment 03 planning set ([`requirements-a
 - Status: DECIDED
 - Raised: 2026-11-21 by Claude (phase R11)
 - Area: docs
-- Decision: `scripts/check_numbers_a3.py` accepts a decimal in the report when its digits occur in a committed file under `eval/results`, `docs/evidence`, `traces`, `docs/specs`, `eval/gate.yaml`, `eval/coverage.yaml` or `corpus/batch_b/PLANTED.json`, or a number there rounds (half up) to it. It is a floor, not a proof of meaning: the rounding rule is permissive for one-decimal numbers, so the tester also reads each table against its source. Roll numbers are the literal `[roll number to be filled by Zain]`; they are not known (human item).
+- Decision: `scripts/check_numbers_a3.py` accepts a decimal in the report when its digits occur in a committed file under `eval/results`, `docs/evidence`, `traces`, `docs/specs`, `eval/gate.yaml`, `eval/coverage.yaml` or `corpus/batch_b/PLANTED.json`, or a number there rounds (half up) to it. It is a floor, not a proof of meaning: the rounding rule is permissive for one-decimal numbers, so the tester also reads each table against its source. Roll numbers were a placeholder here; closed by D-145.
 - Decided on: 2026-11-21
 
 ### D-139 Screenshots are renderings of saved terminal text
@@ -1668,4 +1668,39 @@ Raised 2026-11-21 while writing the Assignment 03 planning set ([`requirements-a
 - Raised: 2026-11-21 by Claude (phase R11)
 - Area: ci
 - Decision: PR #48's Trivy step failed for `rahbar-ui` only (api and indexer pass): nginx 1.30.6-r1 has six HIGH or CRITICAL CVEs with a fix in 1.30.7-r0, but the newest `nginxinc/nginx-unprivileged` tag is 1.30.6 and the `apk upgrade` already in `ui/Dockerfile` cannot reach 1.30.7. Not caused by Assignment 03 (the ui image is unchanged). The CVEs concern the mail module, HTTP/2, TLS and the resolver, none of which `ui/nginx.conf` uses. We added `.trivyignore` with the six ids, each expiring 2026-12-15, instead of lowering the severity gate. Zain should bump the base image tag when 1.30.7 is published.
+- Decided on: 2026-11-21
+
+### D-143 Version-aware refund pair g51 and g52 added, old q07 and g22 kept
+- Status: DECIDED
+- Raised: 2026-11-21 by Claude (phase R12), on Zain's decision (b)
+- Area: eval
+- Decision: the 2027 amendment supersedes `fee-structure-page.html`, so the unversioned q07 and g22 abstain. g51 and g52 name "the 2026-27 fee structure", which selects the superseded page by the scope rule. Checked on the live index with `/api/retrieve`: the `Fee Refund Policy` chunk (page 1, doc_version 2026-27) is rank 1 for g51 and rank 2 for g52. Origin synthetic, reviewed false, tag `version`. They were added after the final result files: the measured runs have 50 questions, the file 52. The LLM suite was not re-run (Ollama stays free), and no report number changed.
+- Decided on: 2026-11-21
+
+### D-144 Review sheet and mark_reviewed; g22 replaced by g23
+- Status: DECIDED
+- Raised: 2026-11-21 by Claude (phase R12), on Zain's decision (a)
+- Area: eval
+- Decision: Zain reviews 8 synthetic questions from `eval/REVIEW_SHEET.md`, written by `scripts/make_review_sheet.py` from the live Chroma collection. g22 now abstains in the live system, so it is a poor review candidate: g23 replaces it. `scripts/mark_reviewed.py <ids>` sets `reviewed: true` for the given synthetic ids only and refuses `human` or unknown ids (test `eval/tests/test_mark_reviewed.py`). The session never sets `reviewed` itself. In the live index g19 is found only at rank 9 of 10: noted in the sheet as a retrieval weakness, not a question defect.
+- Decided on: 2026-11-21
+
+### D-145 Roll numbers
+- Status: DECIDED
+- Raised: 2026-11-21 by Claude (phase R12)
+- Area: docs
+- Decision: Zain gave the roll numbers in chat: Muhammad Zain 24i-3126, Ahmad Jamal 24i-3006. They are on report page 1 and in the README team table; D-138's placeholder is closed.
+- Decided on: 2026-11-21
+
+### D-146 Final audit and state of main
+- Status: DECIDED
+- Raised: 2026-11-21 by Claude (phase R12)
+- Area: docs
+- Decision: `docs/evidence/a3/final-requirements-audit.md` lists every R3 id with status. One NOT MET (R3-B-2 second half, human), one not applicable (R3-B-7). The state of main and CD is recorded in the R12 spec section 11.
+- Decided on: 2026-11-21
+
+### D-147 The 8 synthetic questions are reviewed by Zain (R3-B-2 met, with a nuance)
+- Status: DECIDED
+- Raised: 2026-11-21 by Claude (phase R13), on Zain's statement in chat
+- Area: eval
+- Decision: Zain (human, in chat 2026-11-21) reviewed the 8 synthetic questions g19, g20, g21, g23, g28, g29, g30, g33. He checked g19, g20, g21, g23 against the source pages of the original downloaded PDFs, and read the clauses of g28, g29, g30, g33 in the synthetic Batch B files (`corpus/batch_b`). Those four files are invented (a fictional institute), so their answers match the files by construction: the review confirms the wording and the clause, not a real-world fact. No wording fixes. `scripts/mark_reviewed.py` set `reviewed: true` for the 8 ids (origin stays `synthetic`); `scripts/build_golden_jsonl.py` carries the same ids in a REVIEWED constant so regenerating gives the committed file (test in `eval/tests/test_mark_reviewed.py`). `golden --check` exits 0 (52 questions, 8 synthetic reviewed). The other synthetic questions (26 of 34) stay unreviewed.
 - Decided on: 2026-11-21

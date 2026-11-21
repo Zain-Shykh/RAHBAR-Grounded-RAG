@@ -70,14 +70,14 @@ Anything that is not in `requirements-a3.md`. In particular: a reranker (the exp
 | R1 | Batch B and the manifest contract | R3-AB-1 | 3 h | DONE | #47 |
 | R2 | Verification stage (A1) | R3-A1-* | 6 h | DONE (tested PASS, cluster run done) | #48 |
 | R3 | Incremental update, archive, restore (A2) | R3-A2-*, R3-AB-2 | 7 h | DONE (cluster run done; check_registry added) | #48 |
-| R4 | Golden set, module level, component level, noise | R3-B-1 to R3-B-5 | 5 h | DONE except the 8 synthetic reviews (human, eval/HUMAN_TODO.md) | #48 |
+| R4 | Golden set, module level, component level, noise | R3-B-1 to R3-B-5 | 5 h | DONE (8 synthetic reviews done by Zain, D-147) | #48 |
 | R5 | End-to-end level, stochasticity, one command (no judge, D-115) | R3-B-6 to R3-B-9 | 7 h | DONE (R3-B-7 not applicable, D-115) | #48 |
 | R6 | Trace, trace tool, metrics report, injection rail | R3-D1-* to R3-D5-1, R3-F4-1 | 6 h | DONE (live rail proof: see e3-injection-rail-live.txt) | #48 |
 | R7 | Change experiment and release gate | R3-C1-*, R3-C2-* | 6 h | DONE (decision docs/evidence/r7-decision.md) | #48 |
 | R8 | Kubernetes deployment of RAGOps | R3-F1-*, R3-F2-*, R3-F4-*, R3-F5-*, R3-LOG-11 | 8 h | DONE (fresh-cluster rehearsal R11-AC5) | #48 |
 | R9 | Controlled release and rollback | R3-C3-1, R3-F3-* | 4 h | DONE | #48 |
 | R10 | Drift and coverage | R3-E1-* to R3-E4-* | 4 h | DONE (E3 write-up docs/evidence/a3/e3-data-drift.md); coverage 0.675 below the 0.85 target, stated as a gap | #48 |
-| R11 | Evidence, report, README, final verification | R3-G-*, R3-S-*, R3-LOG-8 to 10 | 8 h | DONE except human items (roll numbers, 8 reviews, contribution check) | #48, release PR |
+| R11 | Evidence, report, README, final verification | R3-G-*, R3-S-*, R3-LOG-8 to 10 | 8 h | DONE except human items (contribution check) | #48, release PR |
 
 Build order note: R4 and R5 need the API and a real index running; R6 changes the API (re-run the A02 fixture eval); R7 needs R5 results; R9 needs R7 and R8; R10 needs R3, R5 and R8; R11 is last. R1 to R3 and R4 to R6 are independent chains and may be swapped if the cluster or Ollama is unavailable, but a phase is never started before the previous one is merged.
 
@@ -86,11 +86,11 @@ Hours spent so far: planned 64 h plus 2 h (R0), actual `____`.
 ## 2. Current focus
 
 ```
-Phase:        R0 to R11 complete; waiting on Zain for the human items
-Stage:        READY FOR PR (R11 independent test: see docs/specs/phase-r11-report.md section 12)
-Branch:       feat/rag-r04-eval-suite (PR #48 into dev), then the release PR dev to main
-Spec:         docs/specs/phase-r11-report.md
-Next action:  Zain: (1) 8 synthetic reviews in eval/HUMAN_TODO.md, (2) roll numbers on report page 1 (then scripts/build_report.sh), (3) check the contribution table and AI statement, (4) decide the production release of 600/100 (make release COLLECTION=rahbar_c600), (5) merge the release PR if not done
+Phase:        R0 to R13 complete; waiting on Zain for the remaining human items
+Stage:        DONE (R13 review record, independent test: docs/specs/phase-r13-review-record.md section 4); main contains PR #48 and #49
+Branch:       feat/rag-r13-review-record (PR into dev, then a release PR dev to main if main lacks the commits)
+Spec:         docs/specs/phase-r13-review-record.md
+Next action:  Zain: (1) approve release PR #51 (dev to main), (2) read the contribution table and AI statement, (3) decide the production release of 600/100 (make release COLLECTION=rahbar_c600)
 Waiting on:   Zain (human items above)
 Last updated: 2026-11-21
 ```
@@ -106,7 +106,7 @@ Update this block at the end of every work session, even if the phase is unfinis
 | H3-1 | Zain to Ahmad | Tell Ahmad Assignment 03 exists, share `Assignment_03.md`, this plan, and the demo rule that both must explain every part | R0 | [ ] |
 | H3-2 | Zain (was Ahmad) | Write at least 8 golden questions by hand (R3-B-2). Not done by the session (D-126): worksheet `eval/HUMAN_TODO.md` | R4 | [ ] |
 | H3-3 | n/a | Hand labels for the judge (R3-B-7): not needed, no LLM judge (D-115) | R5 | [x] |
-| H3-4 | Zain (was Ahmad) | Review 8 or more synthetic questions and mark `reviewed` (R3-B-2), in `eval/HUMAN_TODO.md` | R4 | [ ] |
+| H3-4 | Zain (was Ahmad) | Review 8 or more synthetic questions and mark `reviewed` (R3-B-2), in `eval/HUMAN_TODO.md` | R4 | [x] 2026-11-21 (D-147; four of the eight are about invented Batch B files) |
 | H3-5 | Ahmad | Write the 40 live-style queries' phrasing review (R3-E1-1) and the contribution table entries | R10, R11 | [ ] |
 | H3-6 | Ahmad | Run the README commands on a clean clone and report anything that fails | R11 | [ ] |
 | H3-7 | Zain (human) | Paper supplied at `docs/reference/RAGOPS_paper.pdf` (gitignored) | R0 | [x] |
@@ -162,7 +162,7 @@ Numbers the report will quote. Fill each with the value, the committed file it c
 | Unchanged re-run: chunks embedded, swapped | 0, false | `docs/evidence/a3/a2-unchanged-run.txt` | R3 |
 | Changed-document run: chunks embedded, other docs' ids identical | 26 of 26 untouched chunks identical (spike); see R3 spec | `docs/specs/phase-r03-incremental.md` | R3 |
 | Deleted document: chunks by doc id before and after | b12: 4 chunks to 0 (0 orphans), index 1010 to 1006 chunks | `docs/evidence/a3/a2-delete-no-orphans.txt` | R3 |
-| Golden set counts (answerable, unanswerable, hard, human, synthetic, reviewed) | 50 questions: 39, 11, 23, 18, 32, 0 reviewed (needs 8, human) | `eval/results/suite-20261121T021833Z-baseline-ab.json` (meta), `golden-check-20261121.json` | R4 |
+| Golden set counts (answerable, unanswerable, hard, human, synthetic, reviewed) | (measured runs; the file has 52 since R12) 50 questions: 39, 11, 23, 18, 32, 0 reviewed (needs 8, human) | `eval/results/suite-20261121T021833Z-baseline-ab.json` (meta), `golden-check-20261121.json` | R4 |
 | Embedding: paraphrase mean, unrelated mean, gap, ms per chunk, determinism | 0.791, 0.525, 0.266, 285.3 median, 0 | `eval/results/suite-20261121T021833Z-baseline-ab.json` | R4 |
 | Retrieval: recall@3, recall@5, MRR, nDCG@5, clean and noisy | clean 0.795, 0.795, 0.756, 0.766; noisy 0.769, 0.795, 0.676, 0.706 | same | R4 |
 | E2E: faithfulness (overlap), abstention, citation validity, p50, p95 | 0.879 (supported 0.900), 0.909, 1.000, 54.4 s, 181.7 s | same | R5 |
@@ -185,7 +185,7 @@ Tick only with a pointer to the file.
 - [x] `README.md` has the exact command for each of A to F (R3-LOG-10): README section "Assignment 03"
 - [x] `k8s/README.md` lets a fresh cluster reach a working pipeline (R3-F5-2); rehearsed on a deleted cluster: `docs/evidence/a3/r11-fresh-cluster-rehearsal.txt`
 - [x] `eval/results/` and `traces/` committed with the files the report quotes (R3-LOG-9): checked by `scripts/check_numbers_a3.py`
-- [ ] Report PDF at most 8 pages, names and roll numbers on page 1, appendix of screenshots (R3-G-*): `docs/report/report.pdf`; roll numbers are a placeholder for Zain
+- [x] Report PDF at most 8 pages, names and roll numbers on page 1, appendix of screenshots (R3-G-*): `docs/report/report.pdf` (5 body pages; roll numbers 24i-3126 and 24i-3006 filled in R12)
 - [x] Screenshots S-A1, S-A2, S-B, S-C1, S-C2, S-D1, S-D2, S-E1, S-E2, S-F1 to S-F5, uncropped, labelled (R3-S-*): `docs/evidence/a3/screenshots/`, index `docs/evidence/a3/README.md` (renderings of saved terminal output, D-139)
 - [x] Demo rehearsal: eval as a Job, a trace opened, an unseen batch ingested (R3-LOG-11): `docs/evidence/a3/r11-fresh-cluster-rehearsal.txt`
 - [x] `docs/rubric_checklist.md` section F ticked with evidence; `python3 scripts/check_submission.py` still passes for the A02 parts (164 passed, 0 failures)
@@ -210,7 +210,7 @@ About 45 hours remain. Real runs are slow (a full re-index is about 10 minutes, 
 
 **Cut line if time runs out (cut last first):** the rollback of a bad release is kept (required) while the optional `--chunks` check of the trace tool, Table 1 extras (precision@5, memory per embedding) and the second candidate rehearsal are dropped first. Never cut: A1, A2, the three levels, the gate, traces, the Kubernetes Jobs, the rollout and undo, coverage, the report and screenshots. Anything cut is listed as an honest gap in the report.
 
-**Human-only items (cannot be done by the session, D-126):** write 8 questions and review 8 synthetic ones (`eval/HUMAN_TODO.md`), supply both roll numbers, take or approve the screenshots if the session cannot capture terminals, Docker Hub token if CD is wanted.
+**Human-only items (cannot be done by the session, D-126):** write 8 questions (done: the 18 A02 questions) and review 8 synthetic ones (done 2026-11-21, D-147), supply both roll numbers (done), take or approve the screenshots if the session cannot capture terminals, Docker Hub token if CD is wanted.
 
 **Paper alignment (read 2026-11-21).** Table 1 lists per level a traditional metric and a RAG metric; our suite also reports embedding time, retrieval latency, index update speed (from the R3 summary) and full-pipeline latency next to the RAG metrics. Table 2's operational considerations (data structure and granularity configuration; degradation and source-change detection; injection detection and context adherence; versioning, retrieval routing and grounded source; resource usage) are the rows of the report's Table G-2. The paper's verification has a fifth check, Consistency (contradictory information); the assignment asks for four; not built, stated in R3-G-4(e).
 
@@ -365,7 +365,7 @@ Cluster Jobs (R8). Candidate collections (R9).
 Answer-level metrics and the judge (R5). The one command (R5).
 
 ### Acceptance criteria
-- [ ] R4-AC1 `python -m eval.suite.golden --check` exits 0 and reports at least 25 questions, 15 answerable each with source, section and page, 5 unanswerable, 5 hard, 8 `human`, every question labelled, 8 synthetic marked `reviewed`; it exits non-zero when any minimum is short (test with a trimmed file).
+- [x] R4-AC1 `python -m eval.suite.golden --check` exits 0 and reports at least 25 questions, 15 answerable each with source, section and page, 5 unanswerable, 5 hard, 8 `human`, every question labelled, 8 synthetic marked `reviewed`; it exits non-zero when any minimum is short (test with a trimmed file).
 - [ ] R4-AC2 Every `relevant` entry resolves: the (source, section) exists in the indexed corpus (checked by `scripts/chunk_report.py`-style lookup against the live collection or the fixtures), and the page matches the chunk's page.
 - [ ] R4-AC3 The 18 carried-over questions give the same recall@5 as `eval/results.json` of A02 for the same index (regression anchor; difference explained if any).
 - [x] R4-AC4 Metric functions pass hand-computed tests: recall@3 and @5, MRR (rank 1, rank 4, miss), nDCG@5 (two relevant pairs, one retrieved late, none).
@@ -647,3 +647,5 @@ The report, the screenshots, the README and a clean-clone rehearsal, so the repo
 
 ### Verify
 the report build command from D-125 and the PDF page count; `python scripts/check_numbers.py`; the rehearsal transcript.
+2026-11-21  R12  CLOSE-OUT: roll numbers on report page 1 (5 body pages, number check exit 0); golden g51 and g52 (version-aware refund pair, live index rank 1 and 2, not in the measured runs); eval/REVIEW_SHEET.md and scripts/mark_reviewed.py; final audit docs/evidence/a3/final-requirements-audit.md (56 MET, 21 with caveat, 1 NOT MET: R3-B-2 second half, 1 n/a). Spec docs/specs/phase-r12-closeout.md.
+2026-11-21  R13  REVIEW RECORD: Zain reviewed g19 g20 g21 g23 (original PDFs) and g28 g29 g30 g33 (invented Batch B files, correct by construction); mark_reviewed applied, builder carries REVIEWED, golden --check exit 0 (52 questions, 8 synthetic reviewed), R3-B-2 MET with nuance. Spec docs/specs/phase-r13-review-record.md. D-147.

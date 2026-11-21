@@ -35,3 +35,4 @@ graphify-out/
 # local-only agent context (personal, not shared)
 CLAUDE.md
 docs/reference/
+eval/review/

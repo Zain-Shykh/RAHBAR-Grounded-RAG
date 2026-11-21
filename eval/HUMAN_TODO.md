@@ -5,13 +5,16 @@ The session wrote the new golden questions, so they are labelled `synthetic` and
 by hand. The 18 Assignment 02 questions were written by the group (origin `human`), so the first minimum is met;
 the second is not until you do the following (about 10 minutes).
 
-## 1. Review 8 synthetic questions
+## 1. Review 8 synthetic questions: DONE 2026-11-21 (D-147)
 
-Open `eval/golden.jsonl`. For each of eight questions with `"origin": "synthetic"`: read the question, open the document
-named in `relevant`, check that the section and page really hold the answer and that the question is clear. Fix the
-text if it is not, then set `"reviewed": true`. Suggested eight: g19, g20, g21, g22, g23, g24, g28, g29.
+Done, kept as a record. Zain (human, in chat 2026-11-21) reviewed the 8 synthetic questions g19, g20, g21, g23, g28, g29, g30, g33. He checked g19, g20, g21, g23 against the source pages of the original downloaded PDFs, and read the clauses of g28, g29, g30, g33 in the synthetic Batch B files (`corpus/batch_b`). Those four files are invented (a fictional institute), so their answers match the files by construction: the review confirms the wording and the clause, not a real-world fact. The text below is the original instruction.
 
-Then run `python -m eval.suite.golden --check`; it exits 0 when every minimum is met.
+
+Open [`REVIEW_SHEET.md`](REVIEW_SHEET.md): for g19, g20, g21, g23, g28, g29, g30, g33 it shows the question, the expected answer, the
+ground-truth source, section and page, and the real passage read from the live index. Judge each in about 10 seconds and send the
+reply in the format at the end of the sheet. The session then applies fixes and runs
+`python scripts/mark_reviewed.py <ids> && python -m eval.suite.golden --check` (exit 0 when every minimum is met).
+Nobody but you sets `reviewed` (the script refuses `human` questions and unknown ids).
 
 ## 2. Optionally write your own 8 questions
 
@@ -20,5 +23,5 @@ If you want the hand-written count to be new work rather than the A02 questions:
 
 ## 3. Report items only you can supply
 
-Roll numbers for both members (report page 1), the contribution table (what each of you did), and approval of the AI
+Roll numbers are on report page 1 (done, 24i-3126 and 24i-3006). Still yours: the contribution table (what each of you did), and approval of the AI
 statement. Ahmad did no work on Assignment 03 (D-108); say so plainly in the table.

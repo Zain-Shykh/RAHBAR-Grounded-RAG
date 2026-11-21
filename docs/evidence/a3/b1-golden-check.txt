@@ -1,0 +1,1 @@
+{"questions": 52, "answerable": 41, "unanswerable": 11, "hard": 25, "human": 18, "synthetic": 34, "synthetic_reviewed": 8, "batch_b": 25}
