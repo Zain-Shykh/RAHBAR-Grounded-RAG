@@ -301,7 +301,7 @@ State at final verification, 2026-11-21 (R11). `[x]` = clear of the violation, w
 - [ ] Late submission: **zero** [R3-LOG-2]. Deadline Sunday 22 November (D-107); submission is Zain's act.
 - [x] A requirement changed or renamed: **no credit** [R3-LOG-3]. Names kept: `eval/golden.jsonl`, `eval/results/`, `traces/`, `k8s/eval-job.yaml`; 50 golden questions (minimum 25), 40 live queries (minimum 40).
 - [x] A number in the report that is not from our own committed run [R3-LOG-4, I-25]. `python scripts/check_numbers_a3.py` exits 0 (`docs/specs/phase-r11-report.md` section 12).
-- [ ] Commits from one member only [R3-LOG-6]. **Not clear in substance:** `git log` has 2 non-merge commits by Ahmad Jamal against 279 by Muhammad Zain, all Assignment 02; Ahmad did no work on Assignment 03 (D-108). The report says so.
+- [ ] Commits from one member only [R3-LOG-6]. **Not clear in substance:** `git log` has 2 non-merge commits by Ahmad Jamal against 283 by Muhammad Zain, all Assignment 02; Ahmad did no work on Assignment 03 (D-108). The report says so.
 - [ ] A member who cannot explain a part at the demo [R3-LOG-1]. Risk accepted by Zain (D-108); Ahmad has not seen Assignment 03.
 - [x] Report over 8 pages (appendix excluded), or names and roll numbers missing on page 1 [R3-G]. `docs/report/report.pdf`: body pages as printed by `scripts/build_report.sh`; **roll numbers are a placeholder** that Zain fills (human item).
 - [x] A screenshot cropped, unlabelled, or from somewhere other than our cluster [R3-S-*]. 14 PNGs in `docs/evidence/a3/screenshots/`, each ends with an end marker; they are renderings of the terminal output saved from the cluster runs (D-139), index in `docs/evidence/a3/README.md`.

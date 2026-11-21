@@ -42,14 +42,14 @@ Out: new features; any LLM suite run; merging the production release of 600/100 
 
 ## 6. Acceptance criteria
 
-- [ ] **R11-AC1** The report PDF has at most 8 body pages, names and roll-number placeholders on page 1, and items G-1 to G-5.
-- [ ] **R11-AC2** `scripts/check_numbers_a3.py` exits 0 on the report.
-- [ ] **R11-AC3** 14 screenshots exist, show command and output uncropped, carry their label, each maps to a cluster run in the evidence index.
-- [ ] **R11-AC4** The README commands for A to F were executed once (local ones here, cluster ones in the rehearsal) and the result is logged; not by a second person (honest gap).
-- [ ] **R11-AC5** The fresh-cluster rehearsal reaches a working pipeline from `k8s/README.md`; timings in `docs/evidence/a3/r11-fresh-cluster-rehearsal.txt`.
-- [ ] **R11-AC6** Plan section 6 is ticked with pointers or each unticked item is an honest gap in report and README.
-- [ ] **R11-AC7** `git log` shows commits by both members; the contribution table says what is true.
-- [ ] **R11-AC8** History scan saved: no secret, `corpus/raw/`, model.
+- [x] **R11-AC1** The report PDF has at most 8 body pages, names and roll-number placeholders on page 1, and items G-1 to G-5.
+- [x] **R11-AC2** `scripts/check_numbers_a3.py` exits 0 on the report.
+- [x] **R11-AC3** 14 screenshots exist, show command and output uncropped, carry their label, each maps to a cluster run in the evidence index.
+- [x] **R11-AC4** The README commands for A to F were executed once (local ones here, cluster ones in the rehearsal) and the result is logged; not by a second person (honest gap).
+- [x] **R11-AC5** The fresh-cluster rehearsal reaches a working pipeline from `k8s/README.md`; timings in `docs/evidence/a3/r11-fresh-cluster-rehearsal.txt`.
+- [x] **R11-AC6** Plan section 6 is ticked with pointers or each unticked item is an honest gap in report and README.
+- [x] **R11-AC7** `git log` shows commits by both members; the contribution table says what is true.
+- [x] **R11-AC8** History scan saved: no secret, `corpus/raw/`, model.
 - [ ] **R10-AC5** (E3) The drift run states the metrics that moved, the questions that changed outcome, the version question and the injected document, each with a cause.
 
 ## 7. Test strategy and traceability
@@ -99,11 +99,12 @@ Rollback: every step is a separate commit; the cluster rehearsal changes nothing
 
 | Round | Date | Command | Result | Notes |
 | --- | --- | --- | --- | --- |
+| 1 | 2026-11-21 | fresh tester subagent, all AC | PASS with defects D1 to D7 | D1 faithfulness noise wording, D2 coverage wording, D3 stale commit count, D4 g22 answer text, D5 g34 cause, fixed in the next commit; D6 (permissive 1-decimal check) and D7 (scan command text) accepted, D-138. Not verified by the tester: 11 of 14 PNGs opened. |
 
 ## 13. Sign-offs
 
 | Gate | Date | Approved by | Notes |
 | --- | --- | --- | --- |
 | Spec and plan | 2026-11-21 | gate waived (D-124) | |
-| Tester verdict PASS | | | rounds: |
+| Tester verdict PASS | 2026-11-21 | independent subagent | rounds: 1 |
 | Merged | | | PR # |

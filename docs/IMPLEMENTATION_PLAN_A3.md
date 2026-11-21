@@ -636,14 +636,14 @@ The report, the screenshots, the README and a clean-clone rehearsal, so the repo
 - `docs/AI-USAGE.md` entry for A3.
 
 ### Acceptance criteria
-- [ ] R11-AC1 The report PDF is at most 8 pages excluding the appendix, names and roll numbers on page 1, and contains items G-1 to G-5.
-- [ ] R11-AC2 `scripts/check_numbers.py` finds every numeric claim of the report in a committed file; no unmatched number remains.
-- [ ] R11-AC3 All 14 screenshots exist, show the command and the output uncropped, carry their part and item label, and each file maps to a cluster run recorded in the log.
-- [ ] R11-AC4 The README command for each of A to F is executed once on a clean clone by someone other than the author (Ahmad if available, otherwise a fresh shell by Zain) and the log records the result.
-- [ ] R11-AC5 The fresh-cluster rehearsal passes: a deleted cluster reaches a working pipeline from the manifests; the demo script completes within the time recorded.
-- [ ] R11-AC6 Section 6 checklist is fully ticked with pointers, or each unticked item is listed as an honest gap in the report and the README.
-- [ ] R11-AC7 `git log` shows commits by both members (R3-LOG-6); the contribution table is truthful.
-- [ ] R11-AC8 No secret, no `corpus/raw/`, no model in the history of the submitted branch (scan saved).
+- [x] R11-AC1 The report PDF is at most 8 pages excluding the appendix, names and roll numbers on page 1, and contains items G-1 to G-5.
+- [x] R11-AC2 `scripts/check_numbers.py` finds every numeric claim of the report in a committed file; no unmatched number remains.
+- [x] R11-AC3 All 14 screenshots exist, show the command and the output uncropped, carry their part and item label, and each file maps to a cluster run recorded in the log.
+- [x] R11-AC4 The README command for each of A to F is executed once on a clean clone by someone other than the author (Ahmad if available, otherwise a fresh shell by Zain) and the log records the result.
+- [x] R11-AC5 The fresh-cluster rehearsal passes: a deleted cluster reaches a working pipeline from the manifests; the demo script completes within the time recorded.
+- [x] R11-AC6 Section 6 checklist is fully ticked with pointers, or each unticked item is listed as an honest gap in the report and the README.
+- [x] R11-AC7 `git log` shows commits by both members (R3-LOG-6); the contribution table is truthful.
+- [x] R11-AC8 No secret, no `corpus/raw/`, no model in the history of the submitted branch (scan saved).
 
 ### Verify
 the report build command from D-125 and the PDF page count; `python scripts/check_numbers.py`; the rehearsal transcript.
