@@ -8,7 +8,7 @@ import httpx
 
 
 class Api:
-    def __init__(self, base: str, host: str | None = None, timeout: float = 420.0) -> None:  # > API's LLM_TIMEOUT_SECONDS (300): it answers with a fallback first
+    def __init__(self, base: str, host: str | None = None, timeout: float = 900.0) -> None:  # > 2 x API LLM_TIMEOUT_SECONDS (300): the API may retry once (a 424 s answer killed a run at 420, D-132)
         self.base = base.rstrip("/")
         self.c = httpx.Client(timeout=timeout, headers={"Host": host} if host else {})
 
