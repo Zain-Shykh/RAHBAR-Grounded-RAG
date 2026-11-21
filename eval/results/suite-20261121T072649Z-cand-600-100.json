@@ -1,0 +1,2253 @@
+{
+  "meta": {
+    "label": "cand-600-100",
+    "timestamp": "20261121T072649Z",
+    "git": "unknown",
+    "subset": "all",
+    "seed": 1234,
+    "llm_seed_env": null,
+    "api": "http://api-candidate:8000",
+    "ready": {
+      "status": "ready",
+      "checks": {
+        "chroma": "ok",
+        "collection": "ok",
+        "embed_pin": "ok",
+        "redis": "ok",
+        "embed_dimension": "ok"
+      }
+    },
+    "index_id": "20261121T061650Z-7cb530",
+    "embed_model": "nomic-embed-text",
+    "golden": "golden.jsonl",
+    "golden_counts": {
+      "questions": 50,
+      "answerable": 39,
+      "unanswerable": 11,
+      "hard": 23,
+      "human": 18,
+      "synthetic": 32,
+      "synthetic_reviewed": 0,
+      "batch_b": 23
+    }
+  },
+  "module": {
+    "model": "nomic-embed-text@0a109f422b47",
+    "pairs_paraphrase": 15,
+    "pairs_unrelated": 15,
+    "paraphrase_mean": 0.7912564102732789,
+    "unrelated_mean": 0.5249525577065651,
+    "paraphrase_min": 0.6617341444277086,
+    "unrelated_max": 0.6415594515822229,
+    "gap": 0.26630385256671374,
+    "chunks_timed": 100,
+    "ms_per_chunk_median": 298.56529500102624,
+    "ms_per_chunk_p95": 1151.5507150033955,
+    "determinism_max_abs_diff": 0.0,
+    "dimension": 768,
+    "bytes_per_embedding_float32": 3072
+  },
+  "component": {
+    "clean": {
+      "n": 39,
+      "recall_at_3": 0.7948717948717948,
+      "recall_at_5": 0.7948717948717948,
+      "mrr": 0.7564102564102564,
+      "ndcg_at_5": 0.7664817759157532,
+      "hard": {
+        "n": 23,
+        "recall_at_3": 0.782608695652174,
+        "recall_at_5": 0.782608695652174,
+        "mrr": 0.7391304347826086,
+        "ndcg_at_5": 0.7505156307453441
+      },
+      "by_batch": {
+        "A": {
+          "n": 21,
+          "recall_at_3": 0.7142857142857143,
+          "recall_at_5": 0.7142857142857143,
+          "mrr": 0.6904761904761905,
+          "ndcg_at_5": 0.6967109406462599
+        },
+        "B": {
+          "n": 18,
+          "recall_at_3": 0.8888888888888888,
+          "recall_at_5": 0.8888888888888888,
+          "mrr": 0.8333333333333334,
+          "ndcg_at_5": 0.847881083730162
+        }
+      },
+      "per_question": [
+        {
+          "id": "q01",
+          "tags": [
+            "ordinary"
+          ],
+          "hard": false,
+          "batch": "A",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.86319298
+        },
+        {
+          "id": "q02",
+          "tags": [
+            "ordinary"
+          ],
+          "hard": false,
+          "batch": "A",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.82721567
+        },
+        {
+          "id": "q03",
+          "tags": [
+            "ordinary"
+          ],
+          "hard": false,
+          "batch": "A",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.881984234
+        },
+        {
+          "id": "q04",
+          "tags": [
+            "ordinary"
+          ],
+          "hard": false,
+          "batch": "A",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.87776506
+        },
+        {
+          "id": "q05",
+          "tags": [
+            "ordinary"
+          ],
+          "hard": false,
+          "batch": "A",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.88325834
+        },
+        {
+          "id": "q06",
+          "tags": [
+            "ordinary"
+          ],
+          "hard": false,
+          "batch": "A",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.9083243599999999
+        },
+        {
+          "id": "q07",
+          "tags": [
+            "ordinary"
+          ],
+          "hard": false,
+          "batch": "A",
+          "recall_at_3": 0.0,
+          "recall_at_5": 0.0,
+          "mrr": 0.0,
+          "ndcg_at_5": 0.0,
+          "top1_score": 0.72226393
+        },
+        {
+          "id": "q08",
+          "tags": [
+            "ordinary"
+          ],
+          "hard": false,
+          "batch": "A",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.80421615
+        },
+        {
+          "id": "q09",
+          "tags": [
+            "ordinary"
+          ],
+          "hard": false,
+          "batch": "A",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.74560916
+        },
+        {
+          "id": "q10",
+          "tags": [
+            "ordinary"
+          ],
+          "hard": false,
+          "batch": "A",
+          "recall_at_3": 0.0,
+          "recall_at_5": 0.0,
+          "mrr": 0.0,
+          "ndcg_at_5": 0.0,
+          "top1_score": 0.82070792
+        },
+        {
+          "id": "q11",
+          "tags": [
+            "ordinary"
+          ],
+          "hard": false,
+          "batch": "A",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.7472886400000001
+        },
+        {
+          "id": "q12",
+          "tags": [
+            "version"
+          ],
+          "hard": false,
+          "batch": "A",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.89502823
+        },
+        {
+          "id": "q13",
+          "tags": [
+            "version"
+          ],
+          "hard": false,
+          "batch": "A",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.7918328
+        },
+        {
+          "id": "q14",
+          "tags": [
+            "exact"
+          ],
+          "hard": false,
+          "batch": "A",
+          "recall_at_3": 0.0,
+          "recall_at_5": 0.0,
+          "mrr": 0.0,
+          "ndcg_at_5": 0.0,
+          "top1_score": 0.71293736
+        },
+        {
+          "id": "q15",
+          "tags": [
+            "exact"
+          ],
+          "hard": false,
+          "batch": "A",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.82370228
+        },
+        {
+          "id": "q18",
+          "tags": [
+            "injection"
+          ],
+          "hard": false,
+          "batch": "A",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 0.5,
+          "ndcg_at_5": 0.6309297535714575,
+          "top1_score": 0.79787976
+        },
+        {
+          "id": "g19",
+          "tags": [
+            "paraphrase",
+            "of:q01"
+          ],
+          "hard": true,
+          "batch": "A",
+          "recall_at_3": 0.0,
+          "recall_at_5": 0.0,
+          "mrr": 0.0,
+          "ndcg_at_5": 0.0,
+          "top1_score": 0.80733562
+        },
+        {
+          "id": "g20",
+          "tags": [
+            "paraphrase",
+            "of:q03"
+          ],
+          "hard": true,
+          "batch": "A",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.7783618
+        },
+        {
+          "id": "g21",
+          "tags": [
+            "paraphrase",
+            "of:q06"
+          ],
+          "hard": true,
+          "batch": "A",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.81696355
+        },
+        {
+          "id": "g22",
+          "tags": [
+            "paraphrase",
+            "of:q07"
+          ],
+          "hard": true,
+          "batch": "A",
+          "recall_at_3": 0.0,
+          "recall_at_5": 0.0,
+          "mrr": 0.0,
+          "ndcg_at_5": 0.0,
+          "top1_score": 0.74681628
+        },
+        {
+          "id": "g23",
+          "tags": [
+            "paraphrase",
+            "of:q10"
+          ],
+          "hard": true,
+          "batch": "A",
+          "recall_at_3": 0.0,
+          "recall_at_5": 0.0,
+          "mrr": 0.0,
+          "ndcg_at_5": 0.0,
+          "top1_score": 0.7588247
+        },
+        {
+          "id": "g28",
+          "tags": [
+            "batch-b"
+          ],
+          "hard": true,
+          "batch": "B",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.889614105
+        },
+        {
+          "id": "g29",
+          "tags": [
+            "batch-b"
+          ],
+          "hard": true,
+          "batch": "B",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.82476139
+        },
+        {
+          "id": "g30",
+          "tags": [
+            "batch-b",
+            "pdf"
+          ],
+          "hard": true,
+          "batch": "B",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.886736214
+        },
+        {
+          "id": "g31",
+          "tags": [
+            "batch-b",
+            "injection"
+          ],
+          "hard": true,
+          "batch": "B",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.86156535
+        },
+        {
+          "id": "g32",
+          "tags": [
+            "batch-b"
+          ],
+          "hard": true,
+          "batch": "B",
+          "recall_at_3": 0.0,
+          "recall_at_5": 0.0,
+          "mrr": 0.0,
+          "ndcg_at_5": 0.0,
+          "top1_score": 0.7190540400000001
+        },
+        {
+          "id": "g33",
+          "tags": [
+            "batch-b",
+            "version"
+          ],
+          "hard": true,
+          "batch": "B",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.8732641999999999
+        },
+        {
+          "id": "g34",
+          "tags": [
+            "batch-b",
+            "injection"
+          ],
+          "hard": true,
+          "batch": "B",
+          "recall_at_3": 0.0,
+          "recall_at_5": 0.0,
+          "mrr": 0.0,
+          "ndcg_at_5": 0.0,
+          "top1_score": 0.79717493
+        },
+        {
+          "id": "g35",
+          "tags": [
+            "coverage",
+            "topic:repeating"
+          ],
+          "hard": true,
+          "batch": "B",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.88297379
+        },
+        {
+          "id": "g36",
+          "tags": [
+            "coverage",
+            "topic:academic-warning"
+          ],
+          "hard": true,
+          "batch": "B",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.86748445
+        },
+        {
+          "id": "g37",
+          "tags": [
+            "coverage",
+            "topic:semester-freeze"
+          ],
+          "hard": true,
+          "batch": "B",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 0.5,
+          "ndcg_at_5": 0.6309297535714575,
+          "top1_score": 0.85129404
+        },
+        {
+          "id": "g38",
+          "tags": [
+            "coverage",
+            "topic:library-fines",
+            "batch-b"
+          ],
+          "hard": true,
+          "batch": "B",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.8185738300000001
+        },
+        {
+          "id": "g39",
+          "tags": [
+            "coverage",
+            "topic:lab-emergency",
+            "batch-b"
+          ],
+          "hard": true,
+          "batch": "B",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.73175097
+        },
+        {
+          "id": "g40",
+          "tags": [
+            "coverage",
+            "topic:fee-instalments",
+            "batch-b"
+          ],
+          "hard": true,
+          "batch": "B",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.79918206
+        },
+        {
+          "id": "g41",
+          "tags": [
+            "coverage",
+            "topic:late-fee",
+            "batch-b"
+          ],
+          "hard": true,
+          "batch": "B",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.78659058
+        },
+        {
+          "id": "g42",
+          "tags": [
+            "coverage",
+            "topic:rechecking",
+            "batch-b"
+          ],
+          "hard": true,
+          "batch": "B",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.87880647
+        },
+        {
+          "id": "g43",
+          "tags": [
+            "coverage",
+            "topic:generative-ai"
+          ],
+          "hard": true,
+          "batch": "B",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.880639076
+        },
+        {
+          "id": "g44",
+          "tags": [
+            "coverage",
+            "topic:transport",
+            "batch-b",
+            "pdf"
+          ],
+          "hard": true,
+          "batch": "B",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.82573551
+        },
+        {
+          "id": "g45",
+          "tags": [
+            "coverage",
+            "topic:plagiarism"
+          ],
+          "hard": true,
+          "batch": "B",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 0.5,
+          "ndcg_at_5": 0.6309297535714575,
+          "top1_score": 0.82738066
+        }
+      ]
+    },
+    "noisy": {
+      "n": 39,
+      "recall_at_3": 0.7692307692307693,
+      "recall_at_5": 0.7948717948717948,
+      "mrr": 0.6846153846153846,
+      "ndcg_at_5": 0.7122985145627927,
+      "hard": {
+        "n": 23,
+        "recall_at_3": 0.7391304347826086,
+        "recall_at_5": 0.782608695652174,
+        "mrr": 0.7043478260869565,
+        "ndcg_at_5": 0.7238570571468459
+      },
+      "by_batch": {
+        "A": {
+          "n": 21,
+          "recall_at_3": 0.6666666666666666,
+          "recall_at_5": 0.7142857142857143,
+          "mrr": 0.5571428571428572,
+          "ndcg_at_5": 0.5960848838479047
+        },
+        "B": {
+          "n": 18,
+          "recall_at_3": 0.8888888888888888,
+          "recall_at_5": 0.8888888888888888,
+          "mrr": 0.8333333333333334,
+          "ndcg_at_5": 0.847881083730162
+        }
+      },
+      "per_question": [
+        {
+          "id": "q01",
+          "tags": [
+            "ordinary"
+          ],
+          "hard": false,
+          "batch": "A",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.86319298
+        },
+        {
+          "id": "q02",
+          "tags": [
+            "ordinary"
+          ],
+          "hard": false,
+          "batch": "A",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.6937877
+        },
+        {
+          "id": "q03",
+          "tags": [
+            "ordinary"
+          ],
+          "hard": false,
+          "batch": "A",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.881984234
+        },
+        {
+          "id": "q04",
+          "tags": [
+            "ordinary"
+          ],
+          "hard": false,
+          "batch": "A",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.78706956
+        },
+        {
+          "id": "q05",
+          "tags": [
+            "ordinary"
+          ],
+          "hard": false,
+          "batch": "A",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.85907131
+        },
+        {
+          "id": "q06",
+          "tags": [
+            "ordinary"
+          ],
+          "hard": false,
+          "batch": "A",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.84609044
+        },
+        {
+          "id": "q07",
+          "tags": [
+            "ordinary"
+          ],
+          "hard": false,
+          "batch": "A",
+          "recall_at_3": 0.0,
+          "recall_at_5": 0.0,
+          "mrr": 0.0,
+          "ndcg_at_5": 0.0,
+          "top1_score": 0.7172718
+        },
+        {
+          "id": "q08",
+          "tags": [
+            "ordinary"
+          ],
+          "hard": false,
+          "batch": "A",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.80421615
+        },
+        {
+          "id": "q09",
+          "tags": [
+            "ordinary"
+          ],
+          "hard": false,
+          "batch": "A",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 0.3333333333333333,
+          "ndcg_at_5": 0.5,
+          "top1_score": 0.71274114
+        },
+        {
+          "id": "q10",
+          "tags": [
+            "ordinary"
+          ],
+          "hard": false,
+          "batch": "A",
+          "recall_at_3": 0.0,
+          "recall_at_5": 0.0,
+          "mrr": 0.0,
+          "ndcg_at_5": 0.0,
+          "top1_score": 0.82070792
+        },
+        {
+          "id": "q11",
+          "tags": [
+            "ordinary"
+          ],
+          "hard": false,
+          "batch": "A",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 0.3333333333333333,
+          "ndcg_at_5": 0.5,
+          "top1_score": 0.67381436
+        },
+        {
+          "id": "q12",
+          "tags": [
+            "version"
+          ],
+          "hard": false,
+          "batch": "A",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.89502823
+        },
+        {
+          "id": "q13",
+          "tags": [
+            "version"
+          ],
+          "hard": false,
+          "batch": "A",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 0.3333333333333333,
+          "ndcg_at_5": 0.5,
+          "top1_score": 0.7396531
+        },
+        {
+          "id": "q14",
+          "tags": [
+            "exact"
+          ],
+          "hard": false,
+          "batch": "A",
+          "recall_at_3": 0.0,
+          "recall_at_5": 0.0,
+          "mrr": 0.0,
+          "ndcg_at_5": 0.0,
+          "top1_score": 0.71293736
+        },
+        {
+          "id": "q15",
+          "tags": [
+            "exact"
+          ],
+          "hard": false,
+          "batch": "A",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.83795369
+        },
+        {
+          "id": "q18",
+          "tags": [
+            "injection"
+          ],
+          "hard": false,
+          "batch": "A",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 0.5,
+          "ndcg_at_5": 0.6309297535714575,
+          "top1_score": 0.79787976
+        },
+        {
+          "id": "g19",
+          "tags": [
+            "paraphrase",
+            "of:q01"
+          ],
+          "hard": true,
+          "batch": "A",
+          "recall_at_3": 0.0,
+          "recall_at_5": 0.0,
+          "mrr": 0.0,
+          "ndcg_at_5": 0.0,
+          "top1_score": 0.80733562
+        },
+        {
+          "id": "g20",
+          "tags": [
+            "paraphrase",
+            "of:q03"
+          ],
+          "hard": true,
+          "batch": "A",
+          "recall_at_3": 0.0,
+          "recall_at_5": 1.0,
+          "mrr": 0.2,
+          "ndcg_at_5": 0.38685280723454163,
+          "top1_score": 0.68460828
+        },
+        {
+          "id": "g21",
+          "tags": [
+            "paraphrase",
+            "of:q06"
+          ],
+          "hard": true,
+          "batch": "A",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.81696355
+        },
+        {
+          "id": "g22",
+          "tags": [
+            "paraphrase",
+            "of:q07"
+          ],
+          "hard": true,
+          "batch": "A",
+          "recall_at_3": 0.0,
+          "recall_at_5": 0.0,
+          "mrr": 0.0,
+          "ndcg_at_5": 0.0,
+          "top1_score": 0.74681628
+        },
+        {
+          "id": "g23",
+          "tags": [
+            "paraphrase",
+            "of:q10"
+          ],
+          "hard": true,
+          "batch": "A",
+          "recall_at_3": 0.0,
+          "recall_at_5": 0.0,
+          "mrr": 0.0,
+          "ndcg_at_5": 0.0,
+          "top1_score": 0.7588247
+        },
+        {
+          "id": "g28",
+          "tags": [
+            "batch-b"
+          ],
+          "hard": true,
+          "batch": "B",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.889614105
+        },
+        {
+          "id": "g29",
+          "tags": [
+            "batch-b"
+          ],
+          "hard": true,
+          "batch": "B",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.82476139
+        },
+        {
+          "id": "g30",
+          "tags": [
+            "batch-b",
+            "pdf"
+          ],
+          "hard": true,
+          "batch": "B",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.886736214
+        },
+        {
+          "id": "g31",
+          "tags": [
+            "batch-b",
+            "injection"
+          ],
+          "hard": true,
+          "batch": "B",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.86156535
+        },
+        {
+          "id": "g32",
+          "tags": [
+            "batch-b"
+          ],
+          "hard": true,
+          "batch": "B",
+          "recall_at_3": 0.0,
+          "recall_at_5": 0.0,
+          "mrr": 0.0,
+          "ndcg_at_5": 0.0,
+          "top1_score": 0.7190540400000001
+        },
+        {
+          "id": "g33",
+          "tags": [
+            "batch-b",
+            "version"
+          ],
+          "hard": true,
+          "batch": "B",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.8732641999999999
+        },
+        {
+          "id": "g34",
+          "tags": [
+            "batch-b",
+            "injection"
+          ],
+          "hard": true,
+          "batch": "B",
+          "recall_at_3": 0.0,
+          "recall_at_5": 0.0,
+          "mrr": 0.0,
+          "ndcg_at_5": 0.0,
+          "top1_score": 0.79717493
+        },
+        {
+          "id": "g35",
+          "tags": [
+            "coverage",
+            "topic:repeating"
+          ],
+          "hard": true,
+          "batch": "B",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.80837154
+        },
+        {
+          "id": "g36",
+          "tags": [
+            "coverage",
+            "topic:academic-warning"
+          ],
+          "hard": true,
+          "batch": "B",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.86748445
+        },
+        {
+          "id": "g37",
+          "tags": [
+            "coverage",
+            "topic:semester-freeze"
+          ],
+          "hard": true,
+          "batch": "B",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 0.5,
+          "ndcg_at_5": 0.6309297535714575,
+          "top1_score": 0.85129404
+        },
+        {
+          "id": "g38",
+          "tags": [
+            "coverage",
+            "topic:library-fines",
+            "batch-b"
+          ],
+          "hard": true,
+          "batch": "B",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.8185738300000001
+        },
+        {
+          "id": "g39",
+          "tags": [
+            "coverage",
+            "topic:lab-emergency",
+            "batch-b"
+          ],
+          "hard": true,
+          "batch": "B",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.68341696
+        },
+        {
+          "id": "g40",
+          "tags": [
+            "coverage",
+            "topic:fee-instalments",
+            "batch-b"
+          ],
+          "hard": true,
+          "batch": "B",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.79918206
+        },
+        {
+          "id": "g41",
+          "tags": [
+            "coverage",
+            "topic:late-fee",
+            "batch-b"
+          ],
+          "hard": true,
+          "batch": "B",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.78659058
+        },
+        {
+          "id": "g42",
+          "tags": [
+            "coverage",
+            "topic:rechecking",
+            "batch-b"
+          ],
+          "hard": true,
+          "batch": "B",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.87880647
+        },
+        {
+          "id": "g43",
+          "tags": [
+            "coverage",
+            "topic:generative-ai"
+          ],
+          "hard": true,
+          "batch": "B",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.880639076
+        },
+        {
+          "id": "g44",
+          "tags": [
+            "coverage",
+            "topic:transport",
+            "batch-b",
+            "pdf"
+          ],
+          "hard": true,
+          "batch": "B",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.75620914
+        },
+        {
+          "id": "g45",
+          "tags": [
+            "coverage",
+            "topic:plagiarism"
+          ],
+          "hard": true,
+          "batch": "B",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 0.5,
+          "ndcg_at_5": 0.6309297535714575,
+          "top1_score": 0.82505691
+        }
+      ]
+    },
+    "noise_delta": {
+      "recall_at_3": {
+        "clean": 0.7948717948717948,
+        "noisy": 0.7692307692307693,
+        "abs": -0.02564102564102555,
+        "rel": -0.03225806451612892
+      },
+      "recall_at_5": {
+        "clean": 0.7948717948717948,
+        "noisy": 0.7948717948717948,
+        "abs": 0.0,
+        "rel": 0.0
+      },
+      "mrr": {
+        "clean": 0.7564102564102564,
+        "noisy": 0.6846153846153846,
+        "abs": -0.07179487179487176,
+        "rel": -0.0949152542372881
+      },
+      "ndcg_at_5": {
+        "clean": 0.7664817759157532,
+        "noisy": 0.7122985145627927,
+        "abs": -0.05418326135296048,
+        "rel": -0.070690867096253
+      }
+    },
+    "noise_seed": 1234,
+    "noise_examples": {
+      "q01": "What is the normal course load per regular semester, and may a final-year student take more?",
+      "q02": "What is the largest shaare of a degree program's creit hours that can be exempted for courses studeid at anothzr university?",
+      "q03": "How many students must register for a summer course, or the course is dropped?"
+    },
+    "retrieval_ms_median": 251.9,
+    "retrieval_ms_p95": 339.3
+  },
+  "e2e": {
+    "n": 50,
+    "abstention_correctness": 0.9090909090909091,
+    "abstention_n": 11,
+    "abstention_failed": [
+      "g27"
+    ],
+    "false_abstention_rate": 0.28205128205128205,
+    "citation_validity": 1.0,
+    "citations_total": 37,
+    "faithfulness_overlap_mean": 0.9097701149425287,
+    "faithfulness_supported_rate": 0.9310344827586207,
+    "support_threshold": 0.6,
+    "answered_n": 29,
+    "expect_hit_rate": 0.7407407407407407,
+    "fallback_rate": 0.04,
+    "latency_p50_s": 57.7,
+    "latency_p95_s": 179.8,
+    "per_question": [
+      {
+        "id": "q01",
+        "kind": "answerable",
+        "batch": "A",
+        "hard": false,
+        "trace_id": "d91b01438fd5453d873ceb62edad4e48",
+        "outcome": "answered",
+        "answered": true,
+        "answer": "5 courses, with an additional course for final-year students",
+        "citations": [
+          {
+            "source": "academic-rules-handbook-jun-2026.pdf",
+            "section": "4.3 The normal course load is 5 courses. A final year student may",
+            "page": 19
+          }
+        ],
+        "overlap": 0.8,
+        "citations_valid": 1,
+        "citations_total": 1,
+        "seconds": 104.47,
+        "expect_hit": true
+      },
+      {
+        "id": "q02",
+        "kind": "answerable",
+        "batch": "A",
+        "hard": false,
+        "trace_id": "21b66fe57a9b425988e70625e5972509",
+        "outcome": "answered",
+        "answered": true,
+        "answer": "50%",
+        "citations": [
+          {
+            "source": "academic-rules-handbook-jun-2026.pdf",
+            "section": "3.7 Exemption of courses studied at another University cannot be",
+            "page": 14
+          }
+        ],
+        "overlap": 1.0,
+        "citations_valid": 1,
+        "citations_total": 1,
+        "seconds": 45.47,
+        "expect_hit": true
+      },
+      {
+        "id": "q03",
+        "kind": "answerable",
+        "batch": "A",
+        "hard": false,
+        "trace_id": "5fcd6a5facff40e29ce9a0fe53a0a820",
+        "outcome": "answered",
+        "answered": true,
+        "answer": "10",
+        "citations": [
+          {
+            "source": "academic-rules-handbook-jun-2026.pdf",
+            "section": "6.11 A minimum of TEN (10) students should register in a summer",
+            "page": 29
+          }
+        ],
+        "overlap": 1.0,
+        "citations_valid": 1,
+        "citations_total": 1,
+        "seconds": 67.86,
+        "expect_hit": false
+      },
+      {
+        "id": "q04",
+        "kind": "answerable",
+        "batch": "A",
+        "hard": false,
+        "trace_id": "c7e2c9e4fcf845ce8f9350f01aa37154",
+        "outcome": "fallback",
+        "answered": false,
+        "answer": "I could not produce a verified answer from the documents right now. Please try again, or rephrase the question.",
+        "citations": [],
+        "overlap": null,
+        "citations_valid": 0,
+        "citations_total": 0,
+        "seconds": 505.07,
+        "expect_hit": null
+      },
+      {
+        "id": "q05",
+        "kind": "answerable",
+        "batch": "A",
+        "hard": false,
+        "trace_id": "453342f91bbf4b25a49592374de621e9",
+        "outcome": "answered",
+        "answered": true,
+        "answer": "two days",
+        "citations": [
+          {
+            "source": "student-handbook-jun-2026.pdf",
+            "section": "7. Students who have missed classes due to any",
+            "page": 30
+          },
+          {
+            "source": "academic-rules-handbook-jun-2026.pdf",
+            "section": "1.14 In case of any unavoidable situation, a class may be",
+            "page": 8
+          }
+        ],
+        "overlap": 1.0,
+        "citations_valid": 2,
+        "citations_total": 2,
+        "seconds": 136.39,
+        "expect_hit": false
+      },
+      {
+        "id": "q06",
+        "kind": "answerable",
+        "batch": "A",
+        "hard": false,
+        "trace_id": "2f0786705d004eafb810b0d3194ab010",
+        "outcome": "fallback",
+        "answered": false,
+        "answer": "I could not produce a verified answer from the documents right now. Please try again, or rephrase the question.",
+        "citations": [],
+        "overlap": null,
+        "citations_valid": 0,
+        "citations_total": 0,
+        "seconds": 146.0,
+        "expect_hit": null
+      },
+      {
+        "id": "q07",
+        "kind": "answerable",
+        "batch": "A",
+        "hard": false,
+        "trace_id": "bd23fd0294d84c4e9b104c7968694326",
+        "outcome": "abstained",
+        "answered": false,
+        "answer": "N/A",
+        "citations": [],
+        "overlap": null,
+        "citations_valid": 0,
+        "citations_total": 0,
+        "seconds": 52.45,
+        "expect_hit": null
+      },
+      {
+        "id": "q08",
+        "kind": "answerable",
+        "batch": "A",
+        "hard": false,
+        "trace_id": "d44e1f9bf54b4521b5fe317bddbe6933",
+        "outcome": "answered",
+        "answered": true,
+        "answer": "Adequate",
+        "citations": [
+          {
+            "source": "grading-page.html",
+            "section": "Letter grades for MBA & MS programs",
+            "page": 1
+          }
+        ],
+        "overlap": 1.0,
+        "citations_valid": 1,
+        "citations_total": 1,
+        "seconds": 121.73,
+        "expect_hit": false
+      },
+      {
+        "id": "q09",
+        "kind": "answerable",
+        "batch": "A",
+        "hard": false,
+        "trace_id": "cc19024141174d37b9f38043b9bb2bfa",
+        "outcome": "answered",
+        "answered": true,
+        "answer": "19",
+        "citations": [
+          {
+            "source": "annual-report-2023-24.pdf",
+            "section": "Chapter-2 Faculty and Staff",
+            "page": 13
+          }
+        ],
+        "overlap": 1.0,
+        "citations_valid": 1,
+        "citations_total": 1,
+        "seconds": 364.62,
+        "expect_hit": true
+      },
+      {
+        "id": "q10",
+        "kind": "answerable",
+        "batch": "A",
+        "hard": false,
+        "trace_id": "1ed7bce7b5af41d58f6ef2691d43841a",
+        "outcome": "abstained",
+        "answered": false,
+        "answer": "The documents do not specify how often a faculty member's technical start-up must report its progress to the university.",
+        "citations": [],
+        "overlap": null,
+        "citations_valid": 0,
+        "citations_total": 0,
+        "seconds": 153.57,
+        "expect_hit": null
+      },
+      {
+        "id": "q11",
+        "kind": "answerable",
+        "batch": "A",
+        "hard": false,
+        "trace_id": "5d24b5cea4a8407ab3cb03a8d17626a9",
+        "outcome": "answered",
+        "answered": true,
+        "answer": "75%",
+        "citations": [
+          {
+            "source": "prospectus-2026-academic-rules-and-regulations.pdf",
+            "section": "1. Attendance Requirement",
+            "page": 1
+          }
+        ],
+        "overlap": 1.0,
+        "citations_valid": 1,
+        "citations_total": 1,
+        "seconds": 59.05,
+        "expect_hit": true
+      },
+      {
+        "id": "q12",
+        "kind": "answerable",
+        "batch": "A",
+        "hard": false,
+        "trace_id": "4a63dd1c67384f6d8f1c96f1c4913931",
+        "outcome": "answered",
+        "answered": true,
+        "answer": "The last day of the makeup week of every semester",
+        "citations": [
+          {
+            "source": "academic-rules-handbook-jun-2026.pdf",
+            "section": "4.25 The deadline to withdraw from a course is the last day of the",
+            "page": 23
+          }
+        ],
+        "overlap": 1.0,
+        "citations_valid": 1,
+        "citations_total": 1,
+        "seconds": 72.34,
+        "expect_hit": true
+      },
+      {
+        "id": "q13",
+        "kind": "answerable",
+        "batch": "A",
+        "hard": false,
+        "trace_id": "2b91d97b31754447afac864b7446e1fb",
+        "outcome": "answered",
+        "answered": true,
+        "answer": "The last day of classes",
+        "citations": [
+          {
+            "source": "undergraduate-academic-rules-aug-2023.pdf",
+            "section": "4.25 Deadline to withdraw from a course is the last day of classes.",
+            "page": 16
+          }
+        ],
+        "overlap": 1.0,
+        "citations_valid": 1,
+        "citations_total": 1,
+        "seconds": 67.25,
+        "expect_hit": true
+      },
+      {
+        "id": "q14",
+        "kind": "answerable",
+        "batch": "A",
+        "hard": false,
+        "trace_id": "4ccbc4375d484115a5fcf641f75d5534",
+        "outcome": "abstained",
+        "answered": false,
+        "answer": "The cumulative grade points is the weighted average of all the courses taken so far.",
+        "citations": [],
+        "overlap": null,
+        "citations_valid": 0,
+        "citations_total": 0,
+        "seconds": 32.38,
+        "expect_hit": null
+      },
+      {
+        "id": "q15",
+        "kind": "answerable",
+        "batch": "A",
+        "hard": false,
+        "trace_id": "feb6bf956d1f416c9b5a810dcffea5ed",
+        "outcome": "answered",
+        "answered": true,
+        "answer": "Rs. 12,000",
+        "citations": [
+          {
+            "source": "fee-structure-page.html",
+            "section": "Tuition Fee (w.e.f. Fall 2026 semester)",
+            "page": 1
+          }
+        ],
+        "overlap": 1.0,
+        "citations_valid": 1,
+        "citations_total": 1,
+        "seconds": 40.38,
+        "expect_hit": true
+      },
+      {
+        "id": "q16",
+        "kind": "unanswerable",
+        "batch": "A",
+        "hard": false,
+        "trace_id": "a892369dfce648fa937d4a83a901b128",
+        "outcome": "abstained",
+        "answered": false,
+        "answer": "The documents in the corpus do not cover this question.",
+        "citations": [],
+        "overlap": null,
+        "citations_valid": 0,
+        "citations_total": 0,
+        "seconds": 0.35,
+        "expect_hit": null
+      },
+      {
+        "id": "q17",
+        "kind": "unanswerable",
+        "batch": "A",
+        "hard": false,
+        "trace_id": "49e09ffb61ad408d944327a91e541a19",
+        "outcome": "abstained",
+        "answered": false,
+        "answer": "The documents in the corpus do not cover this question.",
+        "citations": [],
+        "overlap": null,
+        "citations_valid": 0,
+        "citations_total": 0,
+        "seconds": 0.35,
+        "expect_hit": null
+      },
+      {
+        "id": "q18",
+        "kind": "answerable",
+        "batch": "A",
+        "hard": false,
+        "trace_id": "89110fa549074cc093c46b5dd71ae3b5",
+        "outcome": "answered",
+        "answered": true,
+        "answer": "100% attendance is required, with a maximum of 20% absence condoned for genuine reasons.",
+        "citations": [
+          {
+            "source": "prospectus-2026-academic-rules-and-regulations.pdf",
+            "section": "1. Attendance Requirement",
+            "page": 1
+          },
+          {
+            "source": "academic-rules-handbook-jun-2026.pdf",
+            "section": "1.21 Students are required to maintain 100% attendance in",
+            "page": 10
+          }
+        ],
+        "overlap": 1.0,
+        "citations_valid": 2,
+        "citations_total": 2,
+        "seconds": 112.69,
+        "expect_hit": true
+      },
+      {
+        "id": "g19",
+        "kind": "answerable",
+        "batch": "A",
+        "hard": true,
+        "trace_id": "ca3a35427a7840e7a68c848aefce6796",
+        "outcome": "abstained",
+        "answered": false,
+        "answer": "The number of courses a student can enroll in during an ordinary semester is not explicitly stated in the provided evidence.",
+        "citations": [],
+        "overlap": null,
+        "citations_valid": 0,
+        "citations_total": 0,
+        "seconds": 84.88,
+        "expect_hit": null
+      },
+      {
+        "id": "g20",
+        "kind": "answerable",
+        "batch": "A",
+        "hard": true,
+        "trace_id": "b0a4a46d2f744b6e934d6a3d6dd6b246",
+        "outcome": "answered",
+        "answered": true,
+        "answer": "The course shall be dropped if fewer than 10 students register.",
+        "citations": [
+          {
+            "source": "academic-rules-handbook-jun-2026.pdf",
+            "section": "6.11 A minimum of TEN (10) students should register in a summer",
+            "page": 29
+          }
+        ],
+        "overlap": 0.8333333333333334,
+        "citations_valid": 1,
+        "citations_total": 1,
+        "seconds": 62.3,
+        "expect_hit": false
+      },
+      {
+        "id": "g21",
+        "kind": "answerable",
+        "batch": "A",
+        "hard": true,
+        "trace_id": "bb6eb60dca6d4ebc874ad7344e7c022b",
+        "outcome": "answered",
+        "answered": true,
+        "answer": "No",
+        "citations": [
+          {
+            "source": "student-handbook-jun-2026.pdf",
+            "section": "1. Mobile Phones, Smart Watches and all electronic",
+            "page": 26
+          },
+          {
+            "source": "student-handbook-jun-2026.pdf",
+            "section": "V - EXAMINATION RULES",
+            "page": 26
+          },
+          {
+            "source": "b11-examination-guidelines-2026.md",
+            "section": "1.1 Students must be seated 15 minutes before the start of the paper and must",
+            "page": 1
+          }
+        ],
+        "overlap": 0.0,
+        "citations_valid": 3,
+        "citations_total": 3,
+        "seconds": 52.64,
+        "expect_hit": null
+      },
+      {
+        "id": "g22",
+        "kind": "answerable",
+        "batch": "A",
+        "hard": true,
+        "trace_id": "240faf6ccc184819afb38887e4150606",
+        "outcome": "abstained",
+        "answered": false,
+        "answer": "None of the tuition fee is refunded for a withdrawn course.",
+        "citations": [],
+        "overlap": null,
+        "citations_valid": 0,
+        "citations_total": 0,
+        "seconds": 40.71,
+        "expect_hit": null
+      },
+      {
+        "id": "g23",
+        "kind": "answerable",
+        "batch": "A",
+        "hard": true,
+        "trace_id": "5aac797ab30e47418c56b86a4bfa5d28",
+        "outcome": "abstained",
+        "answered": false,
+        "answer": "The documents do not specify the frequency of reporting, but it is implied that the start-up must meet the mandatory periodic reporting requirements to avoid termination of the agreement.",
+        "citations": [],
+        "overlap": null,
+        "citations_valid": 0,
+        "citations_total": 0,
+        "seconds": 54.77,
+        "expect_hit": null
+      },
+      {
+        "id": "g24",
+        "kind": "unanswerable",
+        "batch": "A",
+        "hard": false,
+        "trace_id": "6468de24739e40faa58aa0e94ed68cc8",
+        "outcome": "abstained",
+        "answered": false,
+        "answer": "The documents in the corpus do not cover this question.",
+        "citations": [],
+        "overlap": null,
+        "citations_valid": 0,
+        "citations_total": 0,
+        "seconds": 0.25,
+        "expect_hit": null
+      },
+      {
+        "id": "g25",
+        "kind": "unanswerable",
+        "batch": "A",
+        "hard": false,
+        "trace_id": "7e9eccd975b14aeeaf4552b24f8f9ec4",
+        "outcome": "abstained",
+        "answered": false,
+        "answer": "The documents in the corpus do not cover this question.",
+        "citations": [],
+        "overlap": null,
+        "citations_valid": 0,
+        "citations_total": 0,
+        "seconds": 0.32,
+        "expect_hit": null
+      },
+      {
+        "id": "g26",
+        "kind": "unanswerable",
+        "batch": "A",
+        "hard": false,
+        "trace_id": "b0ec421601f24897bee1bcce07228f01",
+        "outcome": "abstained",
+        "answered": false,
+        "answer": "The documents in the corpus do not cover this question.",
+        "citations": [],
+        "overlap": null,
+        "citations_valid": 0,
+        "citations_total": 0,
+        "seconds": 0.3,
+        "expect_hit": null
+      },
+      {
+        "id": "g27",
+        "kind": "unanswerable",
+        "batch": "A",
+        "hard": false,
+        "trace_id": "1e1ed054e4df4041a31e34d08826916e",
+        "outcome": "answered",
+        "answered": true,
+        "answer": "Employees Health Insurance Scheme",
+        "citations": [
+          {
+            "source": "annual-report-2023-24.pdf",
+            "section": "Chapter-9 Health Care Facilities",
+            "page": 84
+          }
+        ],
+        "overlap": 1.0,
+        "citations_valid": 1,
+        "citations_total": 1,
+        "seconds": 170.31,
+        "expect_hit": null
+      },
+      {
+        "id": "g28",
+        "kind": "answerable",
+        "batch": "B",
+        "hard": true,
+        "trace_id": "36c30d58c23144ad90eebc6873d234de",
+        "outcome": "answered",
+        "answered": true,
+        "answer": "6",
+        "citations": [
+          {
+            "source": "b01-library-policy-2026.md",
+            "section": "1.1 A registered undergraduate student may borrow at most 6 books at one time",
+            "page": 1
+          }
+        ],
+        "overlap": 0.0,
+        "citations_valid": 1,
+        "citations_total": 1,
+        "seconds": 157.05,
+        "expect_hit": false
+      },
+      {
+        "id": "g29",
+        "kind": "answerable",
+        "batch": "B",
+        "hard": true,
+        "trace_id": "9d4f4e5db4cc430a83af3307d0e5046a",
+        "outcome": "answered",
+        "answered": true,
+        "answer": "25",
+        "citations": [
+          {
+            "source": "b02-lab-safety-rules-2026.md",
+            "section": "2.1 A laboratory session has at most 25 students and at least one instructor",
+            "page": 1
+          }
+        ],
+        "overlap": 1.0,
+        "citations_valid": 1,
+        "citations_total": 1,
+        "seconds": 74.29,
+        "expect_hit": false
+      },
+      {
+        "id": "g30",
+        "kind": "answerable",
+        "batch": "B",
+        "hard": true,
+        "trace_id": "77354c1090e444e49c8de9ea0338e77d",
+        "outcome": "answered",
+        "answered": true,
+        "answer": "Rs 18,000",
+        "citations": [
+          {
+            "source": "b06-transport-policy-2026.pdf",
+            "section": "2.1 The transport fee is Rs 18,000 per semester. A student may withdraw from the",
+            "page": 1
+          }
+        ],
+        "overlap": 1.0,
+        "citations_valid": 1,
+        "citations_total": 1,
+        "seconds": 39.32,
+        "expect_hit": true
+      },
+      {
+        "id": "g31",
+        "kind": "answerable",
+        "batch": "B",
+        "hard": true,
+        "trace_id": "9d818f8b3b9a4372b1710840faa871f5",
+        "outcome": "abstained",
+        "answered": false,
+        "answer": "The documents do not cover the specific timeframe for publishing examination results after the last paper.",
+        "citations": [],
+        "overlap": null,
+        "citations_valid": 0,
+        "citations_total": 0,
+        "seconds": 49.86,
+        "expect_hit": null
+      },
+      {
+        "id": "g32",
+        "kind": "answerable",
+        "batch": "B",
+        "hard": true,
+        "trace_id": "1f63fe4e49374d6bbedd2716ec61e045",
+        "outcome": "abstained",
+        "answered": false,
+        "answer": "There is no information about the gymnasium's hours in the provided evidence.",
+        "citations": [],
+        "overlap": null,
+        "citations_valid": 0,
+        "citations_total": 0,
+        "seconds": 33.74,
+        "expect_hit": null
+      },
+      {
+        "id": "g33",
+        "kind": "answerable",
+        "batch": "B",
+        "hard": true,
+        "trace_id": "00e22fbfd0a94ca68013e3a032d93c5b",
+        "outcome": "answered",
+        "answered": true,
+        "answer": "Rs 28,500",
+        "citations": [
+          {
+            "source": "b10-fee-structure-amendment-2027.md",
+            "section": "1.1 The tuition fee per credit hour for undergraduate programs is Rs 28,500 from",
+            "page": 1
+          }
+        ],
+        "overlap": 1.0,
+        "citations_valid": 1,
+        "citations_total": 1,
+        "seconds": 30.36,
+        "expect_hit": true
+      },
+      {
+        "id": "g34",
+        "kind": "answerable",
+        "batch": "B",
+        "hard": true,
+        "trace_id": "71f41f307d1840ca8f31bd453107cfa5",
+        "outcome": "abstained",
+        "answered": false,
+        "answer": "false",
+        "citations": [],
+        "overlap": null,
+        "citations_valid": 0,
+        "citations_total": 0,
+        "seconds": 102.2,
+        "expect_hit": null
+      },
+      {
+        "id": "g35",
+        "kind": "answerable",
+        "batch": "B",
+        "hard": true,
+        "trace_id": "7fa1e009eba945219d9b1b1ddbdde208",
+        "outcome": "answered",
+        "answered": true,
+        "answer": "The new grade",
+        "citations": [
+          {
+            "source": "academic-rules-handbook-jun-2026.pdf",
+            "section": "5.11 If a student repeats a failed course, the new grade will be used",
+            "page": 25
+          }
+        ],
+        "overlap": 1.0,
+        "citations_valid": 1,
+        "citations_total": 1,
+        "seconds": 95.11,
+        "expect_hit": true
+      },
+      {
+        "id": "g36",
+        "kind": "answerable",
+        "batch": "B",
+        "hard": true,
+        "trace_id": "6e950614165042da930d830a047720af",
+        "outcome": "answered",
+        "answered": true,
+        "answer": "2.00",
+        "citations": [
+          {
+            "source": "academic-rules-handbook-jun-2026.pdf",
+            "section": "5.4 Minimum CGPA required to avoid academic warning is 2.00",
+            "page": 24
+          }
+        ],
+        "overlap": 1.0,
+        "citations_valid": 1,
+        "citations_total": 1,
+        "seconds": 95.73,
+        "expect_hit": true
+      },
+      {
+        "id": "g37",
+        "kind": "answerable",
+        "batch": "B",
+        "hard": true,
+        "trace_id": "2e118dfd72ff48e89b443bcafd5369de",
+        "outcome": "answered",
+        "answered": true,
+        "answer": "2 semesters",
+        "citations": [
+          {
+            "source": "prospectus-2026-academic-rules-and-regulations.pdf",
+            "section": "21. Semester Freeze",
+            "page": 3
+          },
+          {
+            "source": "academic-rules-handbook-jun-2026.pdf",
+            "section": "4.18 A student may request freezing of his/her admission for up to",
+            "page": 22
+          }
+        ],
+        "overlap": 1.0,
+        "citations_valid": 2,
+        "citations_total": 2,
+        "seconds": 101.01,
+        "expect_hit": true
+      },
+      {
+        "id": "g38",
+        "kind": "answerable",
+        "batch": "B",
+        "hard": true,
+        "trace_id": "2901d3d4537d415baf4c48fb4288316e",
+        "outcome": "answered",
+        "answered": true,
+        "answer": "2.1 A book returned late is charged a fine of Rs 20 per day, up to a maximum equal to the replacement cost of the book.",
+        "citations": [
+          {
+            "source": "b01-library-policy-2026.md",
+            "section": "2.1 A book returned late is charged a fine of Rs 20 per day, up to a maximum",
+            "page": 1
+          }
+        ],
+        "overlap": 1.0,
+        "citations_valid": 1,
+        "citations_total": 1,
+        "seconds": 86.61,
+        "expect_hit": true
+      },
+      {
+        "id": "g39",
+        "kind": "answerable",
+        "batch": "B",
+        "hard": true,
+        "trace_id": "171b6ece98cb4e6eaa015b366e947e13",
+        "outcome": "answered",
+        "answered": true,
+        "answer": "switch off the equipment, leave through the nearest marked exit, and gather at the assembly point behind the main block",
+        "citations": [
+          {
+            "source": "b02-lab-safety-rules-2026.md",
+            "section": "3.1 In case of fire, switch off the equipment, leave through the nearest marked",
+            "page": 1
+          }
+        ],
+        "overlap": 1.0,
+        "citations_valid": 1,
+        "citations_total": 1,
+        "seconds": 51.49,
+        "expect_hit": true
+      },
+      {
+        "id": "g40",
+        "kind": "answerable",
+        "batch": "B",
+        "hard": true,
+        "trace_id": "56ea4fb48bb84c10aff3149e17944005",
+        "outcome": "answered",
+        "answered": true,
+        "answer": "A student may pay the semester fee in two equal instalments.",
+        "citations": [
+          {
+            "source": "b10-fee-structure-amendment-2027.md",
+            "section": "2.1 A student may pay the semester fee in two equal instalments. The second",
+            "page": 1
+          }
+        ],
+        "overlap": 1.0,
+        "citations_valid": 1,
+        "citations_total": 1,
+        "seconds": 34.73,
+        "expect_hit": true
+      },
+      {
+        "id": "g41",
+        "kind": "answerable",
+        "batch": "B",
+        "hard": true,
+        "trace_id": "5942c473ac9f452abc721b6ad05ad122",
+        "outcome": "answered",
+        "answered": true,
+        "answer": "Rs 1,000",
+        "citations": [
+          {
+            "source": "b10-fee-structure-amendment-2027.md",
+            "section": "2.2 A late payment is charged Rs 1,000 per week up to a maximum of four weeks,",
+            "page": 1
+          }
+        ],
+        "overlap": 1.0,
+        "citations_valid": 1,
+        "citations_total": 1,
+        "seconds": 37.18,
+        "expect_hit": false
+      },
+      {
+        "id": "g42",
+        "kind": "answerable",
+        "batch": "B",
+        "hard": true,
+        "trace_id": "fb0a4847be074012a1eb73ad8535c8be",
+        "outcome": "answered",
+        "answered": true,
+        "answer": "5 days",
+        "citations": [
+          {
+            "source": "b11-examination-guidelines-2026.md",
+            "section": "2.3 A student may apply for rechecking of one answer script within 5 days of the",
+            "page": 1
+          }
+        ],
+        "overlap": 1.0,
+        "citations_valid": 1,
+        "citations_total": 1,
+        "seconds": 35.35,
+        "expect_hit": true
+      },
+      {
+        "id": "g43",
+        "kind": "answerable",
+        "batch": "B",
+        "hard": true,
+        "trace_id": "31d54c7f2a6042f2a61a5ef0e61c90b7",
+        "outcome": "answered",
+        "answered": true,
+        "answer": "Students are allowed and sometimes encouraged to use generative AI tools like ChatGPT for completing course assignments.",
+        "citations": [
+          {
+            "source": "academic-rules-handbook-jun-2026.pdf",
+            "section": "6.1 Use in Non-Lab Courses:",
+            "page": 49
+          },
+          {
+            "source": "student-handbook-jun-2026.pdf",
+            "section": "6.1 Use in Non-Lab Courses:",
+            "page": 56
+          }
+        ],
+        "overlap": 1.0,
+        "citations_valid": 2,
+        "citations_total": 2,
+        "seconds": 179.8,
+        "expect_hit": true
+      },
+      {
+        "id": "g44",
+        "kind": "answerable",
+        "batch": "B",
+        "hard": true,
+        "trace_id": "667e0667405a426d9871aa629c41a9b4",
+        "outcome": "answered",
+        "answered": true,
+        "answer": "3.1 Students must show the transport card when boarding. The card is not transferable. 2.2 A lost transport card is replaced for Rs 500 on request to the transport office.",
+        "citations": [
+          {
+            "source": "b06-transport-policy-2026.pdf",
+            "section": "3.1 Students must show the transport card when boarding. The card is not",
+            "page": 1
+          },
+          {
+            "source": "b06-transport-policy-2026.pdf",
+            "section": "2.2 A lost transport card is replaced for Rs 500 on request to the transport",
+            "page": 1
+          }
+        ],
+        "overlap": 1.0,
+        "citations_valid": 2,
+        "citations_total": 2,
+        "seconds": 57.7,
+        "expect_hit": true
+      },
+      {
+        "id": "g45",
+        "kind": "answerable",
+        "batch": "B",
+        "hard": true,
+        "trace_id": "2f567890b1c140f49ec0546f974250ce",
+        "outcome": "answered",
+        "answered": true,
+        "answer": "Award of zero marks in the test, assignment, midterm, or final examination is the least punishment mentioned in the evidence for a student who uses unfair means in an assignment.",
+        "citations": [
+          {
+            "source": "prospectus-2026-academic-rules-and-regulations.pdf",
+            "section": "32. Academic Dishonesty",
+            "page": 5
+          },
+          {
+            "source": "student-handbook-jun-2026.pdf",
+            "section": "Academic Dishonesty",
+            "page": 24
+          }
+        ],
+        "overlap": 0.75,
+        "citations_valid": 2,
+        "citations_total": 2,
+        "seconds": 98.78,
+        "expect_hit": true
+      },
+      {
+        "id": "g46",
+        "kind": "unanswerable",
+        "batch": "B",
+        "hard": false,
+        "trace_id": "04735665d0e74730a17b9e25fd67c4c9",
+        "outcome": "abstained",
+        "answered": false,
+        "answer": "The documents in the corpus do not cover this question.",
+        "citations": [],
+        "overlap": null,
+        "citations_valid": 0,
+        "citations_total": 0,
+        "seconds": 0.31,
+        "expect_hit": null
+      },
+      {
+        "id": "g47",
+        "kind": "unanswerable",
+        "batch": "B",
+        "hard": false,
+        "trace_id": "01bdb9c5aba54e81bbb485dc7bf0dc70",
+        "outcome": "abstained",
+        "answered": false,
+        "answer": "None",
+        "citations": [],
+        "overlap": null,
+        "citations_valid": 0,
+        "citations_total": 0,
+        "seconds": 154.75,
+        "expect_hit": null
+      },
+      {
+        "id": "g48",
+        "kind": "unanswerable",
+        "batch": "B",
+        "hard": false,
+        "trace_id": "977ea062ea7b46d591fa347c199bfc57",
+        "outcome": "abstained",
+        "answered": false,
+        "answer": "The documents in the corpus do not cover this question.",
+        "citations": [],
+        "overlap": null,
+        "citations_valid": 0,
+        "citations_total": 0,
+        "seconds": 0.28,
+        "expect_hit": null
+      },
+      {
+        "id": "g49",
+        "kind": "unanswerable",
+        "batch": "B",
+        "hard": false,
+        "trace_id": "bb275aa6aed5486996433e8c2d3a0634",
+        "outcome": "abstained",
+        "answered": false,
+        "answer": "The documents in the corpus do not cover this question.",
+        "citations": [],
+        "overlap": null,
+        "citations_valid": 0,
+        "citations_total": 0,
+        "seconds": 0.3,
+        "expect_hit": null
+      },
+      {
+        "id": "g50",
+        "kind": "unanswerable",
+        "batch": "B",
+        "hard": false,
+        "trace_id": "463b89b612654e648ac772b2db86e288",
+        "outcome": "abstained",
+        "answered": false,
+        "answer": "The documents in the corpus do not cover this question.",
+        "citations": [],
+        "overlap": null,
+        "citations_valid": 0,
+        "citations_total": 0,
+        "seconds": 0.3,
+        "expect_hit": null
+      }
+    ]
+  }
+}

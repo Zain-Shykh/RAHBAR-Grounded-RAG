@@ -1,0 +1,52 @@
+$ kubectl rollout history deployment/api -n rahbar   # before the undo
+7         <none>
+8         <none>
+9         <none>
+
+$ make rollback   # kubectl rollout undo deployment/api + rollout status
+Waiting for deployment "api" rollout to finish: 2 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "api" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "api" rollout to finish: 1 old replicas are pending termination...
+deployment "api" successfully rolled out
+$ kubectl rollout history deployment/api -n rahbar   # after: revision 9 (rahbar_bad) became revision 10 = the rahbar_cand template
+7         <none>
+9         <none>
+10        <none>
+
+$ kubectl get deploy api -n rahbar -o jsonpath={.spec.template.spec.containers[0].env}
+[{"name":"LLM_API_KEY","valueFrom":{"secretKeyRef":{"key":"LLM_API_KEY","name":"rahbar-secret","optional":true}}},{"name":"CHROMA_COLLECTION","value":"rahbar_cand"}]
+$ kubectl get deploy api -n rahbar
+NAME   READY   UP-TO-DATE   AVAILABLE   AGE
+api    3/3     3            3           14d
+api-797c696d74-4t2tz             1/1     Terminating   0              4m52s
+api-797c696d74-gw56r             1/1     Terminating   0              5m14s
+api-candidate-65c4cb6b4d-hjn4t   1/1     Running       0              74m
+api-ccf99cdf5-729k2              1/1     Running       0              23s
+api-ccf99cdf5-82p62              1/1     Running       0              34s
+api-ccf99cdf5-bh2vm              1/1     Running       0              12s
+$ [end state] kubectl rollout undo deployment/api --to-revision=7 -n rahbar   # revision 7 = the original template (CHROMA_COLLECTION from the ConfigMap = rahbar); the whole experiment is reversed
+Warning: resource deployments/api was previously managed with 'kubectl apply'. Rolling back will not update the kubectl.kubernetes.io/last-applied-configuration annotation, which may cause unexpected behavior on future 'kubectl apply' operations. Consider using 'kubectl apply' with your previous configuration file instead.
+deployment.apps/api rolled back
+Waiting for deployment "api" rollout to finish: 1 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 1 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 1 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 2 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 2 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 2 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "api" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "api" rollout to finish: 1 old replicas are pending termination...
+deployment "api" successfully rolled out
+$ kubectl rollout history deployment/api -n rahbar | tail -4
+9         <none>
+10        <none>
+11        <none>
+
+$ kubectl exec deploy/api -- env | grep CHROMA_COLLECTION
+CHROMA_COLLECTION=rahbar
+$ kubectl get deploy api -n rahbar
+NAME   READY   UP-TO-DATE   AVAILABLE   AGE
+api    3/3     3            3           14d
+$ curl -s localhost... /api/retrieve via Ingress: index_id of the live api
+{'index_id': '20261121T005113Z-a45667', 'embed_model': 'nomic-embed-text'}

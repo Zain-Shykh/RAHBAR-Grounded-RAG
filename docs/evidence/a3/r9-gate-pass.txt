@@ -1,0 +1,36 @@
+$ make gate-config; make eval-job API=http://api-candidate:8000 LABEL=cand-300-50 SUBSET=all   # candidate rahbar_cand (CHUNK=300 OVERLAP=50) vs baseline-ab
+$ kubectl get job eval -n rahbar
+NAME   STATUS     COMPLETIONS   DURATION   AGE
+eval   Complete   1/1           63m        63m
+$ kubectl logs job/eval -n rahbar | tail -9   # the gate lines
+baseline /results/baseline.json
+candidate /results/suite-20261121T053953Z-cand-300-50.json
+PASS  component.clean.recall_at_5: candidate 0.7949, limit >= baseline 0.7949 - 0.02   (assignment example: no more than 2 points lost; retrieval two-run difference is 0.0 (f3-stochasticity.txt), so any loss is real)
+PASS  component.clean.mrr: candidate 0.7436, limit >= baseline 0.7564 - 0.03   (baseline 0.7564 over 39 questions: one question moving rank 1 to 2 costs 0.013, so 0.03 tolerates two such moves; two-run difference 0.0)
+PASS  e2e.faithfulness_supported_rate: candidate 0.8966, limit >= baseline 0.9000 - 0.05   (baseline 0.900 (n=30 answered); two-run noise is 1 answer = 0.033-0.037 (f3-stochasticity.txt), 0.05 allows 1.5 answers; replaces the absolute 0.70 placeholder (set from the 0.833 batch-A-only baseline), see docs/evidence/r7-decision.md)
+PASS  e2e.abstention_correctness: candidate 1.0000, limit >= baseline 0.9091   (assignment: not lower than the baseline (0.909, n=11))
+PASS  e2e.citation_validity: candidate 1.0000, limit >= 0.95   (A02 gate value; baseline 1.000 over 39 citations)
+PASS  e2e.latency_p95_s: candidate 188.5700, limit <= 300.0   (p95 is noisy on this CPU (184.5 s vs 113.1 s on two identical runs, f3-stochasticity.txt; 181.7 s on baseline-ab), so no relative rule; 300 s is the API model timeout, a slower p95 means fallbacks)
+GATE PASSED: 6 of 6 rules pass
+$ python -m eval.suite.compare baseline-ab cand-300-50
+| level | metric | baseline (baseline-ab) | candidate (cand-300-50) | change |
+| --- | --- | --- | --- | --- |
+| module | paraphrase mean cosine | 0.7913 | 0.7913 | +0.0000 |
+| module | unrelated mean cosine | 0.5250 | 0.5250 | +0.0000 |
+| module | gap | 0.2663 | 0.2663 | +0.0000 |
+| module | embed ms per chunk (median) | 285.3091 | 292.4378 | +7.1287 |
+| component | recall@3 | 0.7949 | 0.7949 | +0.0000 |
+| component | recall@5 | 0.7949 | 0.7949 | +0.0000 |
+| component | MRR | 0.7564 | 0.7436 | -0.0128 |
+| component | nDCG@5 | 0.7665 | 0.7570 | -0.0095 |
+| component | recall@5 with typos | 0.7949 | 0.7949 | +0.0000 |
+| component | MRR with typos | 0.6761 | 0.6846 | +0.0085 |
+| component | retrieval ms p95 | 350.7000 | 312.4000 | -38.3000 |
+| e2e | faithfulness (share supported) | 0.9000 | 0.8966 | -0.0034 |
+| e2e | faithfulness (overlap mean) | 0.8794 | 0.8953 | +0.0158 |
+| e2e | abstention correctness | 0.9091 | 1.0000 | +0.0909 |
+| e2e | false abstention rate | 0.2564 | 0.2564 | +0.0000 |
+| e2e | citation validity | 1.0000 | 1.0000 | +0.0000 |
+| e2e | expected-text hit rate | 0.7143 | 0.7143 | +0.0000 |
+| e2e | latency p50 s | 54.3900 | 59.1700 | +4.7800 |
+| e2e | latency p95 s | 181.6800 | 188.5700 | +6.8900 |
