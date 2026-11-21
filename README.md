@@ -230,7 +230,7 @@ Prerequisites: a running cluster with the application deployed (`make cluster`, 
 | D traces, metrics, rail, root cause | done | `traces/`, `docs/evidence/a3/d*` |
 | E coverage, drift | done; coverage after 0.675, target 0.85 not reached | `eval/results/coverage-*`, `docs/evidence/a3/e3-data-drift.md` |
 | F Kubernetes, release, rollback | done on minikube; rebuilt from `k8s/README.md` on a deleted cluster | `docs/evidence/a3/r9-*`, `r11-fresh-cluster-rehearsal.txt` |
-| Report and 14 screenshots | done; roll numbers to be filled by Zain | `docs/report/`, `docs/evidence/a3/screenshots/` |
+| Report and 14 screenshots | done; roll numbers on page 1 | `docs/report/`, `docs/evidence/a3/screenshots/` |
 
 Commands in this table were run before submission: the local ones (golden check, compare, coverage, trace tool and report, report build, number check) on the final tree, the cluster ones in the rehearsal (`docs/evidence/a3/r11-fresh-cluster-rehearsal.txt`). They were not run by a second person (Ahmad did no work on Assignment 03).
 

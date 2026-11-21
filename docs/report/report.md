@@ -122,4 +122,3 @@ Screenshots F1 to F5. Objects: Deployment `api` (3 replicas, HPA), StatefulSet `
 4. Consistency, the paper's fifth verification check, is not built.
 5. The golden labels of q07 and g22 point at a superseded document and need a human decision.
 6. One Ollama model on CPU: each answer takes about a minute, so each comparison rests on a single run of 50 questions. Two version-aware questions (g51, g52, naming the 2026-27 fee page) were added to `eval/golden.jsonl` after the final result files; they are not in the measured runs (so the file has 52 questions, the runs 50).
-7. Roll numbers on page 1 are to be filled by Zain.

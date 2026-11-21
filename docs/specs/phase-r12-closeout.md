@@ -4,7 +4,7 @@
 | --- | --- |
 | Phase | R12 (after R11), `docs/IMPLEMENTATION_PLAN_A3.md` |
 | Branch | `feat/rag-r12-closeout` off `dev`, PR into `dev`, then a release PR if `main` lacks the commits |
-| Stage | TESTING |
+| Stage | READY FOR PR |
 | Gate | waived (D-124, Zain: no approval gate) |
 
 ## 1. Objective
@@ -38,7 +38,9 @@ Tester (fresh subagent, spec path only) runs: `scripts/build_report.sh`-free che
 - State of main at 2026-11-21: PR #49 (dev into main) MERGED 2026-11-21T10:24:44Z (review decision shown by GitHub: REVIEW_REQUIRED, merged by the owner under the branch rules at that time; not repeated here); the CD run `44894223325` on `main` completed with success (4m56s), so Docker Hub login and push worked. `origin/main` = a8f327d (merge of #49), whose tree equals `origin/dev` c9753ff (empty `git diff --stat`). Local `main` and `dev` are brought in sync with origin.
 
 ## 12. Test report
-(see below, filled after the tester)
+| Round | Result |
+| --- | --- |
+| 1 | Fresh tester subagent: AC2 to AC7 PASS; AC1 FAIL: stale sentence "Roll numbers on page 1 are to be filled" in report limitation 7 and README line 233 (fixed, PDF rebuilt, 5 body pages, number check exit 0); AC8 GitHub claims not checkable by the tester, checked by the developer session (PR #49 merged, CD run 44894223325 success). |
 
 ## 13. Sign-offs
 | Gate | Date | By |
