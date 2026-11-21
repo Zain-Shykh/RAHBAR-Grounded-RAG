@@ -6,8 +6,8 @@
 
 | Group member | Roll number |
 | --- | --- |
-| Muhammad Zain | [roll number to be filled by Zain] |
-| Ahmad Jamal | [roll number to be filled by Zain] |
+| Muhammad Zain | 24i-3126 |
+| Ahmad Jamal | 24i-3006 |
 
 Repository: the submitted branch of the RAHBAR project (`README.md`, section "Assignment 03", has one command per part A to F). Every number below comes from a committed file under `eval/results/`, `docs/evidence/`, `traces/` or `docs/specs/`; `python scripts/check_numbers_a3.py` checks that mechanically.
 
@@ -23,7 +23,7 @@ The system is RAHBAR from Assignment 02 (FastAPI, ChromaDB, Redis, Ollama `llama
 | Verification | Four checks per document (quality, completeness, recency, uniqueness incl. near-duplicate by embedding, threshold 0.97), failures quarantined with a reason, report per run | `indexer/pipeline/verification/`, `eval/results/neardup-calibration-20261120T221945Z.json` | **Consistency** (contradiction detection) is not built; the injected instruction passes by design and is caught only at query time |
 | Update data lake | Registry, quarantine, archive of each version by hash, reports on volume `lake-data`; incremental update by copy-forward, then swap; `restore` rolls back with 0 embeddings | `indexer/pipeline/registry.py`, `incremental.py`, `restore.py` | One volume, no off-cluster backup, no archive retention rule |
 | Update retrieval sources | One vector collection per index, written only by the indexer Job; metadata `doc_version`, `superseded`; retrieval filters superseded documents | `indexer/pipeline/store.py`, `api/app/retrieval/chroma.py` | One source type; no knowledge graph, no second retriever |
-| Offline testing | Golden set (50 questions) and one command running module, component and end-to-end levels, with noise, two-run stochasticity and the release gate | `eval/golden.jsonl`, `eval/suite/`, `eval/gate.yaml` | No LLM judge (faithfulness is token overlap, D-115); synthetic questions not yet reviewed by a person |
+| Offline testing | Golden set (52 questions in the file, 50 in the measured runs) and one command running module, component and end-to-end levels, with noise, two-run stochasticity and the release gate | `eval/golden.jsonl`, `eval/suite/`, `eval/gate.yaml` | No LLM judge (faithfulness is token overlap, D-115); synthetic questions not yet reviewed by a person |
 | Live testing | One JSON trace per query on stdout and on a volume; trace tool that rebuilds the prompt; metrics endpoint; summary Job; injection rail | `api/app/services/trace.py`, `scripts/trace_tool.py`, `scripts/trace_report.py` | No alerting, no automatic feedback from monitoring to re-indexing (only a weekly CronJob) |
 | Coverage checking | 40 live-style queries against the golden set by embedding similarity, exit code 1 below target | `eval/suite/coverage.py`, `eval/coverage.yaml`, `eval/live_queries.jsonl` | Only query coverage; retrieval, generation and vocabulary coverage not done; target not reached (section 3, E) |
 
@@ -121,5 +121,5 @@ Screenshots F1 to F5. Objects: Deployment `api` (3 replicas, HPA), StatefulSet `
 3. Coverage after is 0.675, below the 0.85 target.
 4. Consistency, the paper's fifth verification check, is not built.
 5. The golden labels of q07 and g22 point at a superseded document and need a human decision.
-6. One Ollama model on CPU: each answer takes about a minute, so each comparison rests on a single run of 50 questions.
+6. One Ollama model on CPU: each answer takes about a minute, so each comparison rests on a single run of 50 questions. Two version-aware questions (g51, g52, naming the 2026-27 fee page) were added to `eval/golden.jsonl` after the final result files; they are not in the measured runs (so the file has 52 questions, the runs 50).
 7. Roll numbers on page 1 are to be filled by Zain.
