@@ -36,7 +36,7 @@ Out: coverage and drift analysis (R10; the baseline run is also the drift run an
 ## 5. Behaviour and design details
 
 - The release is only run by hand after a Complete gate Job; the failing candidate is never released through `make release` (history compared before and after).
-- Rolling update `maxSurge 1, maxUnavailable 0`; a request loop (one `/healthz`-free real call: `GET /readyz` plus a cached question) runs during it and counts non-200.
+- Rolling update `maxSurge 1, maxUnavailable 0`; a request loop (as run: `POST /api/retrieve` through the Ingress, a real call without the model; deviation from the first draft, D-135) runs during it and counts non-200.
 - Cache: scope key includes `index_id`; the same question before and after the release must be a miss after (different collection, different `index_id`).
 - Only one LLM job runs at a time (Ollama is the bottleneck); candidate builds run when no eval is running.
 
@@ -97,12 +97,14 @@ Rollback: `make rollback`; delete `rahbar_bad` and `rahbar_cand` via the indexer
 
 ## 12. Test report
 
-(filled by the independent tester)
+Round 1, 2026-11-21, commit 3a9167f, fresh tester subagent: R7-AC1..7 PASS, R9-AC1..7 PASS (AC1 from the evidence file, AC3 qualified: loop used /api/retrieve). Gate recomputed for all three candidates: exit 1, 0, 0, byte-identical on a second run; numbers in r7-decision.md match the JSONs. Test added: `eval/tests/test_committed_gate_results.py`.
+Defects: (1) `make release` with empty COLLECTION and `make candidate` without CHUNK/OVERLAP ran with blank values: FIXED (guards, exit 2). (2) `kubectl wait --timeout=3000s` flake: known, not fixed. (3) `make release` does not enforce a passed gate: by design (the bad release must be forceable), documented.
+Honesty: the q18 probe on `rahbar_bad` is labelled abstained but the body holds an uncited substantive answer (answered_from_context false, no citations): this is the existing abstention-with-text behaviour, not new, and is noted here rather than hidden.
 
 ## 13. Sign-offs
 
 | Gate | Date | Approved by | Notes |
 | --- | --- | --- | --- |
 | Spec and plan | 2026-11-21 | waived (D-124) | |
-| Tester verdict PASS | | | |
+| Tester verdict PASS | 2026-11-21 | independent subagent | |
 | Merged | | | |

@@ -196,6 +196,7 @@ traces-pull: ## copy the trace files from the traces-data volume into traces/clu
 	kubectl delete pod traces-viewer -n $(NS) --wait=false
 
 candidate: ## build a candidate collection and point api-candidate at it: make candidate CHUNK=300 OVERLAP=50 [COLL=rahbar_cand]
+	@test -n "$(CHUNK)" -a -n "$(OVERLAP)" || { echo "CHUNK and OVERLAP are required"; exit 2; }
 	kubectl delete job indexer-candidate -n $(NS) --ignore-not-found
 	sed 's/CANDIDATE_CHUNK_SIZE/$(CHUNK)/; s/CANDIDATE_CHUNK_OVERLAP/$(OVERLAP)/; s/CANDIDATE_COLLECTION/$(or $(COLL),rahbar_cand)/' k8s/candidate/indexer-job.yaml | kubectl apply -f -
 	kubectl wait --for=condition=complete job/indexer-candidate -n $(NS) --timeout=3000s
@@ -207,6 +208,7 @@ candidate-serve: ## point api-candidate at an existing collection: make candidat
 	kubectl rollout status deployment/api-candidate -n $(NS) --timeout=300s
 
 release: ## release the candidate collection to the live api by a rolling update (only after the gate passed)
+	@test -n "$(COLLECTION)" || { echo "COLLECTION is required: make release COLLECTION=rahbar_cand"; exit 2; }
 	kubectl set env deployment/api -n $(NS) CHROMA_COLLECTION=$(COLLECTION)
 	kubectl rollout status deployment/api -n $(NS) --timeout=600s
 
