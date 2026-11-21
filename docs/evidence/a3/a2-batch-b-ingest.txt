@@ -1,0 +1,71 @@
+$ make ingest-batch BATCH=corpus/batch_b   (log of Job ingest-1795221912)
+{"ts": "2026-11-21T00:45:14Z", "logger": "rahbar.indexer", "msg": "indexer starting", "dummy": false, "embed_model": "nomic-embed-text", "collection": "rahbar", "chroma": "chroma:8000", "pod": "ingest-1795221912-vmg86"}
+{"ts": "2026-11-21T00:45:18Z", "logger": "rahbar.indexer", "msg": "extracted", "source": "b01-library-policy-2026.md", "pages": 1, "ocr_pages": 0, "seconds": 0.0}
+{"ts": "2026-11-21T00:45:20Z", "logger": "rahbar.indexer", "msg": "extracted", "source": "b02-lab-safety-rules-2026.md", "pages": 1, "ocr_pages": 0, "seconds": 0.0}
+{"ts": "2026-11-21T00:45:21Z", "logger": "rahbar.indexer", "msg": "extracted", "source": "b03-library-policy-2026-copy.md", "pages": 1, "ocr_pages": 0, "seconds": 0.0}
+{"ts": "2026-11-21T00:45:23Z", "logger": "rahbar.indexer", "msg": "extracted", "source": "b04-lab-safety-rules-2026-copy.md", "pages": 1, "ocr_pages": 0, "seconds": 0.0}
+{"ts": "2026-11-21T00:45:24Z", "logger": "rahbar.indexer", "msg": "extracted", "source": "b05-library-policy-2026-reissue.md", "pages": 1, "ocr_pages": 0, "seconds": 0.0}
+{"ts": "2026-11-21T00:45:26Z", "logger": "rahbar.indexer", "msg": "extracted", "source": "b06-transport-policy-2026.pdf", "pages": 1, "ocr_pages": 0, "seconds": 0.1}
+{"ts": "2026-11-21T00:45:27Z", "logger": "rahbar.indexer", "msg": "extracted", "source": "b08-transport-notice-corrupt.pdf", "pages": 0, "ocr_pages": 0, "seconds": 0.0}
+{"ts": "2026-11-21T00:45:27Z", "logger": "rahbar.indexer", "msg": "extracted", "source": "b09-merit-scholarship-notes.md", "pages": 1, "ocr_pages": 0, "seconds": 0.0}
+{"ts": "2026-11-21T00:45:28Z", "logger": "rahbar.indexer", "msg": "extracted", "source": "b10-fee-structure-amendment-2027.md", "pages": 1, "ocr_pages": 0, "seconds": 0.0}
+{"ts": "2026-11-21T00:45:30Z", "logger": "rahbar.indexer", "msg": "extracted", "source": "b11-examination-guidelines-2026.md", "pages": 1, "ocr_pages": 0, "seconds": 0.0}
+{"ts": "2026-11-21T00:45:31Z", "logger": "rahbar.indexer", "msg": "extracted", "source": "b12-sports-facilities-2026.md", "pages": 1, "ocr_pages": 0, "seconds": 0.0}
+{"ts": "2026-11-21T00:45:44Z", "logger": "rahbar.indexer", "msg": "embedded", "vectors": 30, "model": "nomic-embed-text", "seconds": 12.5}
+{"ts": "2026-11-21T00:45:53Z", "logger": "rahbar.indexer", "msg": "stored", "chunks": 1010, "index_id": "20261121T004544Z-f0e17e", "collection": "rahbar", "replaced": true, "seconds": 8.2}
+{"ts": "2026-11-21T00:45:53Z", "logger": "rahbar.indexer", "msg": "ingest summary", "run_id": "20261121T004514Z-3effae", "mode": "incremental", "note": "", "dry_run": false, "new": 12, "changed": 0, "unchanged": 9, "deleted": 0, "quarantined": 6, "quarantined_before": 0, "superseded": 1, "flipped": 1, "chunks_embedded": 30, "chunks_copied": 980, "chunks_total": 1010, "index_swapped": true, "index_id": "20261121T004544Z-f0e17e", "deleted_chunks_remaining": {}, "chunks_by_source": {"academic-rules-handbook-jun-2026.pdf": 238, "annual-report-2019-20.pdf": 65, "annual-report-2023-24.pdf": 182, "b01-library-policy-2026.md": 6, "b02-lab-safety-rules-2026.md": 6, "b06-transport-policy-2026.pdf": 6, "b10-fee-structure-amendment-2027.md": 5, "b11-examination-guidelines-2026.md": 3, "b12-sports-facilities-2026.md": 4, "faculty-entrepreneurship-and-technical-start-ups-policy.pdf": 39, "fee-structure-page.html": 7, "grading-page.html": 8, "prospectus-2026-academic-rules-and-regulations.pdf": 44, "student-handbook-jun-2026.pdf": 245, "undergraduate-academic-rules-aug-2023.pdf": 152}, "seconds": 38.2}
+ingest summary 20261121T004514Z-3effae
+  mode                                           incremental
+  documents new / changed / unchanged / deleted  12 / 0 / 9 / 0
+  quarantined now / quarantined before           6 / 0
+  superseded / flags flipped                     1 / 1
+  chunks embedded                                30
+  chunks copied forward                          980
+  chunks in the index                            1010
+  index swapped                                  True
+  index_id                                       20261121T004544Z-f0e17e
+{"ts": "2026-11-21T00:45:53Z", "logger": "rahbar.indexer", "msg": "indexer finished", "chunks": 1010, "seconds": 38.7}
+
+$ cat summary.json of the run
+{
+  "run_id": "20261121T004514Z-3effae",
+  "mode": "incremental",
+  "note": "",
+  "dry_run": false,
+  "new": 12,
+  "changed": 0,
+  "unchanged": 9,
+  "deleted": 0,
+  "quarantined": 6,
+  "quarantined_before": 0,
+  "superseded": 1,
+  "flipped": 1,
+  "chunks_embedded": 30,
+  "chunks_copied": 980,
+  "chunks_total": 1010,
+  "index_swapped": true,
+  "index_id": "20261121T004544Z-f0e17e",
+  "deleted_chunks_remaining": {},
+  "chunks_by_source": {
+    "academic-rules-handbook-jun-2026.pdf": 238,
+    "annual-report-2019-20.pdf": 65,
+    "annual-report-2023-24.pdf": 182,
+    "b01-library-policy-2026.md": 6,
+    "b02-lab-safety-rules-2026.md": 6,
+    "b06-transport-policy-2026.pdf": 6,
+    "b10-fee-structure-amendment-2027.md": 5,
+    "b11-examination-guidelines-2026.md": 3,
+    "b12-sports-facilities-2026.md": 4,
+    "faculty-entrepreneurship-and-technical-start-ups-policy.pdf": 39,
+    "fee-structure-page.html": 7,
+    "grading-page.html": 8,
+    "prospectus-2026-academic-rules-and-regulations.pdf": 44,
+    "student-handbook-jun-2026.pdf": 245,
+    "undergraduate-academic-rules-aug-2023.pdf": 152
+  },
+  "seconds": 38.2
+}
+
+$ registry entries (fee amendment supersedes the old fee page)
+fee-structure-page.html {"sha256": "ec8872ae77cac7e96e20e6979933f36b00aaeb0ab3f668a2116e521c655e7b90", "doc_version": "2026-27", "status": "superseded", "pinned": false, "chunks": 7}
+b10-fee-structure-amendment-2027.md {"sha256": "b89ca10d99d6faed2fbd729f43445784f06e004557081a4263c254416828f1a7", "doc_version": "2027-01", "status": "active", "pinned": false, "chunks": 5}

@@ -24,6 +24,10 @@ lake-viewer                     3        12         12          0           0
 redis                         830        25         29          9          14
 ui                            830         1          1          4           4
 
+### Run C, Batch B incremental ingestion Job (44 s) and the delete and restore Jobs (samples docs/evidence/a3/f5-samples-batch-b.txt)
+chroma  n=114  cpu median 7m, peak 60m  mem median 80Mi, peak 110Mi  (the limit of 384Mi holds an index swap with room)
+The short Jobs (44 s, 9 s) fall between one or two 5 s samples; their memory stays under the Run A indexer peak of 469Mi.
+
 ## Chosen values (applied in k8s/base/*.yaml, k8s/eval-job.yaml, k8s/candidate/*.yaml, k8s/tools/restore-job.yaml)
 | container | request cpu / mem | limit cpu / mem | basis |
 | --- | --- | --- | --- |

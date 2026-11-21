@@ -17,7 +17,7 @@ CHROMA_IMAGE ?= chromadb/chroma:1.0.12
 REDIS_IMAGE ?= redis/redis-stack-server:7.4.0-v8
 
 .DEFAULT_GOAL := help
-.PHONY: eval-job eval-ctx eval-image gate-config suite suite-twice candidate release rollback ingest-batch restore lake-ls results-pull traces-pull baseline resources help install test lint dev dev-services dev-services-stop dev-services-reset cluster images corpus apply down secret index ask fetch eval eval-fixtures check manifests
+.PHONY: eval-job eval-ctx eval-image gate-config suite suite-twice candidate release rollback ingest-batch inbox-delete restore lake-ls results-pull traces-pull baseline resources help install test lint dev dev-services dev-services-stop dev-services-reset cluster images corpus apply down secret index ask fetch eval eval-fixtures check manifests
 
 help: ## list the targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  make %-14s %s\n", $$1, $$2}'
@@ -155,6 +155,17 @@ ingest-batch: ## ingest a batch of documents: make ingest-batch BATCH=corpus/bat
 	kubectl cp /tmp/rahbar-merged/. $(NS)/corpus-loader:/corpus
 	kubectl delete pod corpus-loader -n $(NS) --wait=false
 	kubectl create job --from=cronjob/reindex ingest-$$(date +%s) -n $(NS)
+
+inbox-delete: ## delete a document from the inbox (file and manifest entry); the next `make index` removes its chunks: make inbox-delete FILE=b12-sports-facilities-2026.md
+	test -n "$(FILE)"
+	kubectl delete pod corpus-loader -n $(NS) --ignore-not-found
+	kubectl apply -f k8s/tools/corpus-loader.yaml
+	kubectl wait --for=condition=Ready pod/corpus-loader -n $(NS) --timeout=120s
+	kubectl exec -n $(NS) corpus-loader -- rm -f /corpus/$(FILE)
+	kubectl exec -n $(NS) corpus-loader -- cat /corpus/_index.json > /tmp/rahbar-index.json
+	$(BIN)/python scripts/manifest_remove.py /tmp/rahbar-index.json $(FILE)
+	kubectl cp /tmp/rahbar-index.json $(NS)/corpus-loader:/corpus/_index.json
+	kubectl delete pod corpus-loader -n $(NS) --wait=false
 
 restore: ## roll back: make restore SOURCE=<older file> SUPERSEDE=<newer file> (one-off Job, zero embeddings)
 	test -n "$(SOURCE)"

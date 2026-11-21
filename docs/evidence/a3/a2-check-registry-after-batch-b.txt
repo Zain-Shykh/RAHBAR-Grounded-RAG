@@ -1,0 +1,23 @@
+$ python scripts/check_registry.py (after Batch B)
+source                                                        chroma registry  verdict
+academic-rules-handbook-jun-2026.pdf                             238      238  ok
+annual-report-2019-20.pdf                                         65       65  ok
+annual-report-2023-24.pdf                                        182      182  ok
+b01-library-policy-2026.md                                         6        6  ok
+b02-lab-safety-rules-2026.md                                       6        6  ok
+b06-transport-policy-2026.pdf                                      6        6  ok
+b10-fee-structure-amendment-2027.md                                5        5  ok
+b11-examination-guidelines-2026.md                                 3        3  ok
+b12-sports-facilities-2026.md                                      4        4  ok
+faculty-entrepreneurship-and-technical-start-ups-policy.pdf       39       39  ok
+fee-structure-page.html                                            7        7  ok
+grading-page.html                                                  8        8  ok
+prospectus-2026-academic-rules-and-regulations.pdf                44       44  ok
+student-handbook-jun-2026.pdf                                    245      245  ok
+undergraduate-academic-rules-aug-2023.pdf                        152      152  ok
+PASS
+exit 0
+
+$ chroma: fee-structure chunks superseded flag
+fee-structure-page.html 7 chunks superseded= [True] doc_version= ['2026-27']
+b10-fee-structure-amendment-2027.md 5 chunks superseded= [False] doc_version= ['2027-01']

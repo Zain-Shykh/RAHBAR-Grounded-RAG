@@ -1,0 +1,69 @@
+# R8-AC11 regression of the A02 cluster checks on the R8 deployment, 2026-11-21T00:51:56Z
+$ curl -s -i localhost:18002/readyz
+HTTP/1.1 200 OK
+content-length: 114
+content-type: application/json
+x-request-id: b76ee12572f94292bdd730c09aef454f
+
+{"status":"ready","checks":{"chroma":"ok","collection":"ok","embed_pin":"ok","redis":"ok","embed_dimension":"ok"}}
+
+$ curl -s localhost:18002/healthz
+{"status":"alive","version":"0.1.0"}
+$ kubectl get hpa,pdb -n rahbar
+NAME                                      REFERENCE        TARGETS       MINPODS   MAXPODS   REPLICAS   AGE
+horizontalpodautoscaler.autoscaling/api   Deployment/api   cpu: 5%/70%   3         8         3          14d
+
+NAME                             MIN AVAILABLE   MAX UNAVAILABLE   ALLOWED DISRUPTIONS   AGE
+poddisruptionbudget.policy/api   2               N/A               1                     14d
+$ probes and rollout strategy of deploy/api
+{"rollingUpdate":{"maxSurge":1,"maxUnavailable":0},"type":"RollingUpdate"}
+{"failureThreshold":3,"httpGet":{"path":"/readyz","port":8000,"scheme":"HTTP"},"periodSeconds":10,"successThreshold":1,"timeoutSeconds":1}
+{"failureThreshold":3,"httpGet":{"path":"/healthz","port":8000,"scheme":"HTTP"},"periodSeconds":20,"successThreshold":1,"timeoutSeconds":1}
+revisionHistoryLimit=10
+
+$ rollout test: restart under a 1 request/s /healthz loop (non-200 counted)
+[1]+  Terminated              kubectl port-forward svc/api 18002:8000 -n rahbar > /dev/null 2>&1
+deployment.apps/api restarted
+Waiting for deployment "api" rollout to finish: 1 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 1 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 1 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 2 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 2 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 2 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 2 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "api" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "api" rollout to finish: 1 old replicas are pending termination...
+deployment "api" successfully rolled out
+     48 200
+[1]+  Terminated              ( while true; do
+    c=$(curl -s -o /dev/null -w "%{http_code}" -m 3 http://$(minikube ip 2> /dev/null || echo 127.0.0.1)/healthz -H "Host: rahbar.local" 2> /dev/null); echo $c; sleep 1;
+done ) > /tmp/r8/loop.txt 2>&1
+
+$ pin test: EMBED_MODEL changed in the ConfigMap, api restarted -> not ready, revert
+configmap/rahbar-config patched
+NAME                  READY   STATUS    RESTARTS   AGE
+api-b7dffdb47-29rjt   1/1     Running   0          89s
+api-b7dffdb47-p25kr   1/1     Running   0          68s
+api-b7dffdb47-z522c   1/1     Running   0          109s
+api-bc8d697cb-lblw5   0/1     Running   0          40s
+api-b7dffdb47-29rjt ready=true
+api-b7dffdb47-p25kr ready=true
+api-b7dffdb47-z522c ready=true
+api-bc8d697cb-lblw5 ready=false
+not-ready pod: api-bc8d697cb-lblw5
+HTTP/1.1 503 Service Unavailable
+content-length: 163
+content-type: application/json
+x-request-id: a9a1fd577b354884aefc7389bd2f2128
+
+{"status":"not_ready","failed":["embed_pin"],"checks":{"chroma":"ok","collection":"ok","embed_pin":"failed","redis":"not_checked","embed_dimension":"not_checked"}}
+$ revert
+configmap/rahbar-config patched
+[1]+  Terminated              kubectl port-forward pod/$N 18003:8000 -n rahbar > /dev/null 2>&1
+deployment "api" successfully rolled out
+NAME                   READY   STATUS        RESTARTS   AGE
+api-76cd7874fb-8ws9c   1/1     Running       0          56s
+api-76cd7874fb-g6l8w   1/1     Running       0          37s
+api-76cd7874fb-tw48p   1/1     Running       0          19s
+api-b7dffdb47-p25kr    1/1     Terminating   0          2m8s
