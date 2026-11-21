@@ -1,0 +1,44 @@
+# R8-AC7: a ConfigMap edit changes the gate outcome with the same image (GATE_ONLY re-applies the gate to the live2 result file)
+$ grep latency_p95 eval/gate.yaml
+  - {metric: e2e.latency_p95_s, op: at_most, value: 300, why: "baseline p95 184.5 s on the cluster r
+$ make gate-config && make eval-job LABEL=live3-pass GATE_ONLY=/results/suite-20261121T003229Z-live2.json
+configmap/rahbar-gate unchanged
+$ kubectl get job eval -n rahbar
+NAME   STATUS     COMPLETIONS   DURATION   AGE
+eval   Complete   1/1           9s         10s
+$ kubectl get pod -n rahbar -l app.kubernetes.io/name=eval -o jsonpath=imageID
+sha256:d08aa1a88053d27cef729a283d589c95e7b2768b01f356946e4b1bacc154acdd  exit code 0
+$ kubectl logs job/eval -n rahbar
+baseline /results/baseline.json
+candidate /results/suite-20261121T003229Z-live2.json
+PASS  component.clean.recall_at_5: candidate 0.8095, limit >= baseline 0.8095 - 0.02   (assignment example: no more than 2 points lost)
+PASS  component.clean.mrr: candidate 0.7857, limit >= baseline 0.7857 - 0.03   (ranking quality; set above the run-to-run difference)
+PASS  e2e.faithfulness_supported_rate: candidate 0.8333, limit >= 0.7   (placeholder until R7 measures the baseline)
+PASS  e2e.abstention_correctness: candidate 0.8333, limit >= baseline 0.8333   (assignment: not lower than the baseline)
+PASS  e2e.citation_validity: candidate 1.0000, limit >= 0.95   (A02 gate value)
+PASS  e2e.latency_p95_s: candidate 113.1400, limit <= 300.0   (baseline p95 184.5 s on the cluster run (docs/evidence/a3/f3-eval-baseline-logs.txt); 300 s is the API model timeout, so a slower p95 means fallbacks)
+GATE PASSED: 6 of 6 rules pass
+
+=== edit: e2e.latency_p95_s at_most 300 -> 0.001 ===
+$ grep latency_p95 eval/gate.yaml
+  - {metric: e2e.latency_p95_s, op: at_most, value: 0.001, why: "baseline p95 184.5 s on the cluster
+$ make gate-config && make eval-job LABEL=live3-fail GATE_ONLY=/results/suite-20261121T003229Z-live2.json
+configmap/rahbar-gate configured
+$ kubectl get job eval -n rahbar
+NAME   STATUS   COMPLETIONS   DURATION   AGE
+eval   Failed   0/1           10s        10s
+$ kubectl get pod -n rahbar -l app.kubernetes.io/name=eval -o jsonpath=imageID
+sha256:d08aa1a88053d27cef729a283d589c95e7b2768b01f356946e4b1bacc154acdd  exit code 1
+$ kubectl logs job/eval -n rahbar
+baseline /results/baseline.json
+candidate /results/suite-20261121T003229Z-live2.json
+PASS  component.clean.recall_at_5: candidate 0.8095, limit >= baseline 0.8095 - 0.02   (assignment example: no more than 2 points lost)
+PASS  component.clean.mrr: candidate 0.7857, limit >= baseline 0.7857 - 0.03   (ranking quality; set above the run-to-run difference)
+PASS  e2e.faithfulness_supported_rate: candidate 0.8333, limit >= 0.7   (placeholder until R7 measures the baseline)
+PASS  e2e.abstention_correctness: candidate 0.8333, limit >= baseline 0.8333   (assignment: not lower than the baseline)
+PASS  e2e.citation_validity: candidate 1.0000, limit >= 0.95   (A02 gate value)
+FAIL  e2e.latency_p95_s: candidate 113.1400, limit <= 0.001   (baseline p95 184.5 s on the cluster run (docs/evidence/a3/f3-eval-baseline-logs.txt); 300 s is the API model timeout, so a slower p95 means fallbacks)
+GATE FAILED: 5 of 6 rules pass
+
+# restored afterwards:
+$ git diff eval/gate.yaml shows only the two reasons and the p95 value 300 

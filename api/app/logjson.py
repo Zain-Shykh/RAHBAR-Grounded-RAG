@@ -43,5 +43,11 @@ def configure_logging(level: str = "INFO") -> None:
     root = logging.getLogger()
     root.handlers[:] = [handler]
     root.setLevel(level.upper())
+    trace = logging.getLogger("rahbar.trace")      # the record is already one JSON line with request_id
+    th = logging.StreamHandler(sys.stdout)
+    th.setFormatter(logging.Formatter("%(message)s"))
+    trace.handlers[:] = [th]
+    trace.propagate = False
+    trace.setLevel("INFO")
     for noisy in ("uvicorn.access",):
         logging.getLogger(noisy).setLevel("WARNING")

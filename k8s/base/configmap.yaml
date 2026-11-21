@@ -35,3 +35,11 @@ data:
   EMBED_BATCH_SIZE: "32"
   CORPUS_DIR: "/corpus"
   LOG_LEVEL: "INFO"
+  # Assignment 03 (architecture-a3 11): incremental ingestion with the lake, traces on a volume, the retrieval rail,
+  # a fixed generation seed (AD-38). The ci overlay sets INDEX_MODE back to "full" (fixtures have no titles).
+  INDEX_MODE: "incremental"
+  LAKE_DIR: "/lake"
+  VERIFY_STRICT: "false"
+  TRACE_DIR: "/traces"
+  INJECTION_RAIL: "true"
+  LLM_SEED: "42"

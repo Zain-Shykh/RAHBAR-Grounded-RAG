@@ -1,0 +1,262 @@
+{
+  "created": "2026-11-20T22:17:00Z",
+  "real": [
+    "academic-rules-handbook-jun-2026.pdf",
+    "annual-report-2019-20.pdf",
+    "annual-report-2023-24.pdf",
+    "faculty-entrepreneurship-and-technical-start-ups-policy.pdf",
+    "fee-structure-page.html",
+    "grading-page.html",
+    "prospectus-2026-academic-rules-and-regulations.pdf",
+    "student-handbook-jun-2026.pdf",
+    "undergraduate-academic-rules-aug-2023.pdf"
+  ],
+  "batch": [
+    "b01-library-policy-2026.md",
+    "b02-lab-safety-rules-2026.md",
+    "b03-library-policy-2026-copy.md",
+    "b04-lab-safety-rules-2026-copy.md",
+    "b05-library-policy-2026-reissue.md",
+    "b06-transport-policy-2026.pdf",
+    "b09-merit-scholarship-notes.md",
+    "b10-fee-structure-amendment-2027.md",
+    "b11-examination-guidelines-2026.md",
+    "b12-sports-facilities-2026.md"
+  ],
+  "models": {
+    "hashing-bow-768": {
+      "max_distinct": {
+        "a": "academic-rules-handbook-jun-2026.pdf",
+        "b": "student-handbook-jun-2026.pdf",
+        "cosine": 0.6222,
+        "same_family_other_version": false
+      },
+      "min_planted_near_duplicate": {
+        "a": "b01-library-policy-2026.md",
+        "b": "b05-library-policy-2026-reissue.md",
+        "cosine": 0.9805,
+        "same_family_other_version": false
+      },
+      "margin": 0.3583,
+      "suggested_threshold": 0.801,
+      "configured_threshold": 0.85,
+      "distinct_pairs": [
+        {
+          "a": "academic-rules-handbook-jun-2026.pdf",
+          "b": "student-handbook-jun-2026.pdf",
+          "cosine": 0.6222,
+          "same_family_other_version": false
+        },
+        {
+          "a": "annual-report-2019-20.pdf",
+          "b": "annual-report-2023-24.pdf",
+          "cosine": 0.5598,
+          "same_family_other_version": false
+        },
+        {
+          "a": "prospectus-2026-academic-rules-and-regulations.pdf",
+          "b": "undergraduate-academic-rules-aug-2023.pdf",
+          "cosine": 0.4962,
+          "same_family_other_version": false
+        },
+        {
+          "a": "academic-rules-handbook-jun-2026.pdf",
+          "b": "undergraduate-academic-rules-aug-2023.pdf",
+          "cosine": 0.4901,
+          "same_family_other_version": false
+        },
+        {
+          "a": "grading-page.html",
+          "b": "prospectus-2026-academic-rules-and-regulations.pdf",
+          "cosine": 0.4412,
+          "same_family_other_version": false
+        },
+        {
+          "a": "b06-transport-policy-2026.pdf",
+          "b": "b10-fee-structure-amendment-2027.md",
+          "cosine": 0.3899,
+          "same_family_other_version": false
+        },
+        {
+          "a": "b05-library-policy-2026-reissue.md",
+          "b": "b06-transport-policy-2026.pdf",
+          "cosine": 0.387,
+          "same_family_other_version": false
+        },
+        {
+          "a": "b01-library-policy-2026.md",
+          "b": "b06-transport-policy-2026.pdf",
+          "cosine": 0.3852,
+          "same_family_other_version": false
+        },
+        {
+          "a": "b03-library-policy-2026-copy.md",
+          "b": "b06-transport-policy-2026.pdf",
+          "cosine": 0.3852,
+          "same_family_other_version": false
+        },
+        {
+          "a": "grading-page.html",
+          "b": "undergraduate-academic-rules-aug-2023.pdf",
+          "cosine": 0.3836,
+          "same_family_other_version": false
+        },
+        {
+          "a": "b10-fee-structure-amendment-2027.md",
+          "b": "fee-structure-page.html",
+          "cosine": 0.3645,
+          "same_family_other_version": false
+        },
+        {
+          "a": "academic-rules-handbook-jun-2026.pdf",
+          "b": "prospectus-2026-academic-rules-and-regulations.pdf",
+          "cosine": 0.3644,
+          "same_family_other_version": false
+        },
+        {
+          "a": "b02-lab-safety-rules-2026.md",
+          "b": "b06-transport-policy-2026.pdf",
+          "cosine": 0.3483,
+          "same_family_other_version": false
+        },
+        {
+          "a": "b04-lab-safety-rules-2026-copy.md",
+          "b": "b06-transport-policy-2026.pdf",
+          "cosine": 0.3483,
+          "same_family_other_version": false
+        },
+        {
+          "a": "b02-lab-safety-rules-2026.md",
+          "b": "b05-library-policy-2026-reissue.md",
+          "cosine": 0.3441,
+          "same_family_other_version": false
+        }
+      ],
+      "planted": [
+        {
+          "a": "b01-library-policy-2026.md",
+          "b": "b05-library-policy-2026-reissue.md",
+          "cosine": 0.9805,
+          "same_family_other_version": false
+        }
+      ]
+    },
+    "nomic-embed-text": {
+      "max_distinct": {
+        "a": "academic-rules-handbook-jun-2026.pdf",
+        "b": "student-handbook-jun-2026.pdf",
+        "cosine": 0.9379,
+        "same_family_other_version": false
+      },
+      "min_planted_near_duplicate": {
+        "a": "b01-library-policy-2026.md",
+        "b": "b05-library-policy-2026-reissue.md",
+        "cosine": 0.9998,
+        "same_family_other_version": false
+      },
+      "margin": 0.0619,
+      "suggested_threshold": 0.969,
+      "configured_threshold": 0.97,
+      "distinct_pairs": [
+        {
+          "a": "academic-rules-handbook-jun-2026.pdf",
+          "b": "student-handbook-jun-2026.pdf",
+          "cosine": 0.9379,
+          "same_family_other_version": false
+        },
+        {
+          "a": "annual-report-2019-20.pdf",
+          "b": "annual-report-2023-24.pdf",
+          "cosine": 0.9122,
+          "same_family_other_version": false
+        },
+        {
+          "a": "academic-rules-handbook-jun-2026.pdf",
+          "b": "annual-report-2019-20.pdf",
+          "cosine": 0.9045,
+          "same_family_other_version": false
+        },
+        {
+          "a": "prospectus-2026-academic-rules-and-regulations.pdf",
+          "b": "undergraduate-academic-rules-aug-2023.pdf",
+          "cosine": 0.9036,
+          "same_family_other_version": false
+        },
+        {
+          "a": "academic-rules-handbook-jun-2026.pdf",
+          "b": "undergraduate-academic-rules-aug-2023.pdf",
+          "cosine": 0.8954,
+          "same_family_other_version": false
+        },
+        {
+          "a": "annual-report-2019-20.pdf",
+          "b": "student-handbook-jun-2026.pdf",
+          "cosine": 0.8831,
+          "same_family_other_version": false
+        },
+        {
+          "a": "student-handbook-jun-2026.pdf",
+          "b": "undergraduate-academic-rules-aug-2023.pdf",
+          "cosine": 0.8726,
+          "same_family_other_version": false
+        },
+        {
+          "a": "academic-rules-handbook-jun-2026.pdf",
+          "b": "annual-report-2023-24.pdf",
+          "cosine": 0.8629,
+          "same_family_other_version": false
+        },
+        {
+          "a": "annual-report-2023-24.pdf",
+          "b": "student-handbook-jun-2026.pdf",
+          "cosine": 0.8627,
+          "same_family_other_version": false
+        },
+        {
+          "a": "grading-page.html",
+          "b": "undergraduate-academic-rules-aug-2023.pdf",
+          "cosine": 0.8539,
+          "same_family_other_version": false
+        },
+        {
+          "a": "b10-fee-structure-amendment-2027.md",
+          "b": "fee-structure-page.html",
+          "cosine": 0.8477,
+          "same_family_other_version": false
+        },
+        {
+          "a": "grading-page.html",
+          "b": "prospectus-2026-academic-rules-and-regulations.pdf",
+          "cosine": 0.8449,
+          "same_family_other_version": false
+        },
+        {
+          "a": "academic-rules-handbook-jun-2026.pdf",
+          "b": "grading-page.html",
+          "cosine": 0.8366,
+          "same_family_other_version": false
+        },
+        {
+          "a": "academic-rules-handbook-jun-2026.pdf",
+          "b": "prospectus-2026-academic-rules-and-regulations.pdf",
+          "cosine": 0.8282,
+          "same_family_other_version": false
+        },
+        {
+          "a": "annual-report-2019-20.pdf",
+          "b": "undergraduate-academic-rules-aug-2023.pdf",
+          "cosine": 0.8241,
+          "same_family_other_version": false
+        }
+      ],
+      "planted": [
+        {
+          "a": "b01-library-policy-2026.md",
+          "b": "b05-library-policy-2026-reissue.md",
+          "cosine": 0.9998,
+          "same_family_other_version": false
+        }
+      ]
+    }
+  }
+}

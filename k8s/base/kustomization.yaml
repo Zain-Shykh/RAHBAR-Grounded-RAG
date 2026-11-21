@@ -15,6 +15,7 @@ resources:
   - pdb.yaml
   - networkpolicy.yaml
   - corpus-pvc.yaml
+  - ragops-pvc.yaml
   - indexer-job.yaml
   - reindex-cronjob.yaml
 # The CronJob runs exactly the Job's spec (D-093).

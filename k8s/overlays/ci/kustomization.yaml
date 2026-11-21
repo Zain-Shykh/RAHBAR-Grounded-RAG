@@ -38,19 +38,20 @@ patches:
       data:
         EMBED_MODEL: "hashing-bow-768"
         LLM_PROVIDER: "extractive"
+        INDEX_MODE: "full"   # fixtures have no titles; incremental verification would quarantine them
         # H-8: hashing embedder scores run 0.00 to 0.43; 0.70 would abstain on everything.
         RELEVANCE_FLOOR: "0.20"
         CORPUS_DIR: "/corpus"
-  # The Job and the CronJob (a copy made in base) read the fixtures, not the PVC.
+  # The Job and the CronJob (a copy made in base) read the fixtures, not the PVC (volumes: 0 lake, 1 corpus, 2 tmp).
   - target: {kind: Job, name: indexer}
     patch: |-
       - op: replace
-        path: /spec/template/spec/volumes/0
+        path: /spec/template/spec/volumes/1
         value: {name: corpus, configMap: {name: corpus-fixtures}}
   - target: {kind: CronJob, name: reindex}
     patch: |-
       - op: replace
-        path: /spec/jobTemplate/spec/template/spec/volumes/0
+        path: /spec/jobTemplate/spec/template/spec/volumes/1
         value: {name: corpus, configMap: {name: corpus-fixtures}}
   # No Ollama in CI: drop the host ipBlock egress rules (api index 2, indexer index 1).
   - target: {kind: NetworkPolicy, name: api-egress}

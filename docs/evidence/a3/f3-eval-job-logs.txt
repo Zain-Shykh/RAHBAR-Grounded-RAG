@@ -1,0 +1,98 @@
+$ make eval-job SET_BASELINE=true LABEL=baseline
+$ kubectl get job eval -n rahbar
+NAME   STATUS     COMPLETIONS   DURATION   AGE
+eval   Complete   1/1           35m        35m
+$ kubectl logs job/eval -n rahbar
+# Suite result baseline (20261121T001033Z)
+
+index `20261120T232205Z-182148`, embed `nomic-embed-text@0a109f422b47`, questions 27, subset `A`, git `unknown`
+
+## Module level (embedding)
+
+| metric | value |
+| --- | --- |
+| paraphrase mean cosine (15 pairs) | 0.791 |
+| unrelated mean cosine (15 pairs) | 0.525 |
+| gap | 0.266 |
+| embed time per chunk, median / p95 ms (91 chunks) | 581.6 / 3197.9 |
+| memory per embedding (float32 bytes) | 3072 |
+| determinism, largest abs difference | 0.00e+00 |
+
+## Component level (retrieval, answerable questions)
+
+| metric | clean | with typos | change |
+| --- | --- | --- | --- |
+| recall@3 (n=21) | 0.810 | 0.762 | -0.048 |
+| recall@5 (n=21) | 0.810 | 0.810 | +0.000 |
+| MRR (n=21) | 0.786 | 0.637 | -0.149 |
+| nDCG@5 (n=21) | 0.792 | 0.680 | -0.112 |
+| retrieval latency median / p95 ms | 362.2 / 800.4 | | |
+
+## End-to-end level (answers)
+
+| metric | value |
+| --- | --- |
+| faithfulness, support overlap mean (answered n=18) | 0.813 |
+| faithfulness, share supported at 0.6 | 0.833 |
+| abstention correctness (n=6) | 0.833 |
+| false abstention rate (answerable) | 0.190 |
+| citation validity (22 citations) | 1.000 |
+| expected-text hit rate | 0.600 |
+| fallback rate | 0.000 |
+| latency p50 / p95 seconds | 61.2 / 184.5 |
+
+wrote /results/suite-20261121T001033Z-baseline.json
+baseline written: /results/baseline.json
+$ make eval-job LABEL=live2
+$ kubectl get job eval -n rahbar
+NAME   STATUS     COMPLETIONS   DURATION   AGE
+eval   Complete   1/1           21m        21m
+$ kubectl logs job/eval -n rahbar
+# Suite result live2 (20261121T003229Z)
+
+index `20261120T232205Z-182148`, embed `nomic-embed-text@0a109f422b47`, questions 27, subset `A`, git `unknown`
+
+## Module level (embedding)
+
+| metric | value |
+| --- | --- |
+| paraphrase mean cosine (15 pairs) | 0.791 |
+| unrelated mean cosine (15 pairs) | 0.525 |
+| gap | 0.266 |
+| embed time per chunk, median / p95 ms (91 chunks) | 503.9 / 3193.4 |
+| memory per embedding (float32 bytes) | 3072 |
+| determinism, largest abs difference | 0.00e+00 |
+
+## Component level (retrieval, answerable questions)
+
+| metric | clean | with typos | change |
+| --- | --- | --- | --- |
+| recall@3 (n=21) | 0.810 | 0.762 | -0.048 |
+| recall@5 (n=21) | 0.810 | 0.810 | +0.000 |
+| MRR (n=21) | 0.786 | 0.637 | -0.149 |
+| nDCG@5 (n=21) | 0.792 | 0.680 | -0.112 |
+| retrieval latency median / p95 ms | 192.9 / 316.6 | | |
+
+## End-to-end level (answers)
+
+| metric | value |
+| --- | --- |
+| faithfulness, support overlap mean (answered n=18) | 0.813 |
+| faithfulness, share supported at 0.6 | 0.833 |
+| abstention correctness (n=6) | 0.833 |
+| false abstention rate (answerable) | 0.190 |
+| citation validity (21 citations) | 1.000 |
+| expected-text hit rate | 0.600 |
+| fallback rate | 0.000 |
+| latency p50 / p95 seconds | 40.1 / 113.1 |
+
+wrote /results/suite-20261121T003229Z-live2.json
+baseline /results/baseline.json
+candidate /results/suite-20261121T003229Z-live2.json
+PASS  component.clean.recall_at_5: candidate 0.8095, limit >= baseline 0.8095 - 0.02   (assignment example: no more than 2 points lost)
+PASS  component.clean.mrr: candidate 0.7857, limit >= baseline 0.7857 - 0.03   (ranking quality; set above the run-to-run difference)
+PASS  e2e.faithfulness_supported_rate: candidate 0.8333, limit >= 0.7   (placeholder until R7 measures the baseline)
+PASS  e2e.abstention_correctness: candidate 0.8333, limit >= baseline 0.8333   (assignment: not lower than the baseline)
+PASS  e2e.citation_validity: candidate 1.0000, limit >= 0.95   (A02 gate value)
+PASS  e2e.latency_p95_s: candidate 113.1400, limit <= 300.0   (baseline p95 184.5 s on the cluster run (docs/evidence/a3/f3-eval-baseline-logs.txt); 300 s is the API model timeout, so a slower p95 means fallbacks)
+GATE PASSED: 6 of 6 rules pass

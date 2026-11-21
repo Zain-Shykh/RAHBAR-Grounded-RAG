@@ -1,0 +1,8 @@
+PASS  component.clean.recall_at_5: candidate 0.8095, limit >= baseline 0.8095 - 0.02   (assignment example: no more than 2 points lost)
+PASS  component.clean.mrr: candidate 0.7857, limit >= baseline 0.7857 - 0.03   (ranking quality; set above the run-to-run difference)
+PASS  e2e.faithfulness_supported_rate: candidate 0.8333, limit >= 0.7   (placeholder until R7 measures the baseline)
+PASS  e2e.abstention_correctness: candidate 0.8333, limit >= baseline 0.8333   (assignment: not lower than the baseline)
+PASS  e2e.citation_validity: candidate 1.0000, limit >= 0.95   (A02 gate value)
+PASS  e2e.latency_p95_s: candidate 113.1400, limit <= 300.0   (baseline p95 184.5 s on the cluster run (docs/evidence/a3/f3-eval-baseline-logs.txt); 300 s is the API model timeout, so a slower p95 means fallbacks)
+GATE PASSED: 6 of 6 rules pass
+exit 0

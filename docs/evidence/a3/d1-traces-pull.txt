@@ -1,0 +1,21 @@
+$ make traces-pull
+tar: removing leading '/' from member names
+kubectl delete pod traces-viewer -n rahbar --wait=false
+pod "traces-viewer" deleted from rahbar namespace
+$ ls -l traces/cluster
+total 392
+-rw-rw-r-- 1 zain-shykh zain-shykh  31056 Nov 21 05:44 traces-20261120-api-7966bb7df4-bc5x9.jsonl
+-rw-rw-r-- 1 zain-shykh zain-shykh 105347 Nov 21 05:44 traces-20261120-api-7966bb7df4-l7k72.jsonl
+-rw-rw-r-- 1 zain-shykh zain-shykh   7049 Nov 21 05:44 traces-20261121-api-557d94f9b4-b9mrx.jsonl
+-rw-rw-r-- 1 zain-shykh zain-shykh   7262 Nov 21 05:44 traces-20261121-api-557d94f9b4-r8tg6.jsonl
+-rw-rw-r-- 1 zain-shykh zain-shykh   2281 Nov 21 05:44 traces-20261121-api-557d94f9b4-tjdl6.jsonl
+-rw-rw-r-- 1 zain-shykh zain-shykh 171345 Nov 21 05:44 traces-20261121-api-7966bb7df4-bc5x9.jsonl
+-rw-rw-r-- 1 zain-shykh zain-shykh  66222 Nov 21 05:44 traces-20261121-api-7966bb7df4-l7k72.jsonl
+     4 traces/cluster/traces-20261120-api-7966bb7df4-bc5x9.jsonl
+    14 traces/cluster/traces-20261120-api-7966bb7df4-l7k72.jsonl
+     1 traces/cluster/traces-20261121-api-557d94f9b4-b9mrx.jsonl
+     1 traces/cluster/traces-20261121-api-557d94f9b4-r8tg6.jsonl
+     1 traces/cluster/traces-20261121-api-557d94f9b4-tjdl6.jsonl
+    27 traces/cluster/traces-20261121-api-7966bb7df4-bc5x9.jsonl
+    13 traces/cluster/traces-20261121-api-7966bb7df4-l7k72.jsonl
+    61 total

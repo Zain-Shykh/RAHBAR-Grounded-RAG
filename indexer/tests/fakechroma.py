@@ -55,3 +55,14 @@ class FakeClient:
 
     def heartbeat(self) -> int:
         return 1
+
+
+def _fake_get(self, include=None, limit=None, offset=0, where=None, ids=None):  # type: ignore[no-untyped-def]
+    idx = [i for i in range(len(self.ids)) if (ids is None or self.ids[i] in ids)
+           and (where is None or all(self.metas[i].get(k) == v for k, v in where.items()))]
+    idx = idx[offset:offset + limit] if limit is not None else idx[offset:]
+    return {"ids": [self.ids[i] for i in idx], "documents": [self.docs[i] for i in idx],
+            "metadatas": [self.metas[i] for i in idx], "embeddings": [self.embs[i] for i in idx]}
+
+
+FakeCollection.get = _fake_get  # type: ignore[attr-defined]

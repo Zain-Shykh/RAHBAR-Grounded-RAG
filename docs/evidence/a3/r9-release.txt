@@ -1,0 +1,155 @@
+$ curl -s -H "Host: rahbar.local" -X POST http://192.168.49.2/api/retrieve -d {question,k}   # live api via the Ingress: index_id
+{'index_id': '20261121T005113Z-a45667', 'embed_model': 'nomic-embed-text'}
+$ kubectl exec deploy/api -- env | grep CHROMA_COLLECTION   # live
+CHROMA_COLLECTION=rahbar
+$ kubectl exec deploy/api-candidate -- env | grep CHROMA_COLLECTION   # candidate
+CHROMA_COLLECTION=rahbar_cand
+$ curl -s localhost:18001/readyz   # kubectl port-forward deploy/api-candidate 18001:8000
+{"status":"ready","checks":{"chroma":"ok","collection":"ok","embed_pin":"ok","redis":"ok","embed_dimension":"ok"}}
+$ curl -s localhost:18001/api/retrieve ...   # candidate index_id
+{'index_id': '20261121T043602Z-c5b48e', 'embed_model': 'nomic-embed-text'}
+$ POST /api/ask on the live api (off-domain question, abstains without a model call)
+HTTP/1.1 200 OK
+x-outcome: abstained
+x-cache: MISS
+{"request_id":"e3af1146f0c966c3e02a0d609cab26d2","answer":"The documents in the corpus do not cover this question.","citations":[],"answered_from_context":false,"confidence":"high","retrieved":[{"chun
+$ POST /api/ask on api-candidate via port-forward (same question)
+HTTP/1.1 200 OK
+x-outcome: abstained
+x-cache: MISS
+{"request_id":"ee5416ed81d849708d2c978c5bef08d5","answer":"The documents in the corpus do not cover this question.","citations":[],"answered_from_context":false,"confidence":"high","retrieved":[{"chun
+$ trace of the live api (kubectl logs of the api pods, "type": "trace", fields: collection, embedding, cache, outcome)
+{"ts": "2026-11-21T05:42:01Z", "query": "What is the capital of France?", "collection": {"name": "rahbar", "index_id": "20261121T005113Z-a45667", "chunk_count": 1006, "embed_model": "nomic-embed-text"}, "embedding": {"model": "nomic-embed-text", "version": "nomic-embed-text@0a109f422b47", "dimension": 768}, "cache": "miss", "outcome": "abstained", "abstain_reason": "below_floor", "top_scores": [0.572, 0.567, 0.561], "latency_ms_total": 330.2}
+{"ts": "2026-11-21T05:42:02Z", "query": "What is the capital of France?", "collection": {"name": "rahbar_cand", "index_id": "20261121T043602Z-c5b48e", "chunk_count": 1041, "embed_model": "nomic-embed-text"}, "embedding": {"model": "nomic-embed-text", "version": "nomic-embed-text@0a109f422b47", "dimension": 768}, "cache": "miss", "outcome": "abstained", "abstain_reason": "below_floor", "top_scores": [0.58, 0.567, 0.561], "latency_ms_total": 219.4}
+$ trace of api-candidate
+{"ts": "2026-11-21T05:42:02Z", "query": "What is the capital of France?", "collection": {"name": "rahbar_cand", "index_id": "20261121T043602Z-c5b48e", "chunk_count": 1041, "embed_model": "nomic-embed-text"}, "embedding": {"model": "nomic-embed-text", "version": "nomic-embed-text@0a109f422b47", "dimension": 768}, "cache": "miss", "outcome": "abstained", "abstain_reason": "below_floor", "top_scores": [0.58, 0.567, 0.561], "latency_ms_total": 219.4}
+$ [R9-AC6 before the release] POST /api/ask on live api, same question twice: first MISS (model), second HIT
+# question: What CGPA puts a student on academic warning?
+HTTP/1.1 200 OK
+x-outcome: answered
+x-cache: MISS
+{"request_id":"692cc0228a4623bbd57f9697526a43cd","answer":"2.00","citations":[{"source":"academic-rules-handbook-jun-2026.pdf","section":"5.4 Minimum CGPA required to avoid academic warning is 2.00","page":24}],"answered_from_context":true,"confidenc
+HTTP/1.1 200 OK
+x-outcome: cached
+x-cache: HIT
+{"request_id":"6f36daeb13cd56332967a03f3b79fc49","answer":"2.00","citations":[{"source":"academic-rules-handbook-jun-2026.pdf","section":"5.4 Minimum CGPA required to avoid academic warning is 2.00","page":24}],"answered_from_context":true,"confidenc
+{"ts": "2026-11-21T05:42:10Z", "query": "What CGPA puts a student on academic warning?", "collection": {"name": "rahbar", "index_id": "20261121T005113Z-a45667", "chunk_count": 1006, "embed_model": "nomic-embed-text"}, "embedding": {"model": "nomic-embed-text", "version": "nomic-embed-text@0a109f422b47", "dimension": 768}, "cache": "miss", "outcome": "answered", "abstain_reason": null, "top_scores": [0.844, 0.822, 0.82], "latency_ms_total": 102322.1}
+{"ts": "2026-11-21T05:43:53Z", "query": "What CGPA puts a student on academic warning?", "collection": {"name": "rahbar", "index_id": "20261121T005113Z-a45667", "chunk_count": 1006, "embed_model": "nomic-embed-text"}, "embedding": {"model": "nomic-embed-text", "version": "nomic-embed-text@0a109f422b47", "dimension": 768}, "cache": "hit", "outcome": "cached", "abstain_reason": null, "top_scores": [0.844, 0.822, 0.82], "latency_ms_total": 276.8}
+$ [R9-AC3] make release COLLECTION=rahbar_cand   # kubectl set env deployment/api CHROMA_COLLECTION=rahbar_cand + rollout status; request loop running in parallel
+kubectl set env deployment/api -n rahbar CHROMA_COLLECTION=rahbar_cand
+deployment.apps/api env updated
+kubectl rollout status deployment/api -n rahbar --timeout=600s
+Waiting for deployment "api" rollout to finish: 1 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 1 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 1 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 2 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 2 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 2 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "api" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "api" rollout to finish: 1 old replicas are pending termination...
+deployment "api" successfully rolled out
+$ request loop during the rolling update (POST /api/retrieve through the Ingress every 0.5 s): HH:MM:SS http_code index_id
+05:43:59 200 20261121T005113Z-a45667
+05:44:00 200 20261121T005113Z-a45667
+05:44:01 200 20261121T005113Z-a45667
+05:44:01 200 20261121T005113Z-a45667
+05:44:02 200 20261121T005113Z-a45667
+05:44:03 200 20261121T005113Z-a45667
+05:44:04 200 20261121T005113Z-a45667
+05:44:04 200 20261121T005113Z-a45667
+05:44:05 200 20261121T005113Z-a45667
+05:44:06 200 20261121T005113Z-a45667
+05:44:07 200 20261121T005113Z-a45667
+05:44:08 200 20261121T005113Z-a45667
+05:44:09 200 20261121T005113Z-a45667
+05:44:09 200 20261121T005113Z-a45667
+05:44:10 200 20261121T005113Z-a45667
+05:44:11 200 20261121T005113Z-a45667
+05:44:12 200 20261121T005113Z-a45667
+05:44:13 200 20261121T005113Z-a45667
+05:44:14 200 20261121T005113Z-a45667
+05:44:14 200 20261121T005113Z-a45667
+05:44:15 200 20261121T005113Z-a45667
+05:44:16 200 20261121T005113Z-a45667
+05:44:17 200 20261121T005113Z-a45667
+05:44:18 200 20261121T005113Z-a45667
+05:44:18 200 20261121T005113Z-a45667
+05:44:19 200 20261121T005113Z-a45667
+05:44:20 200 20261121T005113Z-a45667
+05:44:21 200 20261121T043602Z-c5b48e
+05:44:21 200 20261121T005113Z-a45667
+05:44:22 200 20261121T005113Z-a45667
+05:44:23 200 20261121T005113Z-a45667
+05:44:24 200 20261121T043602Z-c5b48e
+05:44:25 200 20261121T005113Z-a45667
+05:44:25 200 20261121T043602Z-c5b48e
+05:44:26 200 20261121T005113Z-a45667
+05:44:27 200 20261121T005113Z-a45667
+05:44:28 200 20261121T043602Z-c5b48e
+05:44:29 200 20261121T005113Z-a45667
+05:44:29 200 20261121T043602Z-c5b48e
+05:44:30 200 20261121T043602Z-c5b48e
+05:44:31 200 20261121T005113Z-a45667
+05:44:32 200 20261121T043602Z-c5b48e
+05:44:32 200 20261121T043602Z-c5b48e
+05:44:33 200 20261121T043602Z-c5b48e
+05:44:34 200 20261121T043602Z-c5b48e
+05:44:35 200 20261121T005113Z-a45667
+05:44:36 200 20261121T043602Z-c5b48e
+05:44:36 200 20261121T043602Z-c5b48e
+05:44:37 200 20261121T005113Z-a45667
+05:44:38 200 20261121T005113Z-a45667
+05:44:39 200 20261121T005113Z-a45667
+05:44:40 200 20261121T043602Z-c5b48e
+05:44:40 200 20261121T043602Z-c5b48e
+05:44:41 200 20261121T043602Z-c5b48e
+05:44:42 200 20261121T043602Z-c5b48e
+05:44:43 200 20261121T043602Z-c5b48e
+05:44:43 200 20261121T043602Z-c5b48e
+05:44:44 200 20261121T043602Z-c5b48e
+05:44:45 200 20261121T043602Z-c5b48e
+05:44:46 200 20261121T043602Z-c5b48e
+05:44:46 200 20261121T043602Z-c5b48e
+05:44:47 200 20261121T043602Z-c5b48e
+05:44:48 200 20261121T043602Z-c5b48e
+05:44:49 200 20261121T043602Z-c5b48e
+$ awk "{print \$2}" loop | sort | uniq -c   # status codes
+     64 200
+$ kubectl rollout status deployment/api -n rahbar
+deployment "api" successfully rolled out
+$ kubectl rollout history deployment/api -n rahbar   # before
+deployment.apps/api 
+REVISION  CHANGE-CAUSE
+1         <none>
+2         <none>
+3         <none>
+4         <none>
+5         <none>
+6         <none>
+7         <none>
+
+$ kubectl rollout history deployment/api -n rahbar   # after
+deployment.apps/api 
+REVISION  CHANGE-CAUSE
+1         <none>
+2         <none>
+3         <none>
+4         <none>
+5         <none>
+6         <none>
+7         <none>
+8         <none>
+
+$ kubectl get deploy api -n rahbar -o jsonpath={.spec.template.spec.containers[0].env}
+[{"name":"LLM_API_KEY","valueFrom":{"secretKeyRef":{"key":"LLM_API_KEY","name":"rahbar-secret","optional":true}}},{"name":"CHROMA_COLLECTION","value":"rahbar_cand"}]
+$ kubectl get deploy api -n rahbar -o jsonpath={.spec.strategy}
+{"rollingUpdate":{"maxSurge":1,"maxUnavailable":0},"type":"RollingUpdate"}
+$ [R9-AC6 after the release] POST /api/ask, SAME question as before: MISS, not a stale HIT (cache scope includes index_id)
+# question: What CGPA puts a student on academic warning?
+HTTP/1.1 200 OK
+x-outcome: answered
+x-cache: MISS
+{"request_id":"45a3936ae0d3004c1455fff032350842","answer":"2.00","citations":[{"source":"academic-rules-handbook-jun-2026.pdf","section":"5.4 Minimum CGPA required to avoid academic warning is 2.00","page":24}],"answered_from_context":true,"confidenc
+$ trace after release (collection.name = rahbar_cand)
+{"ts": "2026-11-21T05:44:56Z", "query": "What CGPA puts a student on academic warning?", "collection": {"name": "rahbar_cand", "index_id": "20261121T043602Z-c5b48e", "chunk_count": 1041, "embed_model": "nomic-embed-text"}, "embedding": {"model": "nomic-embed-text", "version": "nomic-embed-text@0a109f422b47", "dimension": 768}, "cache": "miss", "outcome": "answered", "abstain_reason": null, "top_scores": [0.844, 0.822, 0.82], "latency_ms_total": 29204.8}

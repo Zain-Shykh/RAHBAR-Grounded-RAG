@@ -1,0 +1,14 @@
+$ kubectl port-forward svc/chroma 18000:8000 -n rahbar &
+$ python scripts/check_registry.py --chroma-host localhost --chroma-port 18000 --collection rahbar --registry rahbar.json (copied from lake-data)
+source                                                        chroma registry  verdict
+academic-rules-handbook-jun-2026.pdf                             238      238  ok
+annual-report-2019-20.pdf                                         65       65  ok
+annual-report-2023-24.pdf                                        182      182  ok
+faculty-entrepreneurship-and-technical-start-ups-policy.pdf       39       39  ok
+fee-structure-page.html                                            7        7  ok
+grading-page.html                                                  8        8  ok
+prospectus-2026-academic-rules-and-regulations.pdf                44       44  ok
+student-handbook-jun-2026.pdf                                    245      245  ok
+undergraduate-academic-rules-aug-2023.pdf                        152      152  ok
+PASS
+exit 0

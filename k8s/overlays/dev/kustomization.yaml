@@ -22,3 +22,9 @@ patches:
   - target: {kind: NetworkPolicy, name: indexer-egress}
     patch: |-
       - {op: replace, path: /spec/egress/1/to/0/ipBlock/cidr, value: 192.168.49.1/32}
+  - target: {kind: NetworkPolicy, name: eval-egress}
+    patch: |-
+      - {op: replace, path: /spec/egress/1/to/0/ipBlock/cidr, value: 192.168.49.1/32}
+  - target: {kind: NetworkPolicy, name: api-candidate-egress}
+    patch: |-
+      - {op: replace, path: /spec/egress/2/to/0/ipBlock/cidr, value: 192.168.49.1/32}

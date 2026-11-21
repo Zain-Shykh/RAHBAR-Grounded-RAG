@@ -1,0 +1,21 @@
+| level | metric | baseline (baseline-ab) | candidate (cand-100-0) | change |
+| --- | --- | --- | --- | --- |
+| module | paraphrase mean cosine | 0.7913 | 0.7913 | +0.0000 |
+| module | unrelated mean cosine | 0.5250 | 0.5250 | +0.0000 |
+| module | gap | 0.2663 | 0.2663 | +0.0000 |
+| module | embed ms per chunk (median) | 285.3091 | 293.9890 | +8.6799 |
+| component | recall@3 | 0.7949 | 0.7949 | +0.0000 |
+| component | recall@5 | 0.7949 | 0.7949 | +0.0000 |
+| component | MRR | 0.7564 | 0.7308 | -0.0256 |
+| component | nDCG@5 | 0.7665 | 0.7476 | -0.0189 |
+| component | recall@5 with typos | 0.7949 | 0.7436 | -0.0513 |
+| component | MRR with typos | 0.6761 | 0.6752 | -0.0009 |
+| component | retrieval ms p95 | 350.7000 | 333.8000 | -16.9000 |
+| e2e | faithfulness (share supported) | 0.9000 | 0.8214 | -0.0786 |
+| e2e | faithfulness (overlap mean) | 0.8794 | 0.8192 | -0.0603 |
+| e2e | abstention correctness | 0.9091 | 1.0000 | +0.0909 |
+| e2e | false abstention rate | 0.2564 | 0.2821 | +0.0256 |
+| e2e | citation validity | 1.0000 | 1.0000 | +0.0000 |
+| e2e | expected-text hit rate | 0.7143 | 0.6667 | -0.0476 |
+| e2e | latency p50 s | 54.3900 | 57.3400 | +2.9500 |
+| e2e | latency p95 s | 181.6800 | 128.7300 | -52.9500 |

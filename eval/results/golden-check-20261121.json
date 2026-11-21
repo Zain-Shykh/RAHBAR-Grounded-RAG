@@ -1,0 +1,23 @@
+{
+  "counts": {
+    "questions": 34,
+    "answerable": 28,
+    "unanswerable": 6,
+    "hard": 12,
+    "human": 18,
+    "synthetic": 16,
+    "synthetic_reviewed": 0,
+    "batch_b": 7
+  },
+  "problems": [
+    "synthetic_reviewed: 0 < required 8"
+  ],
+  "minimums": {
+    "questions": 25,
+    "answerable": 15,
+    "unanswerable": 5,
+    "hard": 5,
+    "human": 8,
+    "synthetic_reviewed": 8
+  }
+}

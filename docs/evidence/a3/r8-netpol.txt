@@ -1,0 +1,34 @@
+# R8-AC5 NetworkPolicy proof from the running eval pod pod/eval-b9c2q (2026-11-20T23:23:43Z)
+$ kubectl get netpol -n rahbar
+NAME                    POD-SELECTOR                           AGE
+allow-dns-egress        <none>                                 14d
+api-candidate-egress    app.kubernetes.io/name=api-candidate   28m
+api-candidate-ingress   app.kubernetes.io/name=api-candidate   28m
+api-egress              app.kubernetes.io/name=api             14d
+api-ingress             app.kubernetes.io/name=api             14d
+chroma-ingress          app.kubernetes.io/name=chroma          14d
+default-deny-all        <none>                                 14d
+eval-egress             app.kubernetes.io/name=eval            28m
+indexer-egress          app.kubernetes.io/name=indexer         14d
+redis-ingress           app.kubernetes.io/name=redis           14d
+ui-ingress              app.kubernetes.io/name=ui              14d
+$ kubectl exec -n rahbar pod/eval-b9c2q -- python -c 'urllib.request.urlopen(http://api:8000/healthz, timeout=4)'
+200
+exit=0
+$ kubectl exec -n rahbar pod/eval-b9c2q -- python -c 'urllib.request.urlopen(http://chroma:8000/api/v2/heartbeat, timeout=4)'
+BLOCKED: URLError(TimeoutError('timed out'))
+command terminated with exit code 1
+exit=1
+$ kubectl exec -n rahbar pod/eval-b9c2q -- python -c 'urllib.request.urlopen(http://redis:6379, timeout=4)'
+BLOCKED: TimeoutError('timed out')
+command terminated with exit code 1
+exit=1
+$ lake mounts: only indexer and reindex pods mount lake-data read-write
+Pod reindex-1795216940-b5fm8 lake-data mount readOnly= [False]
+Pod reindex-1795216940-b5fm8 corpus-data mount readOnly= [True]
+CronJob reindex lake-data mount readOnly= [False]
+CronJob reindex corpus-data mount readOnly= [True]
+Job reindex-1795216940 lake-data mount readOnly= [False]
+Job reindex-1795216940 corpus-data mount readOnly= [True]
+$ grep -rn "chroma" api/app | grep -in "add(\|upsert\|delete_collection\|create_collection"
+(no write calls in api/app: exit 1)

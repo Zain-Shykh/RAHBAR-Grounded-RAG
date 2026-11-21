@@ -1,0 +1,36 @@
+$ make gate-config; make eval-job LABEL=cand-100-0-final GATE_ONLY=/results/suite-20261121T041138Z-cand-100-0.json   # failing candidate through the final gate (ConfigMap rahbar-gate)
+$ kubectl get job eval -n rahbar
+NAME   STATUS   COMPLETIONS   DURATION   AGE
+eval   Failed   0/1           10s        10s
+$ kubectl logs job/eval -n rahbar
+baseline /results/baseline.json
+candidate /results/suite-20261121T041138Z-cand-100-0.json
+PASS  component.clean.recall_at_5: candidate 0.7949, limit >= baseline 0.7949 - 0.02   (assignment example: no more than 2 points lost; retrieval two-run difference is 0.0 (f3-stochasticity.txt), so any loss is real)
+PASS  component.clean.mrr: candidate 0.7308, limit >= baseline 0.7564 - 0.03   (baseline 0.7564 over 39 questions: one question moving rank 1 to 2 costs 0.013, so 0.03 tolerates two such moves; two-run difference 0.0)
+FAIL  e2e.faithfulness_supported_rate: candidate 0.8214, limit >= baseline 0.9000 - 0.05   (baseline 0.900 (n=30 answered); two-run noise is 1 answer = 0.033-0.037 (f3-stochasticity.txt), 0.05 allows 1.5 answers; replaces the absolute 0.70 placeholder (set from the 0.833 batch-A-only baseline), see docs/evidence/r7-decision.md)
+PASS  e2e.abstention_correctness: candidate 1.0000, limit >= baseline 0.9091   (assignment: not lower than the baseline (0.909, n=11))
+PASS  e2e.citation_validity: candidate 1.0000, limit >= 0.95   (A02 gate value; baseline 1.000 over 39 citations)
+PASS  e2e.latency_p95_s: candidate 128.7300, limit <= 300.0   (p95 is noisy on this CPU (184.5 s vs 113.1 s on two identical runs, f3-stochasticity.txt; 181.7 s on baseline-ab), so no relative rule; 300 s is the API model timeout, a slower p95 means fallbacks)
+GATE FAILED: 5 of 6 rules pass
+$ kubectl rollout history deployment/api -n rahbar   # before the failing gate run
+deployment.apps/api 
+REVISION  CHANGE-CAUSE
+1         <none>
+2         <none>
+3         <none>
+4         <none>
+5         <none>
+6         <none>
+7         <none>
+
+$ kubectl rollout history deployment/api -n rahbar   # after: unchanged, no release
+deployment.apps/api 
+REVISION  CHANGE-CAUSE
+1         <none>
+2         <none>
+3         <none>
+4         <none>
+5         <none>
+6         <none>
+7         <none>
+

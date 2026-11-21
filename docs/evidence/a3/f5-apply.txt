@@ -1,0 +1,6 @@
+$ make apply
+deployment.apps/api configured
+statefulset.apps/chroma configured
+cronjob.batch/reindex configured
+poddisruptionbudget.policy/api configured
+job.batch/indexer created

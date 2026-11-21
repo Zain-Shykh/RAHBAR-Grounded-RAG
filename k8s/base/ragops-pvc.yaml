@@ -1,0 +1,32 @@
+# Assignment 03 volumes (architecture-a3 5.1, 9.1).
+# lake-data: registry, quarantine, archive and verification reports. Read-write for the indexer Job only (I-18).
+# traces-data: one trace file per api pod (AD-39). eval-results: result files written by the eval Job.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: lake-data
+  namespace: rahbar
+  labels: {app.kubernetes.io/name: indexer, app.kubernetes.io/part-of: rahbar}
+spec:
+  accessModes: [ReadWriteOnce]
+  resources: {requests: {storage: 1Gi}}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: traces-data
+  namespace: rahbar
+  labels: {app.kubernetes.io/name: api, app.kubernetes.io/part-of: rahbar}
+spec:
+  accessModes: [ReadWriteOnce]
+  resources: {requests: {storage: 500Mi}}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: eval-results
+  namespace: rahbar
+  labels: {app.kubernetes.io/name: eval, app.kubernetes.io/part-of: rahbar}
+spec:
+  accessModes: [ReadWriteOnce]
+  resources: {requests: {storage: 200Mi}}

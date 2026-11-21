@@ -1,0 +1,61 @@
+live queries 40, golden questions 34, threshold 0.72, target 0.85
+covered 12 of 40: share 0.300  (in-domain share 0.429)
+uncovered queries by topic:
+  academic warning: l16
+  campus wifi: l36
+  careers: l34
+  cricket: l30
+  degree requirements: l27
+  entertainment: l33
+  fee instalments: l21
+  finance: l31
+  food: l32
+  general knowledge: l40
+  generative AI policy: l08
+  internships: l38
+  lab emergency: l20
+  late fee: l22
+  leave of absence: l18
+  library fines: l19
+  parking: l37
+  plagiarism: l17
+  programming help: l35
+  rechecking: l28
+  repeating courses: l15
+  scholarships: l26
+  sports teams: l24
+  student societies: l39
+  transcripts: l23
+  transport: l25
+  weather: l29
+  withdrawal and refund: l03
+    l03 0.707 (nearest q07)  till when can i drop a subject and still get a refund of fee
+    l08 0.562 (nearest q04)  can i use chatgpt to write my assignment
+    l15 0.657 (nearest g20)  what happens to my cgpa if i repeat a course
+    l16 0.691 (nearest q05)  what is an academic warning and when does it happen
+    l17 0.584 (nearest q04)  what is the punishment if i am caught copying in an assignment
+    l18 0.602 (nearest g19)  how do i freeze my semester
+    l19 0.624 (nearest g28)  how much is the fine if i return a library book late
+    l20 0.638 (nearest g29)  what should i do if there is a fire in the lab
+    l21 0.686 (nearest g30)  can i pay my semester fee in two parts
+    l22 0.570 (nearest g20)  what happens if i pay the fee late
+    l23 0.583 (nearest g25)  how do i get my official transcript
+    l24 0.629 (nearest g26)  how can i join the university cricket team
+    l25 0.612 (nearest g30)  what are the rules for the transport card
+    l26 0.628 (nearest q11)  what is the cgpa needed to get a merit scholarship
+    l27 0.707 (nearest g33)  how many credit hours are needed to graduate
+    l28 0.609 (nearest g31)  who can apply for rechecking of a paper and by when
+    l29 0.651 (nearest q09)  what is the weather going to be like in islamabad tomorrow
+    l30 0.513 (nearest g31)  who won the cricket match yesterday
+    l31 0.553 (nearest q15)  what is the bitcoin price today
+    l32 0.526 (nearest g24)  give me a recipe for biryani
+    l33 0.569 (nearest g32)  recommend a good movie for the weekend
+    l34 0.564 (nearest q10)  how do i prepare for a job interview at a software company
+    l35 0.464 (nearest g31)  write a python function to sort a list
+    l36 0.570 (nearest g28)  what is the wifi password in the library
+    l37 0.539 (nearest q17)  how do i get a parking permit for my motorbike
+    l38 0.594 (nearest g27)  how does the internship placement office help students
+    l39 0.608 (nearest q16)  when are the student society elections held
+    l40 0.469 (nearest g32)  what is the capital of australia
+COVERAGE BELOW TARGET
+exit code 1

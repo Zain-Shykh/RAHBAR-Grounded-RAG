@@ -89,6 +89,10 @@ Copy this block to the end of section 7, increment the number, and fill every li
 | DEV-012 | `cd.yml` also runs on `workflow_dispatch` and may push SHA tags from `dev` | S3 | ABSORBED | 4.15 | 2026-11-06 |
 | DEV-013 | Requests and limits in 4.2 replaced by the values measured in K10 (`docs/evidence/resources.md`) | S3 | ABSORBED | 4.2, R-RES-2 | 2026-11-07 |
 | DEV-014 | A PodDisruptionBudget for the api (`minAvailable: 2`) was built although AD-26 listed it as a non-goal | S3 | ABSORBED | AD-26, 1.2 | 2026-11-07 |
+| DEV-015 | A3: incremental ingestion mode next to the A02 full rebuild; per-document verification verdicts instead of aborting on the first bad file; registry and lake volume (`architecture-a3.md` 5) | S3 | OPEN | I-1, AD-02, 5.4 | 2026-11-21 |
+| DEV-016 | A3: new ConfigMap keys (`INDEX_MODE`, `LAKE_DIR`, `VERIFY_STRICT`, `TRACE_DIR`, `INJECTION_RAIL`, `LLM_SEED`, `TRACE_PROMPT`) and `rahbar-gate` created by `make gate-config` instead of a Kustomize generator | S3 | OPEN | 4.4, AD-17, C-2 | 2026-11-21 |
+| DEV-017 | A3: API additions: `POST /api/retrieve`, header `X-Cache-Bypass`, trace record per query, retrieval rail, metrics `rahbar_injection_flags_total` and `rahbar_trace_write_errors_total`, abstain reason `guardrail` | S3 | OPEN | 5.5, 5.11, AD-24 | 2026-11-21 |
+| DEV-018 | A3: the api Deployment mounts a read-write volume (`traces-data`) and has `revisionHistoryLimit: 10`; new image `rahbar-eval`; new NetworkPolicies (`eval-egress`, `api-candidate-*`); resources revised from new measurement | S3 | OPEN | 4.2, 4.5, 4.6 | 2026-11-21 |
 
 ## 7. Log
 
@@ -410,3 +414,72 @@ Places where the architecture has flagged a real chance of deviation (architectu
 **Why it matters:** it is a small, standard resilience object that supports the "service stays up" requirement; it costs nothing at runtime and is valid on the 3 to 8 replica HPA range. Leaving the architecture saying "none" while the cluster has one would be silent drift.
 
 **Impact:** none on behaviour. Architecture 1.2 and AD-26 no longer list the PodDisruptionBudget as a non-goal.
+
+### DEV-015 Incremental ingestion, per-document verdicts and the lake (Assignment 03)
+
+| | |
+| --- | --- |
+| Status | OPEN until R11 (then ABSORBED into `architecture-a3.md`, which already states it) |
+| Severity | S3 |
+| Date | 2026-11-21 |
+| Raised by | Claude (phases R2, R3) |
+| Architecture reference | I-1, AD-02, 5.4 |
+| Files changed | `indexer/pipeline/{incremental,registry,restore,manifest}.py`, `indexer/pipeline/verification/*`, `indexer/pipeline/run.py`, `indexer/pipeline/config.py` |
+
+**The architecture says:** one build mode: extract everything, embed everything, stage and swap. An integrity failure aborts the Job.
+
+**What was built:** a second mode (`INDEX_MODE=incremental`) that embeds only new and changed documents, copies the stored vectors of unchanged documents into the staging collection and keeps the AD-02 swap; a verification stage with a verdict per document and check (quarantine instead of aborting; `VERIFY_STRICT=true` restores the abort); a registry, quarantine, archive and reports on the new volume `lake-data`. The default of `INDEX_MODE` in code stays `full` (the A02 behaviour and tests); the ConfigMap sets `incremental`; the `ci` overlay sets `full`.
+
+**Why it matters:** required by R3-A1 and R3-A2. The writer to Chroma is still only the indexer (I-1) and every update is still all-or-nothing (AD-02).
+
+**Impact:** none on the API contract. Checked on real Chroma 1.0.12: the copied collection returns the same vectors and the same top 5.
+
+### DEV-016 New ConfigMap keys and the gate ConfigMap (Assignment 03)
+
+| | |
+| --- | --- |
+| Status | OPEN until R11 |
+| Severity | S3 |
+| Date | 2026-11-21 |
+| Raised by | Claude (phases R5, R8) |
+| Architecture reference | 4.4, AD-17, contract C-2 |
+| Files changed | `k8s/base/configmap.yaml`, `Makefile` (`gate-config`) |
+
+**What was built:** the keys listed in the dashboard line. `rahbar-gate` is created with `kubectl create configmap --from-file=eval/gate.yaml` (`make gate-config`) instead of a Kustomize `configMapGenerator`, because the generator would read a file outside `k8s/` and `kubectl apply -k` forbids that (D-096). One file, no copy, so no drift.
+
+**Impact:** `LLM_SEED=42` makes the generator's sampling repeatable in the live configuration; the semantic cache is unaffected.
+
+### DEV-017 API additions for evaluation and traceability (Assignment 03)
+
+| | |
+| --- | --- |
+| Status | OPEN until R11 |
+| Severity | S3 |
+| Date | 2026-11-21 |
+| Raised by | Claude (phases R5, R6) |
+| Architecture reference | 5.5, 5.11, AD-24 |
+| Files changed | `api/app/routes/ask.py`, `api/app/services/{answer,trace,guardrails}.py`, `api/app/routes/metrics.py`, `api/app/config.py`, `api/app/logjson.py`, `api/app/providers/llm/ollama.py` |
+
+**What was built:** `POST /api/retrieve` (retrieval only, read-only); request header `X-Cache-Bypass: 1` (evaluation); one trace record per query to stdout and to per-pod files; an opt-in retrieval rail (`INJECTION_RAIL=true`) that drops instruction-like passages and writes the action into the trace; two metric names; `Settings.llm_seed`, `trace_dir`, `trace_prompt`, `injection_rail`. External JSON shapes (`AskRequest`, `AskResponse`) are unchanged. The rail scans the same normalised text the model sees (NFKC, delimiter runs removed), after a security review flagged a bypass with `ign<<<ore`.
+
+**Why it matters:** needed by R3-B (component level), R3-D (traces, guardrail) and R3-B-8 (reproducible runs).
+
+**Impact:** A02 tests unchanged and green; the rail is off unless the ConfigMap turns it on. A trace stores the query and the prompt (D-118); set `TRACE_PROMPT=false` to keep only the hash. Trace files live on a volume mounted only by the api pods and the report Job.
+
+### DEV-018 Cluster objects added by Assignment 03
+
+| | |
+| --- | --- |
+| Status | OPEN until R11 |
+| Severity | S3 |
+| Date | 2026-11-21 |
+| Raised by | Claude (phase R8) |
+| Architecture reference | 4.2, 4.5, 4.6, 4.12 |
+| Files changed | `k8s/base/{ragops-pvc,api,indexer-job,configmap,networkpolicy,kustomization}.yaml`, `k8s/candidate/*`, `k8s/eval-job.yaml`, `k8s/trace-report-job.yaml`, `k8s/tools/volume-viewer.yaml`, `eval/Dockerfile` |
+
+**What was built:** PVCs `lake-data`, `traces-data`, `eval-results`; the api mounts `traces-data` (read-write, one file per pod) and has `fsGroup: 10001`; the Job mounts `lake-data`; Job `eval` and Job `trace-report`; Deployment and Service `api-candidate`; NetworkPolicies for `eval` and `api-candidate`; image `rahbar-eval`.
+
+**Measured resources (R8, `docs/evidence/f5-resources.txt`):** replaces the K10 values: api 100m/80Mi request, 500m/128Mi limit (was 256Mi); chroma 50m/128Mi, 250m/384Mi (was 512Mi); indexer 250m/416Mi, 1/768Mi (was 1Gi); eval 50m/32Mi, 250m/64Mi. Also: indexer `activeDeadlineSeconds` 3600, eval client timeout 420 s, gate limits from the cluster baseline (D-128, D-129), CI overlay patches the corpus volume at index 1 (the lake volume is index 0).
+
+**Impact:** every added container has requests and limits (I-15); NetworkPolicies keep default deny. The `ReadWriteOnce` traces volume is shared by pods on one node (minikube); a multi-node cluster needs RWX or a log collector.
+

@@ -1,0 +1,40 @@
+# Summarise the trace files on the traces volume (R3-D3-2, R3-F4-1): kubectl apply -f k8s/trace-report-job.yaml
+# The volume is mounted read-only; the report goes to the Job's log (kubectl logs job/trace-report -n rahbar).
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: trace-report
+  namespace: rahbar
+  labels: {app.kubernetes.io/name: trace-report, app.kubernetes.io/part-of: rahbar}
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels: {app.kubernetes.io/name: trace-report, app.kubernetes.io/part-of: rahbar}
+    spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      restartPolicy: Never
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile: {type: RuntimeDefault}
+      containers:
+        - name: report
+          image: rahbar-eval:dev
+          imagePullPolicy: IfNotPresent
+          command: ["python", "scripts/trace_report.py", "--dir", "/traces", "--since", "7d"]
+          resources:
+            requests: {cpu: 50m, memory: 64Mi}
+            limits: {cpu: 200m, memory: 128Mi}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: {drop: [ALL]}
+          volumeMounts:
+            - {name: traces, mountPath: /traces, readOnly: true}
+      volumes:
+        - name: traces
+          persistentVolumeClaim: {claimName: traces-data, readOnly: true}

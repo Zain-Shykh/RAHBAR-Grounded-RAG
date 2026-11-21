@@ -11,7 +11,7 @@ metadata:
     app.kubernetes.io/part-of: rahbar
 spec:
   backoffLimit: 2
-  activeDeadlineSeconds: 1800
+  activeDeadlineSeconds: 3600
   template:
     metadata:
       labels:
@@ -26,6 +26,7 @@ spec:
         runAsNonRoot: true
         runAsUser: 10001
         runAsGroup: 10001
+        fsGroup: 10001
         seccompProfile:
           type: RuntimeDefault
       containers:
@@ -38,10 +39,10 @@ spec:
           resources:
             requests:
               cpu: 250m
-              memory: 384Mi
+              memory: 416Mi
             limits:
               cpu: "1"
-              memory: 1Gi
+              memory: 768Mi
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
@@ -52,9 +53,14 @@ spec:
             - name: corpus
               mountPath: /corpus
               readOnly: true
+            - name: lake
+              mountPath: /lake
             - name: tmp
               mountPath: /tmp
       volumes:
+        - name: lake
+          persistentVolumeClaim:
+            claimName: lake-data
         - name: corpus
           persistentVolumeClaim:
             claimName: corpus-data

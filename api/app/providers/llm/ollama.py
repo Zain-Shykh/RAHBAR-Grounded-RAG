@@ -7,6 +7,7 @@ LLM_MAX_CONCURRENCY keeps a pod from flooding a laptop Ollama (AD-21).
 from __future__ import annotations
 
 import threading
+from typing import Any
 
 import httpx
 
@@ -31,7 +32,7 @@ class OllamaProvider:
         self, question: str, passages: list[Passage], *, hint: str | None = None
     ) -> GenerationResult:
         s = self.settings
-        body = {
+        body: dict[str, Any] = {
             "model": s.llm_model,
             "messages": build_messages(question, passages, hint=hint),
             "stream": False,
@@ -39,6 +40,8 @@ class OllamaProvider:
             "options": {"temperature": s.temperature, "num_ctx": s.llm_num_ctx,
                         "num_predict": s.llm_max_tokens},
         }
+        if s.llm_seed is not None:   # AD-38: unset keeps the A02 request body exactly
+            body["options"]["seed"] = s.llm_seed
         if not self._sem.acquire(timeout=s.llm_timeout_seconds):
             raise ProviderError("busy: no free model slot before the timeout")   # not transient (D-70)
         try:

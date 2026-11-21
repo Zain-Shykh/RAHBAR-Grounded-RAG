@@ -107,6 +107,11 @@ def run_pipeline(settings: IndexerSettings) -> int:
 def main() -> int:
     parser = argparse.ArgumentParser(description="Build the RAHBAR index, then exit.")
     parser.add_argument("--dummy", action="store_true", help="write three fake chunks")
+    parser.add_argument("--full", action="store_true", help="re-extract and re-embed everything (A02 behaviour)")
+    parser.add_argument("--incremental", action="store_true", help="embed only new and changed documents")
+    parser.add_argument("--dry-run", action="store_true", help="incremental: plan and verify, write no index")
+    parser.add_argument("--verify-only", action="store_true",
+                        help="run the four verification checks, write the report and quarantine, exit")
     args = parser.parse_args()
     settings = get_settings()
     log("indexer starting", dummy=args.dummy, embed_model=settings.embed_model,
@@ -114,11 +119,23 @@ def main() -> int:
         pod=os.environ.get("HOSTNAME", "-"))
     started = time.perf_counter()
     try:
+        if args.verify_only:
+            from .verification.run_verify import verify_only
+
+            return verify_only(settings)
         if args.dummy:
             from .dummy import write_dummy_index
             from .store import get_client
 
             count = write_dummy_index(settings, get_client(settings))
+        elif args.incremental or args.dry_run or (settings.index_mode == "incremental" and not args.full):
+            from .incremental import run_incremental
+
+            result = run_incremental(settings, full=False, dry_run=args.dry_run)
+            count = result["chunks_total"]
+            if settings.verify_strict and result["quarantined"]:
+                log("quarantined documents and VERIFY_STRICT is set", quarantined=result["quarantined"])
+                return 1
         else:
             count = run_pipeline(settings)
     except VerifyError as exc:

@@ -1,0 +1,43 @@
+# R3-F5-1 measured resources (phase R8), minikube, namespace rahbar, 2026-11-21
+# Method: scripts/measure_resources.sh samples `kubectl top pod -n rahbar` every 5 s; scripts/summarize_resources.py groups by workload.
+#   Run A  full ingestion Job (OCR plus embedding of 980 chunks, 1396 s):   raw samples docs/evidence/a3/f5-samples-ingest.txt
+#   Run B  eval Job baseline and live2 (27 questions each, live api):        raw samples docs/evidence/a3/f5-samples-eval.txt
+# Rule: request about the median, limit about 1.5 x peak, rounded up. Documented exceptions below the table.
+
+# Tables below are regenerated from the committed sample files (the committed files are the evidence).
+## Raw peaks (cpu in millicores, memory in Mi)
+### Run A, ingestion
+workload                        n cpu_med_m cpu_peak_m mem_med_Mi mem_peak_Mi
+api                           906         5          6         68          70
+chroma                        282         3         30         71          97
+redis                         282        23         27         10          12
+reindex                       266         2       1000        415         469
+ui                            282         1          1          4           4
+
+### Run B, eval (two runs)
+workload                        n cpu_med_m cpu_peak_m mem_med_Mi mem_peak_Mi
+api                          2427         6         21         69          71
+chroma                        809         3         30        103         104
+eval                          772         1        142         24          24
+lake-viewer                     3        12         12          0           0
+redis                         809        25         29          9          14
+ui                            809         1          1          4           4
+
+### Run C, Batch B incremental ingestion Job (44 s) and the delete and restore Jobs (samples docs/evidence/a3/f5-samples-batch-b.txt)
+chroma  n=114  cpu median 7m, peak 60m  mem median 80Mi, peak 110Mi  (the limit of 384Mi holds an index swap with room)
+The short Jobs (44 s, 9 s) fall between one or two 5 s samples; their memory stays under the Run A indexer peak of 469Mi.
+
+## Chosen values (applied in k8s/base/*.yaml, k8s/eval-job.yaml, k8s/candidate/*.yaml, k8s/tools/restore-job.yaml)
+| container | request cpu / mem | limit cpu / mem | basis |
+| --- | --- | --- | --- |
+| api (and api-candidate) | 100m / 80Mi | 500m / 128Mi | mem median 69, peak 71 -> 1.5 x peak = 107, rounded to 128Mi; cpu peak 250m (rollout, pod start; batch-b samples) -> 1.5 x = 377 -> 500m |
+| chroma | 50m / 128Mi | 250m / 384Mi | mem median 103, peak 104 -> 128Mi request; limit 3 x peak because an index swap holds two collections at once |
+| indexer, reindex, restore, candidate indexer | 250m / 416Mi | 1 / 768Mi | mem median 415, peak 469 -> 1.5 x = 703, rounded to 768Mi; cpu peak 1000m equals the old limit (throttled), so it stays 1 CPU |
+| eval Job | 50m / 32Mi | 250m / 64Mi | mem median 24, peak 24 -> 32Mi request, limit rounded to 64Mi; cpu peak 142m -> 1.5 x = 213 -> 250m |
+| trace-report Job | 50m / 64Mi | 200m / 128Mi | runs a few seconds, below one sampling interval; K10 values kept |
+| redis, ui, viewer and loader pods | unchanged | unchanged | not the subject of R3-F5-1; K10 values hold (peaks redis 29m / 14Mi, ui 1m / 4Mi) |
+
+## Documented exceptions to the rule
+1. CPU requests are not set from the median: the api median (6m) is idle time and the HPA scales on 70 percent of the api CPU request, so 100m stays (K3); the indexer median (2m) is time spent waiting for Ollama, while OCR uses a full core.
+2. Floors: CPU limit at least 250m (startup and request bursts), memory limit at least 64Mi.
+3. This replaces the K10 values (api 256Mi, chroma 512Mi, indexer 1Gi, eval 256Mi); see docs/architecture/deviations.md DEV-018.
