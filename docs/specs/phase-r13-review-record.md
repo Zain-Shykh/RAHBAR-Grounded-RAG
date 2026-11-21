@@ -4,7 +4,7 @@
 | --- | --- |
 | Phase | R13 (after R12), `docs/IMPLEMENTATION_PLAN_A3.md` |
 | Branch | `feat/rag-r13-review-record` off `dev`, PR into `dev` |
-| Stage | READY FOR TEST |
+| Stage | READY FOR PR |
 | Gate | waived (D-124) |
 
 ## 1. Objective
@@ -24,3 +24,4 @@ Fresh tester subagent, spec path only: runs the commands above and a diff agains
 ## 4. Test report
 | Round | Result |
 | --- | --- |
+| 1 | Fresh tester subagent: AC1 to AC6 PASS. Cosmetic: Current focus Stage and Branch lines stale (fixed). |

@@ -87,9 +87,9 @@ Hours spent so far: planned 64 h plus 2 h (R0), actual `____`.
 
 ```
 Phase:        R0 to R13 complete; waiting on Zain for the remaining human items
-Stage:        DONE (R12 close-out, independent test: docs/specs/phase-r12-closeout.md section 12); main contains PR #48 and #49
-Branch:       feat/rag-r12-closeout (PR into dev, then a release PR dev to main if main lacks the commits)
-Spec:         docs/specs/phase-r12-closeout.md
+Stage:        DONE (R13 review record, independent test: docs/specs/phase-r13-review-record.md section 4); main contains PR #48 and #49
+Branch:       feat/rag-r13-review-record (PR into dev, then a release PR dev to main if main lacks the commits)
+Spec:         docs/specs/phase-r13-review-record.md
 Next action:  Zain: (1) approve release PR #51 (dev to main), (2) read the contribution table and AI statement, (3) decide the production release of 600/100 (make release COLLECTION=rahbar_c600)
 Waiting on:   Zain (human items above)
 Last updated: 2026-11-21
