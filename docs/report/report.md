@@ -116,7 +116,7 @@ Screenshots F1 to F5. Objects: Deployment `api` (3 replicas, HPA), StatefulSet `
 
 **Gaps, stated plainly.**
 
-1. The golden set has 18 human questions (from Assignment 02) and 32 synthetic ones; none of the synthetic questions is reviewed by a person (8 are needed, `eval/HUMAN_TODO.md`), so `golden --check` fails on that point.
+1. The golden set has 18 human questions (from Assignment 02) and 32 synthetic ones in the measured runs. Zain reviewed 8 of the synthetic ones (g19, g20, g21, g23, g28, g29, g30, g33), so `golden --check` passes. The nuance: g19 to g23 were checked against the source pages of the original PDFs, but g28 to g33 are about the invented Batch B files (a fictional institute), so their answers match those files by construction; the review confirms the clause and the wording, not a real-world fact. The other synthetic questions are not reviewed and their origin is unchanged.
 2. No LLM judge; the requirement on judge agreement does not apply (D-115).
 3. Coverage after is 0.675, below the 0.85 target.
 4. Consistency, the paper's fifth verification check, is not built.

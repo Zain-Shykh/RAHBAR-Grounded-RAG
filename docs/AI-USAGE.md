@@ -58,3 +58,6 @@ Claude Code (Sonnet 5.5) wrote `scripts/drift_report.py` and the E3 drift write-
 
 ## Phase R12 (close-out): 2026-11-21
 Claude Code (Sonnet 5.5) put the roll numbers Zain gave on report page 1 and rebuilt the PDF, added two golden questions (g51, g52) after checking them against the live index, wrote `scripts/make_review_sheet.py` (passages read from the live Chroma collection) and `scripts/mark_reviewed.py` with a test, generated `eval/REVIEW_SHEET.md`, and wrote the final requirements audit. It did not set `reviewed` on any question, did not run the LLM suite, and did not touch secrets. The audit statuses are the AI's reading of the evidence files; the independent tester checked them.
+
+## Phase R13 (review record): 2026-11-21
+Claude Code (Sonnet 5.5) ran `scripts/mark_reviewed.py` for the 8 synthetic questions Zain reviewed by hand (D-147), added a REVIEWED constant to `scripts/build_golden_jsonl.py` plus a regeneration test, updated the report, README and checklists, and saved the `golden --check` output. Zain did the review; the session set no flag on its own judgement.

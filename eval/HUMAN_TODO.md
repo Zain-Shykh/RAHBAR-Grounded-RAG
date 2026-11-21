@@ -5,7 +5,10 @@ The session wrote the new golden questions, so they are labelled `synthetic` and
 by hand. The 18 Assignment 02 questions were written by the group (origin `human`), so the first minimum is met;
 the second is not until you do the following (about 10 minutes).
 
-## 1. Review 8 synthetic questions
+## 1. Review 8 synthetic questions: DONE 2026-11-21 (D-147)
+
+Done, kept as a record. Zain (human, in chat 2026-11-21) reviewed the 8 synthetic questions g19, g20, g21, g23, g28, g29, g30, g33. He checked g19, g20, g21, g23 against the source pages of the original downloaded PDFs, and read the clauses of g28, g29, g30, g33 in the synthetic Batch B files (`corpus/batch_b`). Those four files are invented (a fictional institute), so their answers match the files by construction: the review confirms the wording and the clause, not a real-world fact. The text below is the original instruction.
+
 
 Open [`REVIEW_SHEET.md`](REVIEW_SHEET.md): for g19, g20, g21, g23, g28, g29, g30, g33 it shows the question, the expected answer, the
 ground-truth source, section and page, and the real passage read from the live index. Judge each in about 10 seconds and send the

@@ -1697,3 +1697,10 @@ Raised 2026-11-21 while writing the Assignment 03 planning set ([`requirements-a
 - Area: docs
 - Decision: `docs/evidence/a3/final-requirements-audit.md` lists every R3 id with status. One NOT MET (R3-B-2 second half, human), one not applicable (R3-B-7). The state of main and CD is recorded in the R12 spec section 11.
 - Decided on: 2026-11-21
+
+### D-147 The 8 synthetic questions are reviewed by Zain (R3-B-2 met, with a nuance)
+- Status: DECIDED
+- Raised: 2026-11-21 by Claude (phase R13), on Zain's statement in chat
+- Area: eval
+- Decision: Zain (human, in chat 2026-11-21) reviewed the 8 synthetic questions g19, g20, g21, g23, g28, g29, g30, g33. He checked g19, g20, g21, g23 against the source pages of the original downloaded PDFs, and read the clauses of g28, g29, g30, g33 in the synthetic Batch B files (`corpus/batch_b`). Those four files are invented (a fictional institute), so their answers match the files by construction: the review confirms the wording and the clause, not a real-world fact. No wording fixes. `scripts/mark_reviewed.py` set `reviewed: true` for the 8 ids (origin stays `synthetic`); `scripts/build_golden_jsonl.py` carries the same ids in a REVIEWED constant so regenerating gives the committed file (test in `eval/tests/test_mark_reviewed.py`). `golden --check` exits 0 (52 questions, 8 synthetic reviewed). The other synthetic questions (26 of 34) stay unreviewed.
+- Decided on: 2026-11-21
