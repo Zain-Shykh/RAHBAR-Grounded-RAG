@@ -32,7 +32,7 @@ spec:
           envFrom:
             - configMapRef: {name: rahbar-config}
           env:
-            - {name: CHROMA_COLLECTION, value: rahbar_cand}
+            - {name: CHROMA_COLLECTION, value: CANDIDATE_COLLECTION}
             - {name: INDEX_MODE, value: full}
             - {name: CHUNK_SIZE, value: "CANDIDATE_CHUNK_SIZE"}
             - {name: CHUNK_OVERLAP, value: "CANDIDATE_CHUNK_OVERLAP"}

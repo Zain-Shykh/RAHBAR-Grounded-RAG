@@ -195,11 +195,14 @@ traces-pull: ## copy the trace files from the traces-data volume into traces/clu
 	kubectl cp $(NS)/traces-viewer:/data traces/cluster
 	kubectl delete pod traces-viewer -n $(NS) --wait=false
 
-candidate: ## build the candidate collection and run api-candidate: make candidate CHUNK=300 OVERLAP=50
+candidate: ## build a candidate collection and point api-candidate at it: make candidate CHUNK=300 OVERLAP=50 [COLL=rahbar_cand]
 	kubectl delete job indexer-candidate -n $(NS) --ignore-not-found
-	sed 's/CANDIDATE_CHUNK_SIZE/$(CHUNK)/; s/CANDIDATE_CHUNK_OVERLAP/$(OVERLAP)/' k8s/candidate/indexer-job.yaml | kubectl apply -f -
+	sed 's/CANDIDATE_CHUNK_SIZE/$(CHUNK)/; s/CANDIDATE_CHUNK_OVERLAP/$(OVERLAP)/; s/CANDIDATE_COLLECTION/$(or $(COLL),rahbar_cand)/' k8s/candidate/indexer-job.yaml | kubectl apply -f -
 	kubectl wait --for=condition=complete job/indexer-candidate -n $(NS) --timeout=3000s
-	kubectl apply -k k8s/candidate
+	$(MAKE) candidate-serve COLL=$(or $(COLL),rahbar_cand)
+
+candidate-serve: ## point api-candidate at an existing collection: make candidate-serve COLL=rahbar_cand
+	kubectl kustomize k8s/candidate | sed 's/CANDIDATE_COLLECTION/$(or $(COLL),rahbar_cand)/' | kubectl apply -f -
 	kubectl rollout restart deployment/api-candidate -n $(NS)
 	kubectl rollout status deployment/api-candidate -n $(NS) --timeout=300s
 
@@ -211,6 +214,6 @@ rollback: ## reverse the last release
 	kubectl rollout undo deployment/api -n $(NS)
 	kubectl rollout status deployment/api -n $(NS) --timeout=600s
 
-eval-job: ## run the eval Job: make eval-job [API=http://api:8000] [LABEL=live] [SET_BASELINE=false] [GATE_ONLY=/results/<file>.json]
+eval-job: ## run the eval Job: make eval-job [API=http://api:8000] [LABEL=live] [SUBSET=A|B|all] [SET_BASELINE=false] [GATE_ONLY=/results/<file>.json]
 	kubectl delete job eval -n $(NS) --ignore-not-found
-	sed 's|{name: API_URL, value: "http://api:8000"}|{name: API_URL, value: "$(or $(API),http://api:8000)"}|; s|{name: RUN_LABEL, value: "live"}|{name: RUN_LABEL, value: "$(or $(LABEL),live)"}|; s|{name: SET_BASELINE, value: "false"}|{name: SET_BASELINE, value: "$(or $(SET_BASELINE),false)"}|; s|{name: GATE_ONLY, value: ""}|{name: GATE_ONLY, value: "$(GATE_ONLY)"}|' k8s/eval-job.yaml | kubectl apply -f -
+	sed 's|{name: API_URL, value: "http://api:8000"}|{name: API_URL, value: "$(or $(API),http://api:8000)"}|; s|{name: RUN_LABEL, value: "live"}|{name: RUN_LABEL, value: "$(or $(LABEL),live)"}|; s|{name: SUBSET, value: "A"}|{name: SUBSET, value: "$(or $(SUBSET),A)"}|; s|{name: SET_BASELINE, value: "false"}|{name: SET_BASELINE, value: "$(or $(SET_BASELINE),false)"}|; s|{name: GATE_ONLY, value: ""}|{name: GATE_ONLY, value: "$(GATE_ONLY)"}|' k8s/eval-job.yaml | kubectl apply -f -

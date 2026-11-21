@@ -13,7 +13,6 @@ import json
 import logging
 import os
 import time
-from functools import lru_cache
 from typing import Any
 
 import httpx
@@ -25,19 +24,31 @@ TRACE_LOG = logging.getLogger("rahbar.trace")
 log = logging.getLogger("rahbar.api")
 
 
-@lru_cache(maxsize=8)
+_VERSIONS: dict[tuple[str, str], str] = {}
+
+
 def embed_version(model: str, url: str) -> str:
-    """`<model>@<digest12>` from Ollama /api/tags, `hashing-bow-768@1` for the CI embedder, else `<model>@unknown`."""
+    """`<model>@<digest12>` from Ollama /api/tags, `hashing-bow-768@1` for the CI embedder, else `<model>@unknown`.
+    Cached per (model, url) except `@unknown`: a failed first lookup is retried on the next request (R9, R3-F3-4)."""
+    if (model, url) in _VERSIONS:
+        return _VERSIONS[(model, url)]
+    v = f"{model}@unknown"
     if model.startswith("hashing-bow"):
-        return f"{model}@1"
-    try:
-        tags = httpx.get(f"{url.rstrip('/')}/api/tags", timeout=3.0).json()["models"]
-        for t in tags:
-            if t["name"].split(":")[0] == model.split(":")[0]:
-                return f"{model}@{str(t['digest'])[:12]}"
-    except Exception:
-        pass
-    return f"{model}@unknown"
+        v = f"{model}@1"
+    else:
+        try:
+            tags = httpx.get(f"{url.rstrip('/')}/api/tags", timeout=3.0).json()["models"]
+            for t in tags:
+                if t["name"].split(":")[0] == model.split(":")[0]:
+                    v = f"{model}@{str(t['digest'])[:12]}"
+        except Exception:
+            pass
+    if not v.endswith("@unknown"):
+        _VERSIONS[(model, url)] = v
+    return v
+
+
+embed_version.cache_clear = _VERSIONS.clear  # type: ignore[attr-defined]
 
 
 def prompt_hash(messages: list[dict[str, str]]) -> str:

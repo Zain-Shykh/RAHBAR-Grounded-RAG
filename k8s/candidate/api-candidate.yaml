@@ -35,7 +35,7 @@ spec:
             - configMapRef: {name: rahbar-config}
           env:
             # The candidate reads its own collection; everything else is the live configuration.
-            - {name: CHROMA_COLLECTION, value: rahbar_cand}
+            - {name: CHROMA_COLLECTION, value: CANDIDATE_COLLECTION}
           startupProbe:
             httpGet: {path: /healthz, port: 8000}
             failureThreshold: 30
