@@ -41,3 +41,8 @@ Codex performed the read-only final audit, then, under explicit user authorizati
 ## Codex screenshot verification and documentation (2026-11-07)
 
 On `docs/final-evidence-screenshots`, Codex visually inspected the four supplied PNGs, checked the failed Actions run number against GitHub and the original K9 text evidence, indexed the screenshots, and updated only evidence-supported checklist and current platform-plan statements. The screenshots were captured manually from real GitHub/RAHBAR interfaces; Codex did not capture, generate, synthesize or edit them. The green screenshot shows PR #37, not PR #30 recovered, and the failed-job screenshot does not show a disabled Merge button. Full R-CD-6 screenshot compliance, human approvals, understanding checks and Classroom submission are not marked complete. Original K9/K10 logs and historical progress entries are preserved. Codex ran the requested documentation validation checks; results are reported in the session summary.
+
+
+## Assignment 03, phase R8 (2026-11-21)
+
+Claude Code (Sonnet 5.5) ran the RAGOps ingestion, evaluation, trace and release-gate steps on the minikube cluster, fixed the defects the real runs exposed (eval client timeout, indexer deadline, gate placeholders, CI overlay volume index), added `GATE_ONLY`, `make restore`, `make inbox-delete` and the resource sampling scripts, and saved every command output under `docs/evidence/a3/`. A separate tester agent re-checked the criteria. The numbers in the evidence files come from the cluster runs; none were typed by hand.

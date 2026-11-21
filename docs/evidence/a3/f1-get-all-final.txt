@@ -1,0 +1,61 @@
+$ kubectl get all,pvc,configmap,cronjob,job -n rahbar   (final state, Batch A plus Batch B ingested)
+NAME                        READY   STATUS      RESTARTS       AGE
+pod/api-76cd7874fb-8ws9c    1/1     Running     0              2m37s
+pod/api-76cd7874fb-g6l8w    1/1     Running     0              2m18s
+pod/api-76cd7874fb-tw48p    1/1     Running     0              2m
+pod/chroma-0                1/1     Running     0              4m55s
+pod/eval-pmfc7              0/1     Error       0              19m
+pod/lake-viewer             1/1     Running     0              10m
+pod/redis-6f989b5dd-zflgv   1/1     Running     4 (128m ago)   14d
+pod/trace-report-lhftj      0/1     Completed   0              11m
+pod/ui-666d88fd49-cvcqt     1/1     Running     4 (128m ago)   14d
+
+NAME             TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)    AGE
+service/api      ClusterIP   10.100.203.93   <none>        8000/TCP   14d
+service/chroma   ClusterIP   10.97.196.211   <none>        8000/TCP   14d
+service/redis    ClusterIP   10.111.60.15    <none>        6379/TCP   14d
+service/ui       ClusterIP   10.100.0.147    <none>        80/TCP     14d
+
+NAME                    READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/api     3/3     3            3           14d
+deployment.apps/redis   1/1     1            1           14d
+deployment.apps/ui      1/1     1            1           14d
+
+NAME                              DESIRED   CURRENT   READY   AGE
+replicaset.apps/api-557d94f9b4    0         0         0       23m
+replicaset.apps/api-6486b9b855    0         0         0       14d
+replicaset.apps/api-76cd7874fb    3         3         3       2m38s
+replicaset.apps/api-7966bb7df4    0         0         0       121m
+replicaset.apps/api-b7dffdb47     0         0         0       4m31s
+replicaset.apps/api-bc8d697cb     0         0         0       3m22s
+replicaset.apps/redis-6f989b5dd   1         1         1       14d
+replicaset.apps/ui-666d88fd49     1         1         1       14d
+
+NAME                      READY   AGE
+statefulset.apps/chroma   1/1     14d
+
+NAME                                      REFERENCE        TARGETS       MINPODS   MAXPODS   REPLICAS   AGE
+horizontalpodautoscaler.autoscaling/api   Deployment/api   cpu: 5%/70%   3         8         3          14d
+
+NAME                    SCHEDULE    TIMEZONE   SUSPEND   ACTIVE   LAST SCHEDULE   AGE
+cronjob.batch/reindex   0 3 * * 0   <none>     False     0        5d21h           14d
+
+NAME                           STATUS     COMPLETIONS   DURATION   AGE
+job.batch/eval                 Failed     0/1           19m        19m
+job.batch/indexer              Complete   1/1           12s        23m
+job.batch/reindex-1795222203   Complete   1/1           16s        6m29s
+job.batch/restore              Complete   1/1           17s        5m25s
+job.batch/trace-report         Complete   1/1           6s         11m
+
+NAME                                         STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE
+persistentvolumeclaim/cache-data             Bound    pvc-8b20cfcb-3a04-4d36-bfba-f91352fc9ab8   1Gi        RWO            standard       <unset>                 14d
+persistentvolumeclaim/chroma-data-chroma-0   Bound    pvc-6e9a2c11-6ef9-4e71-915e-6c5a14fb9fbf   2Gi        RWO            standard       <unset>                 14d
+persistentvolumeclaim/corpus-data            Bound    pvc-c5e6cdf5-ba65-4cf9-8b51-003c585d45f7   1Gi        RWO            standard       <unset>                 14d
+persistentvolumeclaim/eval-results           Bound    pvc-e152e7ac-c42d-4fe4-a707-2839168c285d   200Mi      RWO            standard       <unset>                 121m
+persistentvolumeclaim/lake-data              Bound    pvc-263b9515-ca53-4c6c-80dc-73ecc766e6a5   1Gi        RWO            standard       <unset>                 121m
+persistentvolumeclaim/traces-data            Bound    pvc-344bc491-69a8-4448-87e3-742c0557575e   500Mi      RWO            standard       <unset>                 121m
+
+NAME                         DATA   AGE
+configmap/kube-root-ca.crt   1      14d
+configmap/rahbar-config      31     14d
+configmap/rahbar-gate        1      117m

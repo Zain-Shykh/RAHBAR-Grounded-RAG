@@ -74,7 +74,7 @@ Anything that is not in `requirements-a3.md`. In particular: a reranker (the exp
 | R5 | End-to-end level, stochasticity, one command (no judge, D-115) | R3-B-6 to R3-B-9 | 7 h | CODE DONE, runs in progress | #48 |
 | R6 | Trace, trace tool, metrics report, injection rail | R3-D1-* to R3-D5-1, R3-F4-1 | 6 h | CODE DONE, samples pending | #48 |
 | R7 | Change experiment and release gate | R3-C1-*, R3-C2-* | 6 h | CODE DONE, candidate runs pending | #48 |
-| R8 | Kubernetes deployment of RAGOps | R3-F1-*, R3-F2-*, R3-F4-*, R3-F5-*, R3-LOG-11 | 8 h | MANIFESTS DONE, cluster run pending | #48 |
+| R8 | Kubernetes deployment of RAGOps | R3-F1-*, R3-F2-*, R3-F4-*, R3-F5-*, R3-LOG-11 | 8 h | CLUSTER RUN DONE, independent test in progress | #48 |
 | R9 | Controlled release and rollback | R3-C3-1, R3-F3-* | 4 h | NOT STARTED | |
 | R10 | Drift and coverage | R3-E1-* to R3-E4-* | 4 h | CODE DONE (coverage.py, live_queries.jsonl), runs pending | #48 |
 | R11 | Evidence, report, README, final verification | R3-G-*, R3-S-*, R3-LOG-8 to 10 | 8 h | NOT STARTED | |
@@ -86,11 +86,11 @@ Hours spent so far: planned 64 h plus 2 h (R0), actual `____`.
 ## 2. Current focus
 
 ```
-Phase:        R4/R5 real runs, then R8 cluster run (code for R1 to R10 is written)
-Stage:        TESTING (real runs)
+Phase:        R8 tested on the cluster; next R7 candidates, R9 release, R10 runs, R11
+Stage:        TESTING (R8 independent test)
 Branch:       feat/rag-r04-eval-suite (PR #48 into dev)
 Spec:         this file
-Next action:  baseline suite on the local stack, then second run, candidates, then minikube: ingestion Job, eval Job, release, rollback, coverage, report
+Next action:  R7 candidate runs (cluster: make candidate, eval Job against api-candidate), R9 release and rollback, R10 coverage and drift, R11 report
 Waiting on:   nothing (Ollama time: each answer takes 75 to 110 s)
 Last updated: 2026-11-21 03:25
 ```
@@ -132,6 +132,7 @@ Append-only, newest at the bottom. Format: `YYYY-MM-DD  PNN  <stage or event>: <
 2026-11-21  R7   IMPLEMENTED (code): gate.py, compare.py, gate.yaml (limits to be fixed from baseline runs).
 2026-11-21  --   D-127: Zain instructed orchestrator mode. R1 to R8 code was written by the main session; subagents now write the retroactive specs and test reports and run the independent checks; later phases run one subagent each.
 2026-11-21  R8   IMPLEMENTED (manifests): PVCs, eval and trace-report Jobs, candidate Deployment and indexer Job, NetworkPolicies, make targets, k8s/README.md; make manifests validates all; cluster runs pending.
+2026-11-21  R8   CLUSTER RUN: ingestion Job on the real corpus 9 of 9 pass, 980 chunks, 1396 s; unchanged re-run 0 embedded; Batch B on the cluster 6 indexed 6 quarantined, fee page superseded, delete leaves 0 orphans, restore Job rolls back and forward; eval Job baseline then live2 gate PASS (27 answers, identical retrieval metrics, 1 answer text differs); GATE_ONLY flips Complete to Failed with the same image; resources measured (docs/evidence/f5-resources.txt); evidence docs/evidence/a3/. Fixed: eval client timeout, indexer deadline, gate placeholders, CI overlay volume index. Open: CI scan (nginx CVEs in the ui base). Spec docs/specs/phase-r08-k8s-ragops.md.
 2026-11-21  R4   TESTED round 1 (independent): metrics, noise, loader PASS; golden --check exit 1 only for the 8 reviews (D-126); live ACs (page match, A02 anchor, baseline run) pending. Spec docs/specs/phase-r04-golden-retrieval.md. Defect T-1 (loader crashes on null/missing keys, low).
 2026-11-21  R5   TESTED round 1: seed, bypass, exit-on-failure PASS; whole suite proven offline with a fake API; judge N/A (D-115); real runs, calibration, suite-twice pending. Spec docs/specs/phase-r05-e2e-suite.md.
 2026-11-21  R6   TESTED round 1: all outcomes traced (answered, abstained, fallback, cached), writer failure swallowed, tool and report PASS, rail catches 17 evasions, 0 false positives on 250 real pages. Pending: live batch B retrieval, traces/samples, eval-fixtures. Defects T-3 (rail gaps, low), T-4 (cache-hit trace lacks doc_version, low). Spec docs/specs/phase-r06-traces.md.
