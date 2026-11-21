@@ -1,0 +1,54 @@
+$ kubectl port-forward svc/api 18001:8000 -n rahbar   (here: pod port-forward to one api pod)
+$ curl -s localhost:18001/metrics | grep -E "rahbar_injection_flags_total|top_score|rahbar_"
+# HELP rahbar_top_score Best retrieved similarity per request
+rahbar_top_score_bucket{le="0.2"} 0.0
+rahbar_top_score_bucket{le="0.3"} 0.0
+rahbar_top_score_bucket{le="0.4"} 0.0
+rahbar_top_score_bucket{le="0.5"} 0.0
+rahbar_top_score_bucket{le="0.6"} 0.0
+rahbar_top_score_bucket{le="0.7"} 0.0
+rahbar_top_score_bucket{le="0.8"} 0.0
+rahbar_top_score_bucket{le="0.9"} 1.0
+rahbar_top_score_bucket{le="1.0"} 1.0
+rahbar_top_score_bucket{le="+Inf"} 1.0
+rahbar_top_score_count 1.0
+rahbar_top_score_sum 0.84388542
+# HELP rahbar_top_score_created Best retrieved similarity per request
+rahbar_top_score_created 1.7952212423146915e+09
+# HELP rahbar_injection_flags_total Retrieved passages dropped by the injection rail
+rahbar_cache_hit_ratio
+rahbar_cache_lookups_created
+rahbar_cache_lookups_total
+rahbar_embed_seconds_bucket
+rahbar_embed_seconds_count
+rahbar_embed_seconds_created
+rahbar_embed_seconds_sum
+rahbar_generation_seconds_bucket
+rahbar_generation_seconds_count
+rahbar_generation_seconds_created
+rahbar_generation_seconds_sum
+rahbar_index_info
+rahbar_request_duration_seconds_bucket
+rahbar_request_duration_seconds_count
+rahbar_request_duration_seconds_created
+rahbar_request_duration_seconds_sum
+rahbar_requests_created
+rahbar_request_seconds_bucket
+rahbar_request_seconds_count
+rahbar_request_seconds_created
+rahbar_request_seconds_sum
+rahbar_requests_total
+rahbar_retrieval_seconds_bucket
+rahbar_retrieval_seconds_count
+rahbar_retrieval_seconds_created
+rahbar_retrieval_seconds_sum
+rahbar_tokens_bucket
+rahbar_tokens_count
+rahbar_tokens_created
+rahbar_tokens_sum
+rahbar_top_score_bucket
+rahbar_top_score_count
+rahbar_top_score_created
+rahbar_top_score_sum
+rahbar_trace_write_errors_created
+rahbar_trace_write_errors_total

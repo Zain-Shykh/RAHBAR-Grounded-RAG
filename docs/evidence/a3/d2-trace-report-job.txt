@@ -1,0 +1,23 @@
+$ kubectl apply -f k8s/trace-report-job.yaml
+job.batch/trace-report created
+$ kubectl get job trace-report -n rahbar
+NAME           STATUS     COMPLETIONS   DURATION   AGE
+trace-report   Complete   1/1           6s         6s
+$ kubectl logs job/trace-report -n rahbar
+queries: 61
+collections seen: rahbar@20261120T232205Z-182148
+
+top-1 similarity: min 0.611, p25 0.731, median 0.798, p75 0.844, max 0.908
+histogram: 0.2-0.3:0, 0.3-0.4:0, 0.4-0.5:0, 0.5-0.6:0, 0.6-0.7:11, 0.7-0.8:21, 0.8-0.9:27, 0.9-1.0:2
+abstention rate: 0.311   fallback rate: 0.000
+cache hit rate: 0.000 over 3 lookups
+injection attempts flagged: 0
+
+latency ms per stage (p50 / p95):
+  scope       0.100 / 0.100
+  embed       219.400 / 372.300
+  cache       0.000 / 0.000
+  retrieve    19.100 / 23.800
+  guardrails  0.700 / 7.800
+  generate    54001.300 / 153991.500
+  total       54286.700 / 154291.600

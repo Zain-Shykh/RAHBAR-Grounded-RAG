@@ -24,11 +24,14 @@ whole procedure. Ollama runs on the host (`OLLAMA_HOST=0.0.0.0 ollama serve`; mo
 | A, verification report | `kubectl exec -n rahbar <viewer> -- cat /data/reports/<run>/verification.json` or `make lake-ls` |
 | B, suite on the cluster | `kubectl apply -f k8s/eval-job.yaml` (first time with `SET_BASELINE=true`: see below) |
 | C, gate | the eval Job: `kubectl get job eval -n rahbar` is `Complete` (gate passed) or `Failed` (gate failed) |
-| C, change the outcome without a rebuild | edit `eval/gate.yaml`, `make gate-config`, delete and re-apply the Job |
+| C, change the outcome without a rebuild | edit `eval/gate.yaml`, `make gate-config`, `make eval-job GATE_ONLY=/results/<result>.json` (re-applies the gate to a finished result, no model calls; same image, the Job flips to `Failed`) |
+| A, roll back to an older document version | `make restore SOURCE=<older file> SUPERSEDE=<newer file>` (one-off Job, zero embeddings) |
 | D, a trace | `kubectl logs deploy/api -n rahbar \| grep '"type": "trace"'`; `python scripts/trace_tool.py show <trace_id> --kubectl deploy/api` |
 | D, metrics over a window | `kubectl apply -f k8s/trace-report-job.yaml`, then `kubectl logs job/trace-report -n rahbar` |
 | F, metrics endpoint | `kubectl port-forward svc/api 8000:8000 -n rahbar`, then `curl localhost:8000/metrics` |
 | F, candidate and release | `make candidate CHUNK=300 OVERLAP=50`, eval Job with `API_URL=http://api-candidate:8000`, `make release COLLECTION=rahbar_cand`, `make rollback` |
+
+The indexer Job takes about 23 minutes on a full corpus with OCR (`activeDeadlineSeconds: 3600`); the suite takes 20 to 35 minutes with the 3B model (one answer 40 to 100 s), so never start two LLM Jobs at once. Requests and limits come from `docs/evidence/f5-resources.txt`.
 
 First baseline on the cluster: `make eval-job SET_BASELINE=true LABEL=baseline` (the result becomes
 `/results/baseline.json`, no gate); afterwards `kubectl apply -f k8s/eval-job.yaml` (or `make eval-job`) gates against it.
