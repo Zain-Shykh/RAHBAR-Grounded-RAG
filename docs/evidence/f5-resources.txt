@@ -4,25 +4,24 @@
 #   Run B  eval Job baseline and live2 (27 questions each, live api):        raw samples docs/evidence/a3/f5-samples-eval.txt
 # Rule: request about the median, limit about 1.5 x peak, rounded up. Documented exceptions below the table.
 
+# Tables below are regenerated from the committed sample files (the committed files are the evidence).
 ## Raw peaks (cpu in millicores, memory in Mi)
 ### Run A, ingestion
 workload                        n cpu_med_m cpu_peak_m mem_med_Mi mem_peak_Mi
-api                          1455         5         20         68          71
-chroma                        465         3         30         71         102
-eval                          159         1        142         22          24
-lake-viewer                     3        12         12          0           0
-redis                         465        24         29         10          12
+api                           906         5          6         68          70
+chroma                        282         3         30         71          97
+redis                         282        23         27         10          12
 reindex                       266         2       1000        415         469
-ui                            465         1          1          4           4
+ui                            282         1          1          4           4
 
 ### Run B, eval (two runs)
 workload                        n cpu_med_m cpu_peak_m mem_med_Mi mem_peak_Mi
-api                          2489         6        251         69          71
-chroma                        829         3         30        103         104
+api                          2427         6         21         69          71
+chroma                        809         3         30        103         104
 eval                          772         1        142         24          24
 lake-viewer                     3        12         12          0           0
-redis                         830        25         29          9          14
-ui                            830         1          1          4           4
+redis                         809        25         29          9          14
+ui                            809         1          1          4           4
 
 ### Run C, Batch B incremental ingestion Job (44 s) and the delete and restore Jobs (samples docs/evidence/a3/f5-samples-batch-b.txt)
 chroma  n=114  cpu median 7m, peak 60m  mem median 80Mi, peak 110Mi  (the limit of 384Mi holds an index swap with room)
@@ -31,7 +30,7 @@ The short Jobs (44 s, 9 s) fall between one or two 5 s samples; their memory sta
 ## Chosen values (applied in k8s/base/*.yaml, k8s/eval-job.yaml, k8s/candidate/*.yaml, k8s/tools/restore-job.yaml)
 | container | request cpu / mem | limit cpu / mem | basis |
 | --- | --- | --- | --- |
-| api (and api-candidate) | 100m / 80Mi | 500m / 128Mi | mem median 69, peak 71 -> 1.5 x peak = 107, rounded to 128Mi; cpu peak 251m (pod start, first sample after the rollout) -> 1.5 x = 377 -> 500m |
+| api (and api-candidate) | 100m / 80Mi | 500m / 128Mi | mem median 69, peak 71 -> 1.5 x peak = 107, rounded to 128Mi; cpu peak 250m (rollout, pod start; batch-b samples) -> 1.5 x = 377 -> 500m |
 | chroma | 50m / 128Mi | 250m / 384Mi | mem median 103, peak 104 -> 128Mi request; limit 3 x peak because an index swap holds two collections at once |
 | indexer, reindex, restore, candidate indexer | 250m / 416Mi | 1 / 768Mi | mem median 415, peak 469 -> 1.5 x = 703, rounded to 768Mi; cpu peak 1000m equals the old limit (throttled), so it stays 1 CPU |
 | eval Job | 50m / 32Mi | 250m / 64Mi | mem median 24, peak 24 -> 32Mi request, limit rounded to 64Mi; cpu peak 142m -> 1.5 x = 213 -> 250m |

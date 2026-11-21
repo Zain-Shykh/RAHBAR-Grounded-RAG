@@ -94,11 +94,12 @@ Evidence is in `docs/evidence/a3/` (one text file per command, screenshot source
 
 | Round | Date | Command | Result | Notes |
 | --- | --- | --- | --- | --- |
+| 1 | 2026-11-21 | independent tester, live cluster | AC2-AC9, AC11 PASS; AC1 caveat (no delete-and-recreate, deferred to R11-AC5); AC10 NOT PROVEN (images tagged dev; CI scan fails on nginx CVEs) | defects fixed: live api CPU limit drift (make apply), f5 tables regenerated from committed samples; low: quarantine dir clutter on a missing-file run, netpol proof file dated before the eval pod was replaced |
 
 ## 13. Sign-offs
 
 | Gate | Date | Approved by | Notes |
 | --- | --- | --- | --- |
 | Spec and plan | 2026-11-21 | waived (D-124) | retroactive for the manifests |
-| Tester verdict PASS | | | rounds: |
+| Tester verdict PASS | 2026-11-21 | tester agent | rounds: 1, AC1/AC10 open (see above) |
 | Merged | | | PR #48 |
