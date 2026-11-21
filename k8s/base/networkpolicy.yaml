@@ -134,6 +134,9 @@ spec:
         - podSelector:
             matchLabels:
               app.kubernetes.io/name: api
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: api-candidate
       ports:
         - {protocol: TCP, port: 6379}
 ---

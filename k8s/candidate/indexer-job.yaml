@@ -1,4 +1,4 @@
-# Builds the candidate collection with a full re-index (architecture-a3 8.1). Edit CHUNK_SIZE and CHUNK_OVERLAP
+# Builds the candidate collection with a complete re-index (empty registry, incremental code path, D-132) (architecture-a3 8.1). Edit CHUNK_SIZE and CHUNK_OVERLAP
 # (or use `make candidate CHUNK=300 OVERLAP=50`, which substitutes them) and apply. Same image, labels and
 # limits as the indexer Job, so the NetworkPolicies and the lake volume apply unchanged; its registry is
 # registry/rahbar_cand.json, separate from the live one.
@@ -33,7 +33,7 @@ spec:
             - configMapRef: {name: rahbar-config}
           env:
             - {name: CHROMA_COLLECTION, value: CANDIDATE_COLLECTION}
-            - {name: INDEX_MODE, value: full}
+            - {name: INDEX_MODE, value: incremental}   # first run on an empty registry builds everything with the A1 checks (full mode = strict A02 verification, rejects the planted corrupt file)
             - {name: CHUNK_SIZE, value: "CANDIDATE_CHUNK_SIZE"}
             - {name: CHUNK_OVERLAP, value: "CANDIDATE_CHUNK_OVERLAP"}
           resources:

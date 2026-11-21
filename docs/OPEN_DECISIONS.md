@@ -113,6 +113,11 @@ Entry template:
 | D-129 | Gate limits fixed from the cluster baseline | eval | DECIDED | R7, R8 |
 | D-130 | GATE_ONLY, restore Job, inbox-delete targets | k8s | DECIDED | R8 |
 | D-131 | Requests and limits from the first measured run, with floors | k8s | DECIDED | R8 |
+| D-132 | Candidate builds use the incremental code path on an empty registry; eval client timeout 900 s | k8s, eval | DECIDED | R7, R9 |
+| D-133 | Candidate collections `rahbar_bad` (100/0) and `rahbar_cand`; COLL and SUBSET variables; Redis reachable from api-candidate | k8s | DECIDED | R9 |
+| D-134 | Gate re-run with final limits: faithfulness rule becomes baseline-relative | eval | DECIDED | R7 |
+| D-135 | Release evidence: request loop, bad release and undo order | k8s | DECIDED | R9 |
+| D-136 | `embed_version` is not cached while `unknown` | api | DECIDED | R9 |
 
 ---
 
@@ -1578,4 +1583,27 @@ Raised 2026-11-21 while writing the Assignment 03 planning set ([`requirements-a
 - Area: eval
 - Related: D-123, R3-E1-1 to R3-E4-2
 - Decision: T = unrelated_mean + 0.75 x gap = 0.7247, rounded to 0.72 (paraphrase_mean 0.7913, unrelated_mean 0.5250 from `eval/results/suite-20261121T001033Z-baseline.json`; the provisional 0.75 is replaced); target stays 0.85. `live_queries.jsonl` kept unchanged: the before run was neither trivially covered nor empty (share 0.300). 16 golden questions g35 to g50 added (11 answerable with real source/section/page verified by POST /api/retrieve, 5 unanswerable by design: parking, cricket team, transcripts, weather, programming); origin synthetic, reviewed false. After: share 0.675, still below the target; reported as it is.
+- Decided on: 2026-11-21
+
+### D-132 Candidate builds use the incremental code path on an empty registry; client timeout 900 s
+- Status: DECIDED
+- Raised: 2026-11-21 by Claude (phase R9)
+- Area: k8s, eval
+- Question: `INDEX_MODE=full` in the candidate Job (as `k8s/candidate/indexer-job.yaml` had it) ran the A02 strict corpus verification and exited 1 in 7 s on the planted corrupt Batch B file (`sha256 mismatch: b08-transport-notice-corrupt.pdf`).
+- Decision: the candidate Job sets `INDEX_MODE=incremental`. The registry `registry/<collection>.json` for a new collection is empty, so every document is processed: the same A1/A2 checks and quarantine as the live index, full re-extraction and re-embedding, only the chunk settings differ. A build takes about 24 min (OCR plus 1428 chunks at 100/0). The eval client timeout is raised from 420 s to 900 s: one answer took 424 s (the API retried once after its own 300 s model timeout) and killed the first baseline-ab run with `ReadTimeout`.
+- Decided on: 2026-11-21
+
+### D-133 Candidate collections, Make variables, Redis edge
+- Status: DECIDED
+- Raised: 2026-11-21 by Claude (phase R9)
+- Area: k8s
+- Decision: `make candidate CHUNK= OVERLAP= COLL=<name>` (default `rahbar_cand`) builds into `COLL` and `make candidate-serve COLL=` points `api-candidate` at it; `make eval-job SUBSET=A|B|all`. Two collections exist: `rahbar_bad` (100/0, the candidate expected to fail) and `rahbar_cand` (the passing one). A defect found: `redis-ingress` allowed only `api`, so `api-candidate` never became Ready (`cache unavailable`); `api-candidate` was added (R8's NetworkPolicy had no test for it). NOTE for operators: `kubectl apply -f k8s/base/networkpolicy.yaml` alone writes the placeholder Ollama CIDR; apply the dev overlay (the dev overlay patches the node IP).
+- Decided on: 2026-11-21
+
+### D-134 Gate re-run with final limits: faithfulness rule becomes baseline-relative
+- Status: DECIDED
+- Raised: 2026-11-21 by Claude (phase R7)
+- Area: eval
+- Question: Candidate 100/0 passed all six rules with the placeholder limits (faithfulness at least 0.70 absolute, set when the baseline was 0.833 on Batch A only). Baseline-ab faithfulness is 0.900, candidate 0.821.
+- Decision: replace the absolute floor by `not_below_baseline_by 0.05`, justified by measured noise (one answer is 0.033 to 0.037 of the rate; `f3-stochasticity.txt`), not by the candidate's number alone. Both outputs are kept: `eval/results/gate-cand-100-0-initial-limits.txt` (exit 0, placeholders) and `gate-cand-100-0.txt` (exit 1, final limits). This is disclosed in `docs/evidence/r7-decision.md`: the limit was finalised after seeing the candidate, so it is a decision, not a blind test. The other rules were not changed (only the justification text).
 - Decided on: 2026-11-21
