@@ -141,6 +141,7 @@ Append-only, newest at the bottom. Format: `YYYY-MM-DD  PNN  <stage or event>: <
 2026-11-21  R2   TESTED (docs/specs/phase-r02-verification.md): AC1 to AC8 PASS. Real corpus 9 of 9 pass, Batch B 6 indexed and 6 quarantined as planted; verification coverage about 94%. Added strict-exit test.
 2026-11-21  R3   TESTED (docs/specs/phase-r03-incremental.md): AC2 to AC9 PASS, 13 edge tests added (unicode, empty corpus, registry or collection missing, embedder and registry-save failure, quarantine fixed, changed back, restore twice, superseded deleted). AC10 FAIL: scripts/check_registry.py does not exist. AC1 and AC11 (spike, make eval-fixtures) not re-run: need services.
 2026-11-21  R1-R7 FIX ROUND 1: T-1 T-2 T-4 T-5 T-8 fixed, scripts/check_registry.py added (R3-AC10), corpus/raw/_index.a02.json created (R1-AC5); tests green.
+2026-11-21  R7/R9 BASELINE-AB done: eval/results/suite-20261121T021833Z-baseline-ab.json (50 questions, subset all, live index Batch A+B, index 20261121T005113Z-a45667); copy suite-20261121T021833Z-drift-after-batch-b.json is the E3 data-drift run (compare against suite-20261121T001033Z-baseline.json = Batch A only). Eval client timeout raised to 900 s (a 424 s answer killed the first attempt).
 ```
 
 ---
