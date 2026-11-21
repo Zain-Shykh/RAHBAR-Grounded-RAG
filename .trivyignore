@@ -1,0 +1,11 @@
+# Trivy ignore list (read from the repository root by every scan step). Time-limited: each line expires.
+# rahbar-ui: nginx 1.30.6-r1 in nginxinc/nginx-unprivileged:1.30.6-alpine (latest 1.30 tag, no 1.30.7 image yet; `apk upgrade`
+# in ui/Dockerfile cannot reach the fix). The six CVEs are in the nginx mail module, HTTP/2, TLS and the resolver. ui/nginx.conf
+# uses none of them (plain HTTP on 8080, no resolver, no http2, no mail, no ssl). Decision D-142. Remove when an image with
+# nginx 1.30.7 is published (bump the tag in ui/Dockerfile) or on the expiry date.
+CVE-2026-113425 exp:2026-12-15
+CVE-2026-118899 exp:2026-12-15
+CVE-2026-121810 exp:2026-12-15
+CVE-2026-123007 exp:2026-12-15
+CVE-2026-123633 exp:2026-12-15
+CVE-2026-123634 exp:2026-12-15

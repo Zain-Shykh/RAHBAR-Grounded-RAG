@@ -1,0 +1,21 @@
+@page { size: A4; margin: 12mm 13mm 12mm 13mm; }
+html { font-size: 10pt; }
+body { font-family: "DejaVu Sans", "Liberation Sans", Arial, sans-serif; line-height: 1.28; color: #111; margin: 0; }
+h1 { font-size: 17pt; margin: 4mm 0 1mm; }
+h2 { font-size: 11.5pt; margin: 3.5mm 0 1.2mm; border-bottom: 1px solid #999; padding-bottom: 0.5mm; }
+h3 { font-size: 9.8pt; margin: 2.5mm 0 0.8mm; }
+p { margin: 0 0 1.4mm; text-align: left; }
+table { border-collapse: collapse; width: 100%; margin: 1mm 0 2mm; font-size: 8.4pt; line-height: 1.2; page-break-inside: auto; }
+th, td { border: 0.6px solid #888; padding: 0.7mm 1.2mm; vertical-align: top; }
+th { background: #e8ecf1; }
+tr { page-break-inside: avoid; }
+code { font-family: "DejaVu Sans Mono", monospace; font-size: 7.8pt; word-break: break-all; }
+img { display: block; margin: 1mm auto; }
+ol { margin: 0.5mm 0 1mm; padding-left: 5mm; } li { margin: 0; }
+.title { page-break-after: avoid; }
+.title table { width: 70%; font-size: 9.5pt; }
+.appendix { page-break-before: always; }
+.appendix h2 { margin-top: 0; }
+.shot { page-break-before: always; text-align: center; }
+.shot h3 { margin: 0 0 1mm; text-align: left; }
+.shot img { max-width: 184mm; max-height: 252mm; width: auto; height: auto; border: 1px solid #999; }

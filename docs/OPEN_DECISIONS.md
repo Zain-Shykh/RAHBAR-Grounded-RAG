@@ -118,6 +118,12 @@ Entry template:
 | D-134 | Gate re-run with final limits: faithfulness rule becomes baseline-relative | eval | DECIDED | R7 |
 | D-135 | Release evidence: request loop, bad release and undo order | k8s | DECIDED | R9 |
 | D-136 | `embed_version` is not cached while `unknown` | api | DECIDED | R9 |
+| D-137 | E3 drift compared like for like on the 27 baseline questions; causes only where a file shows the mechanism | eval, docs | DECIDED | R10, R11 |
+| D-138 | Report numbers checked by `scripts/check_numbers_a3.py` (digits or rounding of a committed number); roll numbers left as a placeholder | docs | DECIDED | R11 |
+| D-139 | Screenshots are renderings of the saved terminal text files, said so in the evidence index | docs | DECIDED | R11 |
+| D-140 | `QUESTION_LIMIT` (`make eval-job LIMIT=N`) for rehearsal smoke runs; `corpus/demo_batch` committed | eval, k8s | DECIDED | R11 |
+| D-141 | Fresh-cluster rehearsal findings and fixes (image-pull wait, first Job on an empty inbox) | k8s | DECIDED | R11 |
+| D-142 | CI scan: six nginx CVEs in the ui base image, time-limited `.trivyignore` | ci | DECIDED | R11 |
 
 ---
 
@@ -1622,3 +1628,44 @@ Raised 2026-11-21 while writing the Assignment 03 planning set ([`requirements-a
 - Decision: `trace.embed_version` cached its first answer for the process lifetime, so an Ollama outage at the first request would have fixed `embedding.version = <model>@unknown` for the pod (R3-F3-4 requires the field filled). It now caches only resolved digests. A test covers it. The cluster pods run the earlier image and already resolve the digest (`nomic-embed-text@0a109f422b47` in every trace); the image was not rebuilt during the experiments.
 - Decided on: 2026-11-21
 
+### D-137 E3 drift: like for like, causes only from files
+- Status: DECIDED
+- Raised: 2026-11-21 by Claude (phase R11)
+- Area: eval, docs
+- Decision: the two suites differ in question count (27 versus 50), so `eval.suite.compare` alone mixes new questions with a changed index. `scripts/drift_report.py` also recomputes the metrics on the 27 baseline ids (checked against the first file's own numbers) and lists outcome changes per question. A cause is written only where a committed file shows the mechanism (supersession in the registry, `superseded=false` filter in the traces, identical retrieval for q06). Whether the rail removed the injected passage for g31 and g34 is not shown by the committed suite files; a live check is added when the rehearsal cluster runs.
+- Decided on: 2026-11-21
+
+### D-138 Report numbers: check by digits or rounding; roll numbers a placeholder
+- Status: DECIDED
+- Raised: 2026-11-21 by Claude (phase R11)
+- Area: docs
+- Decision: `scripts/check_numbers_a3.py` accepts a decimal in the report when its digits occur in a committed file under `eval/results`, `docs/evidence`, `traces`, `docs/specs`, `eval/gate.yaml`, `eval/coverage.yaml` or `corpus/batch_b/PLANTED.json`, or a number there rounds (half up) to it. It is a floor, not a proof of meaning: the rounding rule is permissive for one-decimal numbers, so the tester also reads each table against its source. Roll numbers are the literal `[roll number to be filled by Zain]`; they are not known (human item).
+- Decided on: 2026-11-21
+
+### D-139 Screenshots are renderings of saved terminal text
+- Status: DECIDED
+- Raised: 2026-11-21 by Claude (phase R11)
+- Area: docs
+- Decision: the 14 PNGs are rendered by `scripts/render_screenshot.py` from the text files saved when the commands ran on the cluster. The evidence index says so. The assignment asks for terminal screenshots from our cluster; if Zain wants real terminal captures, the commands and outputs are in the text files and can be re-run.
+- Decided on: 2026-11-21
+
+### D-140 Smoke option for the eval Job and a demo batch
+- Status: DECIDED
+- Raised: 2026-11-21 by Claude (phase R11)
+- Area: eval, k8s
+- Decision: `QUESTION_LIMIT` (Make: `LIMIT=N`) makes the suite score only the first N questions so the rehearsal on a fresh cluster does not need 25 minutes of model time. It is for smoke runs; a gate decision uses the full set. `corpus/demo_batch/` holds 3 synthetic documents (hostel, careers, societies) for the "ingest an unseen batch" demo; they are fictional like Batch B.
+- Decided on: 2026-11-21
+
+### D-141 Fresh-cluster rehearsal: findings and fixes
+- Status: DECIDED
+- Raised: 2026-11-21 by Claude (phase R11)
+- Area: k8s
+- Decision: see `docs/evidence/a3/r11-fresh-cluster-rehearsal.txt`. Findings fixed in the Makefile and `k8s/README.md`: the helper pods' wait timeout (120 s) is too short on a fresh cluster where the image must be pulled (now 600 s); the indexer Job created by `kubectl apply -k` starts before the inbox is filled and fails (expected: ignore it, `make index` is the real run).
+- Decided on: 2026-11-21
+
+### D-142 CI `scan` fails on six nginx CVEs in the ui base image: time-limited ignore
+- Status: DECIDED
+- Raised: 2026-11-21 by Claude (phase R11)
+- Area: ci
+- Decision: PR #48's Trivy step failed for `rahbar-ui` only (api and indexer pass): nginx 1.30.6-r1 has six HIGH or CRITICAL CVEs with a fix in 1.30.7-r0, but the newest `nginxinc/nginx-unprivileged` tag is 1.30.6 and the `apk upgrade` already in `ui/Dockerfile` cannot reach 1.30.7. Not caused by Assignment 03 (the ui image is unchanged). The CVEs concern the mail module, HTTP/2, TLS and the resolver, none of which `ui/nginx.conf` uses. We added `.trivyignore` with the six ids, each expiring 2026-12-15, instead of lowering the severity gate. Zain should bump the base image tag when 1.30.7 is published.
+- Decided on: 2026-11-21

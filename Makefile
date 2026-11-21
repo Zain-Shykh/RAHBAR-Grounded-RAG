@@ -81,7 +81,7 @@ corpus: ## copy $(CORPUS_SRC) (default corpus/raw) into the corpus-data PVC (nam
 	kubectl apply -f k8s/base/serviceaccounts.yaml
 	kubectl delete pod corpus-loader -n $(NS) --ignore-not-found
 	kubectl apply -f k8s/tools/corpus-loader.yaml
-	kubectl wait --for=condition=Ready pod/corpus-loader -n $(NS) --timeout=120s
+	kubectl wait --for=condition=Ready pod/corpus-loader -n $(NS) --timeout=600s
 	kubectl cp $(CORPUS_SRC)/. $(NS)/corpus-loader:/corpus
 	kubectl cp $(CORPUS_SRC)/../MANIFEST.md $(NS)/corpus-loader:/corpus/MANIFEST.md
 	kubectl exec -n $(NS) corpus-loader -- ls -l /corpus
@@ -149,7 +149,7 @@ ingest-batch: ## ingest a batch of documents: make ingest-batch BATCH=corpus/bat
 	kubectl apply -f k8s/base/namespace.yaml -f k8s/base/corpus-pvc.yaml
 	kubectl delete pod corpus-loader -n $(NS) --ignore-not-found
 	kubectl apply -f k8s/tools/corpus-loader.yaml
-	kubectl wait --for=condition=Ready pod/corpus-loader -n $(NS) --timeout=120s
+	kubectl wait --for=condition=Ready pod/corpus-loader -n $(NS) --timeout=600s
 	kubectl exec -n $(NS) corpus-loader -- sh -c 'cat /corpus/_index.json 2>/dev/null || true' > /tmp/rahbar-existing-index.json
 	rm -rf /tmp/rahbar-merged && $(BIN)/python scripts/add_batch.py $(BATCH) /tmp/rahbar-existing-index.json /tmp/rahbar-merged
 	kubectl cp /tmp/rahbar-merged/. $(NS)/corpus-loader:/corpus
@@ -160,7 +160,7 @@ inbox-delete: ## delete a document from the inbox (file and manifest entry); the
 	test -n "$(FILE)"
 	kubectl delete pod corpus-loader -n $(NS) --ignore-not-found
 	kubectl apply -f k8s/tools/corpus-loader.yaml
-	kubectl wait --for=condition=Ready pod/corpus-loader -n $(NS) --timeout=120s
+	kubectl wait --for=condition=Ready pod/corpus-loader -n $(NS) --timeout=600s
 	kubectl exec -n $(NS) corpus-loader -- rm -f /corpus/$(FILE)
 	kubectl exec -n $(NS) corpus-loader -- cat /corpus/_index.json > /tmp/rahbar-index.json
 	$(BIN)/python scripts/manifest_remove.py /tmp/rahbar-index.json $(FILE)
@@ -177,21 +177,21 @@ restore: ## roll back: make restore SOURCE=<older file> SUPERSEDE=<newer file> (
 lake-ls: ## list the lake volume (registry, quarantine, archive, reports) through a throw-away pod
 	kubectl delete pod lake-viewer -n $(NS) --ignore-not-found
 	sed 's/CLAIM/lake-data/' k8s/tools/volume-viewer.yaml | sed 's/NAME/lake-viewer/' | kubectl apply -f -
-	kubectl wait --for=condition=Ready pod/lake-viewer -n $(NS) --timeout=120s
+	kubectl wait --for=condition=Ready pod/lake-viewer -n $(NS) --timeout=600s
 	kubectl exec -n $(NS) lake-viewer -- find /data -type f
 	kubectl delete pod lake-viewer -n $(NS) --wait=false
 
 results-pull: ## copy the eval Job's result files from the eval-results volume into eval/results/
 	kubectl delete pod results-viewer -n $(NS) --ignore-not-found
 	sed 's/CLAIM/eval-results/' k8s/tools/volume-viewer.yaml | sed 's/NAME/results-viewer/' | kubectl apply -f -
-	kubectl wait --for=condition=Ready pod/results-viewer -n $(NS) --timeout=120s
+	kubectl wait --for=condition=Ready pod/results-viewer -n $(NS) --timeout=600s
 	kubectl cp $(NS)/results-viewer:/data eval/results/cluster
 	kubectl delete pod results-viewer -n $(NS) --wait=false
 
 traces-pull: ## copy the trace files from the traces-data volume into traces/cluster/
 	kubectl delete pod traces-viewer -n $(NS) --ignore-not-found
 	sed 's/CLAIM/traces-data/' k8s/tools/volume-viewer.yaml | sed 's/NAME/traces-viewer/' | kubectl apply -f -
-	kubectl wait --for=condition=Ready pod/traces-viewer -n $(NS) --timeout=120s
+	kubectl wait --for=condition=Ready pod/traces-viewer -n $(NS) --timeout=600s
 	kubectl cp $(NS)/traces-viewer:/data traces/cluster
 	kubectl delete pod traces-viewer -n $(NS) --wait=false
 

@@ -216,6 +216,23 @@ Prerequisites: a running cluster with the application deployed (`make cluster`, 
 | D | Metrics over a window | `python scripts/trace_report.py --dir traces/samples --since 24h`, or `kubectl apply -f k8s/trace-report-job.yaml` |
 | E | Coverage of live queries by the golden set (exit 1 below target) | `python -m eval.suite.coverage --live eval/live_queries.jsonl --golden eval/golden.jsonl` |
 | F | Candidate, release, rollback | `make candidate CHUNK=300 OVERLAP=50`, `make eval-job API=http://api-candidate:8000 LABEL=cand`, `make release COLLECTION=rahbar_cand`, `make rollback` |
+| F | Smoke run of the eval Job (first N questions, for rehearsals; never for a gate decision) | `make eval-job LIMIT=5 LABEL=smoke` |
+| Demo | Ingest an unseen batch (3 synthetic documents) | `make ingest-batch BATCH=corpus/demo_batch`, then `make lake-ls` |
+| Report | Build the PDF, check its numbers | `scripts/build_report.sh`, `python scripts/check_numbers_a3.py` |
+
+**Status of Assignment 03** (details and gaps: [`docs/report/report.pdf`](docs/report/report.pdf), [`docs/IMPLEMENTATION_PLAN_A3.md`](docs/IMPLEMENTATION_PLAN_A3.md) sections 1 and 6)
+
+| Part | Status | Evidence |
+| --- | --- | --- |
+| A verification, incremental update | done on the cluster | `docs/evidence/a3/a1-*`, `a2-*` |
+| B three-level suite, stochasticity | done; 18 human golden questions, 0 of 32 synthetic reviewed (needs a person, `eval/HUMAN_TODO.md`); no LLM judge (D-115) | `eval/results/suite-*` |
+| C change experiment, gate, decision | done: 100/0 rejected, 300/50 and 600/100 pass; faithfulness rule changed after the 100/0 result (stated in the report) | `docs/evidence/r7-decision.md` |
+| D traces, metrics, rail, root cause | done | `traces/`, `docs/evidence/a3/d*` |
+| E coverage, drift | done; coverage after 0.675, target 0.85 not reached | `eval/results/coverage-*`, `docs/evidence/a3/e3-data-drift.md` |
+| F Kubernetes, release, rollback | done on minikube; rebuilt from `k8s/README.md` on a deleted cluster | `docs/evidence/a3/r9-*`, `r11-fresh-cluster-rehearsal.txt` |
+| Report and 14 screenshots | done; roll numbers to be filled by Zain | `docs/report/`, `docs/evidence/a3/screenshots/` |
+
+Commands in this table were run before submission: the local ones (golden check, compare, coverage, trace tool and report, report build, number check) on the final tree, the cluster ones in the rehearsal (`docs/evidence/a3/r11-fresh-cluster-rehearsal.txt`). They were not run by a second person (Ahmad did no work on Assignment 03).
 
 ## Documentation
 
