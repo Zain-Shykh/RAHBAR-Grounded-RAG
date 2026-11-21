@@ -63,10 +63,12 @@ def table(res: dict) -> str:
 
 
 def run_suite(api_url: str, label: str, subset: str, seed: int, golden_path: Path, host: str | None,
-              out_dir: Path, skip_e2e: bool = False) -> Path:
+              out_dir: Path, skip_e2e: bool = False, limit: int = 0) -> Path:
     random.seed(seed)
     api = Api(api_url, host)
     rows = golden.load(golden_path, subset)
+    if limit > 0:   # smoke run (fresh-cluster rehearsal): the first `limit` questions only; never used for a gate decision
+        rows = rows[:limit]
     problems = golden.problems(golden.load(golden_path))
     if problems and subset == "all":
         print("golden set problems (continuing):", problems, file=sys.stderr)
@@ -102,9 +104,10 @@ def main() -> int:
     ap.add_argument("--golden", type=Path, default=HERE / "golden.jsonl")
     ap.add_argument("--out", type=Path, default=Path(os.environ.get("RESULTS_DIR", HERE / "results")))
     ap.add_argument("--skip-e2e", action="store_true")
+    ap.add_argument("--limit", type=int, default=int(os.environ.get("QUESTION_LIMIT", "0")))
     a = ap.parse_args()
     try:
-        run_suite(a.api, a.label, a.subset, a.seed, a.golden, a.host, a.out, a.skip_e2e)
+        run_suite(a.api, a.label, a.subset, a.seed, a.golden, a.host, a.out, a.skip_e2e, a.limit)
     except Exception as exc:   # never present a partial file as a result (R5-AC7)
         print(f"SUITE FAILED: {exc!r}", file=sys.stderr)
         return 1

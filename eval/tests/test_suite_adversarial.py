@@ -369,3 +369,14 @@ def test_job_gate_only_skips_suite_and_follows_config(tmp_path, monkeypatch) -> 
     assert job.main() == 0
     cfg.write_text("rules:\n- {metric: e2e.latency_p95_s, op: at_most, value: 0.001, why: x}\n")
     assert job.main() == 1
+
+
+def test_limit_runs_only_the_first_n_questions(tmp_path, monkeypatch) -> None:
+    monkeypatch.setattr(module_level, "Embedder", FakeEmbedder)
+    monkeypatch.setattr(run_suite, "Api", FakeApi)
+    g = tmp_path / "g.jsonl"
+    rows = [{"id": f"q{i}", "question": f"What is attendance {i}?", "kind": "answerable", "origin": "human", "relevant":
+             [{"source": "a.pdf", "section": "1.1", "page": 1}], "batch": "A", "expect": "80 percent"} for i in range(4)]
+    g.write_text("\n".join(json.dumps(r) for r in rows))
+    res = json.loads(run_suite.run_suite("http://x", "t", "A", 1, g, None, tmp_path / "out", False, 2).read_text())
+    assert res["e2e"]["n"] == 2 and res["meta"]["golden_counts"]["questions"] == 2

@@ -37,6 +37,7 @@ spec:
             - {name: API_URL, value: "http://api:8000"}
             - {name: RUN_LABEL, value: "live"}
             - {name: SUBSET, value: "A"}
+            - {name: QUESTION_LIMIT, value: "0"}
             - {name: SET_BASELINE, value: "false"}
             - {name: GATE_ONLY, value: ""}
             - {name: BASELINE, value: "/results/baseline.json"}
