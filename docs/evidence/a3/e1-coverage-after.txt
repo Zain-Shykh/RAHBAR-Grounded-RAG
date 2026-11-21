@@ -15,7 +15,7 @@ uncovered queries by topic:
   student societies: l39
   withdrawal and refund: l03
     l03 0.707 (nearest q07)  till when can i drop a subject and still get a refund of fee
-    l22 0.699 (nearest g41)  what happens if i pay the fee late
+    l22 0.682 (nearest g41)  what happens if i pay the fee late
     l26 0.719 (nearest g36)  what is the cgpa needed to get a merit scholarship
     l27 0.707 (nearest g33)  how many credit hours are needed to graduate
     l30 0.623 (nearest g47)  who won the cricket match yesterday

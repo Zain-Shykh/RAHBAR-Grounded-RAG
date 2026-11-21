@@ -19,7 +19,7 @@
       "query": "what happens if i pay the fee late",
       "topic": "late fee",
       "in_domain": true,
-      "best_cosine": 0.6991,
+      "best_cosine": 0.6816,
       "nearest_golden": "g41",
       "covered": false
     },
@@ -359,7 +359,7 @@
       "query": "what happens if i pay the fee late",
       "topic": "late fee",
       "in_domain": true,
-      "best_cosine": 0.6991,
+      "best_cosine": 0.6816,
       "nearest_golden": "g41",
       "covered": false
     },
@@ -529,5 +529,5 @@
   "target": 0.85,
   "golden_questions": 50,
   "embedding": "nomic-embed-text@0a109f422b47",
-  "created": "2026-11-21T01:03:32Z"
+  "created": "2026-11-21T01:12:36Z"
 }

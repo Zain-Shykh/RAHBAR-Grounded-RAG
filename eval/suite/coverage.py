@@ -62,7 +62,7 @@ def main() -> int:
     res.update(target=cfg["target"], golden_questions=len(g), embedding=e.version(),
                created=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()))
     print(f"live queries {res['live_queries']}, golden questions {len(g)}, threshold {res['threshold']}, target {res['target']}")
-    print(f"covered {res['covered']} of {res['live_queries']}: share {res['share']:.3f}  (in-domain share {res['in_domain_share']:.3f})")
+    print(f"covered {res['covered']} of {res['live_queries']}: share {res['share']:.3f}  (in-domain share {res['in_domain_share'] if res['in_domain_share'] is None else format(res['in_domain_share'], '.3f')})")
     print("uncovered queries by topic:")
     for topic, ids in sorted(res["uncovered_topics"].items()):
         print(f"  {topic}: {', '.join(ids)}")
