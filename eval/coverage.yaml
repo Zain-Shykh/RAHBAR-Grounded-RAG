@@ -1,5 +1,9 @@
 # Coverage check (R3-E2-1, paper 4.2.7). threshold: cosine between a live query and its nearest golden question
 # at or above which the query counts as covered; target: the share of live queries that must be covered.
-# Both are justified in the report from eval/results (module-level means) and fixed in phase R10.
-threshold: 0.75
+# Calibration (R10, D-123), source eval/results/suite-20261121T001033Z-baseline.json section "module":
+#   paraphrase_mean 0.7913, unrelated_mean 0.5250, gap 0.2663 (paraphrase_min 0.6617, unrelated_max 0.6416).
+#   T = unrelated_mean + 0.75 * gap = 0.7247, rounded to 0.72: nearer the paraphrase side (0.07 below it, 0.20 above
+#   the unrelated mean), and above unrelated_max 0.6416 so no unrelated-pair level counts as covered.
+#   Detail: docs/evidence/a3/e2-coverage-calibration.txt
+threshold: 0.72
 target: 0.85

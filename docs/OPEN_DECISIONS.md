@@ -1337,7 +1337,7 @@ Raised 2026-11-21 while writing the Assignment 03 planning set ([`requirements-a
 - Options: A. New PVC `lake-data`, read-write, Job only; `corpus-data` stays the read-only inbox. B. Make `corpus-data` read-write and put everything in it. C. emptyDir plus copy-out (does not survive pod restarts: fails R3-F1-2).
 - Claude recommends: A. Keeps the A02 hardening (read-only inbox), the lake is exactly the state the assignment wants persisted, and the cost is one 1 Gi claim.
 - Blocks: R3, R8.
-- Decision: A (provisional).
+- Decision: A (provisional; fixed in D-132).
 - Decided on:
 
 ### D-111 How incremental update writes the index
@@ -1349,7 +1349,7 @@ Raised 2026-11-21 while writing the Assignment 03 planning set ([`requirements-a
 - Options: A. Embed only the delta; copy unchanged chunks and their stored vectors into the staging collection; keep the AD-02 swap (no deviation). B. Upsert and delete in place on the live collection (deviation from AD-02, brief half-updated states, metadata immutability risk on `modify`). C. Keep full rebuild and only report what would have changed (fails "embeds zero chunks" honestly only by skipping the swap).
 - Claude recommends: A. All-or-nothing update, no change to the API's swap handling, and the zero-embedding and no-orphan claims are true by construction. Risk A3-R1 (stored vectors identical) is checked first in R3.
 - Blocks: R3.
-- Decision: A (provisional).
+- Decision: A (provisional; fixed in D-132).
 - Decided on:
 
 ### D-112 Document id, family and the manifest fields
@@ -1361,7 +1361,7 @@ Raised 2026-11-21 while writing the Assignment 03 planning set ([`requirements-a
 - Options: A. Document id is the file name (`source`); a `family` field in `_index.json` groups versions; absent family means the file name. B. A synthetic hash id per document. C. Derive family from the title by string matching.
 - Claude recommends: A. `source` is already on every chunk, so the orphan proof is one `count where source=X`; an explicit `family` avoids guessing from names. The real manifest is enriched once by a script that keeps the A02 original.
 - Blocks: R1, R2.
-- Decision: A (provisional).
+- Decision: A (provisional; fixed in D-132).
 - Decided on:
 
 ### D-113 Near-duplicate method and threshold
@@ -1373,7 +1373,7 @@ Raised 2026-11-21 while writing the Assignment 03 planning set ([`requirements-a
 - Options: A. Document signature (mean of three 300-word window embeddings), cosine, threshold calibrated on the 9 real documents and Batch B and justified by the calibration file; same-family different-version pairs excluded. B. MinHash on shingles (no embedding, but the assignment says "by embedding similarity"). C. A fixed constant such as 0.95.
 - Claude recommends: A. Matches the assignment wording and keeps a measured margin; C is rejected because a guessed constant is the kind of number I-25 forbids.
 - Blocks: R2.
-- Decision: A (provisional).
+- Decision: A (provisional; fixed in D-132).
 - Decided on:
 
 ### D-114 Golden set format and its relation to golden.yaml
@@ -1385,7 +1385,7 @@ Raised 2026-11-21 while writing the Assignment 03 planning set ([`requirements-a
 - Options: A. New `eval/golden.jsonl` (superset, 18 questions carried over, labelled); the YAML is frozen and the A02 CI gate keeps using it. B. Convert and delete the YAML (breaks A02 CI and its baseline). C. Generate the YAML from the JSONL.
 - Claude recommends: A. No regression of the submitted work and exactly the file name the assignment requires.
 - Blocks: R4.
-- Decision: A (provisional).
+- Decision: A (provisional; fixed in D-132).
 - Decided on:
 
 ### D-115 Faithfulness judge and its hand labels
@@ -1409,7 +1409,7 @@ Raised 2026-11-21 while writing the Assignment 03 planning set ([`requirements-a
 - Options: A. Typos, seeded, about 1 edit per 8 words. B. Add irrelevant documents (needs a second collection and a re-index). C. Both.
 - Claude recommends: A. The assignment says "or"; data change is shown separately by ingesting Batch B (E3). Add B only if time remains.
 - Blocks: R4.
-- Decision: A (provisional).
+- Decision: A (provisional; fixed in D-132).
 - Decided on:
 
 ### D-117 Seeds and cache bypass for reproducible runs
@@ -1421,7 +1421,7 @@ Raised 2026-11-21 while writing the Assignment 03 planning set ([`requirements-a
 - Options: A. `LLM_SEED` ConfigMap key passed as Ollama `options.seed`; request header `X-Cache-Bypass: 1` from the eval client skips the cache. B. Temperature 0 for eval only (needs a second config). C. Flush Redis between runs (the API owns Redis, I-11; a flush from the eval Job breaks that).
 - Claude recommends: A. Smallest API change, same code path as production, keeps I-11.
 - Blocks: R5.
-- Decision: A (provisional).
+- Decision: A (provisional; fixed in D-132).
 - Decided on:
 
 ### D-118 Trace storage, prompt storage and trace id
@@ -1433,7 +1433,7 @@ Raised 2026-11-21 while writing the Assignment 03 planning set ([`requirements-a
 - Options: A. One JSON line to stdout plus one append-only file per pod on PVC `traces-data`; `trace_id` is the existing `request_id`; the full prompt and its SHA-256 are stored. B. Hash only; the tool rebuilds the prompt from Chroma (breaks after a re-index). C. A database (new component).
 - Claude recommends: A. The tool can print the exact prompt that produced an answer even after the index changed; one writer per file needs no locking; record size is a few KB.
 - Blocks: R6, R8.
-- Decision: A (provisional).
+- Decision: A (provisional; fixed in D-132).
 - Decided on:
 
 ### D-119 The retrieval rail for injected instructions
@@ -1445,7 +1445,7 @@ Raised 2026-11-21 while writing the Assignment 03 planning set ([`requirements-a
 - Options: A. A pattern rail `injection_scan` on retrieved passages: a match drops the passage from the evidence and is logged and counted. B. Only log the existing A02 defences (delimiter stripping, citation check). C. A classifier model (new dependency).
 - Claude recommends: A, keeping B's entries in the same `guardrails` list. It is simple, testable with the Batch B document, and its limits (paraphrased injections pass) are stated in the report.
 - Blocks: R6.
-- Decision: A (provisional).
+- Decision: A (provisional; fixed in D-132).
 - Decided on:
 
 ### D-120 The change experiment: chunk size and overlap
@@ -1457,7 +1457,7 @@ Raised 2026-11-21 while writing the Assignment 03 planning set ([`requirements-a
 - Options: A. Chunk size and overlap (full re-index into its own collection; A02 already has 200/25, 400/50, 600/100 numbers). B. top-k (no re-index, but no separate collection). C. Prompt template. D. Embedding model (needs the pin change, a different dimension is not available locally). E. Reranker (non-goal in A02, new code).
 - Claude recommends: A. It fits "own collection name" in F3 exactly, uses what we already measured, and gives a natural failing candidate (100/0) and a plausible passing one. The two candidate configurations are chosen from the R7 measurements, not now.
 - Blocks: R7, R9.
-- Decision: A (provisional).
+- Decision: A (provisional; fixed in D-132).
 - Decided on:
 
 ### D-121 Eval image, Job path and CD matrix
@@ -1469,7 +1469,7 @@ Raised 2026-11-21 while writing the Assignment 03 planning set ([`requirements-a
 - Options: A. A new image `rahbar-eval` built from `eval/Dockerfile`, Job in `k8s/eval-job.yaml`, added to the CD matrix. B. Reuse the indexer or api image with the eval code copied in (mixes lanes and bloats images). C. A `python:3.12-slim` image with the code mounted from a ConfigMap (not reproducible).
 - Claude recommends: A. Same discipline as the other images (non-root, read-only, SHA tags). The Docker Hub token expiry (A3-R6) is handled by `minikube image load` for the demo.
 - Blocks: R8.
-- Decision: A (provisional).
+- Decision: A (provisional; fixed in D-132).
 - Decided on:
 
 ### D-122 Release mechanism: edit the live Deployment's env
@@ -1481,7 +1481,7 @@ Raised 2026-11-21 while writing the Assignment 03 planning set ([`requirements-a
 - Options: A. `kubectl set env deployment/api CHROMA_COLLECTION=...` (a new ReplicaSet revision; explicit `env` overrides `envFrom`). B. Edit the ConfigMap and `rollout restart` (the revision template does not change, so `undo` would not restore the collection). C. Swap the Services' selectors (not a rolling update of the live Deployment).
 - Claude recommends: A. The only option where `rollout status` and `rollout undo` track the real change and a trace afterwards shows the previous collection.
 - Blocks: R9.
-- Decision: A (provisional).
+- Decision: A (provisional; fixed in D-132).
 - Decided on:
 
 ### D-123 Coverage threshold, target and topic grouping
@@ -1493,7 +1493,7 @@ Raised 2026-11-21 while writing the Assignment 03 planning set ([`requirements-a
 - Options: A. T between the module-level unrelated mean and paraphrase mean (nearer the paraphrase side), justified by the pair table; target 85 percent (the paper's example); topics labelled in `live_queries.jsonl` and checked by clustering the uncovered embeddings. B. A fixed T (0.85). C. Topic grouping by an LLM.
 - Claude recommends: A. Both numbers are then measured, and the topic list is auditable.
 - Blocks: R10.
-- Decision: A (provisional).
+- Decision: A (provisional; fixed in D-132).
 - Decided on:
 
 ### D-124 Authorisation scope and gate mode for Assignment 03
@@ -1570,4 +1570,12 @@ Raised 2026-11-21 while writing the Assignment 03 planning set ([`requirements-a
 - Raised: 2026-11-21 by Claude (phase R8)
 - Area: k8s
 - Decision: rule and exceptions in `docs/evidence/f5-resources.txt` (request about the median, limit about 1.5 x peak; CPU requests stay for HPA and OCR; CPU limit floor 250m, memory limit floor 64Mi; Chroma limit 3 x peak for the swap).
+- Decided on: 2026-11-21
+
+### D-132 R10: coverage threshold 0.72, live-query set unchanged, 16 golden questions added
+- Status: DECIDED
+- Raised: 2026-11-21 by Claude (phase R10)
+- Area: eval
+- Related: D-123, R3-E1-1 to R3-E4-2
+- Decision: T = unrelated_mean + 0.75 x gap = 0.7247, rounded to 0.72 (paraphrase_mean 0.7913, unrelated_mean 0.5250 from `eval/results/suite-20261121T001033Z-baseline.json`; the provisional 0.75 is replaced); target stays 0.85. `live_queries.jsonl` kept unchanged: the before run was neither trivially covered nor empty (share 0.300). 16 golden questions g35 to g50 added (11 answerable with real source/section/page verified by POST /api/retrieve, 5 unanswerable by design: parking, cricket team, transcripts, weather, programming); origin synthetic, reviewed false. After: share 0.675, still below the target; reported as it is.
 - Decided on: 2026-11-21
