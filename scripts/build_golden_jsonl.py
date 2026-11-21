@@ -3,8 +3,7 @@
 
     python scripts/build_golden_jsonl.py            # writes eval/golden.jsonl
 
-Every question written by the session is labelled `synthetic` and `reviewed: false` (D-126): the minimum of
-8 hand-written and 8 hand-reviewed questions is for Zain to close with eval/HUMAN_TODO.md. The A02 questions
+Every question written by the session is labelled `synthetic`; `reviewed` is true only for ids in REVIEWED (D-126, D-147). The A02 questions
 were written by the group in A02 and are labelled `human`. Pages come from the trailing comments of golden.yaml.
 """
 
@@ -19,6 +18,10 @@ import yaml
 HERE = Path(__file__).resolve().parents[1] / "eval"
 HR = "student-handbook-jun-2026.pdf"
 AR = "academic-rules-handbook-jun-2026.pdf"
+
+# Synthetic ids a person reviewed (R13, D-147): Zain checked g19 g20 g21 g23 against the original PDFs and g28 g29 g30 g33 against the invented Batch B files.
+# Keep in sync with `scripts/mark_reviewed.py`, otherwise regenerating undoes the review.
+REVIEWED = {"g19", "g20", "g21", "g23", "g28", "g29", "g30", "g33"}
 
 # (id, kind, question, relevant [(source, section, page)], expect, tags, batch, hard)
 NEW = [
@@ -120,7 +123,7 @@ def build() -> list[dict]:
         # page 0 means "same page as the A02 question it paraphrases"
         r = [{"source": s, "section": sec, "page": p or pages.get((s, sec), 1)} for s, sec, p in rel]
         rows.append({"id": gid, "question": text, "kind": kind, "hard": hard, "origin": "synthetic",
-                     "reviewed": False, "relevant": r, "expect": expect, "batch": batch, "tags": tags,
+                     "reviewed": gid in REVIEWED, "relevant": r, "expect": expect, "batch": batch, "tags": tags,
                      "must_abstain": kind == "unanswerable"})
     return rows
 

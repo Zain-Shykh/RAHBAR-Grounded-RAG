@@ -31,3 +31,11 @@ def test_refuses_human_and_unknown_and_changes_nothing(tmp_path):
         with pytest.raises(SystemExit):
             mr.mark(bad, p)
     assert p.read_text() == before
+
+
+def test_builder_reproduces_committed_golden():
+    bg = importlib.util.spec_from_file_location("bg", Path(__file__).resolve().parents[2] / "scripts" / "build_golden_jsonl.py")
+    m = importlib.util.module_from_spec(bg)
+    bg.loader.exec_module(m)
+    want = "".join(json.dumps(r, ensure_ascii=False) + "\n" for r in m.build())
+    assert (Path(__file__).resolve().parents[1] / "golden.jsonl").read_text(encoding="utf-8") == want

@@ -1,4 +1,4 @@
-# Final requirements audit, Assignment 03 (R12, 2026-11-21)
+# Final requirements audit, Assignment 03 (R12, 2026-11-21; R3-B-2 updated in R13, 2026-11-21)
 
 Source: `Assignment_03.md` read line by line against `docs/requirements-a3.md` (ids R3-*). Status words: MET, MET WITH CAVEAT, NOT MET. Evidence is a committed file or a command that can be re-run. Written by the AI session; the tester checks it (spec `docs/specs/phase-r12-closeout.md`).
 
@@ -6,9 +6,9 @@ Source: `Assignment_03.md` read line by line against `docs/requirements-a3.md` (
 
 | Status | Count |
 | --- | --- |
-| MET | 56 |
+| MET | 57 |
 | MET WITH CAVEAT | 21 (7 table rows plus the 14 screenshot ids R3-S-*, all with the same rendering caveat) |
-| NOT MET | 1 (R3-B-2, second half: waits for Zain's review) |
+| NOT MET | 0 |
 | Not applicable (decision) | 1 (R3-B-7, no LLM judge, D-115) |
 
 79 ids in all (65 table rows plus 14 screenshot ids). Items not met or with a caveat are listed again at the end.
@@ -49,7 +49,7 @@ Source: `Assignment_03.md` read line by line against `docs/requirements-a3.md` (
 | Id | Status | Evidence |
 | --- | --- | --- |
 | R3-B-1 | MET | `python -m eval.suite.golden --check`: 52 questions, 41 answerable, 11 unanswerable, 25 hard (g51 and g52 were added in R12). |
-| R3-B-2 | NOT MET (second half) | First half met: 18 `human` questions (Assignment 02, written by the group) and every question labelled. Second half: 0 of 34 synthetic questions are reviewed (`reviewed: false`). Zain reviews from `eval/REVIEW_SHEET.md`; then `python scripts/mark_reviewed.py <ids>`. |
+| R3-B-2 | MET (with nuance) | 18 `human` questions (Assignment 02) and every question labelled. 8 synthetic questions reviewed by Zain on 2026-11-21 (g19 g20 g21 g23 against the original PDFs; g28 g29 g30 g33 against the invented Batch B files, so correct by construction, not a real-world check): `eval/golden.jsonl`, `docs/evidence/a3/b1-golden-check.txt` (exit 0), D-147. |
 | R3-B-3 | MET | 15 paraphrase and 15 unrelated pairs, gap 0.2663, 285.3 ms per chunk, determinism 0.0: `eval/results/suite-20261121T021833Z-baseline-ab.md`. |
 | R3-B-4 | MET | recall@3, recall@5, MRR, nDCG@5: same file. |
 | R3-B-5 | MET | Typo noise, deltas per metric (D-116): same file, section noise. |
@@ -124,7 +124,7 @@ R3-S-A1, A2, B, C1, C2, D1, D2, E1, E2, F1, F2, F3, F4, F5: all 14 PNGs exist in
 
 ## Open items
 
-1. R3-B-2 second half: Zain reviews 8 synthetic questions (`eval/REVIEW_SHEET.md`).
+1. R3-B-2 is met since R13 (8 reviews, D-147); the nuance on the four Batch B questions is in the row above.
 2. g51 and g52 (version-aware pair for the superseded refund page) were added after the final result files: they are in `eval/golden.jsonl` (52 questions) but not in the measured runs (50). No LLM suite was run for them; the retrieval of both was checked on the live index (rank 1 and rank 2).
 3. Screenshot rendering (D-139), thin commit history of Ahmad, rehearsal by one person, coverage target 0.85 not reached, gate limit set after a result (D-134).
 4. The production release of 600/100 is not done (Zain's decision).

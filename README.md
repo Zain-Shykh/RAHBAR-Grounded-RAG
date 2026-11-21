@@ -225,7 +225,7 @@ Prerequisites: a running cluster with the application deployed (`make cluster`, 
 | Part | Status | Evidence |
 | --- | --- | --- |
 | A verification, incremental update | done on the cluster | `docs/evidence/a3/a1-*`, `a2-*` |
-| B three-level suite, stochasticity | done; 18 human golden questions, 0 of 34 synthetic reviewed (needs a person: `eval/REVIEW_SHEET.md`, `eval/HUMAN_TODO.md`); the file has 52 questions, the measured runs 50 (g51 and g52, the version-aware refund pair, were added later); no LLM judge (D-115) | `eval/results/suite-*` |
+| B three-level suite, stochasticity | done; 18 human golden questions, 8 of 34 synthetic reviewed by Zain (g19 g20 g21 g23 against the original PDFs; g28 g29 g30 g33 against the invented Batch B files, so correct by construction; `eval/REVIEW_SHEET.md`, D-147), `golden --check` exits 0; the file has 52 questions, the measured runs 50 (g51 and g52, the version-aware refund pair, were added later); no LLM judge (D-115) | `eval/results/suite-*` |
 | C change experiment, gate, decision | done: 100/0 rejected, 300/50 and 600/100 pass; faithfulness rule changed after the 100/0 result (stated in the report) | `docs/evidence/r7-decision.md` |
 | D traces, metrics, rail, root cause | done | `traces/`, `docs/evidence/a3/d*` |
 | E coverage, drift | done; coverage after 0.675, target 0.85 not reached | `eval/results/coverage-*`, `docs/evidence/a3/e3-data-drift.md` |
