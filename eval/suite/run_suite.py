@@ -100,7 +100,7 @@ def main() -> int:
     ap.add_argument("--api", default=os.environ.get("API_URL", "http://localhost:8000"))
     ap.add_argument("--host")
     ap.add_argument("--label", default=os.environ.get("RUN_LABEL", "run"))
-    ap.add_argument("--subset", default="A", choices=["A", "B", "all"])
+    ap.add_argument("--subset", default="A", choices=["A", "B", "C", "all"])
     ap.add_argument("--seed", type=int, default=1234)
     ap.add_argument("--golden", type=Path, default=HERE / "golden.jsonl")
     ap.add_argument("--out", type=Path, default=Path(os.environ.get("RESULTS_DIR", HERE / "results")))

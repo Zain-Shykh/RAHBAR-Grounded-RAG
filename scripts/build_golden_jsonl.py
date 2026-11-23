@@ -96,6 +96,25 @@ NEW = [
      [("fee-structure-page.html", "Fee Refund Policy", 1)], "60%", ["version", "of:q07"], "B", True),
     ("g52", "answerable", "According to the 2026-27 fee structure page, how much of my tuition fee do I get back if I leave the university?",
      [("fee-structure-page.html", "Fee Refund Policy", 1)], None, ["version", "of:g22"], "B", True),
+    # Round 2 of E4 (D-148): closes the gap the near-miss and off-domain live queries still showed after g35-g50 (coverage 0.675).
+    # Batch "C": not part of the Part B baseline (`all` = A + B), run on its own with SUBSET=C. In-domain ones checked with /api/retrieve.
+    ("g53", "answerable", "What semester GPA must a Merit Scholarship holder maintain for the scholarship to continue?",
+     [(HR, "Continuation of merit scholarship is subject to maintaining", 20)], "3.0", ["coverage", "topic:scholarships"], "C", False),
+    ("g54", "answerable", "What minimum CGPA does a student need in order to graduate?",
+     [(AR, "1.25", 10)], "2.00", ["coverage", "topic:degree-requirements"], "C", False),
+    ("g55", "answerable", "Under the 2026-27 fee structure, until which day after classes begin does a withdrawing student still get a tuition fee refund?",
+     [("fee-structure-page.html", "Fee Refund Policy", 1)], "30th day", ["coverage", "topic:withdrawal-refund", "version"], "C", True),
+    ("g56", "answerable", "How much extra is charged if a student pays the semester fee late?",
+     [("b10-fee-structure-amendment-2027.md", "2.2", 1)], "Rs 1,000 per week", ["coverage", "topic:late-fee", "batch-b"], "C", True),
+    ("g57", "unanswerable", "Who won the cricket match that was played yesterday?", [], None, ["no-evidence", "coverage", "topic:off-domain"], "C", False),
+    ("g58", "unanswerable", "What is the price of bitcoin in rupees today?", [], None, ["no-evidence", "coverage", "topic:off-domain"], "C", False),
+    ("g59", "unanswerable", "How do I cook biryani at home?", [], None, ["no-evidence", "coverage", "topic:off-domain"], "C", False),
+    ("g60", "unanswerable", "Which movie should I watch this weekend?", [], None, ["no-evidence", "coverage", "topic:off-domain"], "C", False),
+    ("g61", "unanswerable", "How should I prepare for a job interview at a software company?", [], None, ["no-evidence", "coverage", "topic:careers"], "C", False),
+    ("g62", "unanswerable", "What is the wifi password in the library?", [], None, ["no-evidence", "coverage", "topic:campus-life"], "C", False),
+    ("g63", "unanswerable", "How does the internship placement office help students find internships?", [], None, ["no-evidence", "coverage", "topic:careers"], "C", False),
+    ("g64", "unanswerable", "When are the student society elections held?", [], None, ["no-evidence", "coverage", "topic:campus-life"], "C", False),
+    ("g65", "unanswerable", "What is the capital city of Australia?", [], None, ["no-evidence", "coverage", "topic:off-domain"], "C", False),
 ]
 
 

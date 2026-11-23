@@ -64,3 +64,48 @@ def test_report_numbers_match_independent_computation(tmp_path):
     assert sum(s["top1_similarity"]["histogram"].values()) == 4
     assert report.parse_window("2h") == 7200 and report.load(str(tmp_path), 0.0001) in ([], report.load(str(tmp_path), 0.0001))
     assert "queries: 4" in report.text(s)
+
+
+def test_trace_tool_follows_a_cache_hit_to_the_original_request(tmp_path, capsys) -> None:
+    import json
+    import sys
+    sys.path.insert(0, str(__import__("pathlib").Path(__file__).resolve().parents[2] / "scripts"))
+    import trace_tool
+    base = {"type": "trace", "ts": "t", "query": "q", "rewritten_query": None, "embedding": {}, "collection": {}, "scope": {},
+            "retrieved": [], "reranked_order": [], "floor": {}, "guardrails": [], "model": "m", "latency_ms": {}, "tokens": {},
+            "response": {}}
+    msgs = [{"role": "system", "content": "s"}, {"role": "user", "content": "u"}]
+    orig = {**base, "trace_id": "A", "cache": "miss", "prompt": msgs, "prompt_sha256": trace_tool.prompt_hash(msgs),
+            "attempt_log": [{"attempt": 1, "result": "ok", "prompt_sha256": "x" * 64, "hint": None}]}
+    hit = {**base, "trace_id": "B", "cache": "hit", "prompt": None, "prompt_sha256": None, "cached_from": "A"}
+    (tmp_path / "t.jsonl").write_text(json.dumps(orig) + "\n" + json.dumps(hit) + "\n")
+    sys.argv = ["trace_tool", "show", "B", "--dir", str(tmp_path)]
+    assert trace_tool.main() == 0
+    out = capsys.readouterr().out
+    assert "CACHE HIT" in out and "ORIGINAL REQUEST A" in out and "hash OK" in out and "attempt 1: result=ok" in out
+
+
+def test_release_guard_refuses_a_failed_or_unrecorded_gate(tmp_path, monkeypatch) -> None:
+    import sys
+    sys.path.insert(0, str(__import__("pathlib").Path(__file__).resolve().parents[2] / "scripts"))
+    import release_guard as g
+    monkeypatch.setattr(g, "DECISIONS", tmp_path / "d.json")
+    bad, good = tmp_path / "bad.txt", tmp_path / "good.txt"
+    bad.write_text("candidate /results/x.json\nGATE FAILED: 5 of 6 rules pass\nexit 1\n")
+    good.write_text("candidate /results/y.json\nGATE PASSED: 6 of 6 rules pass\nexit 0\n")
+    g.record("c_bad", str(bad))
+    g.record("c_good", str(good))
+    assert g.check("c_bad") == 1 and g.check("c_good") == 0 and g.check("never_ran") == 1
+
+
+def test_extra_metrics_gold_citation_and_noncanned_abstention() -> None:
+    import sys
+    sys.path.insert(0, str(ROOT))
+    from eval.suite.e2e_level import cites_gold, extra_metrics
+    rel = [{"source": "a.pdf", "section": "4.3 The normal course load", "page": 1}]
+    assert cites_gold([{"source": "a.pdf", "section": "4.3 The normal course load is 5 courses. A final"}], rel)
+    assert not cites_gold([{"source": "b.pdf", "section": "4.3 The normal course load"}], rel)
+    per = [{"id": "x", "kind": "answerable", "answered": True, "citations": [{"source": "b.pdf", "section": "9"}], "answer": "a"},
+           {"id": "y", "kind": "unanswerable", "answered": False, "citations": [], "answer": "None of the fee is refunded."}]
+    out = extra_metrics(per, [{"id": "x", "relevant": rel}, {"id": "y", "relevant": []}])
+    assert out["gold_citation_rate"] == 0.0 and out["abstained_noncanned"][0]["id"] == "y"

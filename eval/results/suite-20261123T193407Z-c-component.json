@@ -1,0 +1,253 @@
+{
+  "meta": {
+    "label": "c-component",
+    "timestamp": "20261123T193407Z",
+    "git": "09d9e09",
+    "subset": "C",
+    "seed": 1234,
+    "llm_seed_env": null,
+    "api": "http://localhost:8000",
+    "ready": {
+      "status": "ready",
+      "checks": {
+        "chroma": "ok",
+        "collection": "ok",
+        "embed_pin": "ok",
+        "redis": "ok",
+        "embed_dimension": "ok"
+      }
+    },
+    "index_id": "20261121T083053Z-fd1b7b",
+    "embed_model": "nomic-embed-text",
+    "golden": "golden.jsonl",
+    "golden_counts": {
+      "questions": 13,
+      "answerable": 4,
+      "unanswerable": 9,
+      "hard": 2,
+      "human": 0,
+      "synthetic": 13,
+      "synthetic_reviewed": 0,
+      "batch_b": 0
+    }
+  },
+  "module": {
+    "model": "nomic-embed-text@0a109f422b47",
+    "pairs_paraphrase": 15,
+    "pairs_unrelated": 15,
+    "paraphrase_mean": 0.7912564102732789,
+    "unrelated_mean": 0.5249525577065651,
+    "paraphrase_min": 0.6617341444277086,
+    "unrelated_max": 0.6415594515822229,
+    "gap": 0.26630385256671374,
+    "chunks_timed": 56,
+    "ms_per_chunk_median": 1432.6426390034612,
+    "ms_per_chunk_p95": 9150.004627008457,
+    "determinism_max_abs_diff": 0.0,
+    "dimension": 768,
+    "bytes_per_embedding_float32": 3072
+  },
+  "component": {
+    "clean": {
+      "n": 4,
+      "recall_at_3": 1.0,
+      "recall_at_5": 1.0,
+      "mrr": 0.875,
+      "ndcg_at_5": 0.9077324383928644,
+      "hard": {
+        "n": 2,
+        "recall_at_3": 1.0,
+        "recall_at_5": 1.0,
+        "mrr": 0.75,
+        "ndcg_at_5": 0.8154648767857288
+      },
+      "by_batch": {
+        "C": {
+          "n": 4,
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 0.875,
+          "ndcg_at_5": 0.9077324383928644
+        }
+      },
+      "per_question": [
+        {
+          "id": "g53",
+          "tags": [
+            "coverage",
+            "topic:scholarships"
+          ],
+          "hard": false,
+          "batch": "C",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.80269653
+        },
+        {
+          "id": "g54",
+          "tags": [
+            "coverage",
+            "topic:degree-requirements"
+          ],
+          "hard": false,
+          "batch": "C",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.89493251
+        },
+        {
+          "id": "g55",
+          "tags": [
+            "coverage",
+            "topic:withdrawal-refund",
+            "version"
+          ],
+          "hard": true,
+          "batch": "C",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.77389282
+        },
+        {
+          "id": "g56",
+          "tags": [
+            "coverage",
+            "topic:late-fee",
+            "batch-b"
+          ],
+          "hard": true,
+          "batch": "C",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 0.5,
+          "ndcg_at_5": 0.6309297535714575,
+          "top1_score": 0.7431430800000001
+        }
+      ]
+    },
+    "noisy": {
+      "n": 4,
+      "recall_at_3": 1.0,
+      "recall_at_5": 1.0,
+      "mrr": 0.875,
+      "ndcg_at_5": 0.9077324383928644,
+      "hard": {
+        "n": 2,
+        "recall_at_3": 1.0,
+        "recall_at_5": 1.0,
+        "mrr": 0.75,
+        "ndcg_at_5": 0.8154648767857288
+      },
+      "by_batch": {
+        "C": {
+          "n": 4,
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 0.875,
+          "ndcg_at_5": 0.9077324383928644
+        }
+      },
+      "per_question": [
+        {
+          "id": "g53",
+          "tags": [
+            "coverage",
+            "topic:scholarships"
+          ],
+          "hard": false,
+          "batch": "C",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.80235785
+        },
+        {
+          "id": "g54",
+          "tags": [
+            "coverage",
+            "topic:degree-requirements"
+          ],
+          "hard": false,
+          "batch": "C",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.85281885
+        },
+        {
+          "id": "g55",
+          "tags": [
+            "coverage",
+            "topic:withdrawal-refund",
+            "version"
+          ],
+          "hard": true,
+          "batch": "C",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.75778556
+        },
+        {
+          "id": "g56",
+          "tags": [
+            "coverage",
+            "topic:late-fee",
+            "batch-b"
+          ],
+          "hard": true,
+          "batch": "C",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 0.5,
+          "ndcg_at_5": 0.6309297535714575,
+          "top1_score": 0.7431430800000001
+        }
+      ]
+    },
+    "noise_delta": {
+      "recall_at_3": {
+        "clean": 1.0,
+        "noisy": 1.0,
+        "abs": 0.0,
+        "rel": 0.0
+      },
+      "recall_at_5": {
+        "clean": 1.0,
+        "noisy": 1.0,
+        "abs": 0.0,
+        "rel": 0.0
+      },
+      "mrr": {
+        "clean": 0.875,
+        "noisy": 0.875,
+        "abs": 0.0,
+        "rel": 0.0
+      },
+      "ndcg_at_5": {
+        "clean": 0.9077324383928644,
+        "noisy": 0.9077324383928644,
+        "abs": 0.0,
+        "rel": 0.0
+      }
+    },
+    "noise_seed": 1234,
+    "noise_examples": {
+      "g53": "What semester GPA must a Merit Scholarship holedr maintain for the scholarship to continue?",
+      "g54": "What minimum CGPA does a student need in order to gradutae?",
+      "g55": "Under the 2026-27 fee structure, until which day after classes begin does a withdrawing sutdent stil get a tuitioon fee refund?"
+    },
+    "retrieval_ms_median": 234.5,
+    "retrieval_ms_p95": 492.6
+  },
+  "e2e": {}
+}

@@ -23,15 +23,21 @@ def build_report(run_id: str, corpus_dir: str, embed_model: str, verdicts: list[
 def render_text(report: dict) -> str:
     lines = [f"verification report {report['run_id']}  (embed model {report['embed_model']}, "
              f"near-duplicate threshold {report['neardup_threshold']})", ""]
-    head = f"{'document':<42} {'action':<12} " + " ".join(f"{c:<12}" for c in CHECKS)
+    head = f"{'document':<42} {'action':<18} " + " ".join(f"{c:<12}" for c in CHECKS)
     lines += [head, "-" * len(head)]
     detail = []
     for d in report["documents"]:
         marks = " ".join(f"{'PASS' if d['checks'][c]['pass'] else 'FAIL':<12}" for c in CHECKS)
-        lines.append(f"{d['source'][:41]:<42} {d['action']:<12} {marks}")
+        lines.append(f"{d['source'][:41]:<42} {d['action']:<18} {marks}")
         for c in CHECKS:
             if not d["checks"][c]["pass"]:
                 detail.append(f"  {d['source']}: {c}: {d['checks'][c]['reason']}")
+    if report.get("unchanged"):
+        lines += ["", f"not re-checked, unchanged since their last verified run ({len(report['unchanged'])}): "
+                  + ", ".join(report["unchanged"])]
+    if report.get("previously_quarantined"):
+        lines += ["", f"still quarantined, same file as before ({len(report['previously_quarantined'])}): "
+                  + ", ".join(report["previously_quarantined"])]
     t = report["totals"]
     lines += ["", "reasons for failures:"] + (detail or ["  none"]) + [
         "", f"totals: checked {t['checked']}, indexed {t['passed']}, quarantined {t['quarantined']}, "

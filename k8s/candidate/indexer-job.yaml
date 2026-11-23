@@ -36,6 +36,7 @@ spec:
             - {name: INDEX_MODE, value: incremental}   # first run on an empty registry builds everything with the A1 checks (full mode = strict A02 verification, rejects the planted corrupt file)
             - {name: CHUNK_SIZE, value: "CANDIDATE_CHUNK_SIZE"}
             - {name: CHUNK_OVERLAP, value: "CANDIDATE_CHUNK_OVERLAP"}
+            - {name: EMBED_BATCH_SIZE, value: "8"}   # smaller batches: a 32-chunk batch can pass the 120 s request timeout on a loaded CPU (seen twice, EmbedError ReadTimeout)
           resources:
             requests: {cpu: 250m, memory: 416Mi}
             limits: {cpu: "1", memory: 768Mi}

@@ -1,0 +1,12 @@
+{"id": "f01", "query": "what is the minimum attendance i need to be allowed in the exam", "expected_topic": "attendance", "in_domain": true}
+{"id": "f02", "query": "how many books can i borrow from the library at once", "expected_topic": "library", "in_domain": true}
+{"id": "f03", "query": "what grade points does a B plus carry", "expected_topic": "grading", "in_domain": true}
+{"id": "f04", "query": "can i appeal if i think my exam paper was marked wrongly", "expected_topic": "rechecking", "in_domain": true}
+{"id": "f05", "query": "how much does the university bus cost per semester", "expected_topic": "transport", "in_domain": true}
+{"id": "f06", "query": "what is the penalty for copying in an exam", "expected_topic": "plagiarism", "in_domain": true}
+{"id": "f07", "query": "is it allowed to use chatgpt for my assignments", "expected_topic": "generative AI policy", "in_domain": true}
+{"id": "f08", "query": "what are the gym timings on campus", "expected_topic": "sports", "in_domain": true}
+{"id": "f09", "query": "when does the next semester registration open", "expected_topic": "registration", "in_domain": true}
+{"id": "f10", "query": "do i need a laptop to enroll in the computer science program", "expected_topic": "admission requirements", "in_domain": true}
+{"id": "f11", "query": "who is the current prime minister of the country", "expected_topic": "politics", "in_domain": false}
+{"id": "f12", "query": "what is a good diet for building muscle", "expected_topic": "health", "in_domain": false}

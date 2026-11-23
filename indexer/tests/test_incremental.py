@@ -186,3 +186,22 @@ def test_reconcile_reembeds_a_document_whose_chunks_went_missing(env):
             del lst[i]
     s = run_incremental(settings(corpus, lake), client=client, lake=Lake(lake))
     assert s["changed"] == 1 and client.cols["rahbar"].count() == Registry.load(lake, "rahbar").total_chunks()
+
+
+def test_every_run_writes_a_verification_report_even_when_nothing_changed(env):
+    corpus, lake, client, _ = env
+    write(corpus, {"a.md": (doc("Alpha", 3), {}), "dup.md": (doc("Alpha", 3), {})})
+    s1 = run_incremental(settings(corpus, lake), client=client, lake=Lake(lake))
+    s2 = run_incremental(settings(corpus, lake), client=client, lake=Lake(lake))
+    r1 = Lake(lake).read_report(s1["run_id"])
+    r2 = Lake(lake).read_report(s2["run_id"])
+    assert r1["totals"]["checked"] == 2 and r1["totals"]["quarantined"] == 1
+    assert r2["totals"]["checked"] == 0 and r2["unchanged"] == ["a.md"] and r2["previously_quarantined"] == ["dup.md"]
+
+
+def test_dry_run_reports_but_quarantines_nothing(env):
+    corpus, lake, client, _ = env
+    write(corpus, {"a.md": (doc("Alpha", 3), {}), "dup.md": (doc("Alpha", 3), {})})
+    s = run_incremental(settings(corpus, lake), client=client, lake=Lake(lake), dry_run=True)
+    assert Lake(lake).read_report(s["run_id"])["totals"]["quarantined"] == 1
+    assert not list((lake / "quarantine").glob("*/*"))

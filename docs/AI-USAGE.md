@@ -61,3 +61,6 @@ Claude Code (Sonnet 5.5) put the roll numbers Zain gave on report page 1 and reb
 
 ## Phase R13 (review record): 2026-11-21
 Claude Code (Sonnet 5.5) ran `scripts/mark_reviewed.py` for the 8 synthetic questions Zain reviewed by hand (D-147), added a REVIEWED constant to `scripts/build_golden_jsonl.py` plus a regeneration test, updated the report, README and checklists, and saved the `golden --check` output. Zain did the review; the session set no flag on its own judgement.
+
+## Partner review fixes: 2026-11-23
+Claude Code (Sonnet 5.5) worked through Ahmad's seven review points (`docs/Ahmad_review.jpeg`, decisions D-148 to D-153): trace attempt log and cache-hit origin, a verification report for every incremental run, a release guard and a separate rollback drill, golden batch C and a fresh-query coverage check, two extra end-to-end checks, corrected README commands, and a screenshot runbook. It could not take terminal screenshots (the desktop portal refused a background session), so Zain takes them by hand. Zain approved the direction in chat; Ahmad's audit was done by Ahmad with another assistant and not by us.

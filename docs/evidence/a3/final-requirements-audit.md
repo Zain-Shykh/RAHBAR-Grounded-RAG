@@ -36,7 +36,7 @@ Source: `Assignment_03.md` read line by line against `docs/requirements-a3.md` (
 | R3-A1-1 | MET | `indexer/pipeline/verification/`, runs after extraction and before chunking (`indexer/pipeline/run.py`). |
 | R3-A1-2 | MET | Four checks with reason per document: `docs/evidence/a3/a1-verification-report.txt`. |
 | R3-A1-3 | MET | Quarantine folder on the lake PVC with `.reason.json`: same file. |
-| R3-A1-4 | MET | Report per run: `a1-verification-report.txt`, `a1-verification-report-batch-a.txt`. |
+| R3-A1-4 | MET | Report per run (every incremental run writes `verification.json`, D-151): `a1-verification-report.txt`, `a1-verification-report-batch-a.txt`. |
 | R3-A2-1 | MET | `a2-unchanged-run.txt` (0 chunks embedded). |
 | R3-A2-2 | MET | `a2-batch-b-ingest.txt`, `a2-check-registry*.txt` (copy-forward, only changed document re-embedded). |
 | R3-A2-3 | MET | `a2-delete-no-orphans.txt` (count by document id). |
@@ -87,7 +87,7 @@ Source: `Assignment_03.md` read line by line against `docs/requirements-a3.md` (
 | R3-E1-1 | MET | `eval/live_queries.jsonl`: 40 queries. |
 | R3-E2-1 | MET | `eval.suite.coverage`, threshold 0.72 calibrated (`e2-coverage-calibration.txt`), uncovered topics `e2-uncovered-topics.md`. |
 | R3-E3-1 | MET | `docs/evidence/a3/e3-data-drift.md`, `eval/results/drift-20261121T083232Z.json`. |
-| R3-E4-1 | MET WITH CAVEAT | 16 questions added; share rose from 0.300 to 0.675 (`e1-coverage-before.txt`, `e1-coverage-after.txt`); the 0.85 target is not reached and the report says why. |
+| R3-E4-1 | MET WITH CAVEAT | 16 questions added (0.300 to 0.675), then 13 more in batch C (1.000 on the 40 queries); fresh queries only 0.333 (`eval/results/coverage-fresh.json`); two of the four new answerable questions answered wrongly (`suite-20261123T222344Z-batch-c.json`). |
 | R3-E4-2 | MET | `eval.suite.coverage` exits 1 below target (both runs show exit code 1). |
 
 ## F. Kubernetes
@@ -101,7 +101,7 @@ Source: `Assignment_03.md` read line by line against `docs/requirements-a3.md` (
 | R3-F2-3 | MET | `f4-gate-change.txt` (ConfigMap edit, same image). |
 | R3-F3-1 | MET | `k8s/candidate/api-candidate.yaml`, own Service and collection. |
 | R3-F3-2 | MET | `r9-release.txt` (`maxUnavailable: 0`, 64 of 64 requests HTTP 200 during the rollout). |
-| R3-F3-3 | MET | `r9-gate-fail.txt`, `r9-bad-release.txt`, `r9-rollout-undo.txt`. |
+| R3-F3-3 | MET | Gate stop `c-gate-blocks-candidate.txt`; gated release and separate forced drill with `rollout undo` `c3-gated-release-and-drill.txt` (older: `r9-*`). |
 | R3-F3-4 | MET | `r9-trace-after-undo.txt`. |
 | R3-F4-1 | MET | `d1-trace-lines-in-pod-logs.txt`, `traces-data` volume, `d1-traces-pull.txt`. |
 | R3-F4-2 | MET | `f-metrics.txt`. |
