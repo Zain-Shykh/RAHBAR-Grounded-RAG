@@ -21,21 +21,22 @@ whole procedure. Ollama runs on the host (`OLLAMA_HOST=0.0.0.0 ollama serve`; mo
 | --- | --- |
 | A, ingestion of a batch | `make ingest-batch BATCH=corpus/batch_b`, then `kubectl logs job/<ingest-...> -n rahbar` |
 | A, second run, nothing changed | `make index` again; the log line `ingest summary` shows `chunks_embedded: 0, index_swapped: false` |
-| A, verification report | `kubectl exec -n rahbar <viewer> -- cat /data/reports/<run>/verification.json` or `make lake-ls` |
-| B, suite on the cluster | `kubectl apply -f k8s/eval-job.yaml` (first time with `SET_BASELINE=true`: see below) |
+| A, verification report | `make lake-report` (newest run as a table) or `make lake-report RUN=<id>`; `make lake-ls` lists runs. Every run writes one, also a run in which nothing changed |
+| B, suite on the cluster | `make eval-job SUBSET=all LABEL=<run>` (first time with `SET_BASELINE=true`: see below). A bare `kubectl apply -f k8s/eval-job.yaml` also works once ConfigMap `rahbar-gate` (`make gate-config`) and `/results/baseline.json` exist, with the defaults `SUBSET=A` and the live `api` |
 | C, gate | the eval Job: `kubectl get job eval -n rahbar` is `Complete` (gate passed) or `Failed` (gate failed) |
 | C, change the outcome without a rebuild | edit `eval/gate.yaml`, `make gate-config`, `make eval-job GATE_ONLY=/results/<result>.json` (re-applies the gate to a finished result, no model calls; same image, the Job flips to `Failed`) |
 | A, roll back to an older document version | `make restore SOURCE=<older file> SUPERSEDE=<newer file>` (one-off Job, zero embeddings) |
-| D, a trace | `kubectl logs deploy/api -n rahbar \| grep '"type": "trace"'`; `python scripts/trace_tool.py show <trace_id> --kubectl deploy/api` |
+| D, a trace | `kubectl logs -l app.kubernetes.io/name=api -n rahbar --tail=-1 --prefix=false --max-log-requests=10 \| grep '"type": "trace"'` (`kubectl logs deploy/api` reads one replica only); `python scripts/trace_tool.py show <trace_id> --kubectl deploy/api` (every replica) |
 | D, metrics over a window | `kubectl apply -f k8s/trace-report-job.yaml`, then `kubectl logs job/trace-report -n rahbar` |
 | F, metrics endpoint | `kubectl port-forward svc/api 8000:8000 -n rahbar`, then `curl localhost:8000/metrics` |
-| F, candidate and release | `make candidate CHUNK=300 OVERLAP=50`, eval Job with `API_URL=http://api-candidate:8000`, `make release COLLECTION=rahbar_cand`, `make rollback` |
+| F, candidate and release | `make candidate CHUNK=300 OVERLAP=50 COLL=rahbar_cand`; `make eval-job API=http://api-candidate:8000 LABEL=cand SUBSET=all`; `make results-pull`; `make gate-record COLLECTION=rahbar_cand GATE=eval/results/cluster/gate-cand.txt`; `make release COLLECTION=rahbar_cand` (refused unless the recorded verdict is PASS); `make rollback` |
+| F, rollback drill (not a gated release) | `make release COLLECTION=<any other collection> FORCE=1`, then `make rollback`; `bash scripts/release_demo.sh` has each step |
 
 ### Notes from the fresh-cluster rehearsal (`docs/evidence/a3/r11-fresh-cluster-rehearsal.txt`)
 
 - On a new cluster the first `make corpus` can wait several minutes for the `busybox` image and for Chroma to be pulled; the helper pods wait up to 600 s.
 - Step 3 also creates the Job `indexer`; it starts while the inbox is still empty and ends `Failed`. Ignore it: step 6 (`make index`) is the real run, and `make apply` deletes the old Job before re-applying.
-- The demo after step 8: `make eval-job SET_BASELINE=true LABEL=smoke LIMIT=5` then `make eval-job LABEL=smoke-gate LIMIT=5` (a 5-question smoke run: one unanswerable plus four answerable questions; the full run is `SUBSET=all`, about 60 minutes); `make ingest-batch BATCH=corpus/batch_b` (verification report: `make lake-ls`); `make ingest-batch BATCH=corpus/demo_batch` (3 unseen documents, then `make ask Q="What is the hostel fee per semester?"`); a trace: `kubectl logs deploy/api -n rahbar | grep '"type": "trace"'`.
+- The demo after step 8: `make eval-job SET_BASELINE=true LABEL=smoke LIMIT=5` then `make eval-job LABEL=smoke-gate LIMIT=5` (a 5-question smoke run: one unanswerable plus four answerable questions; the full run is `SUBSET=all`, about 60 minutes); `make ingest-batch BATCH=corpus/batch_b` (verification report: `make lake-ls`); `make ingest-batch BATCH=corpus/demo_batch` (3 unseen documents, then `make ask Q="What is the hostel fee per semester?"`); a trace: `kubectl logs -l app.kubernetes.io/name=api -n rahbar --tail=-1 --prefix=false --max-log-requests=10 | grep '"type": "trace"' | tail -1`.
 
 The indexer Job takes about 23 minutes on a full corpus with OCR (`activeDeadlineSeconds: 3600`); the suite takes 20 to 35 minutes with the 3B model (one answer 40 to 100 s), so never start two LLM Jobs at once. Requests and limits come from `docs/evidence/f5-resources.txt`.
 

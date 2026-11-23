@@ -206,16 +206,17 @@ Prerequisites: a running cluster with the application deployed (`make cluster`, 
 | Part | What | Command |
 | --- | --- | --- |
 | A | Generate Batch B (12 files, 7 planted problems) | `python scripts/make_batch_b.py --out corpus/batch_b` |
-| A1 | Verification of a batch, report and quarantine | `make ingest-batch BATCH=corpus/batch_b` then `make lake-ls`; locally `python -m pipeline.run --verify-only` (from `indexer/`, with `LAKE_DIR`) |
-| A2 | Incremental update: unchanged run embeds 0, changed, deleted, superseded, restore | `make index` twice; `python -m pipeline.restore --source <file> --supersede <newer>` |
+| A1 | Verification of a batch, report and quarantine | `make ingest-batch BATCH=corpus/batch_b`, then `make lake-report` (newest report as a table; `RUN=<id>` for another one, ids from `make lake-ls`); locally `python -m pipeline.run --verify-only` (from `indexer/`, with `LAKE_DIR`) |
+| A2 | Incremental update: unchanged run embeds 0, changed, deleted, superseded, restore | `make index` twice (`kubectl logs job/<name> -n rahbar` shows `chunks_embedded: 0`); `make restore SOURCE=<older file> SUPERSEDE=<newer file>` |
 | B | The whole suite, one command, timestamped result | `make suite API_URL=... LABEL=baseline` (writes `eval/results/suite-<ts>-baseline.json` and `.md`); `make suite-twice` for the two-run comparison |
 | B | Golden set check | `python -m eval.suite.golden --check` |
 | C | Compare, gate (exit 0 pass, 1 fail) | `python -m eval.suite.compare base.json cand.json`; `python -m eval.suite.gate --baseline base.json --candidate cand.json` |
-| C, F | Gate as a Kubernetes Job | `make eval-job SET_BASELINE=true LABEL=baseline`, then `kubectl apply -f k8s/eval-job.yaml` |
-| D | One trace, rebuilt prompt | `python scripts/trace_tool.py show <trace_id> --kubectl deploy/api` (or `--dir traces/samples`) |
+| C, F | Gate as a Kubernetes Job | `make gate-config`, `make eval-job SET_BASELINE=true SUBSET=all LABEL=baseline` (first run, no gate), then `make eval-job SUBSET=all LABEL=<run>` or `kubectl apply -f k8s/eval-job.yaml` (needs the ConfigMap and a baseline on the volume); `kubectl get job eval -n rahbar` is `Complete` or `Failed`. Re-apply the gate to a saved result without model calls: `make results-push FILES=<result.json> BASELINE=<baseline.json>`, then `make eval-job GATE_ONLY=/results/<result.json>` |
+| D | One trace, rebuilt prompt | `python scripts/trace_tool.py show <trace_id> --kubectl deploy/api` (reads every api pod; a cache hit also prints the original request; or `--dir traces/samples`) |
 | D | Metrics over a window | `python scripts/trace_report.py --dir traces/samples --since 24h`, or `kubectl apply -f k8s/trace-report-job.yaml` |
-| E | Coverage of live queries by the golden set (exit 1 below target) | `python -m eval.suite.coverage --live eval/live_queries.jsonl --golden eval/golden.jsonl` |
-| F | Candidate, release, rollback | `make candidate CHUNK=300 OVERLAP=50`, `make eval-job API=http://api-candidate:8000 LABEL=cand`, `make release COLLECTION=rahbar_cand`, `make rollback` |
+| E | Coverage of live queries by the golden set (exit 1 below target) | `PYTHONPATH=. python -m eval.suite.coverage --live eval/live_queries.jsonl --golden eval/golden.jsonl --out eval/results/` (add `--live eval/live_queries_fresh.jsonl` for the fresh log; needs Ollama for embeddings) |
+| F | Candidate, gate, release, rollback | `make candidate CHUNK=300 OVERLAP=50 COLL=rahbar_cand`; `make eval-job API=http://api-candidate:8000 LABEL=cand SUBSET=all` (about 60 min); `make results-pull`; `make gate-record COLLECTION=rahbar_cand GATE=eval/results/cluster/gate-cand.txt`; `make release COLLECTION=rahbar_cand` (refused unless the recorded gate verdict is PASS); `make rollback` |
+| F | Rollback drill (separate from the gate: a release that bypasses it on purpose) | `make release COLLECTION=<other collection> FORCE=1`, `make rollback`, then ask a question and `trace_tool.py show` it: the trace names the previous collection. Script: `bash scripts/release_demo.sh gate-fail\|refuse\|gate-pass\|release\|drill\|undo` |
 | F | Smoke run of the eval Job (first N questions, for rehearsals; never for a gate decision) | `make eval-job LIMIT=5 LABEL=smoke` |
 | Demo | Ingest an unseen batch (3 synthetic documents) | `make ingest-batch BATCH=corpus/demo_batch`, then `make lake-ls` |
 | Report | Build the PDF, check its numbers | `scripts/build_report.sh`, `python scripts/check_numbers_a3.py` |

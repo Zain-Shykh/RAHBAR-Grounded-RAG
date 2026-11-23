@@ -17,7 +17,7 @@ CHROMA_IMAGE ?= chromadb/chroma:1.0.12
 REDIS_IMAGE ?= redis/redis-stack-server:7.4.0-v8
 
 .DEFAULT_GOAL := help
-.PHONY: eval-job eval-ctx eval-image gate-config suite suite-twice candidate gate-record release rollback ingest-batch inbox-delete restore lake-ls lake-report results-pull traces-pull baseline resources help install test lint dev dev-services dev-services-stop dev-services-reset cluster images corpus apply down secret index ask fetch eval eval-fixtures check manifests
+.PHONY: eval-job eval-ctx eval-image gate-config suite suite-twice candidate gate-record release rollback ingest-batch inbox-delete restore lake-ls lake-report results-push results-pull traces-pull baseline resources help install test lint dev dev-services dev-services-stop dev-services-reset cluster images corpus apply down secret index ask fetch eval eval-fixtures check manifests
 
 help: ## list the targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  make %-14s %s\n", $$1, $$2}'
@@ -187,6 +187,15 @@ lake-report: ## print a verification report from the lake volume (newest, or RUN
 	kubectl wait --for=condition=Ready pod/lake-viewer -n $(NS) --timeout=600s
 	kubectl exec -n $(NS) lake-viewer -- sh -c 'cat "/data/reports/$(or $(RUN),$$(ls /data/reports | tail -n 1))/verification.json"' | PYTHONPATH=indexer $(PY) scripts/show_verification.py
 	kubectl delete pod lake-viewer -n $(NS) --wait=false
+
+results-push: ## copy saved result files into the eval-results volume (so GATE_ONLY can re-apply the gate): make results-push FILES="eval/results/a.json eval/results/b.json" [BASELINE=eval/results/suite-...baseline-ab.json]
+	kubectl delete pod results-writer -n $(NS) --ignore-not-found
+	sed 's/CLAIM/eval-results/; s/NAME/results-writer/; s/readOnly: true/readOnly: false/g' k8s/tools/volume-viewer.yaml | kubectl apply -f -
+	kubectl wait --for=condition=Ready pod/results-writer -n $(NS) --timeout=600s
+	for f in $(FILES); do kubectl cp $$f $(NS)/results-writer:/data/$$(basename $$f); done
+	if [ -n "$(BASELINE)" ]; then kubectl cp $(BASELINE) $(NS)/results-writer:/data/baseline.json; fi
+	kubectl exec -n $(NS) results-writer -- ls -l /data
+	kubectl delete pod results-writer -n $(NS) --wait=false
 
 results-pull: ## copy the eval Job's result files from the eval-results volume into eval/results/
 	kubectl delete pod results-viewer -n $(NS) --ignore-not-found
