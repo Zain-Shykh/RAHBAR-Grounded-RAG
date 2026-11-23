@@ -226,12 +226,12 @@ Prerequisites: a running cluster with the application deployed (`make cluster`, 
 | Part | Status | Evidence |
 | --- | --- | --- |
 | A verification, incremental update | done on the cluster | `docs/evidence/a3/a1-*`, `a2-*` |
-| B three-level suite, stochasticity | done; 18 human golden questions, 8 of 34 synthetic reviewed by Zain (g19 g20 g21 g23 against the original PDFs; g28 g29 g30 g33 against the invented Batch B files, so correct by construction; `eval/REVIEW_SHEET.md`, D-147), `golden --check` exits 0; the file has 52 questions, the measured runs 50 (g51 and g52, the version-aware refund pair, were added later); no LLM judge (D-115) | `eval/results/suite-*` |
+| B three-level suite, stochasticity | done; 18 human golden questions, 8 of 34 synthetic reviewed by Zain (g19 g20 g21 g23 against the original PDFs; g28 g29 g30 g33 against the invented Batch B files, so correct by construction; `eval/REVIEW_SHEET.md`, D-147), `golden --check` exits 0; the file has 65 questions, the measured runs 50 (g51 and g52, the version-aware refund pair, and batch C g53 to g65 were added later); no LLM judge (D-115) | `eval/results/suite-*` |
 | C change experiment, gate, decision | done: 100/0 rejected, 300/50 and 600/100 pass; faithfulness rule changed after the 100/0 result (stated in the report) | `docs/evidence/r7-decision.md` |
 | D traces, metrics, rail, root cause | done | `traces/`, `docs/evidence/a3/d*` |
-| E coverage, drift | done; coverage after 0.675, target 0.85 not reached | `eval/results/coverage-*`, `docs/evidence/a3/e3-data-drift.md` |
-| F Kubernetes, release, rollback | done on minikube; rebuilt from `k8s/README.md` on a deleted cluster | `docs/evidence/a3/r9-*`, `r11-fresh-cluster-rehearsal.txt` |
-| Report and 14 screenshots | done; roll numbers on page 1 | `docs/report/`, `docs/evidence/a3/screenshots/` |
+| E coverage, drift | done; coverage 0.300, then 0.675, then 1.000 on the 40 queries after round 2 (batch C), but only 0.333 on 12 fresh queries; target 0.85 not reached on fresh traffic | `eval/results/coverage-*`, `docs/evidence/a3/e3-data-drift.md` |
+| F Kubernetes, release, rollback | done on minikube; rebuilt from `k8s/README.md` on a deleted cluster; gate stop, gated release and rollback drill are separate (`make release` refuses a failed gate) | `docs/evidence/a3/c-gate-*`, `c3-gated-release-and-drill.txt`, `r11-fresh-cluster-rehearsal.txt` |
+| Report and 14 screenshots | report done, roll numbers on page 1; the 14 images are renderings of saved terminal output, real terminal screenshots to be taken with `docs/evidence/a3/SCREENSHOT_RUNBOOK.md` | `docs/report/`, `docs/evidence/a3/screenshots/` |
 
 Commands in this table were run before submission: the local ones (golden check, compare, coverage, trace tool and report, report build, number check) on the final tree, the cluster ones in the rehearsal (`docs/evidence/a3/r11-fresh-cluster-rehearsal.txt`). They were not run by a second person (Ahmad did no work on Assignment 03).
 

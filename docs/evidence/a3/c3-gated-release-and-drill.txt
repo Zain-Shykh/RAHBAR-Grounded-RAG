@@ -1,0 +1,121 @@
+$ kubectl rollout history deployment/api -n rahbar   # live api on collection "rahbar" (the original index)
+deployment.apps/api 
+REVISION  CHANGE-CAUSE
+1         <none>
+2         <none>
+8         <none>
+9         <none>
+10        <none>
+
+
+## 1. GATED RELEASE of rahbar_c600 (recorded gate verdict PASS; rolling update, maxUnavailable 0; a request loop through the Ingress runs during it)
+$ make release COLLECTION=rahbar_c600
+gate PASSED for rahbar_c600 (eval/results/gate-cand-600-100.txt): release allowed
+deployment.apps/api env updated
+Waiting for deployment "api" rollout to finish: 1 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 1 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 1 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 2 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 2 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 2 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "api" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "api" rollout to finish: 1 old replicas are pending termination...
+deployment "api" successfully rolled out
+$ requests during the rolling update, count by HTTP status:
+     54 200
+$ kubectl rollout history deployment/api -n rahbar
+deployment.apps/api 
+REVISION  CHANGE-CAUSE
+1         <none>
+2         <none>
+8         <none>
+10        <none>
+11        <none>
+
+$ ask on the live api
+answer: 2.00
+request_id b3fc6c63b16d42360ad9e5ff33559ed8
+$ python scripts/trace_tool.py show b3fc6c63b16d42360ad9e5ff33559ed8 --kubectl deploy/api
+TRACE b3fc6c63b16d42360ad9e5ff33559ed8  2026-11-23T22:07:11Z
+
+query:      What CGPA puts a student on academic warning?
+rewritten:  None
+embedding:  {'model': 'nomic-embed-text', 'version': 'nomic-embed-text@0a109f422b47', 'dimension': 768}
+collection: {'name': 'rahbar_c600', 'index_id': '20261123T211923Z-4e992b', 'chunk_count': 993, 'embed_model': 'nomic-embed-text'}
+scope:      {'where': {'superseded': False}, 'key': 'current', 'tag': '405ab5d2b930'}
+floor:      {'value': 0.7, 'best_score': 0.8439, 'passed': True}
+cache:      miss
+model: {'provider': 'ollama-host', 'name': 'llama3.2:3b', 'attempts': 1, 'params': {'temperature': 0.2, 'num_ctx': 8192, 'num_predict': 512, 'seed': 42, 'format': 'json-schema'}}
+response: {"answer": "2.00", "citations": [{"source": "academic-rules-handbook-jun-2026.pdf", "section": "5.4 Minimum CGPA required to avoid academic warning is 2.00", "page": 24}], "confidence": "hig
+latency_ms: {'scope': 0.1, 'embed': 128.5, 'cache': 1.7, 'retrieve': 21.7, 'guardrails': 1.6, 'generate': 30551.7, 'total': 30817.6}  tokens: {'in': 990, 'out': 99}
+
+## 2. ROLLBACK DRILL (separate from the gate): a release that bypasses the gate on purpose, then kubectl rollout undo
+$ make release COLLECTION=rahbar_drill FORCE=1
+FORCED RELEASE of rahbar_drill: the gate check is skipped on purpose (rollback drill, not a gated release)
+deployment.apps/api env updated
+Waiting for deployment "api" rollout to finish: 1 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 1 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 1 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 2 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 2 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 2 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "api" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "api" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "api" rollout to finish: 1 old replicas are pending termination...
+deployment "api" successfully rolled out
+$ ask on the live api (drill collection)
+answer: I could not produce a verified answer from the documents right now. Please try again, or rephrase the question.
+request_id 3c9a9c2afb98881cf9524a24aaa56588
+$ python scripts/trace_tool.py show 3c9a9c2afb98881cf9524a24aaa56588 --kubectl deploy/api
+TRACE 3c9a9c2afb98881cf9524a24aaa56588  2026-11-23T22:09:08Z
+
+query:      What is the normal course load in a semester?
+rewritten:  None
+embedding:  {'model': 'nomic-embed-text', 'version': 'nomic-embed-text@0a109f422b47', 'dimension': 768}
+collection: {'name': 'rahbar_drill', 'index_id': '20261123T214747Z-9ec424', 'chunk_count': 970, 'embed_model': 'nomic-embed-text'}
+scope:      {'where': {'superseded': False}, 'key': 'current', 'tag': '405ab5d2b930'}
+floor:      {'value': 0.7, 'best_score': 0.9046, 'passed': True}
+cache:      miss
+model: {'provider': 'ollama-host', 'name': 'llama3.2:3b', 'attempts': 2, 'params': {'temperature': 0.2, 'num_ctx': 8192, 'num_predict': 512, 'seed': 42, 'format': 'json-schema'}}
+response: {"answer": "I could not produce a verified answer from the documents right now. Please try again, or rephrase the question.", "citations": [], "confidence": "low", "answered_from_context": f
+latency_ms: {'scope': 0.3, 'embed': 178.9, 'cache': 4.6, 'retrieve': 49.0, 'guardrails': 3.2, 'generate': 209251.7, 'total': 209622.5}  tokens: {'in': 1547, 'out': 627}
+$ make rollback
+Warning: resource deployments/api was previously managed with 'kubectl apply'. Rolling back will not update the kubectl.kubernetes.io/last-applied-configuration annotation, which may cause unexpected behavior on future 'kubectl apply' operations. Consider using 'kubectl apply' with your previous configuration file instead.
+deployment.apps/api rolled back
+Waiting for deployment "api" rollout to finish: 1 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 1 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 1 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 2 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 2 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 2 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "api" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "api" rollout to finish: 1 old replicas are pending termination...
+deployment "api" successfully rolled out
+$ kubectl rollout history deployment/api -n rahbar
+deployment.apps/api 
+REVISION  CHANGE-CAUSE
+1         <none>
+2         <none>
+10        <none>
+12        <none>
+13        <none>
+
+$ ask after the undo
+answer: 100%
+request_id df9138b970bb8f033fcdbf4a555886c3
+$ python scripts/trace_tool.py show df9138b970bb8f033fcdbf4a555886c3 --kubectl deploy/api   # collection and embedding version are the previous ones
+TRACE df9138b970bb8f033fcdbf4a555886c3  2026-11-23T22:13:12Z
+
+query:      What is the attendance requirement for a course?
+rewritten:  None
+embedding:  {'model': 'nomic-embed-text', 'version': 'nomic-embed-text@0a109f422b47', 'dimension': 768}
+collection: {'name': 'rahbar_c600', 'index_id': '20261123T211923Z-4e992b', 'chunk_count': 993, 'embed_model': 'nomic-embed-text'}
+scope:      {'where': {'superseded': False}, 'key': 'current', 'tag': '405ab5d2b930'}
+floor:      {'value': 0.7, 'best_score': 0.892, 'passed': True}
+cache:      miss
+model: {'provider': 'ollama-host', 'name': 'llama3.2:3b', 'attempts': 1, 'params': {'temperature': 0.2, 'num_ctx': 8192, 'num_predict': 512, 'seed': 42, 'format': 'json-schema'}}
+response: {"answer": "100%", "citations": [{"source": "prospectus-2026-academic-rules-and-regulations.pdf", "section": "1. Attendance Requirement", "page": 1}, {"source": "academic-rules-handbook-jun-
+latency_ms: {'scope': 0.1, 'embed': 130.4, 'cache': 1.3, 'retrieve': 60.4, 'guardrails': 2.1, 'generate': 45356.5, 'total': 45702.9}  tokens: {'in': 879, 'out': 160}

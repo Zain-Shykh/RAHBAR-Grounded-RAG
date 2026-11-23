@@ -1,0 +1,512 @@
+{
+  "meta": {
+    "label": "batch-c",
+    "timestamp": "20261123T222344Z",
+    "git": "8f9090d",
+    "subset": "C",
+    "seed": 1234,
+    "llm_seed_env": null,
+    "api": "http://localhost:8000",
+    "ready": {
+      "status": "ready",
+      "checks": {
+        "chroma": "ok",
+        "collection": "ok",
+        "embed_pin": "ok",
+        "redis": "ok",
+        "embed_dimension": "ok"
+      }
+    },
+    "index_id": "20261123T211923Z-4e992b",
+    "embed_model": "nomic-embed-text",
+    "golden": "golden.jsonl",
+    "golden_counts": {
+      "questions": 13,
+      "answerable": 4,
+      "unanswerable": 9,
+      "hard": 2,
+      "human": 0,
+      "synthetic": 13,
+      "synthetic_reviewed": 0,
+      "batch_b": 0
+    }
+  },
+  "module": {
+    "model": "nomic-embed-text@0a109f422b47",
+    "pairs_paraphrase": 15,
+    "pairs_unrelated": 15,
+    "paraphrase_mean": 0.7912564102732789,
+    "unrelated_mean": 0.5249525577065651,
+    "paraphrase_min": 0.6617341444277086,
+    "unrelated_max": 0.6415594515822229,
+    "gap": 0.26630385256671374,
+    "chunks_timed": 55,
+    "ms_per_chunk_median": 866.4311809989158,
+    "ms_per_chunk_p95": 5846.931143983966,
+    "determinism_max_abs_diff": 0.0,
+    "dimension": 768,
+    "bytes_per_embedding_float32": 3072
+  },
+  "component": {
+    "clean": {
+      "n": 4,
+      "recall_at_3": 1.0,
+      "recall_at_5": 1.0,
+      "mrr": 0.875,
+      "ndcg_at_5": 0.9077324383928644,
+      "hard": {
+        "n": 2,
+        "recall_at_3": 1.0,
+        "recall_at_5": 1.0,
+        "mrr": 0.75,
+        "ndcg_at_5": 0.8154648767857288
+      },
+      "by_batch": {
+        "C": {
+          "n": 4,
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 0.875,
+          "ndcg_at_5": 0.9077324383928644
+        }
+      },
+      "per_question": [
+        {
+          "id": "g53",
+          "tags": [
+            "coverage",
+            "topic:scholarships"
+          ],
+          "hard": false,
+          "batch": "C",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.80269653
+        },
+        {
+          "id": "g54",
+          "tags": [
+            "coverage",
+            "topic:degree-requirements"
+          ],
+          "hard": false,
+          "batch": "C",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.89493251
+        },
+        {
+          "id": "g55",
+          "tags": [
+            "coverage",
+            "topic:withdrawal-refund",
+            "version"
+          ],
+          "hard": true,
+          "batch": "C",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.77389282
+        },
+        {
+          "id": "g56",
+          "tags": [
+            "coverage",
+            "topic:late-fee",
+            "batch-b"
+          ],
+          "hard": true,
+          "batch": "C",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 0.5,
+          "ndcg_at_5": 0.6309297535714575,
+          "top1_score": 0.7431430800000001
+        }
+      ]
+    },
+    "noisy": {
+      "n": 4,
+      "recall_at_3": 1.0,
+      "recall_at_5": 1.0,
+      "mrr": 0.875,
+      "ndcg_at_5": 0.9077324383928644,
+      "hard": {
+        "n": 2,
+        "recall_at_3": 1.0,
+        "recall_at_5": 1.0,
+        "mrr": 0.75,
+        "ndcg_at_5": 0.8154648767857288
+      },
+      "by_batch": {
+        "C": {
+          "n": 4,
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 0.875,
+          "ndcg_at_5": 0.9077324383928644
+        }
+      },
+      "per_question": [
+        {
+          "id": "g53",
+          "tags": [
+            "coverage",
+            "topic:scholarships"
+          ],
+          "hard": false,
+          "batch": "C",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.80235785
+        },
+        {
+          "id": "g54",
+          "tags": [
+            "coverage",
+            "topic:degree-requirements"
+          ],
+          "hard": false,
+          "batch": "C",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.85281885
+        },
+        {
+          "id": "g55",
+          "tags": [
+            "coverage",
+            "topic:withdrawal-refund",
+            "version"
+          ],
+          "hard": true,
+          "batch": "C",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 1.0,
+          "ndcg_at_5": 1.0,
+          "top1_score": 0.75778556
+        },
+        {
+          "id": "g56",
+          "tags": [
+            "coverage",
+            "topic:late-fee",
+            "batch-b"
+          ],
+          "hard": true,
+          "batch": "C",
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "mrr": 0.5,
+          "ndcg_at_5": 0.6309297535714575,
+          "top1_score": 0.7431430800000001
+        }
+      ]
+    },
+    "noise_delta": {
+      "recall_at_3": {
+        "clean": 1.0,
+        "noisy": 1.0,
+        "abs": 0.0,
+        "rel": 0.0
+      },
+      "recall_at_5": {
+        "clean": 1.0,
+        "noisy": 1.0,
+        "abs": 0.0,
+        "rel": 0.0
+      },
+      "mrr": {
+        "clean": 0.875,
+        "noisy": 0.875,
+        "abs": 0.0,
+        "rel": 0.0
+      },
+      "ndcg_at_5": {
+        "clean": 0.9077324383928644,
+        "noisy": 0.9077324383928644,
+        "abs": 0.0,
+        "rel": 0.0
+      }
+    },
+    "noise_seed": 1234,
+    "noise_examples": {
+      "g53": "What semester GPA must a Merit Scholarship holedr maintain for the scholarship to continue?",
+      "g54": "What minimum CGPA does a student need in order to gradutae?",
+      "g55": "Under the 2026-27 fee structure, until which day after classes begin does a withdrawing sutdent stil get a tuitioon fee refund?"
+    },
+    "retrieval_ms_median": 219.5,
+    "retrieval_ms_p95": 399.0
+  },
+  "e2e": {
+    "n": 13,
+    "abstention_correctness": 1.0,
+    "abstention_n": 9,
+    "abstention_failed": [],
+    "false_abstention_rate": 0.0,
+    "citation_validity": 1.0,
+    "citations_total": 4,
+    "faithfulness_overlap_mean": 0.875,
+    "faithfulness_supported_rate": 0.75,
+    "support_threshold": 0.6,
+    "answered_n": 4,
+    "expect_hit_rate": 0.5,
+    "fallback_rate": 0.0,
+    "latency_p50_s": 0.26,
+    "latency_p95_s": 167.77,
+    "gold_citation_rate": 1.0,
+    "gold_citation_n": 4,
+    "gold_citation_misses": [],
+    "abstained_noncanned": [
+      {
+        "id": "g64",
+        "answer": "Not specified"
+      }
+    ],
+    "per_question": [
+      {
+        "id": "g53",
+        "kind": "answerable",
+        "batch": "C",
+        "hard": false,
+        "trace_id": "5b20a6420bb44408973843c0564abf4f",
+        "outcome": "answered",
+        "answered": true,
+        "answer": "3.0",
+        "citations": [
+          {
+            "source": "student-handbook-jun-2026.pdf",
+            "section": "Continuation of merit scholarship is subject to maintaining",
+            "page": 20
+          }
+        ],
+        "overlap": 1.0,
+        "citations_valid": 1,
+        "citations_total": 1,
+        "seconds": 167.77,
+        "expect_hit": true
+      },
+      {
+        "id": "g54",
+        "kind": "answerable",
+        "batch": "C",
+        "hard": false,
+        "trace_id": "025f53c8038a4862acd18d45059f35f4",
+        "outcome": "answered",
+        "answered": true,
+        "answer": "2.00",
+        "citations": [
+          {
+            "source": "academic-rules-handbook-jun-2026.pdf",
+            "section": "1.25 Minimum Cumulative Grade Point Average (CGPA) of 2.00 is",
+            "page": 10
+          }
+        ],
+        "overlap": 1.0,
+        "citations_valid": 1,
+        "citations_total": 1,
+        "seconds": 88.73,
+        "expect_hit": true
+      },
+      {
+        "id": "g55",
+        "kind": "answerable",
+        "batch": "C",
+        "hard": true,
+        "trace_id": "2b4d09c490fb462c9e16533af5af8191",
+        "outcome": "answered",
+        "answered": true,
+        "answer": "15th day",
+        "citations": [
+          {
+            "source": "fee-structure-page.html",
+            "section": "Fee Refund Policy",
+            "page": 1
+          }
+        ],
+        "overlap": 1.0,
+        "citations_valid": 1,
+        "citations_total": 1,
+        "seconds": 63.0,
+        "expect_hit": false
+      },
+      {
+        "id": "g56",
+        "kind": "answerable",
+        "batch": "C",
+        "hard": true,
+        "trace_id": "16b6072fd9754170a02a3cfa5e8e4624",
+        "outcome": "answered",
+        "answered": true,
+        "answer": "Rs 4,000",
+        "citations": [
+          {
+            "source": "b10-fee-structure-amendment-2027.md",
+            "section": "2.2 A late payment is charged Rs 1,000 per week up to a maximum of four weeks,",
+            "page": 1
+          }
+        ],
+        "overlap": 0.5,
+        "citations_valid": 1,
+        "citations_total": 1,
+        "seconds": 43.38,
+        "expect_hit": false
+      },
+      {
+        "id": "g57",
+        "kind": "unanswerable",
+        "batch": "C",
+        "hard": false,
+        "trace_id": "60e109deb5414470b7a1365e1c43de5c",
+        "outcome": "abstained",
+        "answered": false,
+        "answer": "The documents in the corpus do not cover this question.",
+        "citations": [],
+        "overlap": null,
+        "citations_valid": 0,
+        "citations_total": 0,
+        "seconds": 0.29,
+        "expect_hit": null
+      },
+      {
+        "id": "g58",
+        "kind": "unanswerable",
+        "batch": "C",
+        "hard": false,
+        "trace_id": "31890f896f4c4aa4a22fc1c47c6ee8e7",
+        "outcome": "abstained",
+        "answered": false,
+        "answer": "The documents in the corpus do not cover this question.",
+        "citations": [],
+        "overlap": null,
+        "citations_valid": 0,
+        "citations_total": 0,
+        "seconds": 0.26,
+        "expect_hit": null
+      },
+      {
+        "id": "g59",
+        "kind": "unanswerable",
+        "batch": "C",
+        "hard": false,
+        "trace_id": "98c3e89156c74f5599f84c6e68f6c25d",
+        "outcome": "abstained",
+        "answered": false,
+        "answer": "The documents in the corpus do not cover this question.",
+        "citations": [],
+        "overlap": null,
+        "citations_valid": 0,
+        "citations_total": 0,
+        "seconds": 0.26,
+        "expect_hit": null
+      },
+      {
+        "id": "g60",
+        "kind": "unanswerable",
+        "batch": "C",
+        "hard": false,
+        "trace_id": "a2b6ec44feb249d78150d9d668177661",
+        "outcome": "abstained",
+        "answered": false,
+        "answer": "The documents in the corpus do not cover this question.",
+        "citations": [],
+        "overlap": null,
+        "citations_valid": 0,
+        "citations_total": 0,
+        "seconds": 0.14,
+        "expect_hit": null
+      },
+      {
+        "id": "g61",
+        "kind": "unanswerable",
+        "batch": "C",
+        "hard": false,
+        "trace_id": "d91248c2a5e24ad09c837d07fb7ce7c7",
+        "outcome": "abstained",
+        "answered": false,
+        "answer": "The documents in the corpus do not cover this question.",
+        "citations": [],
+        "overlap": null,
+        "citations_valid": 0,
+        "citations_total": 0,
+        "seconds": 0.17,
+        "expect_hit": null
+      },
+      {
+        "id": "g62",
+        "kind": "unanswerable",
+        "batch": "C",
+        "hard": false,
+        "trace_id": "27d1ef6c3e2d49f2b02f363c5565e47b",
+        "outcome": "abstained",
+        "answered": false,
+        "answer": "The documents in the corpus do not cover this question.",
+        "citations": [],
+        "overlap": null,
+        "citations_valid": 0,
+        "citations_total": 0,
+        "seconds": 0.15,
+        "expect_hit": null
+      },
+      {
+        "id": "g63",
+        "kind": "unanswerable",
+        "batch": "C",
+        "hard": false,
+        "trace_id": "dff0a7c0030046b68f74708572252dcb",
+        "outcome": "abstained",
+        "answered": false,
+        "answer": "The documents in the corpus do not cover this question.",
+        "citations": [],
+        "overlap": null,
+        "citations_valid": 0,
+        "citations_total": 0,
+        "seconds": 0.16,
+        "expect_hit": null
+      },
+      {
+        "id": "g64",
+        "kind": "unanswerable",
+        "batch": "C",
+        "hard": false,
+        "trace_id": "fbe164764ebd4d268a8cb5cc806e69ac",
+        "outcome": "abstained",
+        "answered": false,
+        "answer": "Not specified",
+        "citations": [],
+        "overlap": null,
+        "citations_valid": 0,
+        "citations_total": 0,
+        "seconds": 82.07,
+        "expect_hit": null
+      },
+      {
+        "id": "g65",
+        "kind": "unanswerable",
+        "batch": "C",
+        "hard": false,
+        "trace_id": "1b259868f5064919934373bda4a0ae34",
+        "outcome": "abstained",
+        "answered": false,
+        "answer": "The documents in the corpus do not cover this question.",
+        "citations": [],
+        "overlap": null,
+        "citations_valid": 0,
+        "citations_total": 0,
+        "seconds": 0.15,
+        "expect_hit": null
+      }
+    ]
+  }
+}

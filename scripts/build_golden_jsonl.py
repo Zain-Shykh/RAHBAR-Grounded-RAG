@@ -103,7 +103,7 @@ NEW = [
     ("g54", "answerable", "What minimum CGPA does a student need in order to graduate?",
      [(AR, "1.25", 10)], "2.00", ["coverage", "topic:degree-requirements"], "C", False),
     ("g55", "answerable", "Under the 2026-27 fee structure, until which day after classes begin does a withdrawing student still get a tuition fee refund?",
-     [("fee-structure-page.html", "Fee Refund Policy", 1)], "20th day", ["coverage", "topic:withdrawal-refund", "version"], "C", True),
+     [("fee-structure-page.html", "Fee Refund Policy", 1)], "30th day", ["coverage", "topic:withdrawal-refund", "version"], "C", True),
     ("g56", "answerable", "How much extra is charged if a student pays the semester fee late?",
      [("b10-fee-structure-amendment-2027.md", "2.2", 1)], "Rs 1,000 per week", ["coverage", "topic:late-fee", "batch-b"], "C", True),
     ("g57", "unanswerable", "Who won the cricket match that was played yesterday?", [], None, ["no-evidence", "coverage", "topic:off-domain"], "C", False),

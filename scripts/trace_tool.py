@@ -3,7 +3,8 @@
 
     python scripts/trace_tool.py show <trace_id> [--dir traces/samples | --kubectl deploy/api (every replica) ]
 
-Finds the record in a directory of .jsonl files, or in `kubectl logs`, prints the query, the scope filter, every
+Finds the record in a directory of .jsonl files (after `make traces-pull`: `--dir traces/cluster`; this survives restarts), or in `kubectl logs`
+(live pods only: the log of a pod that was replaced by a rollout is gone), prints the query, the scope filter, every
 retrieved chunk with score and version, the evidence blocks as the model saw them, the exact prompt messages, the
 model parameters and the response, every attempt (a retry's prompt carries the hint), a cache hit's original
 request, and recomputes the prompt SHA-256 (`hash OK` or `hash MISMATCH`).
@@ -61,7 +62,7 @@ def render(t: dict) -> str:
         o.append(f"attempt {a['attempt']}: result={a['result']}  prompt sha256={a['prompt_sha256'][:16]}...  "
                  f"{'(retry hint: ' + a['hint'] + ')' if a.get('hint') else '(no hint)'}")
     if t["prompt"]:
-        o.append("PROMPT (exact messages sent to the model on the LAST attempt, the one that produced the answer):")
+        o.append("PROMPT (exact messages sent to the model on the LAST attempt; it carries the retry hint if there was one):")
         for m in t["prompt"]:
             o += [f"--- {m['role']} ---", m["content"]]
         h = prompt_hash(t["prompt"])
