@@ -1,0 +1,14 @@
+$ python scripts/rescore_extra.py eval/results/suite-20261121T021833Z-baseline-ab.json
+eval/results/suite-20261121T021833Z-baseline-ab.json
+gold_citation_rate 0.9655 over 29 answered answerable questions; misses: ['q09']
+abstained but answer text is not the canned refusal (10):
+  q07: N/A
+  q10: The documents do not specify how often a faculty member's technical start-up must report its progress to the university.
+  q14: The cumulative grade points is the weighted average of all the courses taken so far.
+  g19: The number of courses a student can enroll in during an ordinary semester is not explicitly stated in the provided evide
+  g22: None of the tuition fee is refunded for a withdrawn course.
+  g23: The documents do not specify the frequency of reporting, but it is implied that the start-up must meet the mandatory per
+  g31: The documents do not cover the specific timeframe for publishing examination results after the last paper.
+  g32: There is no information about the gymnasium's hours in the provided evidence.
+  g34: false
+  g47: None

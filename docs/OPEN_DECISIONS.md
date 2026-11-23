@@ -1704,3 +1704,49 @@ Raised 2026-11-21 while writing the Assignment 03 planning set ([`requirements-a
 - Area: eval
 - Decision: Zain (human, in chat 2026-11-21) reviewed the 8 synthetic questions g19, g20, g21, g23, g28, g29, g30, g33. He checked g19, g20, g21, g23 against the source pages of the original downloaded PDFs, and read the clauses of g28, g29, g30, g33 in the synthetic Batch B files (`corpus/batch_b`). Those four files are invented (a fictional institute), so their answers match the files by construction: the review confirms the wording and the clause, not a real-world fact. No wording fixes. `scripts/mark_reviewed.py` set `reviewed: true` for the 8 ids (origin stays `synthetic`); `scripts/build_golden_jsonl.py` carries the same ids in a REVIEWED constant so regenerating gives the committed file (test in `eval/tests/test_mark_reviewed.py`). `golden --check` exits 0 (52 questions, 8 synthetic reviewed). The other synthetic questions (26 of 34) stay unreviewed.
 - Decided on: 2026-11-21
+
+## Partner review of the submitted state (2026-11-23): D-148 to D-153
+
+Source: `docs/Ahmad_review.jpeg` (Ahmad's independent audit against the assignment PDF, 7 points). Zain asked for every point to be addressed.
+
+### D-148 Coverage round 2 in a separate golden batch `C`; honest fresh-query check
+- Status: DECIDED
+- Raised: 2026-11-23 by Claude (review point 6)
+- Area: eval
+- Decision: 13 more golden questions g53 to g65 with `batch: "C"` (4 in-domain answerable for the near-miss live queries l03, l22, l26, l27 with real corpus answers or Batch B answers, 9 unanswerable for the uncovered off-domain topics). `load(subset="all")` stays A plus B so the Part B baseline and the gate keep the same population; `C` runs alone (`SUBSET=C`); coverage uses `every`. Coverage on the 40 live queries is then 1.000 by construction, so a second log of 12 fresh queries written afterwards (`eval/live_queries_fresh.jsonl`) is reported next to it: 0.333, below target. Both are reported; the target is not edited. Reproducible earlier states: `eval/golden_before_e4.jsonl` (0.300), `eval/golden_round1.jsonl` (0.675). Synthetic, `reviewed: false`, labelled as such.
+- Decided on: 2026-11-23
+
+### D-149 Release is guarded by the recorded gate verdict; the rollback drill is a separate, forced release
+- Status: DECIDED
+- Raised: 2026-11-23 by Claude (review point 2)
+- Area: release
+- Decision: `make release` runs `scripts/release_guard.py check <collection>` first and refuses a collection whose verdict in `eval/results/release-decisions.json` is FAIL or missing (`make gate-record` writes it from a gate result file). The old evidence forced the gate-rejected collection live to demonstrate rollback, which mixed the two ideas. Now: (1) the gate stops `rahbar_bad` (Job Failed, release refused, no new revision); (2) `rahbar_c600` passed the gate and is released by rolling update; (3) the rollback drill uses its own collection `rahbar_drill` (CHUNK=1500, OVERLAP=0, built only for the drill) released with `FORCE=1`, which prints that the gate check is skipped on purpose, then `kubectl rollout undo`. Caveat: the recorded verdict of `rahbar_c600` comes from the gate run on the same parameters on the first build of the cluster; the collection was rebuilt after the fresh-cluster rehearsal (same corpus, same parameters, new index id). The guard checks a name, not an index id.
+- Decided on: 2026-11-23
+
+### D-150 The trace records every generation attempt; a cache hit points at its origin
+- Status: DECIDED
+- Raised: 2026-11-23 by Claude (review point 3)
+- Area: observability
+- Decision: `attempt_log` in the trace holds, per attempt, the exact messages sent (the retry carries the hint), their SHA-256 and the result (`ok`, `rejected: <reason>`, `provider_error: <text>`); `prompt` and `prompt_sha256` are those of the last attempt. A cache hit gets `cached_from` (the request id stored with the answer) and `trace_tool.py` prints the original request's trace below it. `trace_tool.py --kubectl deploy/api` now reads every replica (`kubectl logs deploy/api` reads one pod). An embed failure or a below-floor abstention still has no prompt, by design (no model call).
+- Decided on: 2026-11-23
+
+### D-151 Every incremental run writes `verification.json`
+- Status: DECIDED
+- Raised: 2026-11-23 by Claude (review point 4)
+- Area: indexer
+- Decision: also a run that checks nothing writes a report, with the lists `unchanged`, `previously_quarantined` and `deleted`; the text table is printed in the Job log; a dry run reports but quarantines nothing (it used to move files). The strict A02 `--full` path keeps its all-or-nothing verification and has no report by design (it fails the Job on the first bad file). `make lake-report [RUN=<id>]` prints a report.
+- Decided on: 2026-11-23
+
+### D-152 Two extra end-to-end checks, reported not gated
+- Status: DECIDED
+- Raised: 2026-11-23 by Claude (review point 5)
+- Area: eval
+- Decision: `gold_citation_rate` (a citation names the gold source and section) and `abstained_noncanned` (abstained responses whose text is not the canned refusal), computed in `e2e_level.py` for new runs and on old result files by `scripts/rescore_extra.py`. Not added to the gate: they were not part of the baseline decision and adding a rule after seeing results is how the faithfulness rule got changed (disclosed in the report). The report states the limits of faithfulness, citation validity and abstention next to the numbers.
+- Decided on: 2026-11-23
+
+### D-153 Screenshots are taken by a person at the keyboard
+- Status: DECIDED
+- Raised: 2026-11-23 by Claude (review point 1)
+- Area: evidence
+- Decision: the assistant ran in the background and the desktop screenshot portal refused the call, so it cannot take terminal screenshots. `docs/evidence/a3/SCREENSHOT_RUNBOOK.md` lists, per label, the exact commands and what must be visible. Until the 14 PNGs are replaced the report says plainly that the appendix images are renderings of saved terminal output.
+- Decided on: 2026-11-23

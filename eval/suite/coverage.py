@@ -1,6 +1,6 @@
 """Coverage checking (R3-E1 to E4): are the golden questions still representative of live queries?
 
-    python -m eval.suite.coverage --live eval/live_queries.jsonl --golden eval/golden.jsonl [--out result.json]
+    python -m eval.suite.coverage --live eval/live_queries.jsonl --golden eval/golden.jsonl [--out result.json | --out eval/results/]
 
 For each live query: the most similar golden question (cosine of query embeddings). Reports the share at or above
 the threshold, lists the uncovered queries grouped by their expected topic, and exits 1 when the share is below the
@@ -50,7 +50,7 @@ def main() -> int:
     a = ap.parse_args()
     cfg = yaml.safe_load(Path(a.config).read_text())
     live = [json.loads(ln) for ln in Path(a.live).read_text().splitlines() if ln.strip()]
-    g = load(a.golden)
+    g = load(a.golden, "every")
     e = Embedder()
     texts = sorted({q["query"] for q in live} | {r["question"] for r in g})
     vecs: dict[str, list[float]] = {}
@@ -68,8 +68,13 @@ def main() -> int:
         print(f"  {topic}: {', '.join(ids)}")
     for p in res["uncovered"]:
         print(f"    {p['id']} {p['best_cosine']:.3f} (nearest {p['nearest_golden']})  {p['query']}")
-    if a.out:
-        Path(a.out).write_text(json.dumps(res, indent=2) + "\n")
+    if a.out:   # a directory gets coverage-<timestamp>.json, a file path is used as given
+        out = Path(a.out)
+        if out.is_dir() or a.out.endswith("/"):
+            out.mkdir(parents=True, exist_ok=True)
+            out = out / f"coverage-{time.strftime('%Y%m%dT%H%M%SZ', time.gmtime())}.json"
+        out.write_text(json.dumps(res, indent=2) + "\n")
+        print(f"wrote {out}")
     ok = res["share"] >= cfg["target"]
     print("COVERAGE " + ("OK" if ok else "BELOW TARGET"))
     return 0 if ok else 1

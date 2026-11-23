@@ -16,6 +16,33 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from run_eval import _citation_counts, _norm  # noqa: E402
 
 SUPPORT_THRESHOLD = 0.6
+CANNED = ("The documents in the corpus do not cover this question.", "I could not produce a verified answer")
+
+
+def cites_gold(citations: list[dict], relevant: list[dict]) -> bool:
+    """True if some citation names a gold source and a section that is the gold section or starts with / is contained in it
+    (the API truncates long headings, so equality would miss real hits)."""
+    for c in citations:
+        for r in relevant:
+            a, b = str(c.get("section", "")), str(r.get("section", ""))
+            if c.get("source") == r.get("source") and (a == b or a.startswith(b) or b.startswith(a)):
+                return True
+    return False
+
+
+def extra_metrics(per: list[dict], rows: list[dict]) -> dict:
+    """Checks that the three headline metrics do not make (limits listed in the report, section 3 B):
+    - gold_citation_rate: of the answered answerable questions, the share whose citations include a gold passage
+      (citation_validity only says the citation was retrieved, not that it is the right place);
+    - abstained_noncanned: abstained responses whose text is not the canned refusal, so the flag and the text disagree
+      or the model made a claim while flagging no evidence (the abstention rate counts them as abstentions)."""
+    gold = {r["id"]: r.get("relevant") or [] for r in rows}
+    ans = [p for p in per if p["kind"] == "answerable" and p["answered"] and gold.get(p["id"])]
+    hit = [p["id"] for p in ans if cites_gold(p["citations"], gold[p["id"]])]
+    return {"gold_citation_rate": (len(hit) / len(ans)) if ans else None, "gold_citation_n": len(ans),
+            "gold_citation_misses": [p["id"] for p in ans if p["id"] not in hit],
+            "abstained_noncanned": [{"id": p["id"], "answer": p["answer"][:120]} for p in per
+                                    if not p["answered"] and not p["answer"].startswith(CANNED)]}
 
 
 def run(api: Api, rows: list[dict], threshold: float = SUPPORT_THRESHOLD) -> dict:
@@ -53,5 +80,6 @@ def run(api: Api, rows: list[dict], threshold: float = SUPPORT_THRESHOLD) -> dic
         "expect_hit_rate": mean([1.0 if p["expect_hit"] else 0.0 for p in per if p["expect_hit"] is not None]),
         "fallback_rate": sum(p["outcome"] == "fallback" for p in per) / len(per),
         "latency_p50_s": percentile(secs, 0.5), "latency_p95_s": percentile(secs, 0.95),
+        **extra_metrics(per, rows),
         "per_question": per,
     }

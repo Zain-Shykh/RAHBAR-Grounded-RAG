@@ -19,6 +19,7 @@ from .models import Chunk
 from .registry import Registry
 from .run import log
 from .verification.lake import Lake, new_run_id
+from .verification.report import render_text
 from .verification.run_verify import verify_candidates
 from .verification.stage import _sha256
 
@@ -114,8 +115,12 @@ def run_incremental(settings: IndexerSettings, *, client: Any = None, lake: Lake
 
     to_check = set(new) | set(changed)
     view = _view({s: d for s, d in docs.items() if s in unchanged})
-    report, cands, verdicts = verify_candidates(settings, lake, run_id=run_id, registry=view,
-                                                only=to_check or {"\0none"}, write=bool(to_check))
+    # Every run writes its verification report, also one that checked nothing (R3-A1-4); a dry run quarantines nothing.
+    report, cands, verdicts = verify_candidates(
+        settings, lake, run_id=run_id, registry=view, only=to_check or {"\0none"}, write=True, quarantine=not dry_run,
+        extra={"mode": "full" if full else "incremental", "dry_run": dry_run, "unchanged": sorted(unchanged),
+               "previously_quarantined": sorted(qbefore), "deleted": deleted})
+    print(render_text(report), flush=True)
     by_src = {c.entry.file: c for c in cands}
     quarantined = [v.source for v in verdicts if v.action == "quarantine"]
     passing = [v for v in verdicts if v.action in ("index", "supersede") and v.source in by_src]

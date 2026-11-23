@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 """Print the exact context and prompt that produced an answer (R3-D2-1).
 
-    python scripts/trace_tool.py show <trace_id> [--dir traces/samples | --kubectl deploy/api]
+    python scripts/trace_tool.py show <trace_id> [--dir traces/samples | --kubectl deploy/api (every replica) ]
 
-Finds the record in a directory of .jsonl files, or in `kubectl logs`, prints the query, the scope filter, every
+Finds the record in a directory of .jsonl files (after `make traces-pull`: `--dir traces/cluster`; this survives restarts), or in `kubectl logs`
+(live pods only: the log of a pod that was replaced by a rollout is gone), prints the query, the scope filter, every
 retrieved chunk with score and version, the evidence blocks as the model saw them, the exact prompt messages, the
-model parameters and the response, and recomputes the prompt SHA-256 (`hash OK` or `hash MISMATCH`).
+model parameters and the response, every attempt (a retry's prompt carries the hint), a cache hit's original
+request, and recomputes the prompt SHA-256 (`hash OK` or `hash MISMATCH`).
 """
 
 from __future__ import annotations
@@ -24,8 +26,10 @@ def prompt_hash(messages: list[dict]) -> str:
 
 def lines_from(args: argparse.Namespace):
     if args.kubectl:
-        out = subprocess.run(["kubectl", "logs", args.kubectl, "-n", args.namespace, "--tail=-1"],
-                             capture_output=True, text=True, check=False).stdout
+        # `kubectl logs deploy/api` reads ONE pod; the trace may be in another replica, so read every pod of the Deployment
+        name = args.kubectl.split("/", 1)[-1]
+        out = subprocess.run(["kubectl", "logs", "-l", f"app.kubernetes.io/name={name}", "-n", args.namespace, "--tail=-1",
+                              "--max-log-requests=20", "--prefix=false"], capture_output=True, text=True, check=False).stdout
         yield from out.splitlines()
     else:
         for f in sorted(Path(args.dir).glob("*.jsonl")):
@@ -52,8 +56,13 @@ def render(t: dict) -> str:
         o.append(f"  {r['rank']}. {r['score']:.4f}  {r['chunk_id']}  {r.get('doc_id')}  v={r.get('doc_version')} "
                  f"superseded={r.get('superseded')}  section={r['section']!r} page={r['page']}")
     o += ["", f"shown to the model (after floor and rails): {t['reranked_order']}", f"guardrails: {json.dumps(t['guardrails'])}", ""]
+    if t.get("cached_from"):
+        o.append(f"CACHE HIT: this answer was stored by request {t['cached_from']}; no model call was made for this request.")
+    for a in t.get("attempt_log") or []:
+        o.append(f"attempt {a['attempt']}: result={a['result']}  prompt sha256={a['prompt_sha256'][:16]}...  "
+                 f"{'(retry hint: ' + a['hint'] + ')' if a.get('hint') else '(no hint)'}")
     if t["prompt"]:
-        o.append("PROMPT (exact messages sent to the model):")
+        o.append("PROMPT (exact messages sent to the model on the LAST attempt; it carries the retry hint if there was one):")
         for m in t["prompt"]:
             o += [f"--- {m['role']} ---", m["content"]]
         h = prompt_hash(t["prompt"])
@@ -78,6 +87,10 @@ def main() -> int:
         print(f"trace {a.trace_id} not found", file=sys.stderr)
         return 1
     print(render(rec))
+    if rec.get("cached_from"):   # a cache hit has no prompt of its own: show the request that made the stored answer
+        orig = find(rec["cached_from"], a)
+        print("\n" + "=" * 78 + f"\nORIGINAL REQUEST {rec['cached_from']} (the trace behind the cached answer)\n" + "=" * 78)
+        print(render(orig) if orig else f"(trace {rec['cached_from']} not found in this directory)")
     return 0
 
 

@@ -16,7 +16,8 @@ from .stage import Candidate, Verdict, build_candidate, decide
 
 def verify_candidates(settings: IndexerSettings, lake: Lake, *, run_id: str,
                       registry: dict[str, dict] | None = None, only: set[str] | None = None,
-                      write: bool = True) -> tuple[dict, list[Candidate], list[Verdict]]:
+                      write: bool = True, quarantine: bool = True,
+                      extra: dict | None = None) -> tuple[dict, list[Candidate], list[Verdict]]:
     """Extract, check and decide every manifest entry (or `only`); quarantine failures; write the report.
     Returns the report plus the candidates (with their extracted documents) and the verdicts."""
     from ..embed import embed
@@ -29,10 +30,11 @@ def verify_candidates(settings: IndexerSettings, lake: Lake, *, run_id: str,
     verdicts = decide(cands, registry or {}, threshold=threshold)
     by_file = {c.entry.file: c for c in cands}
     for v in verdicts:
-        if v.action == "quarantine" and write:
+        if v.action == "quarantine" and write and quarantine:
             c = by_file[v.source]
             lake.quarantine(run_id, v.source, c.path, v.reasons(), c.file_sha or None)
     report = build_report(run_id, settings.corpus_dir, settings.embed_model, verdicts, threshold)
+    report.update(extra or {})
     if write:
         lake.write_report(run_id, "verification.json", report)
     return report, cands, verdicts

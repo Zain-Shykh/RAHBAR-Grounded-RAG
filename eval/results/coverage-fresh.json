@@ -1,0 +1,221 @@
+{
+  "live_queries": 12,
+  "covered": 4,
+  "share": 0.3333333333333333,
+  "in_domain_share": 0.4,
+  "threshold": 0.72,
+  "uncovered": [
+    {
+      "id": "f03",
+      "query": "what grade points does a B plus carry",
+      "topic": "grading",
+      "in_domain": true,
+      "best_cosine": 0.6223,
+      "nearest_golden": "g35",
+      "covered": false
+    },
+    {
+      "id": "f04",
+      "query": "can i appeal if i think my exam paper was marked wrongly",
+      "topic": "rechecking",
+      "in_domain": true,
+      "best_cosine": 0.6299,
+      "nearest_golden": "q05",
+      "covered": false
+    },
+    {
+      "id": "f06",
+      "query": "what is the penalty for copying in an exam",
+      "topic": "plagiarism",
+      "in_domain": true,
+      "best_cosine": 0.6529,
+      "nearest_golden": "g45",
+      "covered": false
+    },
+    {
+      "id": "f08",
+      "query": "what are the gym timings on campus",
+      "topic": "sports",
+      "in_domain": true,
+      "best_cosine": 0.6973,
+      "nearest_golden": "g32",
+      "covered": false
+    },
+    {
+      "id": "f09",
+      "query": "when does the next semester registration open",
+      "topic": "registration",
+      "in_domain": true,
+      "best_cosine": 0.6974,
+      "nearest_golden": "g37",
+      "covered": false
+    },
+    {
+      "id": "f10",
+      "query": "do i need a laptop to enroll in the computer science program",
+      "topic": "admission requirements",
+      "in_domain": true,
+      "best_cosine": 0.6087,
+      "nearest_golden": "g54",
+      "covered": false
+    },
+    {
+      "id": "f11",
+      "query": "who is the current prime minister of the country",
+      "topic": "politics",
+      "in_domain": false,
+      "best_cosine": 0.5921,
+      "nearest_golden": "g65",
+      "covered": false
+    },
+    {
+      "id": "f12",
+      "query": "what is a good diet for building muscle",
+      "topic": "health",
+      "in_domain": false,
+      "best_cosine": 0.5374,
+      "nearest_golden": "g24",
+      "covered": false
+    }
+  ],
+  "uncovered_topics": {
+    "grading": [
+      "f03"
+    ],
+    "rechecking": [
+      "f04"
+    ],
+    "plagiarism": [
+      "f06"
+    ],
+    "sports": [
+      "f08"
+    ],
+    "registration": [
+      "f09"
+    ],
+    "admission requirements": [
+      "f10"
+    ],
+    "politics": [
+      "f11"
+    ],
+    "health": [
+      "f12"
+    ]
+  },
+  "per_query": [
+    {
+      "id": "f01",
+      "query": "what is the minimum attendance i need to be allowed in the exam",
+      "topic": "attendance",
+      "in_domain": true,
+      "best_cosine": 0.7849,
+      "nearest_golden": "q18",
+      "covered": true
+    },
+    {
+      "id": "f02",
+      "query": "how many books can i borrow from the library at once",
+      "topic": "library",
+      "in_domain": true,
+      "best_cosine": 0.9113,
+      "nearest_golden": "g28",
+      "covered": true
+    },
+    {
+      "id": "f03",
+      "query": "what grade points does a B plus carry",
+      "topic": "grading",
+      "in_domain": true,
+      "best_cosine": 0.6223,
+      "nearest_golden": "g35",
+      "covered": false
+    },
+    {
+      "id": "f04",
+      "query": "can i appeal if i think my exam paper was marked wrongly",
+      "topic": "rechecking",
+      "in_domain": true,
+      "best_cosine": 0.6299,
+      "nearest_golden": "q05",
+      "covered": false
+    },
+    {
+      "id": "f05",
+      "query": "how much does the university bus cost per semester",
+      "topic": "transport",
+      "in_domain": true,
+      "best_cosine": 0.8807,
+      "nearest_golden": "g30",
+      "covered": true
+    },
+    {
+      "id": "f06",
+      "query": "what is the penalty for copying in an exam",
+      "topic": "plagiarism",
+      "in_domain": true,
+      "best_cosine": 0.6529,
+      "nearest_golden": "g45",
+      "covered": false
+    },
+    {
+      "id": "f07",
+      "query": "is it allowed to use chatgpt for my assignments",
+      "topic": "generative AI policy",
+      "in_domain": true,
+      "best_cosine": 0.8778,
+      "nearest_golden": "g43",
+      "covered": true
+    },
+    {
+      "id": "f08",
+      "query": "what are the gym timings on campus",
+      "topic": "sports",
+      "in_domain": true,
+      "best_cosine": 0.6973,
+      "nearest_golden": "g32",
+      "covered": false
+    },
+    {
+      "id": "f09",
+      "query": "when does the next semester registration open",
+      "topic": "registration",
+      "in_domain": true,
+      "best_cosine": 0.6974,
+      "nearest_golden": "g37",
+      "covered": false
+    },
+    {
+      "id": "f10",
+      "query": "do i need a laptop to enroll in the computer science program",
+      "topic": "admission requirements",
+      "in_domain": true,
+      "best_cosine": 0.6087,
+      "nearest_golden": "g54",
+      "covered": false
+    },
+    {
+      "id": "f11",
+      "query": "who is the current prime minister of the country",
+      "topic": "politics",
+      "in_domain": false,
+      "best_cosine": 0.5921,
+      "nearest_golden": "g65",
+      "covered": false
+    },
+    {
+      "id": "f12",
+      "query": "what is a good diet for building muscle",
+      "topic": "health",
+      "in_domain": false,
+      "best_cosine": 0.5374,
+      "nearest_golden": "g24",
+      "covered": false
+    }
+  ],
+  "target": 0.85,
+  "golden_questions": 65,
+  "embedding": "nomic-embed-text@0a109f422b47",
+  "created": "2026-11-23T19:33:38Z"
+}

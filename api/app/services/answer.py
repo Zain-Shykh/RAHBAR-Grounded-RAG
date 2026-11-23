@@ -47,20 +47,31 @@ def _ms(start: float) -> float:
 
 
 def _generate(
-    question: str, shown: list[Passage], provider: LLMProvider, attempts_out: list[int] | None = None
+    question: str, shown: list[Passage], provider: LLMProvider, attempts_out: list[int] | None = None,
+    log_out: list[dict] | None = None,
 ) -> tuple[Answer | None, str, int, int]:
-    """Up to two attempts. Returns (answer or None, fallback reason, tokens in, tokens out)."""
+    """Up to two attempts. Returns (answer or None, fallback reason, tokens in, tokens out).
+    `log_out` gets one entry per attempt: the exact messages sent (the retry carries the hint), their hash, the result."""
     tin = tout = 0
     hint: str | None = None
     reason = "provider_error"
     for attempt in range(_ATTEMPTS):
         if attempts_out is not None:
             attempts_out[0] = attempt + 1
+        if log_out is not None:
+            msgs = build_messages(question, shown, hint=hint)
+            log_out.append({"attempt": attempt + 1, "hint": hint, "prompt": msgs, "prompt_sha256": prompt_hash(msgs),
+                            "result": "pending"})
         try:
             res = provider.generate(question, shown, hint=hint)
             tin, tout = tin + res.tokens_in, tout + res.tokens_out
-            return validate(res.answer, shown), "", tin, tout
+            checked = validate(res.answer, shown)
+            if log_out is not None:
+                log_out[-1]["result"] = "ok"
+            return checked, "", tin, tout
         except InvalidModelOutput as exc:
+            if log_out is not None:
+                log_out[-1]["result"] = f"rejected: {exc.reason}"
             hint = retry_hint(exc)
             reason = "bad_citation" if exc.reason.startswith("bad_citation") else "invalid_output"
             log.warning("model output rejected", extra={
@@ -68,12 +79,16 @@ def _generate(
                 "will retry": attempt + 1 < _ATTEMPTS})
         except ProviderError as exc:
             reason = "provider_error"
+            if log_out is not None:
+                log_out[-1]["result"] = f"provider_error: {exc}"
             log.warning("provider error", extra={"error": str(exc), "transient": exc.transient,
                                                  "attempt": attempt + 1})
             if not exc.transient:
                 break
             hint = None
         except Exception:   # a provider bug must still not be a 500 (I-16)
+            if log_out is not None:
+                log_out[-1]["result"] = "provider_error: unexpected"
             log.exception("provider failed unexpectedly")
             reason = "provider_error"
             break
@@ -161,6 +176,7 @@ def _answer(
             tr.r["retrieved"] = [{"rank": i + 1, "chunk_id": r.chunk_id, "doc_id": r.source, "section": r.section,
                                   "page": r.page, "doc_version": None, "superseded": None,
                                   "score": round(r.score, 4)} for i, r in enumerate(hit.retrieved)]  # not stored in the cache
+            tr.r["cached_from"] = hit.request_id   # the request that produced the stored answer: its trace has the prompt
             return _cached(hit, sc.key, ms_embed)
 
     passages: list[Passage] = []
@@ -209,10 +225,17 @@ def _answer(
                 messages = build_messages(question, shown)
                 tr.r["prompt"], tr.r["prompt_sha256"] = (messages if settings.trace_prompt else None), prompt_hash(messages)
                 attempts = [0]
+                attempt_log: list[dict] = []
                 t = time.perf_counter()
-                got, reason, tin, tout = _generate(question, shown, provider, attempts)
+                got, reason, tin, tout = _generate(question, shown, provider, attempts, attempt_log)
                 ms_generate = _ms(t)
                 tr.lat("generate", ms_generate)
+                if attempt_log:   # the prompt that produced the answer is the LAST attempt's (it carries the retry hint)
+                    last = attempt_log[-1]
+                    tr.r["prompt"] = last["prompt"] if settings.trace_prompt else None
+                    tr.r["prompt_sha256"] = last["prompt_sha256"]
+                tr.r["attempt_log"] = [{k: v for k, v in a.items() if k != "prompt" or settings.trace_prompt}
+                                       for a in attempt_log]
                 tr.r["model"] = {"provider": provider.name, "name": settings.llm_model, "attempts": attempts[0],
                                  "params": {"temperature": settings.temperature, "num_ctx": settings.llm_num_ctx,
                                             "num_predict": settings.llm_max_tokens, "seed": settings.llm_seed,
