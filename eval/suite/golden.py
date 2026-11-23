@@ -12,7 +12,8 @@ MINIMUMS = {"questions": 25, "answerable": 15, "unanswerable": 5, "hard": 5, "hu
 
 
 def load(path: Path | str = HERE / "golden.jsonl", subset: str = "all") -> list[dict]:
-    """subset: `all`, `A` (the corpus before Batch B) or `B`."""
+    """subset: `A` (the corpus before Batch B), `B`, `C` (coverage round 2, D-148), `all` = A + B (the Part B baseline
+    population, unchanged by C) or `every` = A + B + C (coverage uses this)."""
     rows = []
     for n, ln in enumerate(Path(path).read_text(encoding="utf-8").splitlines(), 1):
         if ln.strip():
@@ -20,7 +21,9 @@ def load(path: Path | str = HERE / "golden.jsonl", subset: str = "all") -> list[
                 rows.append(json.loads(ln))
             except json.JSONDecodeError:
                 rows.append({"id": f"line{n}", "_bad_json": True})  # reported by problems(), never a crash
-    if subset != "all":
+    if subset == "all":
+        rows = [r for r in rows if r.get("batch", "A") != "C"]
+    elif subset != "every":
         rows = [r for r in rows if r.get("batch", "A") == subset]
     return rows
 
@@ -72,7 +75,7 @@ def main() -> int:
     ap.add_argument("--golden", default=str(HERE / "golden.jsonl"))
     ap.add_argument("--out")
     a = ap.parse_args()
-    rows = load(a.golden)
+    rows = load(a.golden, "every")
     c, p = counts(rows), problems(rows)
     print(json.dumps(c))
     for m in p:

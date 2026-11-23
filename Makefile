@@ -17,7 +17,7 @@ CHROMA_IMAGE ?= chromadb/chroma:1.0.12
 REDIS_IMAGE ?= redis/redis-stack-server:7.4.0-v8
 
 .DEFAULT_GOAL := help
-.PHONY: eval-job eval-ctx eval-image gate-config suite suite-twice candidate release rollback ingest-batch inbox-delete restore lake-ls results-pull traces-pull baseline resources help install test lint dev dev-services dev-services-stop dev-services-reset cluster images corpus apply down secret index ask fetch eval eval-fixtures check manifests
+.PHONY: eval-job eval-ctx eval-image gate-config suite suite-twice candidate gate-record release rollback ingest-batch inbox-delete restore lake-ls lake-report results-pull traces-pull baseline resources help install test lint dev dev-services dev-services-stop dev-services-reset cluster images corpus apply down secret index ask fetch eval eval-fixtures check manifests
 
 help: ## list the targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  make %-14s %s\n", $$1, $$2}'
@@ -33,7 +33,7 @@ test: ## run the api, indexer and eval tests (stubs only: no cluster, no model, 
 	cd eval && $(BIN)/pytest -q
 
 lint: ## ruff and mypy over everything in Python
-	$(BIN)/ruff check api indexer eval corpus scripts/verify_services.py scripts/verify_ollama.py scripts/check_golden_extract.py scripts/chunk_report.py scripts/check_index.py scripts/live_check_phase10.py scripts/live_check_phase11.py scripts/calibrate_cache.py scripts/make_batch_b.py scripts/enrich_manifest.py scripts/calibrate_neardup.py scripts/build_golden_jsonl.py scripts/trace_tool.py scripts/trace_report.py scripts/add_batch.py scripts/check_registry.py
+	$(BIN)/ruff check api indexer eval corpus scripts/verify_services.py scripts/verify_ollama.py scripts/check_golden_extract.py scripts/chunk_report.py scripts/check_index.py scripts/live_check_phase10.py scripts/live_check_phase11.py scripts/calibrate_cache.py scripts/make_batch_b.py scripts/enrich_manifest.py scripts/calibrate_neardup.py scripts/build_golden_jsonl.py scripts/trace_tool.py scripts/show_verification.py scripts/release_guard.py scripts/trace_report.py scripts/add_batch.py scripts/check_registry.py
 	cd api && $(BIN)/mypy app
 	cd indexer && $(BIN)/mypy pipeline
 
@@ -181,6 +181,13 @@ lake-ls: ## list the lake volume (registry, quarantine, archive, reports) throug
 	kubectl exec -n $(NS) lake-viewer -- find /data -type f
 	kubectl delete pod lake-viewer -n $(NS) --wait=false
 
+lake-report: ## print a verification report from the lake volume (newest, or RUN=<run id> from `make lake-ls`)
+	kubectl delete pod lake-viewer -n $(NS) --ignore-not-found
+	sed 's/CLAIM/lake-data/' k8s/tools/volume-viewer.yaml | sed 's/NAME/lake-viewer/' | kubectl apply -f -
+	kubectl wait --for=condition=Ready pod/lake-viewer -n $(NS) --timeout=600s
+	kubectl exec -n $(NS) lake-viewer -- sh -c 'cat "/data/reports/$(or $(RUN),$$(ls /data/reports | tail -n 1))/verification.json"' | PYTHONPATH=indexer $(PY) scripts/show_verification.py
+	kubectl delete pod lake-viewer -n $(NS) --wait=false
+
 results-pull: ## copy the eval Job's result files from the eval-results volume into eval/results/
 	kubectl delete pod results-viewer -n $(NS) --ignore-not-found
 	sed 's/CLAIM/eval-results/' k8s/tools/volume-viewer.yaml | sed 's/NAME/results-viewer/' | kubectl apply -f -
@@ -207,8 +214,13 @@ candidate-serve: ## point api-candidate at an existing collection: make candidat
 	kubectl rollout restart deployment/api-candidate -n $(NS)
 	kubectl rollout status deployment/api-candidate -n $(NS) --timeout=300s
 
-release: ## release the candidate collection to the live api by a rolling update (only after the gate passed)
+gate-record: ## record a gate result for a collection: make gate-record COLLECTION=rahbar_cand GATE=eval/results/gate-cand-300-50.txt
+	$(PY) scripts/release_guard.py record $(COLLECTION) $(GATE)
+
+release: ## release a collection to the live api by a rolling update; REFUSED unless its recorded gate verdict is PASS (FORCE=1 = rollback drill only)
 	@test -n "$(COLLECTION)" || { echo "COLLECTION is required: make release COLLECTION=rahbar_cand"; exit 2; }
+	@if [ "$(FORCE)" = "1" ]; then echo "FORCED RELEASE of $(COLLECTION): the gate check is skipped on purpose (rollback drill, not a gated release)"; \
+	else $(PY) scripts/release_guard.py check $(COLLECTION); fi
 	kubectl set env deployment/api -n $(NS) CHROMA_COLLECTION=$(COLLECTION)
 	kubectl rollout status deployment/api -n $(NS) --timeout=600s
 

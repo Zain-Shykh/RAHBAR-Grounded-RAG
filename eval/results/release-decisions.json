@@ -1,0 +1,20 @@
+{
+  "rahbar_bad": {
+    "candidate_result": "/results/suite-20261121T041138Z-cand-100-0.json",
+    "gate_file": "eval/results/gate-cand-100-0.txt",
+    "recorded": "2026-11-23T19:22:31Z",
+    "verdict": "FAIL"
+  },
+  "rahbar_c600": {
+    "candidate_result": "/results/suite-20261121T072649Z-cand-600-100.json",
+    "gate_file": "eval/results/gate-cand-600-100.txt",
+    "recorded": "2026-11-23T19:22:31Z",
+    "verdict": "PASS"
+  },
+  "rahbar_cand": {
+    "candidate_result": "/results/suite-20261121T053953Z-cand-300-50.json",
+    "gate_file": "eval/results/gate-cand-300-50.txt",
+    "recorded": "2026-11-23T19:22:31Z",
+    "verdict": "PASS"
+  }
+}

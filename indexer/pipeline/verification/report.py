@@ -32,6 +32,12 @@ def render_text(report: dict) -> str:
         for c in CHECKS:
             if not d["checks"][c]["pass"]:
                 detail.append(f"  {d['source']}: {c}: {d['checks'][c]['reason']}")
+    if report.get("unchanged"):
+        lines += ["", f"not re-checked, unchanged since their last verified run ({len(report['unchanged'])}): "
+                  + ", ".join(report["unchanged"])]
+    if report.get("previously_quarantined"):
+        lines += ["", f"still quarantined, same file as before ({len(report['previously_quarantined'])}): "
+                  + ", ".join(report["previously_quarantined"])]
     t = report["totals"]
     lines += ["", "reasons for failures:"] + (detail or ["  none"]) + [
         "", f"totals: checked {t['checked']}, indexed {t['passed']}, quarantined {t['quarantined']}, "

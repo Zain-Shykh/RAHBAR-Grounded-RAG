@@ -1,0 +1,375 @@
+{
+  "live_queries": 40,
+  "covered": 40,
+  "share": 1.0,
+  "in_domain_share": 1.0,
+  "threshold": 0.72,
+  "uncovered": [],
+  "uncovered_topics": {},
+  "per_query": [
+    {
+      "id": "l01",
+      "query": "how many classes can i skip before i am not allowed to sit the final exam",
+      "topic": "attendance",
+      "in_domain": true,
+      "best_cosine": 0.7346,
+      "nearest_golden": "g37",
+      "covered": true
+    },
+    {
+      "id": "l02",
+      "query": "can someone take more than the usual number of courses in a semester",
+      "topic": "course load",
+      "in_domain": true,
+      "best_cosine": 0.8442,
+      "nearest_golden": "g19",
+      "covered": true
+    },
+    {
+      "id": "l03",
+      "query": "till when can i drop a subject and still get a refund of fee",
+      "topic": "withdrawal and refund",
+      "in_domain": true,
+      "best_cosine": 0.7371,
+      "nearest_golden": "g55",
+      "covered": true
+    },
+    {
+      "id": "l04",
+      "query": "do i need ten students for a summer class to run",
+      "topic": "summer courses",
+      "in_domain": true,
+      "best_cosine": 0.7915,
+      "nearest_golden": "q03",
+      "covered": true
+    },
+    {
+      "id": "l05",
+      "query": "is it ok to wear a smart watch during paper",
+      "topic": "exam conduct",
+      "in_domain": true,
+      "best_cosine": 0.7802,
+      "nearest_golden": "g21",
+      "covered": true
+    },
+    {
+      "id": "l06",
+      "query": "what is the fee for one credit hour this year",
+      "topic": "tuition",
+      "in_domain": true,
+      "best_cosine": 0.74,
+      "nearest_golden": "g33",
+      "covered": true
+    },
+    {
+      "id": "l07",
+      "query": "what do the grades like C mean for masters students",
+      "topic": "grading",
+      "in_domain": true,
+      "best_cosine": 0.8407,
+      "nearest_golden": "q08",
+      "covered": true
+    },
+    {
+      "id": "l08",
+      "query": "can i use chatgpt to write my assignment",
+      "topic": "generative AI policy",
+      "in_domain": true,
+      "best_cosine": 0.8198,
+      "nearest_golden": "g43",
+      "covered": true
+    },
+    {
+      "id": "l09",
+      "query": "how often do faculty start ups need to submit reports",
+      "topic": "start-up policy",
+      "in_domain": true,
+      "best_cosine": 0.9151,
+      "nearest_golden": "g23",
+      "covered": true
+    },
+    {
+      "id": "l10",
+      "query": "how many professors work at the university according to the annual report",
+      "topic": "annual report",
+      "in_domain": true,
+      "best_cosine": 0.7277,
+      "nearest_golden": "q09",
+      "covered": true
+    },
+    {
+      "id": "l11",
+      "query": "how many books can i issue from the library",
+      "topic": "library borrowing",
+      "in_domain": true,
+      "best_cosine": 0.806,
+      "nearest_golden": "g28",
+      "covered": true
+    },
+    {
+      "id": "l12",
+      "query": "how many students can be in a lab at once",
+      "topic": "lab sessions",
+      "in_domain": true,
+      "best_cosine": 0.8615,
+      "nearest_golden": "g29",
+      "covered": true
+    },
+    {
+      "id": "l13",
+      "query": "when will my exam result come out",
+      "topic": "exam results",
+      "in_domain": true,
+      "best_cosine": 0.7365,
+      "nearest_golden": "g31",
+      "covered": true
+    },
+    {
+      "id": "l14",
+      "query": "what time does the gym open in the morning",
+      "topic": "sports",
+      "in_domain": true,
+      "best_cosine": 0.8311,
+      "nearest_golden": "g32",
+      "covered": true
+    },
+    {
+      "id": "l15",
+      "query": "what happens to my cgpa if i repeat a course",
+      "topic": "repeating courses",
+      "in_domain": true,
+      "best_cosine": 0.8245,
+      "nearest_golden": "g35",
+      "covered": true
+    },
+    {
+      "id": "l16",
+      "query": "what is an academic warning and when does it happen",
+      "topic": "academic warning",
+      "in_domain": true,
+      "best_cosine": 0.7638,
+      "nearest_golden": "g36",
+      "covered": true
+    },
+    {
+      "id": "l17",
+      "query": "what is the punishment if i am caught copying in an assignment",
+      "topic": "plagiarism",
+      "in_domain": true,
+      "best_cosine": 0.7433,
+      "nearest_golden": "g45",
+      "covered": true
+    },
+    {
+      "id": "l18",
+      "query": "how do i freeze my semester",
+      "topic": "leave of absence",
+      "in_domain": true,
+      "best_cosine": 0.8118,
+      "nearest_golden": "g37",
+      "covered": true
+    },
+    {
+      "id": "l19",
+      "query": "how much is the fine if i return a library book late",
+      "topic": "library fines",
+      "in_domain": true,
+      "best_cosine": 0.8949,
+      "nearest_golden": "g38",
+      "covered": true
+    },
+    {
+      "id": "l20",
+      "query": "what should i do if there is a fire in the lab",
+      "topic": "lab emergency",
+      "in_domain": true,
+      "best_cosine": 0.9564,
+      "nearest_golden": "g39",
+      "covered": true
+    },
+    {
+      "id": "l21",
+      "query": "can i pay my semester fee in two parts",
+      "topic": "fee instalments",
+      "in_domain": true,
+      "best_cosine": 0.7862,
+      "nearest_golden": "g40",
+      "covered": true
+    },
+    {
+      "id": "l22",
+      "query": "what happens if i pay the fee late",
+      "topic": "late fee",
+      "in_domain": true,
+      "best_cosine": 0.735,
+      "nearest_golden": "g56",
+      "covered": true
+    },
+    {
+      "id": "l23",
+      "query": "how do i get my official transcript",
+      "topic": "transcripts",
+      "in_domain": true,
+      "best_cosine": 0.8847,
+      "nearest_golden": "g48",
+      "covered": true
+    },
+    {
+      "id": "l24",
+      "query": "how can i join the university cricket team",
+      "topic": "sports teams",
+      "in_domain": true,
+      "best_cosine": 0.9749,
+      "nearest_golden": "g47",
+      "covered": true
+    },
+    {
+      "id": "l25",
+      "query": "what are the rules for the transport card",
+      "topic": "transport",
+      "in_domain": true,
+      "best_cosine": 0.9359,
+      "nearest_golden": "g44",
+      "covered": true
+    },
+    {
+      "id": "l26",
+      "query": "what is the cgpa needed to get a merit scholarship",
+      "topic": "scholarships",
+      "in_domain": true,
+      "best_cosine": 0.7928,
+      "nearest_golden": "g53",
+      "covered": true
+    },
+    {
+      "id": "l27",
+      "query": "how many credit hours are needed to graduate",
+      "topic": "degree requirements",
+      "in_domain": true,
+      "best_cosine": 0.7289,
+      "nearest_golden": "g54",
+      "covered": true
+    },
+    {
+      "id": "l28",
+      "query": "who can apply for rechecking of a paper and by when",
+      "topic": "rechecking",
+      "in_domain": true,
+      "best_cosine": 0.7269,
+      "nearest_golden": "g42",
+      "covered": true
+    },
+    {
+      "id": "l29",
+      "query": "what is the weather going to be like in islamabad tomorrow",
+      "topic": "weather",
+      "in_domain": false,
+      "best_cosine": 0.8025,
+      "nearest_golden": "g49",
+      "covered": true
+    },
+    {
+      "id": "l30",
+      "query": "who won the cricket match yesterday",
+      "topic": "cricket",
+      "in_domain": false,
+      "best_cosine": 0.9868,
+      "nearest_golden": "g57",
+      "covered": true
+    },
+    {
+      "id": "l31",
+      "query": "what is the bitcoin price today",
+      "topic": "finance",
+      "in_domain": false,
+      "best_cosine": 0.8541,
+      "nearest_golden": "g58",
+      "covered": true
+    },
+    {
+      "id": "l32",
+      "query": "give me a recipe for biryani",
+      "topic": "food",
+      "in_domain": false,
+      "best_cosine": 0.8729,
+      "nearest_golden": "g59",
+      "covered": true
+    },
+    {
+      "id": "l33",
+      "query": "recommend a good movie for the weekend",
+      "topic": "entertainment",
+      "in_domain": false,
+      "best_cosine": 0.8988,
+      "nearest_golden": "g60",
+      "covered": true
+    },
+    {
+      "id": "l34",
+      "query": "how do i prepare for a job interview at a software company",
+      "topic": "careers",
+      "in_domain": false,
+      "best_cosine": 0.9934,
+      "nearest_golden": "g61",
+      "covered": true
+    },
+    {
+      "id": "l35",
+      "query": "write a python function to sort a list",
+      "topic": "programming help",
+      "in_domain": false,
+      "best_cosine": 0.882,
+      "nearest_golden": "g50",
+      "covered": true
+    },
+    {
+      "id": "l36",
+      "query": "what is the wifi password in the library",
+      "topic": "campus wifi",
+      "in_domain": false,
+      "best_cosine": 0.9974,
+      "nearest_golden": "g62",
+      "covered": true
+    },
+    {
+      "id": "l37",
+      "query": "how do i get a parking permit for my motorbike",
+      "topic": "parking",
+      "in_domain": false,
+      "best_cosine": 0.9296,
+      "nearest_golden": "g46",
+      "covered": true
+    },
+    {
+      "id": "l38",
+      "query": "how does the internship placement office help students",
+      "topic": "internships",
+      "in_domain": false,
+      "best_cosine": 0.9709,
+      "nearest_golden": "g63",
+      "covered": true
+    },
+    {
+      "id": "l39",
+      "query": "when are the student society elections held",
+      "topic": "student societies",
+      "in_domain": false,
+      "best_cosine": 0.9971,
+      "nearest_golden": "g64",
+      "covered": true
+    },
+    {
+      "id": "l40",
+      "query": "what is the capital of australia",
+      "topic": "general knowledge",
+      "in_domain": false,
+      "best_cosine": 0.982,
+      "nearest_golden": "g65",
+      "covered": true
+    }
+  ],
+  "target": 0.85,
+  "golden_questions": 65,
+  "embedding": "nomic-embed-text@0a109f422b47",
+  "created": "2026-11-23T19:33:11Z"
+}
