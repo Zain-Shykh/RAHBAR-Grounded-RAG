@@ -231,7 +231,7 @@ Prerequisites: a running cluster with the application deployed (`make cluster`, 
 | D traces, metrics, rail, root cause | done | `traces/`, `docs/evidence/a3/d*` |
 | E coverage, drift | done; coverage 0.300, then 0.675, then 1.000 on the 40 queries after round 2 (batch C), but only 0.333 on 12 fresh queries; target 0.85 not reached on fresh traffic | `eval/results/coverage-*`, `docs/evidence/a3/e3-data-drift.md` |
 | F Kubernetes, release, rollback | done on minikube; rebuilt from `k8s/README.md` on a deleted cluster; gate stop, gated release and rollback drill are separate (`make release` refuses a failed gate) | `docs/evidence/a3/c-gate-*`, `c3-gated-release-and-drill.txt`, `r11-fresh-cluster-rehearsal.txt` |
-| Report and 14 screenshots | report done, roll numbers on page 1; the 14 images are renderings of saved terminal output, real terminal screenshots to be taken with `docs/evidence/a3/SCREENSHOT_RUNBOOK.md` | `docs/report/`, `docs/evidence/a3/screenshots/` |
+| Report and 14 screenshots | report done, roll numbers on page 1; two PDFs: `report.pdf` (11 terminal captures; C1, F3, F5 missing) and `report-rendered.pdf` (all 14 rendered from saved output) | `docs/report/`, `docs/evidence/a3/screenshots/`, `docs/evidence/a3/screenshots-rendered/` |
 
 Commands in this table were run before submission: the local ones (golden check, compare, coverage, trace tool and report, report build, number check) on the final tree, the cluster ones in the rehearsal (`docs/evidence/a3/r11-fresh-cluster-rehearsal.txt`). They were not run by a second person (Ahmad did no work on Assignment 03).
 

@@ -22,7 +22,7 @@ Source: `Assignment_03.md` read line by line against `docs/requirements-a3.md` (
 | R3-LOG-3 | MET | Fixed names kept: `eval/golden.jsonl`, `k8s/eval-job.yaml`, minimum 25 questions (52 in the file). |
 | R3-LOG-4 | MET | `python scripts/check_numbers_a3.py` exits 0 (100 decimals, 0 unmatched); result files committed under `eval/results/`. |
 | R3-LOG-5 | MET | Kubernetes (minikube, namespace `rahbar`): `docs/evidence/a3/f1-get-all-final.txt`; no Docker-only path. Demo itself is live and cannot be proved by a file. |
-| R3-LOG-6 | MET WITH CAVEAT | Commits by both members exist (Ahmad: 2 non-merge commits, all Assignment 02, none for Assignment 03). Stated in the report. |
+| R3-LOG-6 | MET WITH CAVEAT | Commits by both members exist (Ahmad: 6 non-merge commits, 4 on Assignment 03: captures and Dockerfile security upgrades; 2 on Assignment 02). Stated in the report. |
 | R3-LOG-7 | MET | `docs/reference/RAGOPS_paper.pdf`; Figure 3 and Table 2 tables in the report. |
 | R3-LOG-8 | MET | Repository plus `docs/report/report.pdf` (5 body pages, appendix from page 6, 19 pages in all). |
 | R3-LOG-9 | MET | `eval/results/` (suite, gate, compare, coverage, drift, stochasticity files), `traces/cluster/`, `traces/samples/`, `k8s/`. |
@@ -120,7 +120,9 @@ Source: `Assignment_03.md` read line by line against `docs/requirements-a3.md` (
 
 ## Screenshots
 
-R3-S-A1, A2, B, C1, C2, D1, D2, E1, E2, F1, F2, F3, F4, F5: all 14 PNGs exist in `docs/evidence/a3/screenshots/`, labelled, with command first and an end marker; index `docs/evidence/a3/README.md`. Status for each: **MET WITH CAVEAT**: they are renderings of terminal output saved when the commands ran on the cluster (D-139), not captures of a live terminal window, and E1 and E2 show the documented command although the saved file holds only its output. (Counted as 14 caveats in the summary.)
+Update after the screenshot pass: `screenshots/` now holds terminal captures (C1, F3, F5 not usable, D1 and D2 partial; `docs/report/report.pdf`); the rendered set described next is in `screenshots-rendered/` (`docs/report/report-rendered.pdf`).
+
+R3-S-A1, A2, B, C1, C2, D1, D2, E1, E2, F1, F2, F3, F4, F5: all 14 PNGs exist in `docs/evidence/a3/screenshots-rendered/`, labelled, with command first and an end marker; index `docs/evidence/a3/README.md`. Status for each: **MET WITH CAVEAT**: they are renderings of terminal output saved when the commands ran on the cluster (D-139), not captures of a live terminal window, and E1 and E2 show the documented command although the saved file holds only its output. (Counted as 14 caveats in the summary.)
 
 ## Open items
 

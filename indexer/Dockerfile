@@ -1,6 +1,10 @@
 # rahbar-indexer: writer only. OCR tools, no web framework (architecture 4.12).
 # Documents arrive on a mounted volume; none are baked in.
 FROM python:3.12-slim-bookworm
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends --only-upgrade \
+       libpam-modules libpam-modules-bin libpam-runtime libpam0g libzstd1 \
+    && rm -rf /var/lib/apt/lists/*
 ENV PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1 HOME=/tmp
 RUN apt-get update \

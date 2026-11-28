@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Render saved terminal output (docs/evidence/a3/*.txt) as the report's screenshots (R3-S-*).
 
-    python scripts/render_screenshot.py            # all 14 into docs/evidence/a3/screenshots/<id>-<name>.png
+    python scripts/render_screenshot.py            # all 14 into docs/evidence/a3/screenshots-rendered/<id>-<name>.png
     python scripts/render_screenshot.py B F5       # only those ids
 
 Each PNG is a dark terminal-style page: a label bar (part and item, what it shows, source file), then the command
@@ -20,7 +20,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 EV = ROOT / "docs/evidence/a3"
-OUT = EV / "screenshots"
+OUT = EV / "screenshots-rendered"
 W = 1500
 COV = "PYTHONPATH=. python -m eval.suite.coverage --live eval/live_queries.jsonl --golden eval/golden.jsonl --out eval/results/; echo \"exit code $?\""
 B_MD = "eval/results/suite-20261121T021833Z-baseline-ab.md"
