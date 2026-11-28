@@ -7,7 +7,7 @@
 | Group member | Roll number |
 | --- | --- |
 | Muhammad Zain | 24i-3126 |
-| Ahmad Jamal | 24i-3006 |
+| Ahmad Jamal | An independent audit of Assignment 03 against the assignment PDF (seven points, all handled after it, `D-148` to `D-153`); the terminal captures in `report.pdf`; Debian package upgrades in the api and indexer Dockerfiles so the CI image scan passes. `git log` shows 6 non-merge commits by him: 4 on Assignment 03 (captures, Dockerfiles), 2 on Assignment 02; most commits are Zain's |
 
 Repository: the submitted branch of the RAHBAR project (`README.md`, section "Assignment 03", has one command per part A to F). Every number below comes from a committed file under `eval/results/`, `docs/evidence/`, `traces/` or `docs/specs/`; `python scripts/check_numbers_a3.py` checks that mechanically.
 
@@ -126,5 +126,5 @@ Measured peaks and chosen values (`f5-resources.txt`): api memory peak 71 Mi, re
 4. Consistency, the paper's fifth verification check, is not built.
 5. The golden labels of q07 and g22 point at a superseded document and need a human decision.
 6. One Ollama model on CPU: each answer takes about a minute, so each comparison rests on a single run of 50 questions. Two version-aware questions (g51, g52, naming the 2026-27 fee page) were added to `eval/golden.jsonl` after the final result files; they are not in the measured runs (so the file has 52 questions, the runs 50).
-7. The appendix contains 12 genuine terminal screenshots. Some display previously recorded experiment results. Direct terminal captures for F3 (live evaluation Job logs) and F5 (rollout undo and post-undo trace) were not obtained in the final Codespace rehearsal. Their historical text evidence is retained under `docs/evidence/a3/`, but their generated renderings are excluded from the PDF appendix.
+7. There are two PDFs with the same body. `report.pdf` has 11 terminal captures: A1, A2, F2 and D2 went through a temporary helper script (A1, A2 and F2 display saved results), D1 and D2 are partial, F3 and F5 were not captured because we were short on time, and the C1 capture was left out because it shows a file error, not a gate rejection. `report-rendered.pdf` has all 14 items rendered from saved terminal output; these are not terminal screenshots, and C1, E2 and F5 there predate the partner review fixes.
 8. The release guard compares a collection name with a recorded verdict, not an index id; the verdict of `rahbar_c600` belongs to its first build (section 3 F).
