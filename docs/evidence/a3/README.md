@@ -1,6 +1,6 @@
 # Evidence for Assignment 03 (parts A to F)
 
-Text files in this folder are what the commands printed on the real cluster runs (minikube, namespace `rahbar`), saved at the time. The 14 PNGs in `screenshots/` are **renderings of those saved terminal outputs** made by `scripts/render_screenshot.py` (dark terminal style, label bar, source file, the command first, then the full uncropped output, an end marker). They are not photographs of a terminal window; the commands and outputs are in the text files, and the E1 and E2 commands are the documented invocation of `eval.suite.coverage` (the saved files hold its output only). Regenerate with `python scripts/render_screenshot.py`.
+Text files in this folder are what the commands printed on the real cluster runs (minikube, namespace `rahbar`), saved at the time. Twelve PNGs in `screenshots/` have been replaced with genuine terminal captures. Some show previously recorded results rather than fresh executions. F3 and F5 retain their original generated renderings from saved text; they are not direct terminal captures and are excluded from the final PDF screenshot appendix. The underlying textual evidence remains available.
 
 Screenshot index (required items R3-S-A1 to R3-S-F5):
 

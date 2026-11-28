@@ -126,5 +126,5 @@ Measured peaks and chosen values (`f5-resources.txt`): api memory peak 71 Mi, re
 4. Consistency, the paper's fifth verification check, is not built.
 5. The golden labels of q07 and g22 point at a superseded document and need a human decision.
 6. One Ollama model on CPU: each answer takes about a minute, so each comparison rests on a single run of 50 questions. Two version-aware questions (g51, g52, naming the 2026-27 fee page) were added to `eval/golden.jsonl` after the final result files; they are not in the measured runs (so the file has 52 questions, the runs 50).
-7. The 14 appendix images are renderings of saved terminal output (command first, output uncropped), not photographs of a terminal window. The commands to take real ones are in `docs/evidence/a3/SCREENSHOT_RUNBOOK.md`.
+7. The appendix contains 12 genuine terminal screenshots. Some display previously recorded experiment results. Direct terminal captures for F3 (live evaluation Job logs) and F5 (rollout undo and post-undo trace) were not obtained in the final Codespace rehearsal. Their historical text evidence is retained under `docs/evidence/a3/`, but their generated renderings are excluded from the PDF appendix.
 8. The release guard compares a collection name with a recorded verdict, not an index id; the verdict of `rahbar_c600` belongs to its first build (section 3 F).
